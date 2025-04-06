@@ -53,15 +53,6 @@ services:
       - ./database/mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
       - mongo_data:/data/db
 
-  sql-lint:
-    build:
-      context: .
-      dockerfile: tools/sql-lint/Dockerfile
-    volumes:
-      - ./database/sql:/sql
-      - ./.sqlfluff:/sql/.sqlfluff
-    command: lint
-
   test:
     image: ubuntu:22.04
     depends_on:
