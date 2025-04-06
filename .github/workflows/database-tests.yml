@@ -1,0 +1,51 @@
+name: Database Schema Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'database/**'
+      - 'docker-compose.yml'
+      - 'test-databases.sh'
+      - '.github/workflows/database-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'database/**'
+      - 'docker-compose.yml'
+      - 'test-databases.sh'
+      - '.github/workflows/database-tests.yml'
+
+jobs:
+  test:
+    name: Test Database Schemas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Database Tests
+        run: |
+          docker compose up --build --abort-on-container-exit
+        env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v
+          docker system prune -f
+
+      - name: Check Test Results
+        run: |
+          # Check if the test container exited with success
+          EXIT_CODE=$(docker compose ps -a --format "{{.ExitCode}}" test)
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Database tests failed with exit code $EXIT_CODE"
+            exit 1
+          fi 
