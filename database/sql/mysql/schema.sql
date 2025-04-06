@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS lamps (
 ALTER TABLE lamps COMMENT 'Stores lamp entities and their current status';
 
 -- Create trigger for UUID generation if not provided
+DELIMITER //
+
 CREATE TRIGGER before_insert_lamps
     BEFORE INSERT ON lamps
     FOR EACH ROW
@@ -36,4 +38,6 @@ BEGIN
     IF NEW.id IS NULL THEN
         SET NEW.id = UUID();
     END IF;
-END; 
+END//
+
+DELIMITER ; 
