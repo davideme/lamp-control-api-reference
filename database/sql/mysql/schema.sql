@@ -16,11 +16,11 @@ USE lamp_control;
 -- Lamps table
 CREATE TABLE IF NOT EXISTS lamps (
     id CHAR(36) PRIMARY KEY,  -- UUID format
-    status ENUM('ON', 'OFF') NOT NULL DEFAULT 'OFF',
+    is_on BOOLEAN NOT NULL DEFAULT FALSE,  -- true = ON, false = OFF
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,  -- For soft deletes
-    INDEX idx_status (status),
+    INDEX idx_is_on (is_on),
     INDEX idx_created_at (created_at),
     INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

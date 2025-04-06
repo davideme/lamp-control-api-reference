@@ -9,7 +9,7 @@
 ```javascript
 {
   "_id": "<UUID string>",  // Unique identifier for the lamp
-  "status": "OFF",         // Current status of the lamp (enum: "ON" or "OFF")
+  "isOn": false,          // Current status of the lamp (true = ON, false = OFF)
   "createdAt": ISODate(),  // Timestamp when the lamp was created
   "updatedAt": ISODate(),  // Timestamp when the lamp was last updated
   "deletedAt": ISODate()   // Timestamp when the lamp was soft deleted (null if active)
@@ -22,15 +22,15 @@
 {
   $jsonSchema: {
     bsonType: "object",
-    required: ["_id", "status", "createdAt", "updatedAt"],
+    required: ["_id", "isOn", "createdAt", "updatedAt"],
     properties: {
       _id: {
         bsonType: "string",
         description: "UUID string as the document identifier"
       },
-      status: {
-        enum: ["ON", "OFF"],
-        description: "Current status of the lamp"
+      isOn: {
+        bsonType: "bool",
+        description: "Current status of the lamp (true = ON, false = OFF)"
       },
       createdAt: {
         bsonType: "date",
@@ -58,7 +58,7 @@ db.lamps.createIndex({ "_id": 1 }, { unique: true })
 
 2. Status index for quick status-based queries
 ```javascript
-db.lamps.createIndex({ "status": 1 })
+db.lamps.createIndex({ "isOn": 1 })
 ```
 
 3. Timestamps indexes for time-based queries and soft deletes
@@ -73,7 +73,7 @@ db.lamps.createIndex({ "deletedAt": 1 })
 ```javascript
 db.lamps.insertOne({
   "_id": uuid(),  // Generate UUID
-  "status": "OFF",
+  "isOn": false,
   "createdAt": new Date(),
   "updatedAt": new Date(),
   "deletedAt": null
@@ -86,7 +86,7 @@ db.lamps.updateOne(
   { "_id": "<lamp_id>" },
   { 
     $set: { 
-      "status": "ON",
+      "isOn": true,
       "updatedAt": new Date()
     }
   }
@@ -118,15 +118,15 @@ db.createCollection("lamps", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "status", "createdAt", "updatedAt"],
+      required: ["_id", "isOn", "createdAt", "updatedAt"],
       properties: {
         _id: {
           bsonType: "string",
           description: "UUID string as the document identifier"
         },
-        status: {
-          enum: ["ON", "OFF"],
-          description: "Current status of the lamp"
+        isOn: {
+          bsonType: "bool",
+          description: "Current status of the lamp (true = ON, false = OFF)"
         },
         createdAt: {
           bsonType: "date",
