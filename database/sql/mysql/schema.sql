@@ -8,8 +8,8 @@ SET character_set_client = utf8mb4;
 
 -- Create database if it doesn't exist
 CREATE DATABASE IF NOT EXISTS lamp_control
-    CHARACTER SET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci;
+CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci;
 
 USE lamp_control;
 
@@ -29,13 +29,11 @@ CREATE TABLE IF NOT EXISTS lamps (
 ALTER TABLE lamps COMMENT 'Stores lamp entities and their current status';
 
 -- Create trigger for UUID generation if not provided
-DELIMITER //
 CREATE TRIGGER before_insert_lamps
-BEFORE INSERT ON lamps
-FOR EACH ROW
+    BEFORE INSERT ON lamps
+    FOR EACH ROW
 BEGIN
     IF NEW.id IS NULL THEN
         SET NEW.id = UUID();
     END IF;
-END//
-DELIMITER ; 
+END; 
