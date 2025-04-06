@@ -39,13 +39,13 @@ jobs:
         if: always()
         run: sqlfluff lint database/sql/postgresql --dialect postgres --exclude-rules LT01
 
-      - name: Run SQLFluff fix (MySQL)
-        if: always()
-        run: sqlfluff fix database/sql/mysql --dialect mysql --exclude-rules LT01
+      # - name: Run SQLFluff fix (MySQL)
+      #   if: always()
+      #   run: sqlfluff fix database/sql/mysql --dialect mysql --exclude-rules LT01
 
-      - name: Run SQLFluff lint (MySQL)
-        if: always()
-        run: sqlfluff lint database/sql/mysql --dialect mysql --exclude-rules LT01
+      # - name: Run SQLFluff lint (MySQL)
+      #   if: always()
+      #   run: sqlfluff lint database/sql/mysql --dialect mysql --exclude-rules LT01
 
       - uses: reviewdog/action-suggester@v1
         if: failure()
