@@ -10,7 +10,7 @@ The API allows for basic CRUD operations on a simple lamp resource (with ID and 
 
 ## Languages Included
 
-- JavaScript/Node.js
+- TypeScript
 - Python
 - Java
 - PHP
@@ -36,7 +36,7 @@ lamp-control-api-reference/
 ├── docs/
 │   └── PRD.md
 ├── src/
-│   ├── nodejs/
+│   ├── typescript/
 │   ├── python/
 │   ├── java/
 │   ├── php/
