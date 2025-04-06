@@ -29,7 +29,7 @@ COMMENT ON COLUMN lamps.is_on IS 'Current status of the lamp (true = ON, false =
 COMMENT ON COLUMN lamps.created_at IS 'Timestamp when the lamp was created';
 COMMENT ON COLUMN lamps.updated_at IS 'Timestamp when the lamp was last updated';
 COMMENT ON COLUMN lamps.deleted_at IS 
-    'Timestamp when the lamp was soft deleted, NULL if active';
+'Timestamp when the lamp was soft deleted, NULL if active';
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_lamps_is_on ON lamps (is_on);
@@ -46,6 +46,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_lamps_updated_at
-    BEFORE UPDATE ON lamps
-    FOR EACH ROW
-    EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
+BEFORE UPDATE ON lamps
+FOR EACH ROW
+EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
