@@ -51,4 +51,4 @@ jobs:
         if: failure()
         with:
           tool_name: sqlfluff
-          fail_on_error: false
+          fail_level: error
