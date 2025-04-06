@@ -57,6 +57,4 @@ dialect = postgres
 
 # MySQL specific settings
 [sqlfluff:mysql]
-dialect = mysql
-# Disable parsing validation for triggers
-ignore_words = ["TRIGGER", "BEGIN", "END"] 
+dialect = mysql 
