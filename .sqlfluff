@@ -13,9 +13,6 @@ indent_unit = space
 spacing_before = 0
 spacing_after = 1
 
-[sqlfluff:rules:layout.spacing]
-allow_trailing_whitespace = false
-
 [sqlfluff:rules:layout.end_of_file]
 require_final_newline = true
 
@@ -32,6 +29,7 @@ capitalisation_policy = upper
 extended_capitalisation_policy = lower
 
 [sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = upper
 extended_capitalisation_policy = upper
 
 # Aliasing rules

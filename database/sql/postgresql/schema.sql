@@ -15,10 +15,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Lamps table
 CREATE TABLE IF NOT EXISTS lamps (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT UUID_GENERATE_V4(),
     is_on BOOLEAN NOT NULL DEFAULT FALSE,  -- true = ON, false = OFF
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE
 );
 
@@ -36,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_lamps_created_at ON lamps (created_at);
 CREATE INDEX IF NOT EXISTS idx_lamps_deleted_at ON lamps (deleted_at);
 
 -- Create updated_at trigger
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION UPDATE_UPDATED_AT_COLUMN()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -45,6 +45,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER update_lamps_updated_at
-BEFORE UPDATE ON lamps
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
+    BEFORE UPDATE ON lamps
+    FOR EACH ROW
+    EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
