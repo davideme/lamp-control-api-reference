@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package lamp;
+
+service LampService {
+  // Create a new lamp with the given status
+  rpc CreateLamp(CreateLampRequest) returns (Lamp);
+  
+  // Get a lamp by its ID
+  rpc GetLamp(GetLampRequest) returns (Lamp);
+  
+  // List all lamps
+  rpc ListLamps(ListLampsRequest) returns (ListLampsResponse);
+  
+  // Update a lamp's status
+  rpc UpdateLamp(UpdateLampRequest) returns (Lamp);
+  
+  // Delete a lamp
+  rpc DeleteLamp(DeleteLampRequest) returns (DeleteLampResponse);
+}
+
+// A lamp with an ID and on/off status
+message Lamp {
+  string id = 1;
+  bool status = 2;
+}
+
+message CreateLampRequest {
+  bool status = 1;
+}
+
+message GetLampRequest {
+  string id = 1;
+}
+
+message ListLampsRequest {
+  // Empty request
+}
+
+message ListLampsResponse {
+  repeated Lamp lamps = 1;
+}
+
+message UpdateLampRequest {
+  string id = 1;
+  bool status = 2;
+}
+
+message DeleteLampRequest {
+  string id = 1;
+}
+
+message DeleteLampResponse {
+  bool success = 1;
+}
