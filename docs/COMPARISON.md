@@ -6,7 +6,7 @@ This document provides a comparison of the different language implementations in
 
 | Language | REST API | GraphQL | gRPC | Total |
 |----------|----------|---------|------|-------|
-| Node.js  | TBD      | TBD     | TBD  | TBD   |
+| TypeScript | TBD      | TBD     | TBD  | TBD   |
 | Python   | TBD      | TBD     | TBD  | TBD   |
 | Java     | TBD      | TBD     | TBD  | TBD   |
 | PHP      | TBD      | TBD     | TBD  | TBD   |
@@ -17,7 +17,7 @@ This document provides a comparison of the different language implementations in
 
 | Language | Coverage % |
 |----------|------------|
-| Node.js  | TBD        |
+| TypeScript | TBD        |
 | Python   | TBD        |
 | Java     | TBD        |
 | PHP      | TBD        |
