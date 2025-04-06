@@ -57,7 +57,7 @@ Each language implementation must provide the same functionality through three i
 
 #### 3.2.1 Programming Languages
 The reference implementation will include the following languages:
-- JavaScript/Node.js
+- TypeScript
 - Python
 - Java
 - PHP
