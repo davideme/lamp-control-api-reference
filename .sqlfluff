@@ -1,5 +1,5 @@
 [sqlfluff]
-dialect = postgres
+# Default settings (can be overridden by dialect-specific sections)
 templater = jinja
 max_line_length = 88
 
@@ -49,4 +49,12 @@ ignore_words = ["uuid-ossp"]
 enabled = false
 
 [sqlfluff:rules:layout.select_targets]
-enabled = false 
+enabled = false
+
+# PostgreSQL specific settings
+[sqlfluff:postgres]
+dialect = postgres
+
+# MySQL specific settings
+[sqlfluff:mysql]
+dialect = mysql 

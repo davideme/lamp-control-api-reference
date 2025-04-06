@@ -31,16 +31,20 @@ jobs:
       - name: Install SQLFluff
         run: pip install sqlfluff==3.3.1
         
-      - name: Run SQLFluff fix
-        id: sqlfluff
-        run: sqlfluff fix database/sql --exclude-rules LT01
-        
+      - name: Run SQLFluff fix (PostgreSQL)
+        run: sqlfluff fix database/sql/postgresql --dialect postgres --exclude-rules LT01
+
+      - name: Run SQLFluff lint (PostgreSQL)
+        run: sqlfluff lint database/sql/postgresql --dialect postgres --exclude-rules LT01
+
+      - name: Run SQLFluff fix (MySQL)
+        run: sqlfluff fix database/sql/mysql --dialect mysql --exclude-rules LT01
+
+      - name: Run SQLFluff lint (MySQL)
+        run: sqlfluff lint database/sql/mysql --dialect mysql --exclude-rules LT01
+
       - uses: reviewdog/action-suggester@v1
         if: failure() && steps.sqlfluff.outcome == 'failure'
         with:
           tool_name: sqlfluff
           fail_on_error: false
-
-      - name: Run SQLFluff lint
-        if: failure() && steps.sqlfluff.outcome == 'failure'
-        run: sqlfluff lint database/sql --exclude-rules LT01
