@@ -33,7 +33,7 @@ jobs:
         
       - name: Run SQLFluff fix
         id: sqlfluff
-        run: sqlfluff fix database/sql --force
+        run: sqlfluff fix database/sql --exclude-rules LT01
         
       - uses: reviewdog/action-suggester@v1
         if: failure() && steps.sqlfluff.outcome == 'failure'

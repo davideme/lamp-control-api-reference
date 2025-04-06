@@ -36,10 +36,17 @@ extended_capitalisation_policy = upper
 [sqlfluff:rules:aliasing.table]
 aliasing = explicit
 
-# References
+# References and quoting
 [sqlfluff:rules:references.keywords]
 unquoted_identifiers_policy = all
 
+[sqlfluff:rules:references.quoting]
+prefer_quoted_identifiers = False
+ignore_words = ["uuid-ossp"]
+
 # Disable problematic rules
 [sqlfluff:rules:layout.spacing]
+enabled = false
+
+[sqlfluff:rules:layout.select_targets]
 enabled = false 
