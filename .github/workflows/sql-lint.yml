@@ -32,9 +32,11 @@ jobs:
         run: pip install sqlfluff==2.3.5
         
       - name: Run SQLFluff fix
+        id: sqlfluff
         run: sqlfluff fix database/sql --force
         
       - uses: reviewdog/action-suggester@v1
+        if: failure() && steps.sqlfluff.outcome == 'failure'
         with:
           tool_name: sqlfluff
           fail_on_error: false
