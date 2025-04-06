@@ -38,7 +38,7 @@ test_mongodb() {
         print("Database connected successfully");
         db.lamps.getIndexes();
         db.lamps.insertOne({
-            _id: UUID().toString(),
+            _id: new UUID().toString(),
             isOn: true,
             createdAt: new Date(),
             updatedAt: new Date()

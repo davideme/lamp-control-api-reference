@@ -40,7 +40,7 @@ db.lamps.createIndex({ "deletedAt": 1 });
 
 // Insert a test document
 db.lamps.insertOne({
-  _id: UUID().toString(),
+  _id: new UUID().toString(),
   isOn: false,
   createdAt: new Date(),
   updatedAt: new Date(),
