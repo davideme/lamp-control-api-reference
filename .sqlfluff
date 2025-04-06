@@ -1,0 +1,64 @@
+[sqlfluff]
+# Default settings (can be overridden by dialect-specific sections)
+templater = jinja
+max_line_length = 88
+
+# Indentation
+[sqlfluff:indentation]
+tab_space_size = 4
+indent_unit = space
+
+# Layout
+[sqlfluff:layout:type:comma]
+spacing_before = 0
+spacing_after = 1
+
+[sqlfluff:rules:layout.end_of_file]
+require_final_newline = true
+
+# Rules configuration
+[sqlfluff:rules]
+allow_scalar = True
+single_table_references = consistent
+
+# Capitalization rules
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = upper
+extended_capitalisation_policy = upper
+
+# Aliasing rules
+[sqlfluff:rules:aliasing.table]
+aliasing = explicit
+
+# References and quoting
+[sqlfluff:rules:references.keywords]
+unquoted_identifiers_policy = all
+
+[sqlfluff:rules:references.quoting]
+prefer_quoted_identifiers = False
+ignore_words = ["uuid-ossp"]
+
+# Disable problematic rules
+[sqlfluff:rules:layout.spacing]
+enabled = false
+
+[sqlfluff:rules:layout.select_targets]
+enabled = false
+
+# PostgreSQL specific settings
+[sqlfluff:postgres]
+dialect = postgres
+
+# MySQL specific settings
+[sqlfluff:mysql]
+dialect = mysql
+# Allow MySQL trigger syntax
+ignore_words = ["TRIGGER", "NEW"]
+# Disable parsing validation for MySQL-specific statements
+parse_identifiers = False 

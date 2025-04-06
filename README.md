@@ -1,4 +1,6 @@
-# Lamp Control API Reference Implementation
+# Lamp Control API Reference
+
+[![Database Schema Tests](https://github.com/davideme/lamp-control-api-reference/actions/workflows/database-tests.yml/badge.svg)](https://github.com/davideme/lamp-control-api-reference/actions/workflows/database-tests.yml)
 
 A comprehensive reference implementation of a simple lamp control API in multiple popular web programming languages, showcasing different API styles (REST, GraphQL, and gRPC) and database technologies.
 

@@ -1,0 +1,88 @@
+name: lamp-control-api-reference
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lamp_control
+      MYSQL_USER: lamp_user
+      MYSQL_PASSWORD: lamp_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "lamp_user", "--password=lamp_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/sql/mysql:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: lamp_control
+      POSTGRES_USER: lamp_user
+      POSTGRES_PASSWORD: lamp_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lamp_user -d lamp_control"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/sql/postgresql:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:5.0
+    environment:
+      MONGO_INITDB_DATABASE: lamp_control
+      MONGO_INITDB_ROOT_USERNAME: lamp_user
+      MONGO_INITDB_ROOT_PASSWORD: lamp_password
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database/mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
+      - mongo_data:/data/db
+
+  test:
+    image: ubuntu:22.04
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./test-databases.sh:/test-databases.sh
+    command: >
+      bash -c "
+        set -e &&
+        apt-get update &&
+        DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-client postgresql-client curl gpg &&
+        mkdir -p /usr/share/keyrings &&
+        curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg --batch --yes --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg &&
+        echo 'deb [signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg] http://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse' | tee /etc/apt/sources.list.d/mongodb-org-7.0.list &&
+        apt-get update &&
+        DEBIAN_FRONTEND=noninteractive apt-get install -y mongodb-mongosh &&
+        chmod +x /test-databases.sh &&
+        /test-databases.sh
+      "
+    environment:
+      - MYSQL_HOST=mysql
+      - POSTGRES_HOST=postgres
+      - MONGODB_HOST=mongodb
+
+volumes:
+  mysql_data:
+  postgres_data:
+  mongo_data: 
