@@ -40,3 +40,7 @@ jobs:
         with:
           tool_name: sqlfluff
           fail_on_error: false
+
+      - name: Run SQLFluff lint
+        if: failure() && steps.sqlfluff.outcome == 'failure'
+        run: sqlfluff lint database/sql --exclude-rules LT01
