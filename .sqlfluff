@@ -1,0 +1,36 @@
+[sqlfluff]
+dialect = postgres
+templater = jinja
+
+# Indentation
+[sqlfluff:indentation]
+tab_space_size = 4
+indent_unit = space
+
+# Rules configuration
+[sqlfluff:rules]
+max_line_length = 88
+tab_space_size = 4
+allow_scalar = True
+single_table_references = consistent
+unquoted_identifiers_policy = all
+
+# L010: Keywords should be consistently capitalized
+[sqlfluff:rules:L010]
+capitalisation_policy = upper
+
+# L011: Implicit/explicit aliasing of tables
+[sqlfluff:rules:L011]
+aliasing = explicit
+
+# L014: Unquoted identifiers
+[sqlfluff:rules:L014]
+extended_capitalisation_policy = lower
+
+# L029: Keywords should not be used as identifiers
+[sqlfluff:rules:L029]
+unquoted_identifiers_policy = all
+
+# L030: Function names
+[sqlfluff:rules:L030]
+extended_capitalisation_policy = upper 

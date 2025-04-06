@@ -1,0 +1,40 @@
+name: SQL Linting
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'database/sql/**'
+      - '.sqlfluff'
+  pull_request:
+    paths:
+      - 'database/sql/**'
+      - '.sqlfluff'
+
+jobs:
+  sql-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+          
+      - name: Install SQLFluff
+        run: pip install sqlfluff==2.3.5
+        
+      - name: Run SQLFluff fix
+        run: sqlfluff fix database/sql --force
+        
+      - uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: sqlfluff
+          fail_on_error: false
