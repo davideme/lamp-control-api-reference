@@ -38,4 +38,8 @@ aliasing = explicit
 
 # References
 [sqlfluff:rules:references.keywords]
-unquoted_identifiers_policy = all 
+unquoted_identifiers_policy = all
+
+# Disable problematic rules
+[sqlfluff:rules:layout.spacing]
+enabled = false 

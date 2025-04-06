@@ -29,7 +29,7 @@ jobs:
           python-version: "3.8"
           
       - name: Install SQLFluff
-        run: pip install sqlfluff==2.3.5
+        run: pip install sqlfluff==3.3.1
         
       - name: Run SQLFluff fix
         id: sqlfluff
