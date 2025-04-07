@@ -21,8 +21,10 @@ export interface LampOptions {
 // Lamp domain model
 export class Lamp {
   private state: LampState;
+  readonly id: string;
 
   constructor(id: string, name: string, options: LampOptions = {}) {
+    this.id = id;
     const now = new Date();
     this.state = {
       id,
@@ -43,10 +45,6 @@ export class Lamp {
   }
 
   // Getters
-  get id(): string {
-    return this.state.id;
-  }
-
   get name(): string {
     return this.state.name;
   }
@@ -102,9 +100,21 @@ export class Lamp {
     }
   }
 
+  toggle(): void {
+    this.state = { ...this.state, isOn: !this.state.isOn, updatedAt: new Date() };
+  }
+
   // Serialization
-  toJSON(): LampState {
-    return { ...this.state };
+  toJSON(): { id: string } & Omit<LampState, 'id'> {
+    return {
+      id: this.id,
+      name: this.state.name,
+      isOn: this.state.isOn,
+      brightness: this.state.brightness,
+      color: this.state.color,
+      createdAt: this.state.createdAt,
+      updatedAt: this.state.updatedAt
+    };
   }
 
   // Validation
