@@ -1,11 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { appLogger } from '../utils/logger';
 import { DomainError, ValidationError, LampNotFoundError } from '../domain/errors/DomainError';
 import { createLampRouter } from './routes/lampRoutes';
 import { InMemoryLampRepository } from './repositories/InMemoryLampRepository';
 import { LampService } from '../domain/services/LampService';
+import { openApiDocument } from './openapi';
+import { rateLimiter } from './middleware/rateLimiter';
+import { metricsMiddleware, metricsEndpoint } from './middleware/metrics';
 
 const app = express();
 
@@ -13,6 +17,12 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Apply rate limiting to all routes
+app.use(rateLimiter);
+
+// Apply metrics middleware
+app.use(metricsMiddleware);
 
 // Request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -34,6 +44,12 @@ const lampService = new LampService(lampRepository);
 
 // Routes
 app.use('/api/lamps', createLampRouter(lampService));
+
+// Serve OpenAPI documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+
+// Expose metrics endpoint
+app.get('/metrics', metricsEndpoint);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
