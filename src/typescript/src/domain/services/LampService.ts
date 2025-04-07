@@ -30,7 +30,7 @@ export class LampService {
       appLogger.info('Lamp created successfully', { lampId: lamp.id, name: lamp.name });
       return lamp;
     } catch (error) {
-      appLogger.error('Failed to create lamp', error as Error, { data });
+      appLogger.error('Failed to create lamp', { error: error as Error, data });
       if (error instanceof Error) {
         throw new ValidationError(error.message);
       }
@@ -58,12 +58,21 @@ export class LampService {
     try {
       const lamp = await this.getLamp(id);
 
+      if (data.name !== undefined) {
+        lamp.setName(data.name);
+      }
+      if (data.brightness !== undefined) {
+        lamp.setBrightness(data.brightness);
+      }
+      if (data.color !== undefined) {
+        lamp.setColor(data.color);
+      }
 
       await this.repository.save(lamp);
       appLogger.info('Lamp updated successfully', { lampId: id, updates: data });
       return lamp;
     } catch (error) {
-      appLogger.error('Failed to update lamp', error as Error, { lampId: id, data });
+      appLogger.error('Failed to update lamp', { error: error as Error, lampId: id, data });
       if (error instanceof ValidationError || error instanceof LampNotFoundError) {
         throw error;
       }
