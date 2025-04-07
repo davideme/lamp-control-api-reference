@@ -2,7 +2,7 @@ import { Lamp } from '../models/Lamp';
 
 export interface LampRepository {
   // Save a lamp
-  save(lamp: Lamp): Promise<Lamp>;
+  save(lamp: Lamp): Promise<void>;
 
   // Find a lamp by its ID
   findById(id: string): Promise<Lamp | null>;
@@ -12,4 +12,7 @@ export interface LampRepository {
 
   // Delete a lamp by its ID
   delete(id: string): Promise<void>;
+
+  // Clear all lamps
+  clear(): Promise<void>;
 } 
