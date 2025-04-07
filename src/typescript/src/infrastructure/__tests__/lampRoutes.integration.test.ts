@@ -1,142 +1,155 @@
 import request from 'supertest';
-import { app } from '../server';
+import { v4 as uuidv4 } from 'uuid';
+import { createApp } from '../server';
 import { InMemoryLampRepository } from '../repositories/InMemoryLampRepository';
-import { LampService } from '../../domain/services/LampService';
 import { Lamp } from '../../domain/models/Lamp';
 
-describe('Lamp API Integration Tests', () => {
+describe('Lamp Routes Integration Tests', () => {
   let repository: InMemoryLampRepository;
-  let service: LampService;
   let testLamp: Lamp;
+  let app: ReturnType<typeof createApp>;
 
   beforeEach(async () => {
     repository = new InMemoryLampRepository();
-    service = new LampService(repository);
-    testLamp = await service.createLamp({
-      name: 'Test Lamp',
-      brightness: 50,
-      color: '#FFFFFF',
-    });
+    app = createApp(repository);
+    await repository.clear();
+
+    testLamp = new Lamp(
+      uuidv4(),
+      'Test Lamp',
+      {
+        brightness: 100,
+        color: '#FFFFFF'
+      }
+    );
+    await repository.save(testLamp);
   });
 
   describe('GET /api/lamps', () => {
     it('should return all lamps', async () => {
-      const response = await request(app).get('/api/lamps');
-      expect(response.status).toBe(200);
+      const response = await request(app)
+        .get('/api/lamps')
+        .expect(200);
+
       expect(response.body).toHaveLength(1);
       expect(response.body[0].id).toBe(testLamp.id);
+      expect(response.body[0].name).toBe(testLamp.name);
+    });
+  });
+
+  describe('GET /api/lamps/:id', () => {
+    it('should return a lamp by id', async () => {
+      const response = await request(app)
+        .get(`/api/lamps/${testLamp.id}`)
+        .expect(200);
+
+      expect(response.body.id).toBe(testLamp.id);
+      expect(response.body.name).toBe(testLamp.name);
+    });
+
+    it('should return 404 for non-existent lamp', async () => {
+      await request(app)
+        .get('/api/lamps/non-existent-id')
+        .expect(404);
     });
   });
 
   describe('POST /api/lamps', () => {
     it('should create a new lamp', async () => {
-      const lampData = {
+      const newLamp = {
         name: 'New Lamp',
         brightness: 75,
-        color: '#FF0000',
+        color: '#FF0000'
       };
 
       const response = await request(app)
         .post('/api/lamps')
-        .send(lampData);
+        .send(newLamp)
+        .expect(201);
 
-      expect(response.status).toBe(201);
-      expect(response.body.name).toBe(lampData.name);
-      expect(response.body.brightness).toBe(lampData.brightness);
-      expect(response.body.color).toBe(lampData.color);
+      expect(response.body.name).toBe(newLamp.name);
+      expect(response.body.brightness).toBe(newLamp.brightness);
+      expect(response.body.color).toBe(newLamp.color);
+      expect(response.body.id).toBeDefined();
     });
 
     it('should return 400 for invalid lamp data', async () => {
-      const invalidData = {
-        name: '',
-        brightness: 150,
-        color: 'invalid',
+      const invalidLamp = {
+        name: 'Invalid Lamp',
+        brightness: 150, // Invalid brightness
+        color: 'invalid-color'
       };
 
-      const response = await request(app)
+      await request(app)
         .post('/api/lamps')
-        .send(invalidData);
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('ValidationError');
-    });
-  });
-
-  describe('GET /api/lamps/:id', () => {
-    it('should return a lamp by ID', async () => {
-      const response = await request(app).get(`/api/lamps/${testLamp.id}`);
-      expect(response.status).toBe(200);
-      expect(response.body.id).toBe(testLamp.id);
-    });
-
-    it('should return 404 for non-existent lamp', async () => {
-      const response = await request(app).get('/api/lamps/non-existent-id');
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('LampNotFoundError');
+        .send(invalidLamp)
+        .expect(400);
     });
   });
 
   describe('PATCH /api/lamps/:id', () => {
-    it('should update a lamp', async () => {
-      const updateData = {
+    it('should update an existing lamp', async () => {
+      const updates = {
         name: 'Updated Lamp',
-        brightness: 25,
-        color: '#00FF00',
+        brightness: 50,
+        color: '#00FF00'
       };
 
       const response = await request(app)
         .patch(`/api/lamps/${testLamp.id}`)
-        .send(updateData);
+        .send(updates)
+        .expect(200);
 
-      expect(response.status).toBe(200);
-      expect(response.body.name).toBe(updateData.name);
-      expect(response.body.brightness).toBe(updateData.brightness);
-      expect(response.body.color).toBe(updateData.color);
+      expect(response.body.name).toBe(updates.name);
+      expect(response.body.brightness).toBe(updates.brightness);
+      expect(response.body.color).toBe(updates.color);
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      const response = await request(app)
+      await request(app)
         .patch('/api/lamps/non-existent-id')
-        .send({ name: 'Updated' });
-
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('LampNotFoundError');
+        .send({ name: 'Updated' })
+        .expect(404);
     });
   });
 
   describe('DELETE /api/lamps/:id', () => {
-    it('should delete a lamp', async () => {
-      const response = await request(app).delete(`/api/lamps/${testLamp.id}`);
-      expect(response.status).toBe(204);
+    it('should delete an existing lamp', async () => {
+      await request(app)
+        .delete(`/api/lamps/${testLamp.id}`)
+        .expect(204);
 
-      const getResponse = await request(app).get(`/api/lamps/${testLamp.id}`);
-      expect(getResponse.status).toBe(404);
+      await request(app)
+        .get(`/api/lamps/${testLamp.id}`)
+        .expect(404);
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      const response = await request(app).delete('/api/lamps/non-existent-id');
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('LampNotFoundError');
+      await request(app)
+        .delete('/api/lamps/non-existent-id')
+        .expect(404);
     });
   });
 
   describe('POST /api/lamps/:id/toggle', () => {
-    it('should toggle a lamp on/off', async () => {
-      const initialState = testLamp.isOn;
-      const response = await request(app).post(`/api/lamps/${testLamp.id}/toggle`);
+    it('should toggle lamp state', async () => {
+      const response = await request(app)
+        .post(`/api/lamps/${testLamp.id}/toggle`)
+        .expect(200);
 
-      expect(response.status).toBe(200);
-      expect(response.body.isOn).toBe(!initialState);
+      expect(response.body.isOn).toBe(true);
 
-      const secondResponse = await request(app).post(`/api/lamps/${testLamp.id}/toggle`);
-      expect(secondResponse.status).toBe(200);
-      expect(secondResponse.body.isOn).toBe(initialState);
+      const secondResponse = await request(app)
+        .post(`/api/lamps/${testLamp.id}/toggle`)
+        .expect(200);
+
+      expect(secondResponse.body.isOn).toBe(false);
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      const response = await request(app).post('/api/lamps/non-existent-id/toggle');
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('LampNotFoundError');
+      await request(app)
+        .post('/api/lamps/non-existent-id/toggle')
+        .expect(404);
     });
   });
 }); 

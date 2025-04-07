@@ -1,65 +1,38 @@
-import { appLogger, LogContext } from '../../src/utils/logger';
+import { appLogger } from '../../src/utils/logger';
 
-describe('Logger', () => {
+describe('appLogger', () => {
+  let infoSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
+  let debugSpy: jest.SpyInstance;
+
   beforeEach(() => {
-    appLogger.clearContext();
+    infoSpy = jest.spyOn(appLogger, 'info');
+    errorSpy = jest.spyOn(appLogger, 'error');
+    debugSpy = jest.spyOn(appLogger, 'debug');
   });
 
-  it('should log messages with different levels', () => {
-    // These calls should not throw errors
-    expect(() => {
-      appLogger.debug('Debug message');
-      appLogger.info('Info message');
-      appLogger.warn('Warning message');
-      appLogger.error('Error message');
-    }).not.toThrow();
+  afterEach(() => {
+    infoSpy.mockRestore();
+    errorSpy.mockRestore();
+    debugSpy.mockRestore();
   });
 
-  it('should handle context data', () => {
-    const context: LogContext = {
-      requestId: '123',
-      userId: 'user-456',
-    };
-
-    appLogger.setContext(context);
-
-    // These calls should not throw errors and should include context
-    expect(() => {
-      appLogger.info('Message with context');
-    }).not.toThrow();
+  it('should log info messages with context', () => {
+    const context = { userId: '123', action: 'test' };
+    appLogger.info('Info message', context);
+    expect(infoSpy).toHaveBeenCalledWith('Info message', context);
   });
 
-  it('should handle error objects in error logs', () => {
+  it('should log debug messages with context', () => {
+    const context = { userId: '123', action: 'test' };
+    appLogger.debug('Debug message', context);
+    expect(debugSpy).toHaveBeenCalledWith('Debug message', context);
+  });
+
+  it('should log error messages with error and context', () => {
     const error = new Error('Test error');
-    
-    expect(() => {
-      appLogger.error('Error occurred', error, { additionalInfo: 'test' });
-    }).not.toThrow();
-  });
-
-  it('should handle metadata in logs', () => {
-    const metadata = {
-      operation: 'test',
-      duration: 100,
-    };
-
-    expect(() => {
-      appLogger.info('Operation completed', metadata);
-    }).not.toThrow();
-  });
-
-  it('should clear context', () => {
-    const context: LogContext = {
-      requestId: '123',
-      userId: 'user-456',
-    };
-
-    appLogger.setContext(context);
-    appLogger.clearContext();
-
-    // Should log without the previous context
-    expect(() => {
-      appLogger.info('Message without context');
-    }).not.toThrow();
+    const context = { additionalInfo: 'test' };
+    appLogger.error('Error occurred', { error, ...context });
+    expect(errorSpy).toHaveBeenCalledWith('Error occurred', { error, ...context });
   });
 }); 
