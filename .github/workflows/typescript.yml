@@ -1,0 +1,64 @@
+name: TypeScript CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/typescript/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/typescript/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/typescript
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: src/typescript/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Type Check
+      run: npm run typecheck
+      
+    - name: Lint
+      run: npm run lint
+      
+    - name: Format Check
+      run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Run tests with coverage
+      run: npm run test:coverage
+      
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: src/typescript/coverage/
+        
+    - name: Check test coverage threshold
+      run: |
+        COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Test coverage is below 80% (Current: $COVERAGE%)"
+          exit 1
+        fi 
