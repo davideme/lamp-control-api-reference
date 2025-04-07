@@ -39,35 +39,37 @@ class Logger {
     this.context = {};
   }
 
-  private formatMessage(message: string, meta: Record<string, unknown> = {}): Record<string, unknown> {
+  private formatError(error: Error): Record<string, unknown> {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  private formatMessage(message: string, meta?: Record<string, unknown> | Error): Record<string, unknown> {
+    const formattedMeta = meta instanceof Error ? this.formatError(meta) : meta;
     return {
       ...this.context,
-      ...meta,
+      ...(formattedMeta || {}),
       message,
     };
   }
 
-  debug(message: string, meta: Record<string, unknown> = {}): void {
+  debug(message: string, meta?: Record<string, unknown> | Error): void {
     logger.debug(this.formatMessage(message, meta));
   }
 
-  info(message: string, meta: Record<string, unknown> = {}): void {
+  info(message: string, meta?: Record<string, unknown> | Error): void {
     logger.info(this.formatMessage(message, meta));
   }
 
-  warn(message: string, meta: Record<string, unknown> = {}): void {
+  warn(message: string, meta?: Record<string, unknown> | Error): void {
     logger.warn(this.formatMessage(message, meta));
   }
 
-  error(message: string, error?: Error, meta: Record<string, unknown> = {}): void {
-    logger.error(this.formatMessage(message, {
-      ...meta,
-      error: error ? {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      } : undefined,
-    }));
+  error(message: string, meta?: Record<string, unknown> | Error): void {
+    logger.error(this.formatMessage(message, meta));
   }
 }
 
