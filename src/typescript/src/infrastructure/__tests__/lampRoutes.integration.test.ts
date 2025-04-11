@@ -3,20 +3,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { createApp } from '../server';
 import { InMemoryLampRepository } from '../repositories/InMemoryLampRepository';
 import { Lamp } from '../../domain/models/Lamp';
+import { Express } from 'express';
 
 describe('Lamp Routes Integration Tests', () => {
   let repository: InMemoryLampRepository;
   let testLamp: Lamp;
-  let app: ReturnType<typeof createApp>;
+  let app: Express;
 
   beforeEach(async () => {
     repository = new InMemoryLampRepository();
-    app = createApp(repository);
+    app = await createApp(repository);
     await repository.clear();
 
     testLamp = new Lamp(uuidv4(), 'Test Lamp', {
-      brightness: 100,
-      color: '#FFFFFF',
+      isOn: false,
     });
     await repository.save(testLamp);
   });
@@ -55,16 +55,13 @@ describe('Lamp Routes Integration Tests', () => {
       const response = await request(app).post('/api/lamps').send(newLamp).expect(201);
 
       expect(response.body.name).toBe(newLamp.name);
-      expect(response.body.brightness).toBe(newLamp.brightness);
-      expect(response.body.color).toBe(newLamp.color);
       expect(response.body.id).toBeDefined();
     });
 
     it('should return 400 for invalid lamp data', async () => {
       const invalidLamp = {
         name: 'Invalid Lamp',
-        brightness: 150, // Invalid brightness
-        color: 'invalid-color',
+        isOn: 'not-a-boolean', // Invalid type
       };
 
       await request(app).post('/api/lamps').send(invalidLamp).expect(400);
@@ -85,8 +82,6 @@ describe('Lamp Routes Integration Tests', () => {
         .expect(200);
 
       expect(response.body.name).toBe(updates.name);
-      expect(response.body.brightness).toBe(updates.brightness);
-      expect(response.body.color).toBe(updates.color);
     });
 
     it('should return 404 for non-existent lamp', async () => {

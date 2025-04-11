@@ -1,13 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Lamp } from '../../../src/domain/models/Lamp';
-import { ValidationError } from '../../../src/domain/errors/DomainError';
 
 describe('Lamp', () => {
   const validId = uuidv4();
   const validName = 'Test Lamp';
   const validOptions = {
-    brightness: 75,
-    color: '#FF0000',
+    isOn: false,
   };
 
   describe('constructor', () => {
@@ -16,8 +14,6 @@ describe('Lamp', () => {
       expect(lamp.id).toBe(validId);
       expect(lamp.name).toBe(validName);
       expect(lamp.isOn).toBe(false);
-      expect(lamp.brightness).toBe(100);
-      expect(lamp.color).toBe('#FFFFFF');
       expect(lamp.createdAt).toBeInstanceOf(Date);
       expect(lamp.updatedAt).toBeInstanceOf(Date);
     });
@@ -27,28 +23,6 @@ describe('Lamp', () => {
       expect(lamp.id).toBe(validId);
       expect(lamp.name).toBe(validName);
       expect(lamp.isOn).toBe(false);
-      expect(lamp.brightness).toBe(validOptions.brightness);
-      expect(lamp.color).toBe(validOptions.color);
-    });
-
-    it('should throw ValidationError for invalid brightness', () => {
-      expect(() => {
-        new Lamp(validId, validName, { brightness: 101 });
-      }).toThrow(ValidationError);
-
-      expect(() => {
-        new Lamp(validId, validName, { brightness: -1 });
-      }).toThrow(ValidationError);
-    });
-
-    it('should throw ValidationError for invalid color', () => {
-      expect(() => {
-        new Lamp(validId, validName, { color: 'invalid' });
-      }).toThrow(ValidationError);
-
-      expect(() => {
-        new Lamp(validId, validName, { color: '#GGGGGG' });
-      }).toThrow(ValidationError);
     });
   });
 
@@ -73,26 +47,12 @@ describe('Lamp', () => {
       expect(lamp.name).toBe(newName);
     });
 
-    it('should update brightness', () => {
-      const newBrightness = 50;
-      lamp.setBrightness(newBrightness);
-      expect(lamp.brightness).toBe(newBrightness);
-    });
-
-    it('should update color', () => {
-      const newColor = '#00FF00';
-      lamp.setColor(newColor);
-      expect(lamp.color).toBe(newColor);
-    });
-
     it('should serialize to JSON correctly', () => {
       const json = lamp.toJSON();
       expect(json).toEqual({
         id: lamp.id,
         name: lamp.name,
         isOn: lamp.isOn,
-        brightness: lamp.brightness,
-        color: lamp.color,
         createdAt: lamp.createdAt,
         updatedAt: lamp.updatedAt,
       });

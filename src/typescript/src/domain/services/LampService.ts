@@ -6,14 +6,12 @@ import { appLogger } from '../../utils/logger';
 
 export interface CreateLampData {
   name: string;
-  brightness?: number;
-  color?: string;
+  isOn: boolean;
 }
 
 export interface UpdateLampData {
   name?: string;
-  brightness?: number;
-  color?: string;
+  isOn?: boolean;
 }
 
 export class LampService {
@@ -22,8 +20,7 @@ export class LampService {
   async createLamp(data: CreateLampData): Promise<Lamp> {
     try {
       const lamp = new Lamp(uuidv4(), data.name, {
-        brightness: data.brightness,
-        color: data.color,
+        isOn: data.isOn,
       });
 
       await this.repository.save(lamp);
@@ -58,14 +55,6 @@ export class LampService {
 
       if (data.name !== undefined) {
         lamp.setName(data.name);
-      }
-
-      if (data.brightness !== undefined) {
-        lamp.setBrightness(data.brightness);
-      }
-
-      if (data.color !== undefined) {
-        lamp.setColor(data.color);
       }
 
       await this.repository.save(lamp);

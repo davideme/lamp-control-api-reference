@@ -23,8 +23,7 @@ describe('LampService', () => {
     service = new LampService(mockRepository);
 
     testLamp = new Lamp(uuidv4(), 'Test Lamp', {
-      brightness: 100,
-      color: '#FFFFFF',
+      isOn: false,
     });
   });
 
@@ -34,15 +33,12 @@ describe('LampService', () => {
 
       const data = {
         name: 'New Lamp',
-        brightness: 75,
-        color: '#FF0000',
+        isOn: false,
       };
 
       const lamp = await service.createLamp(data);
       expect(mockRepository.save).toHaveBeenCalled();
       expect(lamp.name).toBe(data.name);
-      expect(lamp.brightness).toBe(data.brightness);
-      expect(lamp.color).toBe(data.color);
     });
   });
 
@@ -87,8 +83,6 @@ describe('LampService', () => {
       const result = await service.updateLamp(testLamp.id, updateData);
       expect(mockRepository.save).toHaveBeenCalled();
       expect(result.name).toBe(updateData.name);
-      expect(result.brightness).toBe(updateData.brightness);
-      expect(result.color).toBe(updateData.color);
     });
 
     it('should throw LampNotFoundError when lamp does not exist', async () => {

@@ -11,15 +11,23 @@ import { openApiDocument } from './openapi';
 import { metricsMiddleware, metricsEndpoint } from './middleware/metrics';
 import { rateLimiter } from './middleware/rateLimiter';
 import { LampRepository } from '../domain/repositories/LampRepository';
+import { setupGraphQLServer } from './graphql/server';
 
-export function createApp(repository: LampRepository = new InMemoryLampRepository()) {
+export async function createApp(
+  repository: LampRepository = new InMemoryLampRepository(),
+): Promise<express.Express> {
   const app = express();
   const lampService = new LampService(repository);
 
   // Middleware
   app.use(express.json());
   app.use(cors());
-  app.use(helmet());
+  app.use(
+    helmet({
+      // Need to adjust helmet settings for GraphQL Playground to work properly
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    }),
+  );
 
   // Apply rate limiting to all routes
   app.use(rateLimiter);
@@ -40,6 +48,9 @@ export function createApp(repository: LampRepository = new InMemoryLampRepositor
 
   // Routes
   app.use('/api/lamps', createLampRouter(lampService));
+
+  // Set up the GraphQL server
+  await setupGraphQLServer(app, lampService);
 
   // Serve OpenAPI documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
