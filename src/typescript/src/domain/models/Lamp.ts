@@ -113,7 +113,7 @@ export class Lamp {
       brightness: this.state.brightness,
       color: this.state.color,
       createdAt: this.state.createdAt,
-      updatedAt: this.state.updatedAt
+      updatedAt: this.state.updatedAt,
     };
   }
 
@@ -121,4 +121,4 @@ export class Lamp {
   static validate(data: unknown): LampState {
     return LampStateSchema.parse(data);
   }
-} 
+}

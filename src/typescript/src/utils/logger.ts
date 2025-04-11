@@ -47,7 +47,10 @@ class Logger {
     };
   }
 
-  private formatMessage(message: string, meta?: Record<string, unknown> | Error): Record<string, unknown> {
+  private formatMessage(
+    message: string,
+    meta?: Record<string, unknown> | Error,
+  ): Record<string, unknown> {
     const formattedMeta = meta instanceof Error ? this.formatError(meta) : meta;
     return {
       ...this.context,
@@ -73,4 +76,4 @@ class Logger {
   }
 }
 
-export const appLogger = new Logger(); 
+export const appLogger = new Logger();

@@ -37,4 +37,4 @@ export const metricsEndpoint = async (_req: Request, res: Response) => {
   } catch (error) {
     res.status(500).end(error);
   }
-}; 
+};

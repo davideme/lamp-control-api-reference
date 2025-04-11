@@ -90,4 +90,4 @@ export class LampService {
     await this.repository.save(lamp);
     return lamp;
   }
-} 
+}

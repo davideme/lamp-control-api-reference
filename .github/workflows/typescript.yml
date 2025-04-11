@@ -53,7 +53,6 @@ jobs:
       with:
         tool_name: npm run lint -- --fix
         fail_level: error
-        filter_mode: nofilter
 
     - name: Build
       run: npm run build
