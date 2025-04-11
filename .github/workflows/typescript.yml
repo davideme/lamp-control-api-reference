@@ -5,10 +5,12 @@ on:
     branches: [ main ]
     paths:
       - 'src/typescript/**'
+      - '.github/workflows/typescript.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'src/typescript/**'
+      - '.github/workflows/typescript.yml'
 
 jobs:
   build-and-test:
