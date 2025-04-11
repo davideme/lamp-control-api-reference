@@ -8,14 +8,14 @@ import cors from 'cors';
 import { json } from 'express';
 import { appLogger } from '../../utils/logger';
 
-export const setupGraphQLServer = async (app: Express, lampService: LampService): Promise<void> => {  // Create the Apollo Server instance
+export const setupGraphQLServer = async (app: Express, lampService: LampService): Promise<void> => {
+  // Create the Apollo Server instance
   const server = new ApolloServer<ResolverContext>({
     typeDefs,
     resolvers,
     includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
     formatError: (formattedError, _) => {
       appLogger.error('GraphQL error', { error: formattedError });
-      
       // For production, hide implementation details
       if (process.env.NODE_ENV === 'production') {
         return {
@@ -23,7 +23,6 @@ export const setupGraphQLServer = async (app: Express, lampService: LampService)
           path: formattedError.path,
         };
       }
-      
       return formattedError;
     },
   });
