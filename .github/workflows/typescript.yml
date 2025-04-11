@@ -45,7 +45,6 @@ jobs:
       continue-on-error: true
 
     - uses: reviewdog/action-suggester@v1
-      if: steps.lint.outcome == 'failure'
       with:
         tool_name: npm run lint -- --fix
         fail_level: error
