@@ -75,4 +75,4 @@ export function createApp(repository: LampRepository = new InMemoryLampRepositor
   return app;
 }
 
-export const app = createApp(); 
+export const app = createApp();

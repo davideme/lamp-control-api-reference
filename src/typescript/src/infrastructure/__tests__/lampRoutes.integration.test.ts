@@ -14,22 +14,16 @@ describe('Lamp Routes Integration Tests', () => {
     app = createApp(repository);
     await repository.clear();
 
-    testLamp = new Lamp(
-      uuidv4(),
-      'Test Lamp',
-      {
-        brightness: 100,
-        color: '#FFFFFF'
-      }
-    );
+    testLamp = new Lamp(uuidv4(), 'Test Lamp', {
+      brightness: 100,
+      color: '#FFFFFF',
+    });
     await repository.save(testLamp);
   });
 
   describe('GET /api/lamps', () => {
     it('should return all lamps', async () => {
-      const response = await request(app)
-        .get('/api/lamps')
-        .expect(200);
+      const response = await request(app).get('/api/lamps').expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].id).toBe(testLamp.id);
@@ -39,18 +33,14 @@ describe('Lamp Routes Integration Tests', () => {
 
   describe('GET /api/lamps/:id', () => {
     it('should return a lamp by id', async () => {
-      const response = await request(app)
-        .get(`/api/lamps/${testLamp.id}`)
-        .expect(200);
+      const response = await request(app).get(`/api/lamps/${testLamp.id}`).expect(200);
 
       expect(response.body.id).toBe(testLamp.id);
       expect(response.body.name).toBe(testLamp.name);
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      await request(app)
-        .get('/api/lamps/non-existent-id')
-        .expect(404);
+      await request(app).get('/api/lamps/non-existent-id').expect(404);
     });
   });
 
@@ -59,13 +49,10 @@ describe('Lamp Routes Integration Tests', () => {
       const newLamp = {
         name: 'New Lamp',
         brightness: 75,
-        color: '#FF0000'
+        color: '#FF0000',
       };
 
-      const response = await request(app)
-        .post('/api/lamps')
-        .send(newLamp)
-        .expect(201);
+      const response = await request(app).post('/api/lamps').send(newLamp).expect(201);
 
       expect(response.body.name).toBe(newLamp.name);
       expect(response.body.brightness).toBe(newLamp.brightness);
@@ -77,13 +64,10 @@ describe('Lamp Routes Integration Tests', () => {
       const invalidLamp = {
         name: 'Invalid Lamp',
         brightness: 150, // Invalid brightness
-        color: 'invalid-color'
+        color: 'invalid-color',
       };
 
-      await request(app)
-        .post('/api/lamps')
-        .send(invalidLamp)
-        .expect(400);
+      await request(app).post('/api/lamps').send(invalidLamp).expect(400);
     });
   });
 
@@ -92,7 +76,7 @@ describe('Lamp Routes Integration Tests', () => {
       const updates = {
         name: 'Updated Lamp',
         brightness: 50,
-        color: '#00FF00'
+        color: '#00FF00',
       };
 
       const response = await request(app)
@@ -106,36 +90,25 @@ describe('Lamp Routes Integration Tests', () => {
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      await request(app)
-        .patch('/api/lamps/non-existent-id')
-        .send({ name: 'Updated' })
-        .expect(404);
+      await request(app).patch('/api/lamps/non-existent-id').send({ name: 'Updated' }).expect(404);
     });
   });
 
   describe('DELETE /api/lamps/:id', () => {
     it('should delete an existing lamp', async () => {
-      await request(app)
-        .delete(`/api/lamps/${testLamp.id}`)
-        .expect(204);
+      await request(app).delete(`/api/lamps/${testLamp.id}`).expect(204);
 
-      await request(app)
-        .get(`/api/lamps/${testLamp.id}`)
-        .expect(404);
+      await request(app).get(`/api/lamps/${testLamp.id}`).expect(404);
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      await request(app)
-        .delete('/api/lamps/non-existent-id')
-        .expect(404);
+      await request(app).delete('/api/lamps/non-existent-id').expect(404);
     });
   });
 
   describe('POST /api/lamps/:id/toggle', () => {
     it('should toggle lamp state', async () => {
-      const response = await request(app)
-        .post(`/api/lamps/${testLamp.id}/toggle`)
-        .expect(200);
+      const response = await request(app).post(`/api/lamps/${testLamp.id}/toggle`).expect(200);
 
       expect(response.body.isOn).toBe(true);
 
@@ -147,9 +120,7 @@ describe('Lamp Routes Integration Tests', () => {
     });
 
     it('should return 404 for non-existent lamp', async () => {
-      await request(app)
-        .post('/api/lamps/non-existent-id/toggle')
-        .expect(404);
+      await request(app).post('/api/lamps/non-existent-id/toggle').expect(404);
     });
   });
-}); 
+});

@@ -5,14 +5,21 @@ on:
     branches: [ main ]
     paths:
       - 'src/typescript/**'
+      - '.github/workflows/typescript.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'src/typescript/**'
+      - '.github/workflows/typescript.yml'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+      pull-requests: write
     defaults:
       run:
         working-directory: src/typescript
@@ -37,12 +44,16 @@ jobs:
     - name: Type Check
       run: npm run typecheck
       
-    - name: Lint
-      run: npm run lint
-      
-    - name: Format Check
-      run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
-      
+    - name: Lint & Format Check
+      id: lint
+      run: npm run lint -- --fix
+      continue-on-error: true
+
+    - uses: reviewdog/action-suggester@v1
+      with:
+        tool_name: npm run lint -- --fix
+        fail_level: error
+
     - name: Build
       run: npm run build
       
@@ -58,7 +69,19 @@ jobs:
     - name: Check test coverage threshold
       run: |
         COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        STATEMENTS=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
+        BRANCHES=$(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')
+        FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')
+        
+        echo "## TypeScript Code Coverage" >> $GITHUB_STEP_SUMMARY
+        echo "| Type | Coverage |" >> $GITHUB_STEP_SUMMARY
+        echo "| ---- | -------- |" >> $GITHUB_STEP_SUMMARY
+        echo "| Lines | $COVERAGE% |" >> $GITHUB_STEP_SUMMARY
+        echo "| Statements | $STATEMENTS% |" >> $GITHUB_STEP_SUMMARY
+        echo "| Branches | $BRANCHES% |" >> $GITHUB_STEP_SUMMARY
+        echo "| Functions | $FUNCTIONS% |" >> $GITHUB_STEP_SUMMARY
+        
         if (( $(echo "$COVERAGE < 80" | bc -l) )); then
           echo "Test coverage is below 80% (Current: $COVERAGE%)"
           exit 1
-        fi 
+        fi

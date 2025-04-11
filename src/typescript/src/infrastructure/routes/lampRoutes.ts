@@ -65,4 +65,4 @@ export function createLampRouter(lampService: LampService): Router {
   });
 
   return router;
-} 
+}

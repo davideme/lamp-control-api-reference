@@ -7,7 +7,7 @@ describe('Lamp', () => {
   const validName = 'Test Lamp';
   const validOptions = {
     brightness: 75,
-    color: '#FF0000'
+    color: '#FF0000',
   };
 
   describe('constructor', () => {
@@ -94,8 +94,8 @@ describe('Lamp', () => {
         brightness: lamp.brightness,
         color: lamp.color,
         createdAt: lamp.createdAt,
-        updatedAt: lamp.updatedAt
+        updatedAt: lamp.updatedAt,
       });
     });
   });
-}); 
+});
