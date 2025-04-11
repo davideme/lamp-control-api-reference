@@ -52,16 +52,16 @@ export const resolvers = {
     },
     updateLamp: async (
       _: unknown,
-      { id, isOn }: { id: string; isOn: boolean },
+      { id, status }: { id: string; status: boolean },
       { lampService }: ResolverContext,
     ): Promise<Lamp | null> => {
       try {
         // Update lamp with appropriate properties matching your LampService
         return await lampService.updateLamp(id, {
-          isOn, // Include the status parameter to update the lamp's status
+          isOn: status, // Include the status parameter to update the lamp's status
         });
       } catch (error) {
-        appLogger.error('Error updating lamp', { error, id, isOn });
+        appLogger.error('Error updating lamp', { error, id, status });
         throw error;
       }
     },
