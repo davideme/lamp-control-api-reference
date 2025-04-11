@@ -6,17 +6,16 @@ import { resolvers, ResolverContext } from './resolvers';
 import { Express } from 'express';
 import cors from 'cors';
 import { json } from 'express';
-import { logger } from '../../utils/logger';
+import { appLogger } from '../../utils/logger';
 
-export const setupGraphQLServer = async (app: Express, lampService: LampService): Promise<void> => {
-  // Create the Apollo Server instance
+export const setupGraphQLServer = async (app: Express, lampService: LampService): Promise<void> => {  // Create the Apollo Server instance
   const server = new ApolloServer<ResolverContext>({
     typeDefs,
     resolvers,
     includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
-    formatError: (formattedError, _): Record<string, unknown> => {
-      logger.error('GraphQL error', { error: formattedError });
-
+    formatError: (formattedError, _) => {
+      appLogger.error('GraphQL error', { error: formattedError });
+      
       // For production, hide implementation details
       if (process.env.NODE_ENV === 'production') {
         return {
@@ -24,7 +23,7 @@ export const setupGraphQLServer = async (app: Express, lampService: LampService)
           path: formattedError.path,
         };
       }
-
+      
       return formattedError;
     },
   });
@@ -42,5 +41,5 @@ export const setupGraphQLServer = async (app: Express, lampService: LampService)
     }),
   );
 
-  logger.info('GraphQL API ready at /graphql');
+  appLogger.info('GraphQL API ready at /graphql');
 };

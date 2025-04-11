@@ -3,15 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { createApp } from '../server';
 import { InMemoryLampRepository } from '../repositories/InMemoryLampRepository';
 import { Lamp } from '../../domain/models/Lamp';
+import { Express } from 'express';
 
 describe('Lamp Routes Integration Tests', () => {
   let repository: InMemoryLampRepository;
   let testLamp: Lamp;
-  let app: ReturnType<typeof createApp>;
+  let app: Express;
 
   beforeEach(async () => {
     repository = new InMemoryLampRepository();
-    app = createApp(repository);
+    app = await createApp(repository);
     await repository.clear();
 
     testLamp = new Lamp(uuidv4(), 'Test Lamp', {
