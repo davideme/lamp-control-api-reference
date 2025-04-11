@@ -40,8 +40,16 @@ jobs:
       run: npm run typecheck
       
     - name: Lint & Format Check
-      run: npm run lint
-      
+      id: lint
+      run: npm run lint -- --fix
+      continue-on-error: true
+
+    - uses: reviewdog/action-suggester@v1
+      if: steps.lint.outcome == 'failure'
+      with:
+        tool_name: npm run lint -- --fix
+        fail_level: error
+
     - name: Build
       run: npm run build
       
