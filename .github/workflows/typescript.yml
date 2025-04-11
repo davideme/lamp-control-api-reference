@@ -39,11 +39,8 @@ jobs:
     - name: Type Check
       run: npm run typecheck
       
-    - name: Lint
+    - name: Lint & Format Check
       run: npm run lint
-      
-    - name: Format Check
-      run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
       
     - name: Build
       run: npm run build
