@@ -51,7 +51,6 @@ jobs:
 
     - uses: reviewdog/action-suggester@v1
       with:
-        tool_name: npm run lint
         fail_level: error
 
     - name: Build
