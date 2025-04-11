@@ -5,8 +5,6 @@ const LampStateSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
   isOn: z.boolean(),
-  brightness: z.number().min(0).max(100),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -14,8 +12,7 @@ const LampStateSchema = z.object({
 export type LampState = z.infer<typeof LampStateSchema>;
 
 export interface LampOptions {
-  brightness?: number;
-  color?: string;
+  isOn?: boolean;
 }
 
 // Lamp domain model
@@ -29,9 +26,7 @@ export class Lamp {
     this.state = {
       id,
       name,
-      isOn: false,
-      brightness: options.brightness ?? 100,
-      color: options.color ?? '#FFFFFF',
+      isOn: options.isOn ?? false,
       createdAt: now,
       updatedAt: now,
     };
@@ -51,14 +46,6 @@ export class Lamp {
 
   get isOn(): boolean {
     return this.state.isOn;
-  }
-
-  get brightness(): number {
-    return this.state.brightness;
-  }
-
-  get color(): string {
-    return this.state.color;
   }
 
   get createdAt(): Date {
@@ -110,8 +97,6 @@ export class Lamp {
       id: this.id,
       name: this.state.name,
       isOn: this.state.isOn,
-      brightness: this.state.brightness,
-      color: this.state.color,
       createdAt: this.state.createdAt,
       updatedAt: this.state.updatedAt,
     };
