@@ -35,4 +35,4 @@ describe('appLogger', () => {
     appLogger.error('Error occurred', { error, ...context });
     expect(errorSpy).toHaveBeenCalledWith('Error occurred', { error, ...context });
   });
-}); 
+});

@@ -15,4 +15,4 @@ export interface LampRepository {
 
   // Clear all lamps
   clear(): Promise<void>;
-} 
+}

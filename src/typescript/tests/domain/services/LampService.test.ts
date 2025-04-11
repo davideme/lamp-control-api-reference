@@ -22,14 +22,10 @@ describe('LampService', () => {
 
     service = new LampService(mockRepository);
 
-    testLamp = new Lamp(
-      uuidv4(),
-      'Test Lamp',
-      {
-        brightness: 100,
-        color: '#FFFFFF',
-      }
-    );
+    testLamp = new Lamp(uuidv4(), 'Test Lamp', {
+      brightness: 100,
+      color: '#FFFFFF',
+    });
   });
 
   describe('createLamp', () => {
@@ -98,7 +94,9 @@ describe('LampService', () => {
     it('should throw LampNotFoundError when lamp does not exist', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.updateLamp('non-existent-id', { name: 'Updated' })).rejects.toThrow(LampNotFoundError);
+      await expect(service.updateLamp('non-existent-id', { name: 'Updated' })).rejects.toThrow(
+        LampNotFoundError,
+      );
     });
   });
 
@@ -134,4 +132,4 @@ describe('LampService', () => {
       await expect(service.toggleLamp('non-existent-id')).rejects.toThrow(LampNotFoundError);
     });
   });
-}); 
+});

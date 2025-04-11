@@ -86,4 +86,4 @@ export async function createApp(
   return app;
 }
 
-export const app = createApp(); 
+export const app = createApp();

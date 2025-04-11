@@ -22,4 +22,4 @@ export class InvalidOperationError extends DomainError {
   constructor(message: string) {
     super(message);
   }
-} 
+}

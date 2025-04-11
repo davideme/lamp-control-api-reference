@@ -27,4 +27,4 @@ export class InMemoryLampRepository implements LampRepository {
   async clear(): Promise<void> {
     this.lamps.clear();
   }
-} 
+}
