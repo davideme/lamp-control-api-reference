@@ -43,7 +43,7 @@ export const resolvers = {
         // Create a new lamp with default name and status property mapped to isOn
         return await lampService.createLamp({
           name: `Lamp ${new Date().toISOString()}`,
-          // Optional properties can be added later through updateLamp
+          isOn: status, // Map the status parameter to the isOn property
         });
       } catch (error) {
         appLogger.error('Error creating lamp', { error, status });
@@ -58,8 +58,7 @@ export const resolvers = {
       try {
         // Update lamp with appropriate properties matching your LampService
         return await lampService.updateLamp(id, {
-          // We're only changing status-related properties based on the GraphQL input
-          // Other properties would stay unchanged
+          status, // Include the status parameter to update the lamp's status
         });
       } catch (error) {
         appLogger.error('Error updating lamp', { error, id, status });
