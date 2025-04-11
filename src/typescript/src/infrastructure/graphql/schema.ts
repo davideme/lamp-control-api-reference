@@ -1,4 +1,7 @@
 // GraphQL schema definition
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { resolvers } from './resolvers';
+
 export const typeDefs = `#graphql
   type Lamp {
     id: ID!
@@ -16,3 +19,10 @@ export const typeDefs = `#graphql
     deleteLamp(id: ID!): Boolean!
   }
 `;
+
+// Create and export the executable schema
+export const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+});
+
