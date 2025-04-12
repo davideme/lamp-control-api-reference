@@ -1,7 +1,6 @@
 import { createApp } from './infrastructure/server';
 import { appLogger } from './utils/logger';
 import { MongoDBLampRepository } from './infrastructure/repositories/MongoDBLampRepository';
-import databaseConfig from './config/database';
 
 const port = process.env['PORT'] || 3000;
 
