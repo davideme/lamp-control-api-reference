@@ -15,7 +15,7 @@ register.setDefaultLabels({
 });
 
 // Middleware to collect metrics
-export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const metricsMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const start = Date.now();
 
   // Record response metrics after request is finished
@@ -30,7 +30,7 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
 };
 
 // Endpoint to expose metrics
-export const metricsEndpoint = async (_req: Request, res: Response) => {
+export const metricsEndpoint = async (_req: Request, res: Response): Promise<void> => {
   try {
     res.set('Content-Type', register.contentType);
     res.end(await register.metrics());
