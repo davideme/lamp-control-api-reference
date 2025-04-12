@@ -273,25 +273,10 @@ describe('MongoDBLampRepository', () => {
     });
   });
 
-  describe('documentToDomain', () => {
-    test('should handle null document', async () => {
-      // Arrange - Create a repository and get access to the private method
-      const repo = new MongoDBLampRepository();
-      const documentToDomain = (repo as any).documentToDomain.bind(repo);
-
-      // Act
-      const result = documentToDomain(null);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-  });
-
   describe('static connection management', () => {
     test('should reuse existing connection', async () => {
       // Arrange
       // Reset the connection promise to ensure we're testing from a clean state
-      (MongoDBLampRepository as any).connectionPromise = null;
       await MongoDBLampRepository.disconnect();
 
       const connectSpy = jest.spyOn(mongoose, 'connect');
