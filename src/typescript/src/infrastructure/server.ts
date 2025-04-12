@@ -6,17 +6,34 @@ import { appLogger } from '../utils/logger';
 import { createLampRouter } from './routes/lampRoutes';
 import { ValidationError, LampNotFoundError } from '../domain/errors/DomainError';
 import { InMemoryLampRepository } from './repositories/InMemoryLampRepository';
+import { MongoDBLampRepository } from './repositories/MongoDBLampRepository';
 import { LampService } from '../domain/services/LampService';
 import { openApiDocument } from './openapi';
 import { metricsMiddleware, metricsEndpoint } from './middleware/metrics';
 import { rateLimiter } from './middleware/rateLimiter';
 import { LampRepository } from '../domain/repositories/LampRepository';
 import { setupGraphQLServer } from './graphql/server';
+import databaseConfig from '../config/database';
 
 export async function createApp(
-  repository: LampRepository = new InMemoryLampRepository(),
+  repository?: LampRepository,
 ): Promise<express.Express> {
   const app = express();
+  
+  // Determine which repository to use if none provided
+  if (!repository) {
+    // Use MongoDB repository if explicitly requested via environment variable
+    if (process.env.USE_MONGODB === 'true') {
+      appLogger.info('Using MongoDB repository');
+      // Connect to MongoDB using configuration
+      await MongoDBLampRepository.connect(databaseConfig.mongodb.uri);
+      repository = new MongoDBLampRepository();
+    } else {
+      appLogger.info('Using in-memory repository');
+      repository = new InMemoryLampRepository();
+    }
+  }
+  
   const lampService = new LampService(repository);
 
   // Middleware
