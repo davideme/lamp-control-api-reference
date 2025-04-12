@@ -47,7 +47,6 @@ jobs:
     - name: Lint & Format Check
       id: lint
       run: npm run lint -- --fix
-      continue-on-error: true
 
     - uses: reviewdog/action-suggester@v1
       with:
