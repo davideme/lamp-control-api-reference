@@ -85,7 +85,7 @@ describe('Lamp', () => {
         name: 'Valid Lamp',
         isOn: true,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       const result = Lamp.validate(validData);
       expect(result).toEqual(validData);
@@ -94,7 +94,7 @@ describe('Lamp', () => {
     it('should throw on invalid lamp data', () => {
       const invalidData = {
         name: 123, // name should be a string
-        isOn: 'not-a-boolean' // isOn should be a boolean
+        isOn: 'not-a-boolean', // isOn should be a boolean
       };
       expect(() => Lamp.validate(invalidData)).toThrow();
     });
