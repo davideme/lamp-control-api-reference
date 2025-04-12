@@ -9,7 +9,7 @@ async function startServer(): Promise<void> {
     // Determine which database to use
     const dbType = process.env['DB_TYPE'] || 'memory';
     appLogger.info(`Using database type: ${dbType}`);
-    
+
     // Create the app with the appropriate repository
     const app = await createApp();
 
@@ -32,12 +32,12 @@ async function startServer(): Promise<void> {
     // Handle graceful shutdown
     process.on('SIGTERM', async () => {
       appLogger.info('SIGTERM received, shutting down gracefully');
-      
+
       // Close MongoDB connection if using MongoDB
       if (dbType === 'mongodb') {
         await MongoDBLampRepository.disconnect();
       }
-      
+
       process.exit(0);
     });
   } catch (error) {

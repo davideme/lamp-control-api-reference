@@ -15,16 +15,14 @@ import { LampRepository } from '../domain/repositories/LampRepository';
 import { setupGraphQLServer } from './graphql/server';
 import databaseConfig from '../config/database';
 
-export async function createApp(
-  repository?: LampRepository,
-): Promise<express.Express> {
+export async function createApp(repository?: LampRepository): Promise<express.Express> {
   const app = express();
-  
+
   // Determine which repository to use if none provided
   if (!repository) {
     // Get database type from environment variable
     const dbType = process.env.DB_TYPE || 'memory';
-    
+
     switch (dbType) {
       case 'mongodb':
         appLogger.info('Using MongoDB repository');
@@ -40,7 +38,7 @@ export async function createApp(
         break;
     }
   }
-  
+
   const lampService = new LampService(repository);
 
   // Middleware

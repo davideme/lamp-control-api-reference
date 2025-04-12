@@ -17,16 +17,18 @@ interface DatabaseConfig {
 // Load configuration from environment variables with sensible defaults
 const config: DatabaseConfig = {
   mongodb: {
-    uri: process.env.MONGODB_URI || 'mongodb://lamp_user:lamp_password@localhost:27017/lamp_control',
+    uri:
+      process.env.MONGODB_URI || 'mongodb://lamp_user:lamp_password@localhost:27017/lamp_control',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    }
+    },
   },
   postgresql: {
-    connectionString: process.env.POSTGRESQL_URI || 
-      'postgresql://lamp_user:lamp_password@localhost:5432/lamp_control'
-  }
+    connectionString:
+      process.env.POSTGRESQL_URI ||
+      'postgresql://lamp_user:lamp_password@localhost:5432/lamp_control',
+  },
 };
 
 export default config;
