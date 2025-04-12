@@ -37,7 +37,6 @@ jest.mock('../../../domain/services/LampService', () => ({
 describe('GraphQL Resolvers', () => {
   // Sample lamp for testing
   const sampleLamp = new Lamp(uuidv4(), 'Test Lamp', { isOn: true });
-  
   // Cast to MockLampService to get TypeScript to recognize the mock methods
   const mockLampService = {
     getLamp: jest.fn(),
@@ -66,13 +65,9 @@ describe('GraphQL Resolvers', () => {
     describe('getLamp resolver', () => {
       it('should return a lamp by ID', async () => {
         mockLampService.getLamp.mockResolvedValueOnce(sampleLamp);
-        
-        const result = await resolvers.Query.getLamp(
-          null, 
-          { id: sampleLamp.id }, 
-          mockContext
-        );
-        
+
+        const result = await resolvers.Query.getLamp(null, { id: sampleLamp.id }, mockContext);
+
         expect(result).toEqual(sampleLamp);
         expect(mockLampService.getLamp).toHaveBeenCalledWith(sampleLamp.id);
       });
@@ -80,9 +75,8 @@ describe('GraphQL Resolvers', () => {
       it('should handle errors when fetching a lamp', async () => {
         const error = new Error('Lamp not found');
         mockLampService.getLamp.mockRejectedValueOnce(error);
-        
         await expect(
-          resolvers.Query.getLamp(null, { id: 'invalid-id' }, mockContext)
+          resolvers.Query.getLamp(null, { id: 'invalid-id' }, mockContext),
         ).rejects.toThrow(error);
       });
     });
@@ -91,9 +85,7 @@ describe('GraphQL Resolvers', () => {
       it('should return all lamps', async () => {
         const lamps = [sampleLamp, new Lamp(uuidv4(), 'Another Lamp')];
         mockLampService.getAllLamps.mockResolvedValueOnce(lamps);
-        
         const result = await resolvers.Query.getLamps(null, {}, mockContext);
-        
         expect(result).toEqual(lamps);
         expect(mockLampService.getAllLamps).toHaveBeenCalled();
       });
@@ -101,10 +93,8 @@ describe('GraphQL Resolvers', () => {
       it('should handle errors when fetching all lamps', async () => {
         const error = new Error('Failed to fetch lamps');
         mockLampService.getAllLamps.mockRejectedValueOnce(error);
-        
-        await expect(
-          resolvers.Query.getLamps(null, {}, mockContext)
-        ).rejects.toThrow(error);
+
+        await expect(resolvers.Query.getLamps(null, {}, mockContext)).rejects.toThrow(error);
       });
     });
   });
@@ -120,26 +110,23 @@ describe('GraphQL Resolvers', () => {
     describe('createLamp resolver', () => {
       it('should create a new lamp', async () => {
         mockLampService.createLamp.mockResolvedValueOnce(sampleLamp);
-        
-        const result = await resolvers.Mutation.createLamp(
-          null, 
-          { status: true }, 
-          mockContext
-        );
-        
+
+        const result = await resolvers.Mutation.createLamp(null, { status: true }, mockContext);
+
         expect(result).toEqual(sampleLamp);
-        expect(mockLampService.createLamp).toHaveBeenCalledWith(expect.objectContaining({
-          name: expect.any(String),
-          isOn: true,
-        }));
+        expect(mockLampService.createLamp).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: expect.any(String),
+            isOn: true,
+          }),
+        );
       });
 
       it('should handle errors when creating a lamp', async () => {
         const error = new Error('Failed to create lamp');
         mockLampService.createLamp.mockRejectedValueOnce(error);
-        
         await expect(
-          resolvers.Mutation.createLamp(null, { status: true }, mockContext)
+          resolvers.Mutation.createLamp(null, { status: true }, mockContext),
         ).rejects.toThrow(error);
       });
     });
@@ -148,26 +135,23 @@ describe('GraphQL Resolvers', () => {
       it('should update a lamp', async () => {
         const updatedLamp = new Lamp(sampleLamp.id, 'Updated Lamp', { isOn: false });
         mockLampService.updateLamp.mockResolvedValueOnce(updatedLamp);
-        
         const result = await resolvers.Mutation.updateLamp(
-          null, 
-          { id: sampleLamp.id, status: false }, 
-          mockContext
+          null,
+          { id: sampleLamp.id, status: false },
+          mockContext,
         );
-        
         expect(result).toEqual(updatedLamp);
         expect(mockLampService.updateLamp).toHaveBeenCalledWith(
           sampleLamp.id,
-          expect.objectContaining({ isOn: false })
+          expect.objectContaining({ isOn: false }),
         );
       });
 
       it('should handle errors when updating a lamp', async () => {
         const error = new Error('Lamp not found');
         mockLampService.updateLamp.mockRejectedValueOnce(error);
-        
         await expect(
-          resolvers.Mutation.updateLamp(null, { id: 'invalid-id', status: false }, mockContext)
+          resolvers.Mutation.updateLamp(null, { id: 'invalid-id', status: false }, mockContext),
         ).rejects.toThrow(error);
       });
     });
@@ -175,13 +159,11 @@ describe('GraphQL Resolvers', () => {
     describe('deleteLamp resolver', () => {
       it('should delete a lamp and return true on success', async () => {
         mockLampService.deleteLamp.mockResolvedValueOnce(undefined);
-        
         const result = await resolvers.Mutation.deleteLamp(
-          null, 
-          { id: sampleLamp.id }, 
-          mockContext
+          null,
+          { id: sampleLamp.id },
+          mockContext,
         );
-        
         expect(result).toBe(true);
         expect(mockLampService.deleteLamp).toHaveBeenCalledWith(sampleLamp.id);
       });
@@ -189,9 +171,8 @@ describe('GraphQL Resolvers', () => {
       it('should handle errors when deleting a lamp', async () => {
         const error = new Error('Failed to delete lamp');
         mockLampService.deleteLamp.mockRejectedValueOnce(error);
-        
         await expect(
-          resolvers.Mutation.deleteLamp(null, { id: 'invalid-id' }, mockContext)
+          resolvers.Mutation.deleteLamp(null, { id: 'invalid-id' }, mockContext),
         ).rejects.toThrow(error);
       });
     });
