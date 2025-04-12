@@ -63,16 +63,28 @@ export class MongoDBLampRepository implements LampRepository {
   async save(lamp: Lamp): Promise<void> {
     try {
       await MongoDBLampRepository.connect();
-      await LampModel.updateOne(
-        { _id: lamp.id },
-        {
+      const existingLamp = await LampModel.findOne({ _id: lamp.id });
+      
+      if (existingLamp) {
+        // Update existing lamp
+        await LampModel.updateOne(
+          { _id: lamp.id },
+          {
+            name: lamp.name,
+            isOn: lamp.isOn,
+            updatedAt: new Date()
+          }
+        );
+      } else {
+        // Create new lamp
+        await LampModel.create({
           _id: lamp.id,
           name: lamp.name,
           isOn: lamp.isOn,
+          createdAt: new Date(),
           updatedAt: new Date()
-        },
-        { upsert: true }
-      );
+        });
+      }
       appLogger.debug('Lamp saved to MongoDB', { lampId: lamp.id });
     } catch (error) {
       appLogger.error('Error saving lamp to MongoDB', { error, lampId: lamp.id });

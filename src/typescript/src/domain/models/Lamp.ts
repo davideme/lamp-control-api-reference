@@ -35,7 +35,7 @@ export class Lamp {
     try {
       LampStateSchema.parse(this.state);
     } catch (error) {
-      throw new ValidationError('Invalid lamp state');
+      throw new ValidationError(`Invalid lamp state: ${error}`);
     }
   }
 
