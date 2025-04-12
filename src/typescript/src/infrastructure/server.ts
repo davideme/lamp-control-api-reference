@@ -7,7 +7,6 @@ import { createLampRouter } from './routes/lampRoutes';
 import { ValidationError, LampNotFoundError } from '../domain/errors/DomainError';
 import { InMemoryLampRepository } from './repositories/InMemoryLampRepository';
 import { MongoDBLampRepository } from './repositories/MongoDBLampRepository';
-import { PostgreSQLLampRepository } from './repositories/PostgreSQLLampRepository';
 import { LampService } from '../domain/services/LampService';
 import { openApiDocument } from './openapi';
 import { metricsMiddleware, metricsEndpoint } from './middleware/metrics';
@@ -33,12 +32,7 @@ export async function createApp(
         await MongoDBLampRepository.connect(databaseConfig.mongodb.uri);
         repository = new MongoDBLampRepository();
         break;
-        
-      case 'postgresql':
-        appLogger.info('Using PostgreSQL repository');
-        repository = new PostgreSQLLampRepository(databaseConfig.postgresql.connectionString);
-        break;
-        
+
       case 'memory':
       default:
         appLogger.info('Using in-memory repository');
