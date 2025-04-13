@@ -6,7 +6,7 @@ import { LampServiceService } from './generated/lamp';
 
 export function createGrpcServer(lampRepository: LampRepository): grpc.Server {
   const serviceImplementation = new GrpcLampService(lampRepository);
-  
+
   const server = new grpc.Server();
   server.addService(LampServiceService, {
     createLamp: serviceImplementation.CreateLamp.bind(serviceImplementation),
@@ -15,7 +15,7 @@ export function createGrpcServer(lampRepository: LampRepository): grpc.Server {
     updateLamp: serviceImplementation.UpdateLamp.bind(serviceImplementation),
     deleteLamp: serviceImplementation.DeleteLamp.bind(serviceImplementation),
   });
-  
+
   return server;
 }
 

@@ -68,7 +68,11 @@ async function main() {
     console.log('Lamp details:', lamp);
 
     console.log('\nDeleting lamp...');
-    const deleteResult = await grpcPromise<DeleteLampRequest, DeleteLampResponse>(client, 'deleteLamp', { id: newLamp.id });
+    const deleteResult = await grpcPromise<DeleteLampRequest, DeleteLampResponse>(
+      client,
+      'deleteLamp',
+      { id: newLamp.id },
+    );
     console.log('Lamp deleted:', deleteResult);
 
     process.exit(0);
