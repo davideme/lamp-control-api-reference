@@ -1,38 +1,13 @@
+import {
+  CreateLampRequest,
+  DeleteLampRequest,
+  DeleteLampResponse,
+  GetLampRequest,
+  Lamp,
+  ListLampsResponse,
+  UpdateLampRequest,
+} from '@/infrastructure/grpc/generated/lamp';
 import { createLampClient, grpcPromise } from '../infrastructure/grpc/client';
-
-// Define TypeScript interfaces matching our gRPC message types
-interface Lamp {
-  id: string;
-  name: string;
-  status: boolean;
-}
-
-interface ListLampsResponse {
-  lamps: Lamp[];
-}
-
-interface CreateLampRequest {
-  name: string;
-  status: boolean;
-}
-
-interface UpdateLampRequest {
-  id: string;
-  name?: string;
-  status?: boolean;
-}
-
-interface GetLampRequest {
-  id: string;
-}
-
-interface DeleteLampRequest {
-  id: string;
-}
-
-interface DeleteLampResponse {
-  success: boolean;
-}
 
 /**
  * Example of using the gRPC client to interact with the Lamp Control API

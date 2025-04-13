@@ -11,6 +11,7 @@ const PROTO_PATH = path.resolve(__dirname, '../../../../../../docs/api/lamp.prot
  * @param port The port of the gRPC server
  * @returns A gRPC client for the Lamp Service
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLampClient(host = 'localhost', port = 50051): any {
   const address = `${host}:${port}`;
 
@@ -27,6 +28,7 @@ export function createLampClient(host = 'localhost', port = 50051): any {
   const proto = grpc.loadPackageDefinition(packageDefinition);
 
   // Cast to any because TypeScript doesn't know the structure of the loaded proto
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const LampService = (proto.lamp as any).LampService;
 
   if (!LampService) {
@@ -44,6 +46,7 @@ export function createLampClient(host = 'localhost', port = 50051): any {
  * @returns A promise that resolves to the response
  */
 export function grpcPromise<TRequest, TResponse>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: any,
   method: string,
   request: TRequest,

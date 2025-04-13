@@ -5,12 +5,13 @@ import { startGrpcServer, stopGrpcServer } from '../server';
 import path from 'path';
 import { LampService } from '../../../domain/services/LampService';
 import { v4 as uuidv4 } from 'uuid';
+import { LampServiceClient } from '../generated/lamp';
 
 const PROTO_PATH = path.resolve(__dirname, '../../../../../../docs/api/lamp.proto');
 
 describe('gRPC Server', () => {
   let server: grpc.Server;
-  let client: any;
+  let client: LampServiceClient;
   let lampRepository: InMemoryLampRepository;
   const port = 50052; // Use a different port for testing
 
@@ -38,6 +39,7 @@ describe('gRPC Server', () => {
     });
 
     const proto = grpc.loadPackageDefinition(packageDefinition);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client = new (proto.lamp as any).LampService(
       `localhost:${port}`,
       grpc.credentials.createInsecure(),
@@ -51,12 +53,14 @@ describe('gRPC Server', () => {
 
   it('should list lamps', async () => {
     const listPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.listLamps({}, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await listPromise;
     expect(response).toBeDefined();
     expect(response.lamps).toBeInstanceOf(Array);
@@ -72,6 +76,7 @@ describe('gRPC Server', () => {
     const createPromise = new Promise((resolve, reject) => {
       client.createLamp(
         { name: 'New Lamp', status: false },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (error: Error | null, response: any) => {
           if (error) reject(error);
           else resolve(response);
@@ -79,6 +84,7 @@ describe('gRPC Server', () => {
       );
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lamp: any = await createPromise;
     expect(lamp).toBeDefined();
     expect(lamp.id).toBeDefined();
@@ -87,34 +93,40 @@ describe('gRPC Server', () => {
 
     // Verify it was actually added to the repository
     const allLamps = await new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.listLamps({}, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((allLamps as any).lamps.length).toBe(2);
   });
 
   it('should get a specific lamp', async () => {
     // First get all lamps to get a valid ID
     const listPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.listLamps({}, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const listResponse: any = await listPromise;
     const lampId = listResponse.lamps[0].id;
 
     const getPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.getLamp({ id: lampId }, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lamp: any = await getPromise;
     expect(lamp).toBeDefined();
     expect(lamp.id).toBe(lampId);
@@ -123,12 +135,14 @@ describe('gRPC Server', () => {
   it('should update a lamp', async () => {
     // First get all lamps to get a valid ID
     const listPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.listLamps({}, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const listResponse: any = await listPromise;
     const lampId = listResponse.lamps[0].id;
     const initialStatus = listResponse.lamps[0].status;
@@ -136,6 +150,7 @@ describe('gRPC Server', () => {
     const updatePromise = new Promise((resolve, reject) => {
       client.updateLamp(
         { id: lampId, status: !initialStatus },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (error: Error | null, response: any) => {
           if (error) reject(error);
           else resolve(response);
@@ -143,6 +158,7 @@ describe('gRPC Server', () => {
       );
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatedLamp: any = await updatePromise;
     expect(updatedLamp).toBeDefined();
     expect(updatedLamp.id).toBe(lampId);
@@ -154,6 +170,7 @@ describe('gRPC Server', () => {
     const createPromise = new Promise((resolve, reject) => {
       client.createLamp(
         { name: 'Lamp to Delete', status: true },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (error: Error | null, response: any) => {
           if (error) reject(error);
           else resolve(response);
@@ -161,29 +178,34 @@ describe('gRPC Server', () => {
       );
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newLamp: any = await createPromise;
     const lampId = newLamp.id;
 
     // Now delete it
     const deletePromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.deleteLamp({ id: lampId }, (error: Error | null, response: any) => {
         if (error) reject(error);
         else resolve(response);
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const deleteResponse: any = await deletePromise;
     expect(deleteResponse).toBeDefined();
     expect(deleteResponse.success).toBe(true);
 
     // Try to get the deleted lamp - should fail
     const getPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.getLamp({ id: lampId }, (error: Error | null, _response: any) => {
         if (error) resolve(error);
         else reject(new Error('Expected an error but got a successful response'));
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const error: any = await getPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.NOT_FOUND);
@@ -193,12 +215,14 @@ describe('gRPC Server', () => {
     const nonExistentId = uuidv4();
 
     const getPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       client.getLamp({ id: nonExistentId }, (error: Error | null, _response: any) => {
         if (error) resolve(error);
         else reject(new Error('Expected an error but got a successful response'));
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const error: any = await getPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.NOT_FOUND);
