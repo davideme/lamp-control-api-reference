@@ -57,6 +57,14 @@ export class LampService {
         lamp.setName(data.name);
       }
 
+      if (data.isOn !== undefined) {
+        if (data.isOn) {
+          lamp.turnOn();
+        } else {
+          lamp.turnOff();
+        }
+      }
+
       await this.repository.save(lamp);
       return lamp;
     } catch (error) {

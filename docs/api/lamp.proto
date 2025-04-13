@@ -23,10 +23,12 @@ service LampService {
 message Lamp {
   string id = 1;
   bool status = 2;
+  string name = 3;
 }
 
 message CreateLampRequest {
   bool status = 1;
+  string name = 2;
 }
 
 message GetLampRequest {
