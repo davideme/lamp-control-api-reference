@@ -33,7 +33,13 @@ export class GrpcLampService implements GrpcHandlers {
     this.lampService = new LampService(lampRepository);
   }
 
-  private serializeLamp(lamp: Lamp): { id: string; name: string; status: boolean; createdAt: string; updatedAt: string } {
+  private serializeLamp(lamp: Lamp): {
+    id: string;
+    name: string;
+    status: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } {
     return {
       id: lamp.id,
       name: lamp.name,

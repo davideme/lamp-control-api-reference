@@ -16,7 +16,7 @@ interface LampDocument extends Document {
 
 const lampSchema = new Schema<LampDocument>(
   {
-    _id: { type: String, default: () => uuidv4() },
+    _id: { type: String, default: (): string => uuidv4() },
     name: { type: String, required: true },
     isOn: { type: Boolean, required: true, default: false },
     deletedAt: { type: Date, default: null },

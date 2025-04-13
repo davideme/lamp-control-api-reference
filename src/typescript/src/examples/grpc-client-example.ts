@@ -8,6 +8,7 @@ import {
   UpdateLampRequest,
 } from '@/infrastructure/grpc/generated/lamp';
 import { createLampClient, grpcPromise } from '../infrastructure/grpc/client';
+import { appLogger } from '../utils/logger';
 
 /**
  * Example of using the gRPC client to interact with the Lamp Control API
@@ -17,42 +18,46 @@ async function main(): Promise<void> {
     // Create a gRPC client
     const client = createLampClient('localhost', 50051);
 
-    console.log('Creating a new lamp...');
+    appLogger.info('Creating a new lamp...');
     const newLamp = await grpcPromise<CreateLampRequest, Lamp>(client, 'createLamp', {
       name: 'Living Room Lamp',
       status: true,
     });
-    console.log('Lamp created:', newLamp);
+    appLogger.info('Lamp created:', { lamp: newLamp });
 
-    console.log('\nListing all lamps...');
-    const { lamps } = await grpcPromise<Record<string, never>, ListLampsResponse>(client, 'listLamps', {});
-    console.log('Found', lamps.length, 'lamps:');
+    appLogger.info('\nListing all lamps...');
+    const { lamps } = await grpcPromise<Record<string, never>, ListLampsResponse>(
+      client,
+      'listLamps',
+      {},
+    );
+    appLogger.info(`Found ${lamps.length} lamps`);
     lamps.forEach((lamp: Lamp) => {
-      console.log(`- ${lamp.id}: ${lamp.name} (${lamp.status ? 'ON' : 'OFF'})`);
+      appLogger.info(`- ${lamp.id}: ${lamp.name} (${lamp.status ? 'ON' : 'OFF'})`);
     });
 
-    console.log('\nUpdating lamp status...');
+    appLogger.info('\nUpdating lamp status...');
     const updatedLamp = await grpcPromise<UpdateLampRequest, Lamp>(client, 'updateLamp', {
       id: newLamp.id,
       status: false,
     });
-    console.log('Lamp updated:', updatedLamp);
+    appLogger.info('Lamp updated:', { lamp: updatedLamp });
 
-    console.log('\nGetting lamp by ID...');
+    appLogger.info('\nGetting lamp by ID...');
     const lamp = await grpcPromise<GetLampRequest, Lamp>(client, 'getLamp', { id: newLamp.id });
-    console.log('Lamp details:', lamp);
+    appLogger.info('Lamp details:', { lamp });
 
-    console.log('\nDeleting lamp...');
+    appLogger.info('\nDeleting lamp...');
     const deleteResult = await grpcPromise<DeleteLampRequest, DeleteLampResponse>(
       client,
       'deleteLamp',
       { id: newLamp.id },
     );
-    console.log('Lamp deleted:', deleteResult);
+    appLogger.info('Lamp deleted:', { result: deleteResult });
 
     process.exit(0);
   } catch (error) {
-    console.error('Error:', error);
+    appLogger.error('Error:', { error });
     process.exit(1);
   }
 }
