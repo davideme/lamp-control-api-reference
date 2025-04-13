@@ -1,47 +1,21 @@
 import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import * as path from 'path';
 import { LampRepository } from '../../domain/repositories/LampRepository';
 import { GrpcLampService } from './service';
 import { appLogger } from '../../utils/logger';
-
-// Update the Proto path to the correct location
-// The current path that's failing is: '../../../docs/api/lamp.proto'
-// Let's update it to a more appropriate location within the typescript src directory
-const PROTO_PATH = path.resolve(__dirname, '../../../../../docs/api/lamp.proto');
+import { LampServiceService } from './generated/lamp';
 
 export function createGrpcServer(lampRepository: LampRepository): grpc.Server {
-  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true,
-  });
-
-  // Load the proto file
-  const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
-
-  // Get the service definition
-  // Using type assertion to help TypeScript understand the structure
-  const lampProto = protoDescriptor.lamp as any;
-  const lampService = lampProto?.LampService?.service;
-
-  if (!lampService) {
-    throw new Error('Failed to load LampService from proto file');
-  }
-
-  const server = new grpc.Server();
   const serviceImplementation = new GrpcLampService(lampRepository);
-
-  server.addService(lampService, {
+  
+  const server = new grpc.Server();
+  server.addService(LampServiceService, {
     createLamp: serviceImplementation.CreateLamp.bind(serviceImplementation),
     getLamp: serviceImplementation.GetLamp.bind(serviceImplementation),
     listLamps: serviceImplementation.ListLamps.bind(serviceImplementation),
     updateLamp: serviceImplementation.UpdateLamp.bind(serviceImplementation),
     deleteLamp: serviceImplementation.DeleteLamp.bind(serviceImplementation),
   });
-
+  
   return server;
 }
 
