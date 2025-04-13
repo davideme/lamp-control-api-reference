@@ -12,7 +12,7 @@ import { createLampClient, grpcPromise } from '../infrastructure/grpc/client';
 /**
  * Example of using the gRPC client to interact with the Lamp Control API
  */
-async function main() {
+async function main(): Promise<void> {
   try {
     // Create a gRPC client
     const client = createLampClient('localhost', 50051);
@@ -25,7 +25,7 @@ async function main() {
     console.log('Lamp created:', newLamp);
 
     console.log('\nListing all lamps...');
-    const { lamps } = await grpcPromise<{}, ListLampsResponse>(client, 'listLamps', {});
+    const { lamps } = await grpcPromise<Record<string, never>, ListLampsResponse>(client, 'listLamps', {});
     console.log('Found', lamps.length, 'lamps:');
     lamps.forEach((lamp: Lamp) => {
       console.log(`- ${lamp.id}: ${lamp.name} (${lamp.status ? 'ON' : 'OFF'})`);

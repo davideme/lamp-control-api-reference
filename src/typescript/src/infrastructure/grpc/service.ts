@@ -16,7 +16,7 @@ interface GrpcHandlers {
     { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }
   >;
   ListLamps: grpc.handleUnaryCall<
-    {},
+    Record<string, never>,
     { lamps: { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }[] }
   >;
   UpdateLamp: grpc.handleUnaryCall<
@@ -33,7 +33,7 @@ export class GrpcLampService implements GrpcHandlers {
     this.lampService = new LampService(lampRepository);
   }
 
-  private serializeLamp(lamp: Lamp) {
+  private serializeLamp(lamp: Lamp): { id: string; name: string; status: boolean; createdAt: string; updatedAt: string } {
     return {
       id: lamp.id,
       name: lamp.name,
