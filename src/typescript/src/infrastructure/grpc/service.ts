@@ -4,29 +4,9 @@ import { LampRepository } from '../../domain/repositories/LampRepository';
 import { Lamp } from '../../domain/models/Lamp';
 import { LampNotFoundError } from '../../domain/errors/DomainError';
 import { appLogger } from '../../utils/logger';
+import { CreateLampRequest, DeleteLampRequest, DeleteLampResponse, GetLampRequest, Lamp as LampResponse, LampServiceServer, ListLampsRequest, ListLampsResponse, UpdateLampRequest } from './generated/lamp';
 
-// Interface for gRPC handlers
-interface GrpcHandlers {
-  CreateLamp: grpc.handleUnaryCall<
-    { name: string; status: boolean },
-    { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }
-  >;
-  GetLamp: grpc.handleUnaryCall<
-    { id: string },
-    { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }
-  >;
-  ListLamps: grpc.handleUnaryCall<
-    Record<string, never>,
-    { lamps: { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }[] }
-  >;
-  UpdateLamp: grpc.handleUnaryCall<
-    { id: string; name?: string; status?: boolean },
-    { id: string; name: string; status: boolean; createdAt: string; updatedAt: string }
-  >;
-  DeleteLamp: grpc.handleUnaryCall<{ id: string }, { success: boolean }>;
-}
-
-export class GrpcLampService implements GrpcHandlers {
+export class GrpcLampService implements LampServiceServer {
   private lampService: LampService;
 
   constructor(lampRepository: LampRepository) {
@@ -49,7 +29,10 @@ export class GrpcLampService implements GrpcHandlers {
     };
   }
 
-  CreateLamp: GrpcHandlers['CreateLamp'] = async (call, callback) => {
+  [name: string]: grpc.UntypedHandleCall | any;
+  
+
+  createLamp: grpc.handleUnaryCall<CreateLampRequest, LampResponse> = async (call, callback) => {
     try {
       const { name, status } = call.request;
 
@@ -69,7 +52,7 @@ export class GrpcLampService implements GrpcHandlers {
     }
   };
 
-  GetLamp: GrpcHandlers['GetLamp'] = async (call, callback) => {
+  getLamp: grpc.handleUnaryCall<GetLampRequest, LampResponse> = async (call, callback) => {
     try {
       const { id } = call.request;
       const lamp = await this.lampService.getLamp(id);
@@ -91,7 +74,7 @@ export class GrpcLampService implements GrpcHandlers {
     }
   };
 
-  ListLamps: GrpcHandlers['ListLamps'] = async (_call, callback) => {
+  listLamps: grpc.handleUnaryCall<ListLampsRequest, ListLampsResponse> = async (_call, callback) => {
     try {
       const lamps = await this.lampService.getAllLamps();
       callback(null, {
@@ -106,7 +89,7 @@ export class GrpcLampService implements GrpcHandlers {
     }
   };
 
-  UpdateLamp: GrpcHandlers['UpdateLamp'] = async (call, callback) => {
+  updateLamp: grpc.handleUnaryCall<UpdateLampRequest, LampResponse> = async (call, callback) => {
     try {
       const { id, name, status } = call.request;
 
@@ -133,7 +116,7 @@ export class GrpcLampService implements GrpcHandlers {
     }
   };
 
-  DeleteLamp: GrpcHandlers['DeleteLamp'] = async (call, callback) => {
+  deleteLamp: grpc.handleUnaryCall<DeleteLampRequest, DeleteLampResponse> = async (call, callback) => {
     try {
       const { id } = call.request;
       await this.lampService.deleteLamp(id);

@@ -132,7 +132,7 @@ describe('gRPC Server', () => {
     expect(lamp.id).toBe(lampId);
   });
 
-  it('should update a lamp', async () => {
+  it('should update a lamp status', async () => {
     // First get all lamps to get a valid ID
     const listPromise = new Promise((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,6 +163,97 @@ describe('gRPC Server', () => {
     expect(updatedLamp).toBeDefined();
     expect(updatedLamp.id).toBe(lampId);
     expect(updatedLamp.status).toBe(!initialStatus);
+  });
+
+  it('should update a lamp name', async () => {
+    // First get all lamps to get a valid ID
+    const listPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.listLamps({}, (error: Error | null, response: any) => {
+        if (error) reject(error);
+        else resolve(response);
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listResponse: any = await listPromise;
+    const lampId = listResponse.lamps[0].id;
+    const newName = 'Updated Lamp Name';
+
+    const updatePromise = new Promise((resolve, reject) => {
+      client.updateLamp(
+        { id: lampId, name: newName },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, response: any) => {
+          if (error) reject(error);
+          else resolve(response);
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedLamp: any = await updatePromise;
+    expect(updatedLamp).toBeDefined();
+    expect(updatedLamp.id).toBe(lampId);
+    expect(updatedLamp.name).toBe(newName);
+  });
+
+  it('should update both lamp name and status', async () => {
+    // First create a new lamp to update
+    const createPromise = new Promise((resolve, reject) => {
+      client.createLamp(
+        { name: 'Lamp For Full Update', status: false },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, response: any) => {
+          if (error) reject(error);
+          else resolve(response);
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newLamp: any = await createPromise;
+    const lampId = newLamp.id;
+    const newName = 'Completely Updated Lamp';
+    const newStatus = true;
+
+    const updatePromise = new Promise((resolve, reject) => {
+      client.updateLamp(
+        { id: lampId, name: newName, status: newStatus },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, response: any) => {
+          if (error) reject(error);
+          else resolve(response);
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedLamp: any = await updatePromise;
+    expect(updatedLamp).toBeDefined();
+    expect(updatedLamp.id).toBe(lampId);
+    expect(updatedLamp.name).toBe(newName);
+    expect(updatedLamp.status).toBe(newStatus);
+  });
+
+  it('should handle lamp update with invalid ID', async () => {
+    const nonExistentId = uuidv4();
+    
+    const updatePromise = new Promise((resolve, reject) => {
+      client.updateLamp(
+        { id: nonExistentId, name: 'Should Fail', status: true },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, _response: any) => {
+          if (error) resolve(error);
+          else reject(new Error('Expected an error but got a successful response'));
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await updatePromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.NOT_FOUND);
   });
 
   it('should delete a lamp', async () => {
@@ -209,6 +300,121 @@ describe('gRPC Server', () => {
     const error: any = await getPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.NOT_FOUND);
+  });
+
+  it('should handle deleteLamp with invalid ID', async () => {
+    const nonExistentId = uuidv4();
+    
+    const deletePromise = new Promise((resolve, reject) => {
+      client.deleteLamp(
+        { id: nonExistentId },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, _response: any) => {
+          if (error) resolve(error);
+          else reject(new Error('Expected an error but got a successful response'));
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await deletePromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.NOT_FOUND);
+  });
+
+  it('should validate the success response format from deleteLamp', async () => {
+    // First create a lamp to delete
+    const createPromise = new Promise((resolve, reject) => {
+      client.createLamp(
+        { name: 'Lamp for Deletion Test', status: true },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, response: any) => {
+          if (error) reject(error);
+          else resolve(response);
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newLamp: any = await createPromise;
+    const lampId = newLamp.id;
+
+    // Delete it
+    const deletePromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.deleteLamp({ id: lampId }, (error: Error | null, response: any) => {
+        if (error) reject(error);
+        else resolve(response);
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const deleteResponse: any = await deletePromise;
+    expect(deleteResponse).toBeDefined();
+    expect(deleteResponse).toHaveProperty('success');
+    expect(typeof deleteResponse.success).toBe('boolean');
+    expect(deleteResponse.success).toBe(true);
+  });
+
+  it('should confirm lamp is removed from the repository after deletion', async () => {
+    // First create a lamp to delete
+    const createPromise = new Promise((resolve, reject) => {
+      client.createLamp(
+        { name: 'Repository Check Lamp', status: false },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, response: any) => {
+          if (error) reject(error);
+          else resolve(response);
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newLamp: any = await createPromise;
+    const lampId = newLamp.id;
+
+    // Get all lamps before deletion
+    const beforeListPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.listLamps({}, (error: Error | null, response: any) => {
+        if (error) reject(error);
+        else resolve(response);
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const beforeList: any = await beforeListPromise;
+    const initialCount = beforeList.lamps.length;
+
+    // Delete the lamp
+    const deletePromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.deleteLamp({ id: lampId }, (error: Error | null, response: any) => {
+        if (error) reject(error);
+        else resolve(response);
+      });
+    });
+
+    await deletePromise;
+
+    // Get all lamps after deletion
+    const afterListPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.listLamps({}, (error: Error | null, response: any) => {
+        if (error) reject(error);
+        else resolve(response);
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const afterList: any = await afterListPromise;
+    const afterCount = afterList.lamps.length;
+
+    expect(afterCount).toBe(initialCount - 1);
+    
+    // Make sure the deleted lamp isn't in the list
+    const foundDeletedLamp = afterList.lamps.some((lamp: { id: string }) => lamp.id === lampId);
+    expect(foundDeletedLamp).toBe(false);
   });
 
   it('should handle not found errors correctly', async () => {

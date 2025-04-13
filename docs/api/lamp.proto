@@ -45,7 +45,8 @@ message ListLampsResponse {
 
 message UpdateLampRequest {
   string id = 1;
-  bool status = 2;
+  optional bool status = 2;
+  optional string name = 3;
 }
 
 message DeleteLampRequest {

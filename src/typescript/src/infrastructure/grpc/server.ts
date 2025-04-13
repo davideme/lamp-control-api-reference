@@ -9,11 +9,11 @@ export function createGrpcServer(lampRepository: LampRepository): grpc.Server {
 
   const server = new grpc.Server();
   server.addService(LampServiceService, {
-    createLamp: serviceImplementation.CreateLamp.bind(serviceImplementation),
-    getLamp: serviceImplementation.GetLamp.bind(serviceImplementation),
-    listLamps: serviceImplementation.ListLamps.bind(serviceImplementation),
-    updateLamp: serviceImplementation.UpdateLamp.bind(serviceImplementation),
-    deleteLamp: serviceImplementation.DeleteLamp.bind(serviceImplementation),
+    createLamp: serviceImplementation.createLamp.bind(serviceImplementation),
+    getLamp: serviceImplementation.getLamp.bind(serviceImplementation),
+    listLamps: serviceImplementation.listLamps.bind(serviceImplementation),
+    updateLamp: serviceImplementation.updateLamp.bind(serviceImplementation),
+    deleteLamp: serviceImplementation.deleteLamp.bind(serviceImplementation),
   });
 
   return server;

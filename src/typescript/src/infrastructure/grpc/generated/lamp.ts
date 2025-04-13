@@ -47,7 +47,8 @@ export interface ListLampsResponse {
 
 export interface UpdateLampRequest {
   id: string;
-  status: boolean;
+  status?: boolean | undefined;
+  name?: string | undefined;
 }
 
 export interface DeleteLampRequest {
@@ -386,7 +387,7 @@ export const ListLampsResponse: MessageFns<ListLampsResponse> = {
 };
 
 function createBaseUpdateLampRequest(): UpdateLampRequest {
-  return { id: "", status: false };
+  return { id: "", status: undefined, name: undefined };
 }
 
 export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
@@ -394,8 +395,11 @@ export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.status !== false) {
+    if (message.status !== undefined) {
       writer.uint32(16).bool(message.status);
+    }
+    if (message.name !== undefined) {
+      writer.uint32(26).string(message.name);
     }
     return writer;
   },
@@ -423,6 +427,14 @@ export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
           message.status = reader.bool();
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -435,7 +447,8 @@ export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
   fromJSON(object: any): UpdateLampRequest {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      status: isSet(object.status) ? globalThis.Boolean(object.status) : false,
+      status: isSet(object.status) ? globalThis.Boolean(object.status) : undefined,
+      name: isSet(object.name) ? globalThis.String(object.name) : undefined,
     };
   },
 
@@ -444,8 +457,11 @@ export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.status !== false) {
+    if (message.status !== undefined) {
       obj.status = message.status;
+    }
+    if (message.name !== undefined) {
+      obj.name = message.name;
     }
     return obj;
   },
@@ -456,7 +472,8 @@ export const UpdateLampRequest: MessageFns<UpdateLampRequest> = {
   fromPartial<I extends Exact<DeepPartial<UpdateLampRequest>, I>>(object: I): UpdateLampRequest {
     const message = createBaseUpdateLampRequest();
     message.id = object.id ?? "";
-    message.status = object.status ?? false;
+    message.status = object.status ?? undefined;
+    message.name = object.name ?? undefined;
     return message;
   },
 };
