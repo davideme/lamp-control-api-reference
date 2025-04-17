@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Lamp } from '../../../src/domain/models/Lamp';
+import { describe, expect, it } from '@jest/globals';
 
 describe('Lamp', () => {
   const validId = uuidv4();

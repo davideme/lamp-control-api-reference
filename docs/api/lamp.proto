@@ -23,10 +23,12 @@ service LampService {
 message Lamp {
   string id = 1;
   bool status = 2;
+  string name = 3;
 }
 
 message CreateLampRequest {
   bool status = 1;
+  string name = 2;
 }
 
 message GetLampRequest {
@@ -43,7 +45,8 @@ message ListLampsResponse {
 
 message UpdateLampRequest {
   string id = 1;
-  bool status = 2;
+  optional bool status = 2;
+  optional string name = 3;
 }
 
 message DeleteLampRequest {
