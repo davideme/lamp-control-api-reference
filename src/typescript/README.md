@@ -1,17 +1,22 @@
 # Lamp Control API
 
-A RESTful API for controlling smart lamps, built with TypeScript and Express.
+A comprehensive API for controlling smart lamps, built with TypeScript and implementing multiple interface protocols (REST, GraphQL, gRPC).
 
 ## Features
 
+- Multiple API interfaces:
+  - RESTful API with Express and OpenAPI 3.0
+  - GraphQL API with Apollo Server
+  - gRPC API with Protocol Buffers
 - CRUD operations for managing lamps
 - Toggle lamp on/off functionality
 - Input validation using Zod
 - OpenAPI/Swagger documentation
-- Rate limiting
+- Rate limiting and request throttling
 - Performance monitoring with Prometheus metrics
 - Structured logging with Winston
-- Integration tests with Jest and Supertest
+- Multiple database support (MySQL, PostgreSQL, MongoDB)
+- Comprehensive testing suite with >80% coverage
 
 ## Architecture
 
