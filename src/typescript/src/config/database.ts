@@ -11,7 +11,10 @@ interface DatabaseConfig {
     connectionString: string;
     // Add other PostgreSQL-specific options here if needed
   };
-  // Future implementation for MySQL can be added here
+  mysql: {
+    connectionString: string;
+    // Add other MySQL-specific options here if needed
+  };
 }
 
 // Load configuration from environment variables with sensible defaults
@@ -28,6 +31,10 @@ const config: DatabaseConfig = {
     connectionString:
       process.env.POSTGRESQL_URI ||
       'postgresql://lamp_user:lamp_password@localhost:5432/lamp_control',
+  },
+  mysql: {
+    connectionString:
+      process.env.MYSQL_URI || 'mysql://lamp_user:lamp_password@localhost:3306/lamp_control',
   },
 };
 

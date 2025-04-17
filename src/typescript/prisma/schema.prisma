@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define the PostgreSQL datasource
+datasource postgresql {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+  // The `postgresql` datasource is used as the default
+}
+
+// Define the MySQL datasource
+datasource mysql {
+  provider = "mysql"
+  url      = env("MYSQL_URL")
+}
+
+// Lamp model for both datasources
+model Lamp {
+  id        String   @id @default(uuid())
+  name      String
+  isOn      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@map("lamps")
+}
