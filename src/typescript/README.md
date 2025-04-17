@@ -36,6 +36,22 @@ src/
 └── utils/           # Shared utilities
 ```
 
+## Technology Stack
+
+- **Language**: TypeScript 5.x
+- **API Frameworks**:
+  - REST: Express.js with OpenAPI 3.0
+  - GraphQL: Apollo Server
+  - gRPC: gRPC-js with Protocol Buffers
+- **Database ORMs/ODMs**:
+  - Relational (MySQL/PostgreSQL): Prisma ORM
+  - NoSQL (MongoDB): Mongoose ODM
+- **Validation**: Zod
+- **Logging**: Winston
+- **Metrics**: Prometheus
+- **Security**: Helmet, Express Rate Limit
+- **Testing**: Jest with Supertest
+
 ## Prerequisites
 
 - Node.js >= 18
