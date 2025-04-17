@@ -238,7 +238,7 @@ describe('gRPC Server', () => {
 
   it('should handle lamp update with invalid ID', async () => {
     const nonExistentId = uuidv4();
-    
+
     const updatePromise = new Promise((resolve, reject) => {
       client.updateLamp(
         { id: nonExistentId, name: 'Should Fail', status: true },
@@ -304,7 +304,7 @@ describe('gRPC Server', () => {
 
   it('should handle deleteLamp with invalid ID', async () => {
     const nonExistentId = uuidv4();
-    
+
     const deletePromise = new Promise((resolve, reject) => {
       client.deleteLamp(
         { id: nonExistentId },
@@ -411,7 +411,7 @@ describe('gRPC Server', () => {
     const afterCount = afterList.lamps.length;
 
     expect(afterCount).toBe(initialCount - 1);
-    
+
     // Make sure the deleted lamp isn't in the list
     const foundDeletedLamp = afterList.lamps.some((lamp: { id: string }) => lamp.id === lampId);
     expect(foundDeletedLamp).toBe(false);

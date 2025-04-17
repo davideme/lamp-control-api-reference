@@ -4,7 +4,17 @@ import { LampRepository } from '../../domain/repositories/LampRepository';
 import { Lamp } from '../../domain/models/Lamp';
 import { LampNotFoundError } from '../../domain/errors/DomainError';
 import { appLogger } from '../../utils/logger';
-import { CreateLampRequest, DeleteLampRequest, DeleteLampResponse, GetLampRequest, Lamp as LampResponse, LampServiceServer, ListLampsRequest, ListLampsResponse, UpdateLampRequest } from './generated/lamp';
+import {
+  CreateLampRequest,
+  DeleteLampRequest,
+  DeleteLampResponse,
+  GetLampRequest,
+  Lamp as LampResponse,
+  LampServiceServer,
+  ListLampsRequest,
+  ListLampsResponse,
+  UpdateLampRequest,
+} from './generated/lamp';
 
 export class GrpcLampService implements LampServiceServer {
   private lampService: LampService;
@@ -29,8 +39,7 @@ export class GrpcLampService implements LampServiceServer {
     };
   }
 
-  [name: string]: grpc.UntypedHandleCall | any;
-  
+  [name: string]: grpc.UntypedHandleCall | unknown;
 
   createLamp: grpc.handleUnaryCall<CreateLampRequest, LampResponse> = async (call, callback) => {
     try {
@@ -74,7 +83,10 @@ export class GrpcLampService implements LampServiceServer {
     }
   };
 
-  listLamps: grpc.handleUnaryCall<ListLampsRequest, ListLampsResponse> = async (_call, callback) => {
+  listLamps: grpc.handleUnaryCall<ListLampsRequest, ListLampsResponse> = async (
+    _call,
+    callback,
+  ) => {
     try {
       const lamps = await this.lampService.getAllLamps();
       callback(null, {
@@ -116,7 +128,10 @@ export class GrpcLampService implements LampServiceServer {
     }
   };
 
-  deleteLamp: grpc.handleUnaryCall<DeleteLampRequest, DeleteLampResponse> = async (call, callback) => {
+  deleteLamp: grpc.handleUnaryCall<DeleteLampRequest, DeleteLampResponse> = async (
+    call,
+    callback,
+  ) => {
     try {
       const { id } = call.request;
       await this.lampService.deleteLamp(id);

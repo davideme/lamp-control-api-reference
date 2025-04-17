@@ -36,7 +36,7 @@ export const setupGraphQLServer = async (app: Express, lampService: LampService)
     cors<cors.CorsRequest>(),
     json(),
     expressMiddleware(server, {
-      context: async () => ({ lampService }),
+      context: async (): Promise<ResolverContext> => ({ lampService }),
     }),
   );
 
