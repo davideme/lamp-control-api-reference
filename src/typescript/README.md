@@ -174,6 +174,52 @@ The API implements several security measures:
 - Rate limiting (100 requests per 15 minutes per IP)
 - Input validation for all endpoints
 
+## Implementation Details
+
+### API Interfaces
+
+#### REST API
+- Uses Express.js with versioned routes (`/api/v1/lamps`)
+- Implements OpenAPI 3.0 specifications with Swagger UI
+- Endpoints follow RESTful principles with proper HTTP methods and status codes
+- Input validation with Zod schemas
+
+#### GraphQL API
+- Uses Apollo Server integrated with Express
+- Provides a single endpoint (`/graphql`) for all lamp operations
+- Supports queries (get lamps) and mutations (create/update/delete/toggle lamps)
+- Implements proper error handling with GraphQL error types
+
+#### gRPC API
+- Implements Protocol Buffers defined in `docs/api/lamp.proto`
+- Supports bidirectional streaming for real-time lamp status updates
+- Includes strongly typed request/response models
+- Auto-generated TypeScript interfaces from .proto files using ts-proto
+
+### Database Implementations
+
+- **Prisma ORM**: Used for SQL databases (PostgreSQL, MySQL)
+  - Type-safe database client
+  - Schema-driven development with migrations
+  - Automatic query building
+
+- **Mongoose ODM**: Used for MongoDB
+  - Schema validation
+  - Middleware support
+  - Rich querying capabilities
+
+### Code Metrics
+
+| Component           | Lines of Code | Files |
+|---------------------|---------------|-------|
+| Domain              | 248           | 8     |
+| Infrastructure      | 892           | 27    |
+| Utils               | 102           | 4     |
+| Tests               | 475           | 15    |
+| **Total**           | **1,717**     | **54**|
+
+Test coverage: 86.4%
+
 ## Contributing
 
 1. Create a feature branch:
