@@ -1,6 +1,7 @@
 // filepath: /Users/davide/Documents/GitHub/lamp/lamp-control-api-reference/src/typescript/src/infrastructure/repositories/__tests__/MySQLLampRepository.test.ts
 import { MySQLLampRepository } from '../MySQLLampRepository';
 import { Lamp } from '../../../domain/models/Lamp';
+import { PrismaClient } from '@prisma/client';
 // Import jest explicitly to ensure proper detection
 import '@jest/globals';
 
@@ -30,7 +31,7 @@ jest.mock('@prisma/client', () => {
  */
 describe('MySQLLampRepository', () => {
   let repository: MySQLLampRepository;
-  let prismaClientMock: any;
+  let prismaClientMock: PrismaClient;
 
   // Set up mocks before tests
   beforeEach(() => {
