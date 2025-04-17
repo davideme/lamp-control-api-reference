@@ -1,3 +1,4 @@
+import winston from 'winston';
 import { appLogger, LogContext } from '../../src/utils/logger';
 
 // Mock Winston logger
@@ -29,10 +30,11 @@ describe('appLogger', () => {
   let errorSpy: jest.SpyInstance;
   let debugSpy: jest.SpyInstance;
   let warnSpy: jest.SpyInstance;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockWinstonLogger: any;
 
   beforeEach(() => {
-    mockWinstonLogger = require('winston').createLogger();
+    mockWinstonLogger = winston.createLogger();
     infoSpy = jest.spyOn(appLogger, 'info');
     errorSpy = jest.spyOn(appLogger, 'error');
     debugSpy = jest.spyOn(appLogger, 'debug');

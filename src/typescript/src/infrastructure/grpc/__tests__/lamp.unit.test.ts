@@ -6,7 +6,8 @@ import {
   ListLampsResponse,
   UpdateLampRequest,
   DeleteLampRequest,
-  DeleteLampResponse} from '../generated/lamp';
+  DeleteLampResponse,
+} from '../generated/lamp';
 
 describe('Generated Lamp Protocol Buffer', () => {
   describe('Lamp message', () => {
@@ -21,7 +22,7 @@ describe('Generated Lamp Protocol Buffer', () => {
       const lamp = Lamp.create({
         id: '123',
         status: true,
-        name: 'Test Lamp'
+        name: 'Test Lamp',
       });
       expect(lamp.id).toBe('123');
       expect(lamp.status).toBe(true);
@@ -32,24 +33,24 @@ describe('Generated Lamp Protocol Buffer', () => {
       const originalLamp = Lamp.create({
         id: '123',
         status: true,
-        name: 'Test Lamp'
+        name: 'Test Lamp',
       });
 
       // Encode to binary format
       const encoded = Lamp.encode(originalLamp).finish();
-      
+
       // Decode back to object
       const decodedLamp = Lamp.decode(encoded);
-      
+
       expect(decodedLamp).toEqual(originalLamp);
     });
-    
+
     it('should create from partial data', () => {
       const lamp = Lamp.fromPartial({
         id: '123',
         // Omitting status and name
       });
-      
+
       expect(lamp.id).toBe('123');
       expect(lamp.status).toBe(false); // Default value
       expect(lamp.name).toBe(''); // Default value
@@ -59,12 +60,12 @@ describe('Generated Lamp Protocol Buffer', () => {
       const original = Lamp.create({
         id: '123',
         status: true,
-        name: 'Test Lamp'
+        name: 'Test Lamp',
       });
-      
+
       const json = Lamp.toJSON(original);
       const fromJson = Lamp.fromJSON(json);
-      
+
       expect(fromJson).toEqual(original);
     });
   });
@@ -79,7 +80,7 @@ describe('Generated Lamp Protocol Buffer', () => {
     it('should create request with provided values', () => {
       const request = CreateLampRequest.create({
         status: true,
-        name: 'New Lamp'
+        name: 'New Lamp',
       });
       expect(request.status).toBe(true);
       expect(request.name).toBe('New Lamp');
@@ -88,12 +89,12 @@ describe('Generated Lamp Protocol Buffer', () => {
     it('should encode and decode request', () => {
       const originalRequest = CreateLampRequest.create({
         status: true,
-        name: 'New Lamp'
+        name: 'New Lamp',
       });
-      
+
       const encoded = CreateLampRequest.encode(originalRequest).finish();
       const decoded = CreateLampRequest.decode(encoded);
-      
+
       expect(decoded).toEqual(originalRequest);
     });
   });
@@ -103,12 +104,12 @@ describe('Generated Lamp Protocol Buffer', () => {
       const request = GetLampRequest.create({ id: '123' });
       expect(request.id).toBe('123');
     });
-    
+
     it('should encode and decode request', () => {
       const original = GetLampRequest.create({ id: '123' });
       const encoded = GetLampRequest.encode(original).finish();
       const decoded = GetLampRequest.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -118,12 +119,12 @@ describe('Generated Lamp Protocol Buffer', () => {
       const request = ListLampsRequest.create();
       expect(request).toEqual({});
     });
-    
+
     it('should encode and decode request', () => {
       const original = ListLampsRequest.create();
       const encoded = ListLampsRequest.encode(original).finish();
       const decoded = ListLampsRequest.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -133,31 +134,31 @@ describe('Generated Lamp Protocol Buffer', () => {
       const response = ListLampsResponse.create();
       expect(response.lamps).toEqual([]);
     });
-    
+
     it('should create response with provided lamps', () => {
       const lamp1 = Lamp.create({ id: '1', status: true, name: 'Lamp 1' });
       const lamp2 = Lamp.create({ id: '2', status: false, name: 'Lamp 2' });
-      
+
       const response = ListLampsResponse.create({
-        lamps: [lamp1, lamp2]
+        lamps: [lamp1, lamp2],
       });
-      
+
       expect(response.lamps).toHaveLength(2);
       expect(response.lamps[0]).toEqual(lamp1);
       expect(response.lamps[1]).toEqual(lamp2);
     });
-    
+
     it('should encode and decode response', () => {
       const lamp1 = Lamp.create({ id: '1', status: true, name: 'Lamp 1' });
       const lamp2 = Lamp.create({ id: '2', status: false, name: 'Lamp 2' });
-      
+
       const original = ListLampsResponse.create({
-        lamps: [lamp1, lamp2]
+        lamps: [lamp1, lamp2],
       });
-      
+
       const encoded = ListLampsResponse.encode(original).finish();
       const decoded = ListLampsResponse.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -169,29 +170,29 @@ describe('Generated Lamp Protocol Buffer', () => {
       expect(request.status).toBeUndefined();
       expect(request.name).toBeUndefined();
     });
-    
+
     it('should create request with all fields', () => {
       const request = UpdateLampRequest.create({
         id: '123',
         status: true,
-        name: 'Updated Lamp'
+        name: 'Updated Lamp',
       });
-      
+
       expect(request.id).toBe('123');
       expect(request.status).toBe(true);
       expect(request.name).toBe('Updated Lamp');
     });
-    
+
     it('should encode and decode request', () => {
       const original = UpdateLampRequest.create({
         id: '123',
         status: true,
-        name: 'Updated Lamp'
+        name: 'Updated Lamp',
       });
-      
+
       const encoded = UpdateLampRequest.encode(original).finish();
       const decoded = UpdateLampRequest.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -201,12 +202,12 @@ describe('Generated Lamp Protocol Buffer', () => {
       const request = DeleteLampRequest.create({ id: '123' });
       expect(request.id).toBe('123');
     });
-    
+
     it('should encode and decode request', () => {
       const original = DeleteLampRequest.create({ id: '123' });
       const encoded = DeleteLampRequest.encode(original).finish();
       const decoded = DeleteLampRequest.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -216,17 +217,17 @@ describe('Generated Lamp Protocol Buffer', () => {
       const response = DeleteLampResponse.create();
       expect(response.success).toBe(false);
     });
-    
+
     it('should create response with provided success value', () => {
       const response = DeleteLampResponse.create({ success: true });
       expect(response.success).toBe(true);
     });
-    
+
     it('should encode and decode response', () => {
       const original = DeleteLampResponse.create({ success: true });
       const encoded = DeleteLampResponse.encode(original).finish();
       const decoded = DeleteLampResponse.decode(encoded);
-      
+
       expect(decoded).toEqual(original);
     });
   });
@@ -237,9 +238,9 @@ describe('Generated Lamp Protocol Buffer', () => {
       // Since isSet is not directly exported, we can test it indirectly through fromJSON
 
       const withValues = Lamp.fromJSON({
-        id: '123', 
+        id: '123',
         status: true,
-        name: 'Test'
+        name: 'Test',
       });
       expect(withValues.id).toBe('123');
       expect(withValues.status).toBe(true);
@@ -248,7 +249,7 @@ describe('Generated Lamp Protocol Buffer', () => {
       const withNull = Lamp.fromJSON({
         id: null,
         status: null,
-        name: null
+        name: null,
       });
       expect(withNull.id).toBe('');
       expect(withNull.status).toBe(false);

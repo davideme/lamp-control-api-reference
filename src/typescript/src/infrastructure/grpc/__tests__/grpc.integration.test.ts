@@ -6,6 +6,7 @@ import path from 'path';
 import { LampService } from '../../../domain/services/LampService';
 import { v4 as uuidv4 } from 'uuid';
 import { LampServiceClient } from '../generated/lamp';
+import { Lamp } from '@/domain/models/Lamp';
 
 const PROTO_PATH = path.resolve(__dirname, '../../../../../../docs/api/lamp.proto');
 
@@ -432,5 +433,150 @@ describe('gRPC Server', () => {
     const error: any = await getPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.NOT_FOUND);
+  });
+});
+
+describe('gRPC Server Error Handling', () => {
+  let errorServer: grpc.Server;
+  let errorClient: LampServiceClient;
+  let errorThrowingRepository: InMemoryLampRepository;
+  const errorPort = 50053; // Use a different port for error testing
+
+  // Mock repository that throws errors for testing INTERNAL error status
+  class ErrorThrowingRepository extends InMemoryLampRepository {
+    async save(_lamp: Lamp): Promise<void> {
+      throw new Error('Simulated internal error');
+    }
+
+    async findById(_id: string): Promise<Lamp | null> {
+      throw new Error('Simulated internal error');
+    }
+
+    async findAll(): Promise<Lamp[]> {
+      throw new Error('Simulated internal error');
+    }
+
+    async delete(_id: string): Promise<void> {
+      throw new Error('Simulated internal error');
+    }
+
+    async clear(): Promise<void> {
+      throw new Error('Simulated internal error');
+    }
+  }
+
+  beforeAll(async () => {
+    // Create error-throwing repository
+    errorThrowingRepository = new ErrorThrowingRepository();
+
+    // Start gRPC server with error-throwing repository
+    errorServer = await startGrpcServer(errorPort, errorThrowingRepository);
+
+    // Create gRPC client for error testing
+    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
+    });
+
+    const proto = grpc.loadPackageDefinition(packageDefinition);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    errorClient = new (proto.lamp as any).LampService(
+      `localhost:${errorPort}`,
+      grpc.credentials.createInsecure(),
+    );
+  });
+
+  afterAll(async () => {
+    // Clean up
+    await stopGrpcServer(errorServer);
+  });
+
+  it('should return INTERNAL error on createLamp failure', async () => {
+    const createPromise = new Promise((resolve, reject) => {
+      errorClient.createLamp(
+        { name: 'Error Lamp', status: false },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, _response: any) => {
+          if (error) resolve(error);
+          else reject(new Error('Expected an error but got a successful response'));
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await createPromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.INTERNAL);
+    expect(error.message).toContain("13 INTERNAL: Invalid lamp state");
+  });
+
+  it('should return INTERNAL error on getLamp failure', async () => {
+    const getPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      errorClient.getLamp({ id: 'some-id' }, (error: Error | null, _response: any) => {
+        if (error) resolve(error);
+        else reject(new Error('Expected an error but got a successful response'));
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await getPromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.INTERNAL);
+    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
+  });
+
+  it('should return INTERNAL error on listLamps failure', async () => {
+    const listPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      errorClient.listLamps({}, (error: Error | null, _response: any) => {
+        if (error) resolve(error);
+        else reject(new Error('Expected an error but got a successful response'));
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await listPromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.INTERNAL);
+    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
+  });
+
+  it('should return INTERNAL error on updateLamp failure', async () => {
+    const updatePromise = new Promise((resolve, reject) => {
+      errorClient.updateLamp(
+        { id: 'some-id', name: 'Updated Lamp', status: true },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error: Error | null, _response: any) => {
+          if (error) resolve(error);
+          else reject(new Error('Expected an error but got a successful response'));
+        },
+      );
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await updatePromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.INTERNAL);
+    expect(error.message).toContain("13 INTERNAL: Invalid lamp state");
+  });
+
+  it('should return INTERNAL error on deleteLamp failure', async () => {
+    const deletePromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      errorClient.deleteLamp({ id: 'some-id' }, (error: Error | null, _response: any) => {
+        if (error) resolve(error);
+        else reject(new Error('Expected an error but got a successful response'));
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const error: any = await deletePromise;
+    expect(error).toBeDefined();
+    expect(error.code).toBe(grpc.status.INTERNAL);
+    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
   });
 });
