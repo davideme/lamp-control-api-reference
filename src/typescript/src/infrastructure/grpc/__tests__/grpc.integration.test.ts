@@ -510,7 +510,7 @@ describe('gRPC Server Error Handling', () => {
     const error: any = await createPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.INTERNAL);
-    expect(error.message).toContain("13 INTERNAL: Invalid lamp state");
+    expect(error.message).toContain('13 INTERNAL: Invalid lamp state');
   });
 
   it('should return INTERNAL error on getLamp failure', async () => {
@@ -526,7 +526,7 @@ describe('gRPC Server Error Handling', () => {
     const error: any = await getPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.INTERNAL);
-    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
+    expect(error.message).toContain('13 INTERNAL: Simulated internal error');
   });
 
   it('should return INTERNAL error on listLamps failure', async () => {
@@ -542,7 +542,7 @@ describe('gRPC Server Error Handling', () => {
     const error: any = await listPromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.INTERNAL);
-    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
+    expect(error.message).toContain('13 INTERNAL: Simulated internal error');
   });
 
   it('should return INTERNAL error on updateLamp failure', async () => {
@@ -561,7 +561,7 @@ describe('gRPC Server Error Handling', () => {
     const error: any = await updatePromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.INTERNAL);
-    expect(error.message).toContain("13 INTERNAL: Invalid lamp state");
+    expect(error.message).toContain('13 INTERNAL: Invalid lamp state');
   });
 
   it('should return INTERNAL error on deleteLamp failure', async () => {
@@ -577,6 +577,6 @@ describe('gRPC Server Error Handling', () => {
     const error: any = await deletePromise;
     expect(error).toBeDefined();
     expect(error.code).toBe(grpc.status.INTERNAL);
-    expect(error.message).toContain("13 INTERNAL: Simulated internal error");
+    expect(error.message).toContain('13 INTERNAL: Simulated internal error');
   });
 });
