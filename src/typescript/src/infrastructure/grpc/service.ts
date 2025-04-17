@@ -39,8 +39,8 @@ export class GrpcLampService implements LampServiceServer {
     };
   }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [name: string]: grpc.UntypedHandleCall | any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [name: string]: grpc.UntypedHandleCall | any;
 
   createLamp: grpc.handleUnaryCall<CreateLampRequest, LampResponse> = async (call, callback) => {
     try {
