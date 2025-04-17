@@ -16,14 +16,16 @@ interface PrismaLampModel {
 export class MySQLLampRepository implements LampRepository {
   private prisma: PrismaClient;
 
-  constructor() {
-    this.prisma = new PrismaClient({
-      datasources: {
-        mysql: {
-          url: dbConfig.mysql.connectionString,
+  constructor(prismaClient?: PrismaClient) {
+    this.prisma =
+      prismaClient ||
+      new PrismaClient({
+        datasources: {
+          mysql: {
+            url: dbConfig.mysql.connectionString,
+          },
         },
-      },
-    });
+      });
     appLogger.info('MySQLLampRepository initialized');
   }
 

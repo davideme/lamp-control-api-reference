@@ -17,7 +17,7 @@ jest.mock('@prisma/client', () => {
     },
     $disconnect: jest.fn(),
   };
-  
+
   return {
     PrismaClient: jest.fn(() => mockPrismaClient),
   };
@@ -25,7 +25,7 @@ jest.mock('@prisma/client', () => {
 
 /**
  * Test suite for MySQLLampRepository
- * 
+ *
  * These tests use jest mocks to mock the Prisma Client
  * This allows us to test the repository without requiring an actual MySQL connection
  */
@@ -37,12 +37,12 @@ describe('MySQLLampRepository', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-    
-    // Create a new repository instance
-    repository = new MySQLLampRepository();
-    
-    // Get reference to the mocked Prisma client
-    prismaClientMock = (repository as any).prisma;
+
+    // Create a mocked Prisma client
+    prismaClientMock = new PrismaClient();
+
+    // Create a new repository instance with the mock client
+    repository = new MySQLLampRepository(prismaClientMock);
   });
 
   describe('save', () => {
@@ -55,7 +55,7 @@ describe('MySQLLampRepository', () => {
         isOn: lamp.isOn,
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: null
+        deletedAt: null,
       });
 
       // Act
@@ -68,13 +68,13 @@ describe('MySQLLampRepository', () => {
           id: lamp.id,
           name: lamp.name,
           isOn: lamp.isOn,
-          deletedAt: null
+          deletedAt: null,
         }),
         create: expect.objectContaining({
           id: lamp.id,
           name: lamp.name,
-          isOn: lamp.isOn
-        })
+          isOn: lamp.isOn,
+        }),
       });
     });
 
@@ -98,7 +98,7 @@ describe('MySQLLampRepository', () => {
         isOn: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: null
+        deletedAt: null,
       });
 
       // Act
@@ -108,8 +108,8 @@ describe('MySQLLampRepository', () => {
       expect(prismaClientMock.lamp.findFirst).toHaveBeenCalledWith({
         where: {
           id: lampId,
-          deletedAt: null
-        }
+          deletedAt: null,
+        },
       });
       expect(result).not.toBeNull();
       expect(result?.id).toBe(lampId);
@@ -149,7 +149,7 @@ describe('MySQLLampRepository', () => {
           isOn: false,
           createdAt: new Date(),
           updatedAt: new Date(),
-          deletedAt: null
+          deletedAt: null,
         },
         {
           id: 'a1b2c3d4-e5f6-4a2b-8c7d-0e1f2a3b4c5d',
@@ -157,8 +157,8 @@ describe('MySQLLampRepository', () => {
           isOn: true,
           createdAt: new Date(),
           updatedAt: new Date(),
-          deletedAt: null
-        }
+          deletedAt: null,
+        },
       ];
       prismaClientMock.lamp.findMany.mockResolvedValueOnce(lamps);
 
@@ -168,8 +168,8 @@ describe('MySQLLampRepository', () => {
       // Assert
       expect(prismaClientMock.lamp.findMany).toHaveBeenCalledWith({
         where: {
-          deletedAt: null
-        }
+          deletedAt: null,
+        },
       });
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe('5224f654-4b02-4de5-9a0d-b8e6a12a32c6');
@@ -202,7 +202,7 @@ describe('MySQLLampRepository', () => {
       const lampId = '5224f654-4b02-4de5-9a0d-b8e6a12a32c6';
       prismaClientMock.lamp.update.mockResolvedValueOnce({
         id: lampId,
-        deletedAt: new Date()
+        deletedAt: new Date(),
       });
 
       // Act
@@ -211,7 +211,7 @@ describe('MySQLLampRepository', () => {
       // Assert
       expect(prismaClientMock.lamp.update).toHaveBeenCalledWith({
         where: { id: lampId },
-        data: { deletedAt: expect.any(Date) }
+        data: { deletedAt: expect.any(Date) },
       });
     });
 

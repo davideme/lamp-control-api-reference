@@ -16,14 +16,16 @@ interface PrismaLampModel {
 export class PostgreSQLLampRepository implements LampRepository {
   private prisma: PrismaClient;
 
-  constructor() {
-    this.prisma = new PrismaClient({
-      datasources: {
-        postgresql: {
-          url: dbConfig.postgresql.connectionString,
+  constructor(prismaClient?: PrismaClient) {
+    this.prisma =
+      prismaClient ||
+      new PrismaClient({
+        datasources: {
+          postgresql: {
+            url: dbConfig.postgresql.connectionString,
+          },
         },
-      },
-    });
+      });
     appLogger.info('PostgreSQLLampRepository initialized');
   }
 
