@@ -70,7 +70,7 @@ export class PostgreSQLLampRepository implements LampRepository {
 
   async findById(id: string): Promise<Lamp | null> {
     try {
-      const lamp = await this.prisma.lamp.findUnique({
+      const lamp = await this.prisma.lamp.findFirst({
         where: {
           id,
           deletedAt: null,
