@@ -27,6 +27,15 @@ The API allows for basic CRUD operations on a simple lamp resource (with ID and 
 - Comprehensive test coverage
 - Standardized documentation
 
+## Development Requirements
+
+For the Node.js/TypeScript implementation, the following versions are required:
+
+- **Node.js:** `>=20.x`
+- **npm:** `>=10.x`
+
+Refer to [ADR-002](docs/adr/002-nodejs-and-npm-versions.md) for details.
+
 ## Documentation
 
 For full details on the project requirements and specifications, see the [Product Requirements Document](docs/PRD.md).
