@@ -6,7 +6,7 @@ export const LAMP_VALIDATION = {
   NAME: {
     MIN_LENGTH: 1,
     MAX_LENGTH: 100,
-  }
+  },
 };
 
 const LampStateSchema = z.object({
