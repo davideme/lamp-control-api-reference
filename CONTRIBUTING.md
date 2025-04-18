@@ -22,6 +22,9 @@ This document provides guidelines for contributors based on the DORA (DevOps Res
   - [Data Integration Patterns](#data-integration-patterns)
   - [Event Tracking](#event-tracking)
   - [Analytics Readiness](#analytics-readiness)
+- [Observability](#observability)
+- [Inversion of Control](#inversion-of-control)
+- [Error Handling](#error-handling)
 
 ## Technical Capabilities
 
@@ -306,6 +309,95 @@ For each language implementation:
 3. Design query interfaces that support common analytics patterns
 4. Include data export functionality in all implementations
 5. Document recommended analytics approaches for each database technology
+
+## Observability
+
+1. **Logging**
+   - Use structured logging
+   - Include correlation IDs
+   - Log all business events
+   - Add proper log levels
+   - Include contextual information
+
+2. **Error Monitoring**
+   - Implement error boundaries
+   - Track error rates and types
+   - Set up error alerting
+   - Include error context and stack traces
+   - Monitor error trends
+   - Implement retry mechanisms
+   - Define error severity levels
+   - Document error handling procedures
+
+3. **Application Monitoring**
+   - Track key business metrics
+   - Monitor system health
+   - Implement custom dashboards
+   - Set up alerting thresholds
+   - Track performance metrics
+   - Monitor resource usage
+   - Implement distributed tracing
+   - Track user behavior analytics
+
+## Inversion of Control
+
+1. **Dependency Injection**
+   - Use constructor injection by default
+   - Avoid service locator pattern
+   - Configure DI container at composition root
+   - Document dependencies clearly
+   - Use interfaces for abstractions
+
+2. **Interface Design**
+   - Define clear contracts
+   - Use dependency inversion principle
+   - Keep interfaces focused and cohesive
+   - Document interface behaviors
+   - Version interfaces appropriately
+
+3. **Testing Considerations**
+   - Design for testability
+   - Use mocks and stubs effectively
+   - Test with different implementations
+   - Document testing patterns
+   - Validate interface contracts
+
+4. **Configuration Management**
+   - Externalize configuration
+   - Use environment variables
+   - Implement feature flags
+   - Support different environments
+   - Document configuration options
+
+## Error Handling
+
+1. **Error Types**
+   - Define domain-specific errors
+   - Use error hierarchies
+   - Include error codes
+   - Provide error messages
+   - Document error scenarios
+
+2. **Error Recovery**
+   - Implement graceful degradation
+   - Define recovery strategies
+   - Handle transient failures
+   - Document recovery procedures
+   - Test error scenarios
+
+3. **Error Reporting**
+   - Capture error context
+   - Track error frequency
+   - Monitor error patterns
+   - Alert on critical errors
+   - Analyze error impact
+
+4. **User Experience**
+   - Provide clear error messages
+   - Implement fallback behavior
+   - Guide users through recovery
+   - Log user-facing errors
+   - Track error resolution
 
 ## DORA Metrics to Track
 
