@@ -63,18 +63,6 @@ export class Lamp {
     this.state = newState;
   }
 
-  setBrightness(brightness: number): void {
-    const newState = { ...this.state, brightness, updatedAt: new Date() };
-    LampStateSchema.parse(newState);
-    this.state = newState;
-  }
-
-  setColor(color: string): void {
-    const newState = { ...this.state, color, updatedAt: new Date() };
-    LampStateSchema.parse(newState);
-    this.state = newState;
-  }
-
   turnOn(): void {
     if (!this.state.isOn) {
       this.state = { ...this.state, isOn: true, updatedAt: new Date() };
