@@ -25,6 +25,10 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.x",
+    "npm": ">=10.x"
+  },
   "dependencies": {
     "@apollo/server": "^4.10.2",
     "@grpc/grpc-js": "^1.10.3",
