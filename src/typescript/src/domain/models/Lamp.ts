@@ -1,9 +1,17 @@
 import { z } from 'zod';
 import { ValidationError } from '../errors/DomainError';
 
+// Validation constants
+export const LAMP_VALIDATION = {
+  NAME: {
+    MIN_LENGTH: 1,
+    MAX_LENGTH: 100,
+  },
+};
+
 const LampStateSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().min(1).max(100),
+  name: z.string().min(LAMP_VALIDATION.NAME.MIN_LENGTH).max(LAMP_VALIDATION.NAME.MAX_LENGTH),
   isOn: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
