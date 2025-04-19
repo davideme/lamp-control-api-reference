@@ -55,6 +55,7 @@ jobs:
       with:
         commit-message: "docs: update code metrics in COMPARISON.md"
         title: "docs: update code metrics in COMPARISON.md"
+        base: main
         body: |
           This PR updates the code metrics in COMPARISON.md with the latest measurements:
           - Lines of Code (App and Tests)
