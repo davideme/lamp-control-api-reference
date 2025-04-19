@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update-metrics:
@@ -51,19 +50,10 @@ jobs:
         ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
         mv docs/COMPARISON.md.tmp docs/COMPARISON.md
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        commit-message: "docs: update code metrics in COMPARISON.md"
-        title: "docs: update code metrics in COMPARISON.md"
-        base: main
-        body: |
-          This PR updates the code metrics in COMPARISON.md with the latest measurements:
-          - Lines of Code (App and Tests)
-          - Halstead Metrics (App and Tests)
-          - Test to Code Ratio
-          - Code Coverage Percentage
-          
-          This is an automated PR generated from the latest main branch changes.
-        branch: update-metrics
-        delete-branch: true 
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add docs/COMPARISON.md
+        git commit -m "docs: update code metrics in COMPARISON.md" || exit 0
+        git push 
