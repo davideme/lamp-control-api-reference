@@ -14,57 +14,10 @@ This document provides a comparison of the different language implementations in
 | Go       | TBD      | TBD     | TBD  | TBD   |
 
 ## Code Metrics
-Analyzing TypeScript metrics...
 
-TYPESCRIPT CODE METRICS BREAKDOWN
-
-SUMMARY
--------
-Total Files: 53
-Application Files: 36
-Test Files: 17
-
-APPLICATION CODE
----------------
-Lines of Code:
-  Total Lines: 6116
-  Source Code Lines: 4819
-  Comment Lines: 546
-  Empty Lines: 840
-  Mixed Lines (code + comment): 89
-
-Top 5 Largest Files (by source lines):
-- lamp.ts: 671 source lines (773 total)
-- grpc.integration.test.ts: 419 source lines (582 total)
-- lamp.json.test.ts: 378 source lines (447 total)
-- openapi.ts: 375 source lines (375 total)
-- lamp.decode.test.ts: 281 source lines (408 total)
-
-TEST CODE
----------
-Lines of Code:
-  Total Lines: 3874
-  Source Code Lines: 2882
-  Comment Lines: 433
-  Empty Lines: 636
-  Mixed Lines (code + comment): 77
-
-Top 5 Largest Test Files (by source lines):
-- grpc.integration.test.ts: 419 source lines (582 total)
-- lamp.json.test.ts: 378 source lines (447 total)
-- lamp.decode.test.ts: 281 source lines (408 total)
-- lamp.unit.test.ts: 212 source lines (264 total)
-- lamp.comprehensive.test.ts: 202 source lines (264 total)
-
-RATIOS
-------
-Test to Code Ratio: 0.60
-Comment to Code Ratio: 0.11
-
-HALSTEAD METRICS COMPARISON
--------------------------
-
-Detailed report saved to: metrics_reports/typescript/metrics-2025-04-19.json
+| Language    | App Lines | Test Lines | Test/App Ratio |
+|------------|-----------|------------|----------------|
+| TypeScript | 6116 | 3874 | 0.60 |
 ## Test Coverage
 
 | Language | Coverage % |
