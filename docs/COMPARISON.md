@@ -13,6 +13,10 @@ This document provides a comparison of the different language implementations in
 | Ruby     | TBD      | TBD     | TBD  | TBD   |
 | Go       | TBD      | TBD     | TBD  | TBD   |
 
+## Code Metrics
+
+This section is automatically updated by our metrics analysis tools.
+
 ## Test Coverage
 
 | Language | Coverage % |
