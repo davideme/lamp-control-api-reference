@@ -34,22 +34,28 @@ jobs:
     - name: Run TypeScript metrics analysis
       run: |
         cd tools
-        # Run the analysis for app code
-        APP_METRICS=$(node typescript-metrics.js --dir ../typescript/src --output-format json)
-        APP_LINES=$(echo $APP_METRICS | jq '.totalLines')
         
-        # Run the analysis for test code
-        TEST_METRICS=$(node typescript-metrics.js --dir ../typescript/test --output-format json)
-        TEST_LINES=$(echo $TEST_METRICS | jq '.totalLines')
+        # Run the metrics analysis
+        node typescript-metrics.js
         
-        # Calculate ratio (test lines / app lines)
-        RATIO=$(echo "scale=2; $TEST_LINES / $APP_LINES" | bc)
+        # Get the latest metrics file
+        METRICS_FILE=$(ls -t metrics_reports/typescript/metrics-*.json | head -n1)
+        
+        if [ ! -f "$METRICS_FILE" ]; then
+          echo "No metrics file found"
+          exit 1
+        fi
+        
+        # Extract metrics from the JSON file
+        APP_LINES=$(jq -r '.summary.application.lines.total // 0' "$METRICS_FILE")
+        TEST_LINES=$(jq -r '.summary.tests.lines.total // 0' "$METRICS_FILE")
+        TEST_RATIO=$(jq -r '.summary.ratios.testToCode // "N/A"' "$METRICS_FILE")
         
         # Create the metrics table
         {
           echo "| Language    | App Lines | Test Lines | Test/App Ratio |"
           echo "|------------|-----------|------------|----------------|"
-          echo "| TypeScript | $APP_LINES | $TEST_LINES | $RATIO |"
+          echo "| TypeScript | $APP_LINES | $TEST_LINES | $TEST_RATIO |"
         } > metrics.md
 
     - name: Update COMPARISON.md
