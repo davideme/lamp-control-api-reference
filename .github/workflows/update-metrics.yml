@@ -7,12 +7,12 @@ on:
       - 'typescript/**'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-metrics:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
     - uses: actions/checkout@v4
@@ -34,7 +34,29 @@ jobs:
     - name: Run TypeScript metrics analysis
       run: |
         cd tools
-        node typescript-metrics.js --output-format markdown > metrics.md
+        
+        # Run the metrics analysis
+        node typescript-metrics.js
+        
+        # Get the latest metrics file
+        METRICS_FILE=$(ls -t metrics_reports/typescript/metrics-*.json | head -n1)
+        
+        if [ ! -f "$METRICS_FILE" ]; then
+          echo "No metrics file found"
+          exit 1
+        fi
+        
+        # Extract metrics from the JSON file
+        APP_LINES=$(jq -r '.summary.application.lines.total // 0' "$METRICS_FILE")
+        TEST_LINES=$(jq -r '.summary.tests.lines.total // 0' "$METRICS_FILE")
+        TEST_RATIO=$(jq -r '.summary.ratios.testToCode // "N/A"' "$METRICS_FILE")
+        
+        # Create the metrics table
+        {
+          echo "| Language    | App Lines | Test Lines | Test/App Ratio |"
+          echo "|------------|-----------|------------|----------------|"
+          echo "| TypeScript | $APP_LINES | $TEST_LINES | $TEST_RATIO |"
+        } > metrics.md
 
     - name: Update COMPARISON.md
       run: |
@@ -44,25 +66,16 @@ jobs:
         # Update the metrics section in COMPARISON.md
         awk -v metrics="$METRICS" '
         BEGIN { p=1 }
-        /^## Code Metrics$/ { p=0; print; print metrics; next }
+        /^## Code Metrics$/ { p=0; print; print ""; print metrics; next }
         /^##[^#]/ { p=1 }
         p { print }
         ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
         mv docs/COMPARISON.md.tmp docs/COMPARISON.md
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        commit-message: "docs: update code metrics in COMPARISON.md"
-        title: "docs: update code metrics in COMPARISON.md"
-        base: main
-        body: |
-          This PR updates the code metrics in COMPARISON.md with the latest measurements:
-          - Lines of Code (App and Tests)
-          - Halstead Metrics (App and Tests)
-          - Test to Code Ratio
-          - Code Coverage Percentage
-          
-          This is an automated PR generated from the latest main branch changes.
-        branch: update-metrics
-        delete-branch: true 
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add docs/COMPARISON.md
+        git commit -m "docs: update code metrics in COMPARISON.md" || exit 0
+        git push 

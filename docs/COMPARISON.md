@@ -15,8 +15,9 @@ This document provides a comparison of the different language implementations in
 
 ## Code Metrics
 
-This section is automatically updated by our metrics analysis tools.
-
+| Language    | App Lines | Test Lines | Test/App Ratio |
+|------------|-----------|------------|----------------|
+| TypeScript | 6116 | 3874 | 0.60 |
 ## Test Coverage
 
 | Language | Coverage % |
