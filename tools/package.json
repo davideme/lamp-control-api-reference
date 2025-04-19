@@ -1,0 +1,14 @@
+{
+  "name": "typescript-metrics-tools",
+  "version": "1.0.0",
+  "description": "TypeScript code metrics tools",
+  "private": true,
+  "scripts": {
+    "metrics": "node typescript-metrics.js"
+  },
+  "dependencies": {
+    "ts-complexity": "^0.0.3",
+    "sloc": "^0.2.1",
+    "glob": "^10.3.10"
+  }
+} 
