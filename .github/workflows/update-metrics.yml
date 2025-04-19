@@ -3,8 +3,9 @@ name: Update Code Metrics
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    paths:
+      - 'typescript/**'
+  workflow_dispatch:
 
 jobs:
   update-metrics:
