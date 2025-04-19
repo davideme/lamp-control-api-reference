@@ -30,6 +30,14 @@ jobs:
       run: |
         cd tools
         npm ci
+        cd ../src/typescript
+        npm ci
+
+    - name: Run TypeScript tests with coverage
+      run: |
+        cd src/typescript
+        npm run test:coverage
+        COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
 
     - name: Run TypeScript metrics analysis
       run: |
@@ -51,11 +59,14 @@ jobs:
         TEST_LINES=$(jq -r '.summary.tests.lines.total // 0' "$METRICS_FILE")
         TEST_RATIO=$(jq -r '.summary.ratios.testToCode // "N/A"' "$METRICS_FILE")
         
+        # Get coverage from the previous step
+        COVERAGE=$(cat ../src/typescript/coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        
         # Create the metrics table
         {
-          echo "| Language    | App Lines | Test Lines | Test/App Ratio |"
-          echo "|------------|-----------|------------|----------------|"
-          echo "| TypeScript | $APP_LINES | $TEST_LINES | $TEST_RATIO |"
+          echo "| Language    | App Lines | Test Lines | Test/App Ratio | Coverage % |"
+          echo "|------------|-----------|------------|----------------|------------|"
+          echo "| TypeScript | $APP_LINES | $TEST_LINES | $TEST_RATIO | $COVERAGE |"
         } > metrics.md
 
     - name: Update COMPARISON.md
