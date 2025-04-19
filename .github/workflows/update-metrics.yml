@@ -34,7 +34,23 @@ jobs:
     - name: Run TypeScript metrics analysis
       run: |
         cd tools
-        node typescript-metrics.js --output-format markdown > metrics.md
+        # Run the analysis for app code
+        APP_METRICS=$(node typescript-metrics.js --dir ../typescript/src --output-format json)
+        APP_LINES=$(echo $APP_METRICS | jq '.totalLines')
+        
+        # Run the analysis for test code
+        TEST_METRICS=$(node typescript-metrics.js --dir ../typescript/test --output-format json)
+        TEST_LINES=$(echo $TEST_METRICS | jq '.totalLines')
+        
+        # Calculate ratio (test lines / app lines)
+        RATIO=$(echo "scale=2; $TEST_LINES / $APP_LINES" | bc)
+        
+        # Create the metrics table
+        {
+          echo "| Language    | App Lines | Test Lines | Test/App Ratio |"
+          echo "|------------|-----------|------------|----------------|"
+          echo "| TypeScript | $APP_LINES | $TEST_LINES | $RATIO |"
+        } > metrics.md
 
     - name: Update COMPARISON.md
       run: |
@@ -44,7 +60,7 @@ jobs:
         # Update the metrics section in COMPARISON.md
         awk -v metrics="$METRICS" '
         BEGIN { p=1 }
-        /^## Code Metrics$/ { p=0; print; print metrics; next }
+        /^## Code Metrics$/ { p=0; print; print ""; print metrics; next }
         /^##[^#]/ { p=1 }
         p { print }
         ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
