@@ -1,4 +1,4 @@
-# ADR-006: TypeScript Validation Library
+# ADR 006: TypeScript Validation Library
 
 **Status:** Proposed
 

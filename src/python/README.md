@@ -5,8 +5,7 @@ Python implementation of the Lamp Control API, providing endpoints to control an
 ## Requirements
 
 - Python 3.12.9 or higher
-- pip (Python package installer)
-- virtualenv or venv (recommended)
+- Poetry (Python dependency management tool)
 
 ## Project Structure
 
@@ -23,26 +22,30 @@ lamp_control/
 
 ## Development Setup
 
-1. Create and activate a virtual environment:
+1. Install Poetry (if not already installed):
    ```bash
-   python3.12 -m venv venv
-   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   curl -sSL https://install.python-poetry.org | python3 -
    ```
 
-2. Install development dependencies:
+2. Install project dependencies:
    ```bash
-   pip install -r requirements-dev.txt
+   poetry install
    ```
 
-3. Install pre-commit hooks:
+3. Activate the virtual environment:
    ```bash
-   pre-commit install
+   poetry shell
+   ```
+
+4. Install pre-commit hooks:
+   ```bash
+   poetry run pre-commit install
    ```
 
 ## Running Tests
 
 ```bash
-pytest
+poetry run pytest
 ```
 
 ## Code Quality
@@ -56,10 +59,10 @@ This project uses several tools to ensure code quality:
 
 Run all quality checks:
 ```bash
-black .
-ruff check .
-mypy .
-pytest
+poetry run black .
+poetry run ruff check .
+poetry run mypy .
+poetry run pytest
 ```
 
 ## API Documentation
@@ -74,3 +77,5 @@ Once running, API documentation is available at:
 2. Make your changes
 3. Run tests and quality checks
 4. Submit a pull request
+
+For more details about the dependency management decision, see [ADR 011: Python Dependency Management Tool Selection](../../docs/adr/011-python-dependency-management.md)

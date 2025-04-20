@@ -1,4 +1,4 @@
-# ADR-010: Python Version Selection
+# ADR 010: Python Version Selection
 
 ## Status
 

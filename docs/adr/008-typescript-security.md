@@ -1,4 +1,4 @@
-# ADR-008: TypeScript Security Middleware
+# ADR 008: TypeScript Security Middleware
 
 **Status:** Proposed
 

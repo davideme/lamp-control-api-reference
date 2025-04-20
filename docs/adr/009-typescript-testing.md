@@ -1,4 +1,4 @@
-# ADR-009: TypeScript Testing Framework
+# ADR 009: TypeScript Testing Framework
 
 **Status:** Proposed
 

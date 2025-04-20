@@ -1,4 +1,4 @@
-# ADR-007: TypeScript Observability (Logging, Metrics & Tracing)
+# ADR 007: TypeScript Observability (Logging, Metrics & Tracing)
 
 **Status:** Proposed
 

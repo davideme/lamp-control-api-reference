@@ -1,4 +1,4 @@
-# ADR-003: TypeScript Version
+# ADR 003: TypeScript Version
 
 **Status:** Proposed
 
