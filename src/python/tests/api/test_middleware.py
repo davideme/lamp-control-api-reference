@@ -1,6 +1,7 @@
 """Tests for API middleware."""
 
 import uuid
+from http import HTTPStatus
 from typing import Any, AsyncGenerator, Generator
 
 import pytest
@@ -56,7 +57,7 @@ async def test_correlation_id_generation(
 ) -> None:
     """Test that correlation ID is generated when not provided."""
     response = await client.get("/test")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     # Check correlation ID in response headers
     correlation_id = response.headers.get("X-Correlation-ID")
@@ -76,7 +77,7 @@ async def test_correlation_id_propagation(
     response = await client.get(
         "/test", headers={"X-Correlation-ID": test_correlation_id}
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     # Check correlation ID in response headers
     assert response.headers["X-Correlation-ID"] == test_correlation_id
@@ -94,7 +95,7 @@ async def test_request_context_logging(
     response = await client.get(
         "/test", headers={"User-Agent": test_user_agent}
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     # Check request context in logs
     log_entry = capture_logs[-1]
@@ -142,7 +143,7 @@ async def test_custom_correlation_id_config(
     # Create new client with updated app
     async with AsyncClient(app=app, base_url="http://test") as client:
         response = await client.get("/test")
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
 
         # Check custom header name
         assert response.headers["Custom-Correlation-ID"] == "custom-id"
