@@ -4,24 +4,21 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'lamp_control/**'
-      - 'tests/**'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
+      - 'src/python/**'
       - '.github/workflows/python-ci.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'lamp_control/**'
-      - 'tests/**'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
+      - 'src/python/**'
       - '.github/workflows/python-ci.yml'
 
 jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/python
     strategy:
       matrix:
         python-version: ['3.12']
@@ -54,6 +51,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: 'src/python/requirements*.txt'
 
     - name: Install dependencies
       run: |
