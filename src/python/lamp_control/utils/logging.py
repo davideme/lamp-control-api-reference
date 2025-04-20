@@ -77,10 +77,8 @@ def setup_logging(
         # Development format: Pretty printing
         processors.extend(
             [
-                structlog.dev.ConsoleRenderer(
-                    colors=True,
-                    exception_formatter=structlog.dev.exception_formatter,
-                )
+                structlog.processors.format_exc_info,
+                structlog.dev.ConsoleRenderer(colors=True),
             ]
         )
 
