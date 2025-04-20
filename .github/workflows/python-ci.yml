@@ -89,8 +89,8 @@ jobs:
 
     - name: Auto-format code
       run: |
-        black .
-        ruff check . --fix
+        poetry run black .
+        poetry run ruff check . --fix
 
     - uses: reviewdog/action-suggester@v1
       with:
@@ -99,9 +99,9 @@ jobs:
 
     - name: Run code quality checks
       run: |
-        black . --check --diff
-        ruff check . --diff
-        mypy .
+        poetry run black . --check --diff
+        poetry run ruff check . --diff
+        poetry run mypy .
 
     - name: Run tests
       env:
@@ -117,4 +117,4 @@ jobs:
         MYSQL_DATABASE: lamp_test
         MONGODB_URI: mongodb://localhost:27017/lamp_test
       run: |
-        pytest --cov=lamp_control --cov-report=xml
+        poetry run pytest --cov=lamp_control --cov-report=xml
