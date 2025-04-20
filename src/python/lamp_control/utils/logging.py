@@ -117,7 +117,7 @@ class CorrelationIdFilter(logging.Filter):
         """Add correlation ID to the log record if available in the context."""
         ctx = structlog.contextvars.get_contextvars()
         correlation_id = ctx.get(self.correlation_id_key, "unknown")
-        setattr(record, "correlation_id", correlation_id)
+        record.correlation_id = correlation_id
         return True
 
 

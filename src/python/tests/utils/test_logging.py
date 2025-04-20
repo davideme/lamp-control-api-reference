@@ -51,7 +51,6 @@ def test_setup_logging_json_format() -> None:
         logger.info("test_message", key="value")
         output = mock_stdout.write.call_args[0][0]
         log_entry = json.loads(output)
-        
         assert log_entry["event"] == "test_message"
         assert log_entry["key"] == "value"
         assert "timestamp" in log_entry
@@ -62,7 +61,6 @@ def test_setup_logging_json_format() -> None:
 def test_setup_logging_dev_format() -> None:
     """Test logging setup with development format."""
     setup_logging(json_format=False, log_level="DEBUG")
-    
     # Get the last processor which should be ConsoleRenderer
     processors = structlog.get_config()["processors"]
     assert isinstance(processors[-1], structlog.dev.ConsoleRenderer)
@@ -91,12 +89,12 @@ def test_correlation_id_filter() -> None:
 
     # Test with no correlation ID in context
     correlation_filter.filter(record)
-    assert getattr(record, "correlation_id") == "unknown"
+    assert record.correlation_id == "unknown"
 
     # Test with correlation ID in context
     bind_logging_context(correlation_id="test-id")
     correlation_filter.filter(record)
-    assert getattr(record, "correlation_id") == "test-id"
+    assert record.correlation_id == "test-id"
     clear_logging_context()
 
 
