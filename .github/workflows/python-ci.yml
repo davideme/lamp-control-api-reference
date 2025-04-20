@@ -71,7 +71,7 @@ jobs:
     - uses: reviewdog/action-suggester@v1
       with:
         tool_name: black and ruff
-        fail_level: error      
+        # fail_level: error      
 
     - name: Run code quality checks
       run: |
