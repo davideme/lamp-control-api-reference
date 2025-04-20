@@ -1,12 +1,13 @@
 """Middleware for FastAPI application."""
 
 import uuid
-from typing import Awaitable, Callable
+from collections.abc import Callable
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from lamp_control.utils.logging import bind_logging_context, clear_logging_context
+
 
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Middleware to add correlation ID to each request."""
@@ -32,9 +33,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         self.context_key = context_key
         self.generate_id = generate_id
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """
         Process the request/response cycle.
 
@@ -70,6 +69,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
 
         return response
 
+
 def setup_middleware(app: FastAPI) -> None:
     """
     Set up all middleware for the FastAPI application.
@@ -77,4 +77,4 @@ def setup_middleware(app: FastAPI) -> None:
     Args:
         app: FastAPI application instance
     """
-    app.add_middleware(CorrelationIdMiddleware) 
+    app.add_middleware(CorrelationIdMiddleware)

@@ -8,6 +8,7 @@ from lamp_control.utils.logging import get_logger, setup_logging
 
 logger = get_logger(__name__)
 
+
 def create_app(
     *,
     debug: bool = False,
@@ -62,4 +63,4 @@ def create_app(
         """Log application shutdown."""
         logger.info("application_shutdown")
 
-    return app 
+    return app

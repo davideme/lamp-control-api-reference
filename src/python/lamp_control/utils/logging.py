@@ -13,11 +13,11 @@ This module configures structured logging with the following features:
 
 import logging
 import sys
-import typing
 from typing import Any
 
 import structlog
 from structlog.types import Processor
+
 
 def setup_logging(
     *,
@@ -52,28 +52,30 @@ def setup_logging(
         # Add thread info
         structlog.threadlocal.merge_threadlocal,
         # Add callsite parameters
-        structlog.processors.CallsiteParameterAdder(
-            parameters={"func_name", "lineno", "pathname"}
-        ),
+        structlog.processors.CallsiteParameterAdder(parameters={"func_name", "lineno", "pathname"}),
         # Format exceptions
         structlog.processors.ExceptionPrettyPrinter(),
     ]
 
     if json_format:
         # Production format: JSON
-        processors.extend([
-            # Convert to JSON format
-            structlog.processors.format_exc_info,
-            structlog.processors.JSONRenderer()
-        ])
+        processors.extend(
+            [
+                # Convert to JSON format
+                structlog.processors.format_exc_info,
+                structlog.processors.JSONRenderer(),
+            ]
+        )
     else:
         # Development format: Pretty printing
-        processors.extend([
-            structlog.dev.ConsoleRenderer(
-                colors=True,
-                exception_formatter=structlog.dev.pretty_exc_info,
-            )
-        ])
+        processors.extend(
+            [
+                structlog.dev.ConsoleRenderer(
+                    colors=True,
+                    exception_formatter=structlog.dev.pretty_exc_info,
+                )
+            ]
+        )
 
     structlog.configure(
         processors=processors,
@@ -82,6 +84,7 @@ def setup_logging(
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
+
 
 def get_logger(name: str = "") -> structlog.BoundLogger:
     """
@@ -94,6 +97,7 @@ def get_logger(name: str = "") -> structlog.BoundLogger:
         A configured structlog logger instance
     """
     return structlog.get_logger(name)
+
 
 class CorrelationIdFilter(logging.Filter):
     """Filter that adds correlation ID from context to log records."""
@@ -109,9 +113,11 @@ class CorrelationIdFilter(logging.Filter):
         record.correlation_id = correlation_id  # type: ignore
         return True
 
+
 def clear_logging_context() -> None:
     """Clear all thread-local logging context."""
     structlog.contextvars.clear_contextvars()
+
 
 def bind_logging_context(**kwargs: Any) -> None:
     """
@@ -120,4 +126,4 @@ def bind_logging_context(**kwargs: Any) -> None:
     Args:
         **kwargs: Key-value pairs to bind to the context
     """
-    structlog.contextvars.bind_contextvars(**kwargs) 
+    structlog.contextvars.bind_contextvars(**kwargs)

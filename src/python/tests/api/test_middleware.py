@@ -1,8 +1,9 @@
 """Tests for API middleware."""
 
 import uuid
+from collections.abc import AsyncGenerator, Generator
 from http import HTTPStatus
-from typing import Any, AsyncGenerator, Generator
+from typing import Any
 
 import pytest
 import structlog
@@ -74,9 +75,7 @@ async def test_correlation_id_propagation(
 ) -> None:
     """Test that provided correlation ID is propagated."""
     test_correlation_id = "test-correlation-id"
-    response = await client.get(
-        "/test", headers={"X-Correlation-ID": test_correlation_id}
-    )
+    response = await client.get("/test", headers={"X-Correlation-ID": test_correlation_id})
     assert response.status_code == HTTPStatus.OK
 
     # Check correlation ID in response headers
@@ -92,9 +91,7 @@ async def test_request_context_logging(
 ) -> None:
     """Test that request context is added to logs."""
     test_user_agent = "test-user-agent"
-    response = await client.get(
-        "/test", headers={"User-Agent": test_user_agent}
-    )
+    response = await client.get("/test", headers={"User-Agent": test_user_agent})
     assert response.status_code == HTTPStatus.OK
 
     # Check request context in logs
@@ -106,9 +103,7 @@ async def test_request_context_logging(
 
 
 @pytest.mark.asyncio
-async def test_context_clearing(
-    client: AsyncClient, capture_logs: list[dict[str, Any]]
-) -> None:
+async def test_context_clearing(client: AsyncClient, capture_logs: list[dict[str, Any]]) -> None:
     """Test that context is cleared between requests."""
     # First request
     first_response = await client.get("/test")
@@ -149,4 +144,4 @@ async def test_custom_correlation_id_config(
         assert response.headers["Custom-Correlation-ID"] == "custom-id"
 
         # Check custom context key in logs
-        assert capture_logs[-1]["custom_correlation_id"] == "custom-id" 
+        assert capture_logs[-1]["custom_correlation_id"] == "custom-id"
