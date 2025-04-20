@@ -3,4 +3,4 @@
 
 def test_dummy() -> None:
     """A dummy test that always passes."""
-    assert True, "This test should always pass" 
+    assert True, "This test should always pass"
