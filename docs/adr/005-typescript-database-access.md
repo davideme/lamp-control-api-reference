@@ -1,4 +1,4 @@
-# ADR-005: TypeScript Database Access
+# ADR 005: TypeScript Database Access
 
 **Status:** Proposed
 

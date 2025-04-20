@@ -1,4 +1,4 @@
-# ADR-004: TypeScript API Frameworks
+# ADR 004: TypeScript API Frameworks
 
 **Status:** Proposed
 
