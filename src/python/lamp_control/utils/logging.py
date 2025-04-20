@@ -13,9 +13,10 @@ This module configures structured logging with the following features:
 
 import logging
 import sys
-from typing import Any
+from typing import Any, cast
 
 import structlog
+from structlog.processors import CallsiteParameter
 from structlog.types import Processor
 
 
@@ -52,7 +53,13 @@ def setup_logging(
         # Add thread info
         structlog.threadlocal.merge_threadlocal,
         # Add callsite parameters
-        structlog.processors.CallsiteParameterAdder(parameters={"func_name", "lineno", "pathname"}),
+        structlog.processors.CallsiteParameterAdder(
+            parameters={
+                CallsiteParameter.FUNC_NAME,
+                CallsiteParameter.LINENO,
+                CallsiteParameter.PATHNAME,
+            }
+        ),
         # Format exceptions
         structlog.processors.ExceptionPrettyPrinter(),
     ]
@@ -72,7 +79,7 @@ def setup_logging(
             [
                 structlog.dev.ConsoleRenderer(
                     colors=True,
-                    exception_formatter=structlog.dev.pretty_exc_info,
+                    exception_formatter=structlog.dev.ExceptionPrettyPrinter(),
                 )
             ]
         )
@@ -86,7 +93,7 @@ def setup_logging(
     )
 
 
-def get_logger(name: str = "") -> structlog.BoundLogger:
+def get_logger(name: str = "") -> structlog.stdlib.BoundLogger:
     """
     Get a logger instance with the given name.
 
@@ -96,7 +103,7 @@ def get_logger(name: str = "") -> structlog.BoundLogger:
     Returns:
         A configured structlog logger instance
     """
-    return structlog.get_logger(name)
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
 
 
 class CorrelationIdFilter(logging.Filter):
@@ -110,7 +117,7 @@ class CorrelationIdFilter(logging.Filter):
         """Add correlation ID to the log record if available in the context."""
         ctx = structlog.contextvars.get_contextvars()
         correlation_id = ctx.get(self.correlation_id_key, "unknown")
-        record.correlation_id = correlation_id  # type: ignore
+        setattr(record, "correlation_id", correlation_id)
         return True
 
 

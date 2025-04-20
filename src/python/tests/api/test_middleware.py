@@ -19,7 +19,11 @@ def capture_logs() -> Generator[list[dict[str, Any]], None, None]:
     """Fixture to capture log output for testing."""
     output: list[dict[str, Any]] = []
 
-    def capture(_, __, event_dict: dict[str, Any]) -> dict[str, Any]:
+    def capture(
+        _: structlog.types.WrappedLogger,
+        __: str,
+        event_dict: dict[str, Any],
+    ) -> dict[str, Any]:
         output.append(event_dict)
         return event_dict
 
