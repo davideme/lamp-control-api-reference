@@ -36,6 +36,8 @@ For the Node.js/TypeScript implementation, the following versions are required:
 
 Refer to [ADR-002](docs/adr/002-nodejs-and-npm-versions.md) for details.
 
+For the Python implementation requirements, see [Python README](src/python/README.md).
+
 ## Documentation
 
 For full details on the project requirements and specifications, see the [Product Requirements Document](docs/PRD.md).
