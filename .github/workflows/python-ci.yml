@@ -89,7 +89,8 @@ jobs:
 
     - name: Auto-format code
       run: |
-        poetry run pre-commit run --all-files
+        black .
+        ruff check . --fix
 
     - uses: reviewdog/action-suggester@v1
       with:
