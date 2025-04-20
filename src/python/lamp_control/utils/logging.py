@@ -79,7 +79,7 @@ def setup_logging(
             [
                 structlog.dev.ConsoleRenderer(
                     colors=True,
-                    exception_formatter=structlog.dev.ExceptionPrettyPrinter(),
+                    exception_formatter=structlog.dev.exception_formatter,
                 )
             ]
         )
