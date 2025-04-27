@@ -131,7 +131,8 @@ async def test_custom_correlation_id_config(
 ) -> None:
     """Test custom correlation ID configuration."""
     # Add middleware with custom configuration
-    app.middleware_stack = None  # Clear existing middleware
+    # Create a new FastAPI app instance with custom middleware configuration
+    app = FastAPI()
     app.add_middleware(
         CorrelationIdMiddleware,
         header_name="Custom-Correlation-ID",
