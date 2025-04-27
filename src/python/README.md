@@ -42,6 +42,34 @@ lamp_control/
    poetry run pre-commit install
    ```
 
+## Running the API Server
+
+There are a few different ways to run the FastAPI application:
+
+### Using Python directly
+
+```bash
+cd src/python
+python -m uvicorn main:app --reload
+```
+
+### Using Poetry
+
+```bash
+cd src/python
+poetry run python -m uvicorn main:app --reload
+```
+
+### Using the main.py script
+
+```bash
+cd src/python
+chmod +x main.py  # Make executable if not already
+./main.py
+```
+
+The API server will start and be available at http://localhost:8000 by default.
+
 ## Running Tests
 
 ```bash
@@ -71,11 +99,46 @@ Once running, API documentation is available at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
+### Testing Endpoints
+
+You can use the Swagger UI to test the API endpoints:
+
+1. Create a lamp: `POST /lamps`
+2. List all lamps: `GET /lamps`
+3. Get a specific lamp: `GET /lamps/{lamp_id}`
+4. Update a lamp status: `PUT /lamps/{lamp_id}`
+5. Delete a lamp: `DELETE /lamps/{lamp_id}`
+
+Example curl commands:
+
+```bash
+# Create a new lamp
+curl -X POST "http://localhost:8000/lamps" \
+  -H "Content-Type: application/json" \
+  -d '{"status": true}'
+
+# List all lamps
+curl -X GET "http://localhost:8000/lamps"
+
+# Get a specific lamp (replace {lamp_id} with an actual UUID)
+curl -X GET "http://localhost:8000/lamps/{lamp_id}"
+
+# Update a lamp's status (replace {lamp_id} with an actual UUID)
+curl -X PUT "http://localhost:8000/lamps/{lamp_id}" \
+  -H "Content-Type: application/json" \
+  -d '{"status": false}'
+
+# Delete a lamp (replace {lamp_id} with an actual UUID)
+curl -X DELETE "http://localhost:8000/lamps/{lamp_id}"
+```
+
 ## Contributing
 
 1. Create a new branch for your feature
 2. Make your changes
 3. Run tests and quality checks
 4. Submit a pull request
+
+For more details about the API framework selection, see [ADR 012: Python HTTP Frameworks Selection](../../docs/adr/012-python-http-frameworks.md)
 
 For more details about the dependency management decision, see [ADR 011: Python Dependency Management Tool Selection](../../docs/adr/011-python-dependency-management.md)
