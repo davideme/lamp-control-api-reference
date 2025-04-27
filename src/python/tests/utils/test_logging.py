@@ -3,6 +3,7 @@
 import json
 import logging
 
+import pytest
 import structlog
 
 from lamp_control.utils.logging import (
@@ -14,7 +15,7 @@ from lamp_control.utils.logging import (
 )
 
 
-def test_setup_logging_json_format(capsys) -> None:
+def test_setup_logging_json_format(capsys: pytest.CaptureFixture[str]) -> None:
     """Test logging setup with JSON format."""
     setup_logging(json_format=True, log_level="INFO")
     logger = get_logger("test")
@@ -67,7 +68,7 @@ def test_correlation_id_filter() -> None:
     clear_logging_context()
 
 
-def test_bind_and_clear_context(capsys) -> None:
+def test_bind_and_clear_context(capsys: pytest.CaptureFixture[str]) -> None:
     """Test binding and clearing context values."""
     setup_logging(json_format=True)
     logger = get_logger()
@@ -89,7 +90,7 @@ def test_bind_and_clear_context(capsys) -> None:
     assert "action" not in log_entry
 
 
-def test_log_levels(capsys) -> None:
+def test_log_levels(capsys: pytest.CaptureFixture[str]) -> None:
     """Test different log levels."""
     setup_logging(json_format=True, log_level="DEBUG")
     logger = get_logger()
