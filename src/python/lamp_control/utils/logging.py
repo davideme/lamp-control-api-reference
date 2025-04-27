@@ -16,7 +16,6 @@ import sys
 from typing import Any, cast
 
 import structlog
-from structlog.processors import CallsiteParameter
 from structlog.types import Processor
 
 
