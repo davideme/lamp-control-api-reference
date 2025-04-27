@@ -2,9 +2,7 @@
 
 import json
 import logging
-from unittest.mock import patch
 
-import pytest
 import structlog
 
 from lamp_control.utils.logging import (
@@ -43,6 +41,7 @@ def test_setup_logging_dev_format() -> None:
     # Get the last processor which should be ConsoleRenderer
     processors = structlog.get_config()["processors"]
     assert isinstance(processors[-1], structlog.dev.ConsoleRenderer)
+
 
 def test_correlation_id_filter() -> None:
     """Test the correlation ID filter."""
