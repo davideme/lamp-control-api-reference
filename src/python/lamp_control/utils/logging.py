@@ -42,34 +42,19 @@ def setup_logging(
             level=log_level,
         )
 
-    # Common processors for all environments
+    # Default settings
     processors: list[Processor] = [
-        # Add timestamps in ISO format
-        structlog.processors.TimeStamper(fmt="iso"),
-        # Add log level name
-        structlog.stdlib.add_log_level,
-        # Add logger name
-        structlog.stdlib.add_logger_name,
-        # Add thread info
-        structlog.threadlocal.merge_threadlocal,
-        # Add callsite parameters
-        structlog.processors.CallsiteParameterAdder(
-            parameters={
-                CallsiteParameter.FUNC_NAME,
-                CallsiteParameter.LINENO,
-                CallsiteParameter.PATHNAME,
-            }
-        ),
-        # Format exceptions
-        structlog.processors.ExceptionPrettyPrinter(),
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.set_exc_info,
+        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S", utc=False),
     ]
 
     if json_format:
         # Production format: JSON
         processors.extend(
             [
-                # Convert to JSON format
-                structlog.processors.format_exc_info,
                 structlog.processors.JSONRenderer(),
             ]
         )
@@ -77,19 +62,17 @@ def setup_logging(
         # Development format: Pretty printing
         processors.extend(
             [
-                structlog.processors.format_exc_info,
-                structlog.dev.ConsoleRenderer(colors=True),
+                structlog.dev.ConsoleRenderer(),
             ]
         )
 
     structlog.configure(
         processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(logging.NOTSET),
         context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=False
     )
-
 
 def get_logger(name: str = "") -> structlog.stdlib.BoundLogger:
     """
