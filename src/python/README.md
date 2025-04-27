@@ -23,16 +23,19 @@ lamp_control/
 ## Development Setup
 
 1. Install Poetry (if not already installed):
+
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
 2. Install project dependencies:
+
    ```bash
    poetry install
    ```
 
 3. Activate the virtual environment:
+
    ```bash
    poetry shell
    ```
@@ -86,6 +89,7 @@ This project uses several tools to ensure code quality:
 - `pytest` for testing
 
 Run all quality checks:
+
 ```bash
 poetry run black .
 poetry run ruff check .
@@ -96,6 +100,7 @@ poetry run pytest
 ## API Documentation
 
 Once running, API documentation is available at:
+
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 

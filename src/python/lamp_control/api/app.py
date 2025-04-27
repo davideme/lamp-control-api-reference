@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from lamp_control.api.middleware import setup_middleware
+from lamp_control.api.routes import lamps_router
 from lamp_control.utils.logging import get_logger, setup_logging
 
 logger = get_logger(__name__)
@@ -50,6 +51,9 @@ def create_app(
             allow_methods=["*"],
             allow_headers=["*"],
         )
+        
+    # Include routers
+    app.include_router(lamps_router)
 
     # Log application startup
     @app.on_event("startup")
