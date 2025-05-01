@@ -5,11 +5,13 @@
   },
   "dependencies": {
     "fastify": "^5.3.2",
+    "fastify-openapi-glue": "^4.9.1",
     "remove": "^0.1.5"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.15.3",
     "typescript": "^5.8.3"
-  }
+  },
+  "type": "module"
 }
