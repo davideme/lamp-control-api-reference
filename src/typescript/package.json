@@ -1,17 +1,23 @@
 {
+  "name": "lamp-control-api-types",
+  "version": "1.0.0",
+  "description": "TypeScript types for Lamp Control API",
+  "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "fastify": "^5.3.2",
-    "fastify-openapi-glue": "^4.9.1",
-    "remove": "^0.1.5"
+    "generate-types": "openapi-typescript ../../docs/api/openapi.yaml -o ./src/types.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.15.3",
+    "fastify": "^5.3.2",
+    "fastify-openapi-glue": "^3.1.0",
+    "openapi-typescript": "^7.6.1",
+    "openapi-typescript-codegen": "^0.29.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.8.3"
-  },
-  "type": "module"
+  }
 }

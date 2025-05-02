@@ -9,8 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
 
 const options = {
-    specification: `${currentDir}/../../docs/api/openapi.yaml`,
-    serviceHandlers: new Service(),
+    specification: `${currentDir}/../../../docs/api/openapi.yaml`,
+    service: new Service(),
     securityHandlers: new Security(),
     prefix: "v1",
   };
@@ -32,4 +32,4 @@ server.listen({ port: 8080 }, (err, address) => {
     process.exit(1)
   }
   console.log(`Server listening at ${address}`)
-})
+}) 
