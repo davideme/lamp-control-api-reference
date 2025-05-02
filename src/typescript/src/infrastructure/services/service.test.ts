@@ -1,10 +1,12 @@
+/**
+ * @jest-environment node
+ */
+import { jest } from '@jest/globals';
 import { LampNotFoundError } from '../../domain/errors/lamp-not-found.error';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
-import { components } from '../types/api';
+import { Lamp, LampCreate, LampUpdate } from '../../domain/models/lamp';
 import { Service } from './service';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-
-type Lamp = components['schemas']['Lamp'];
 
 // Mock Fastify types
 type MockFastifyRequest<T = unknown> = Partial<FastifyRequest> & T;
@@ -15,11 +17,11 @@ type MockFastifyReply = Partial<FastifyReply> & {
 
 // Mock repository
 const mockRepository = {
-  findAll: jest.fn<Lamp[], [number?]>(),
-  findById: jest.fn<Lamp | undefined, [string]>(),
-  create: jest.fn<Lamp, [Omit<Lamp, 'id'>]>(),
-  update: jest.fn<Lamp, [string, Partial<Lamp>]>(),
-  delete: jest.fn<void, [string]>(),
+  findAll: jest.fn<(limit?: number) => Lamp[]>(),
+  findById: jest.fn<(id: string) => Lamp | undefined>(),
+  create: jest.fn<(data: LampCreate) => Lamp>(),
+  update: jest.fn<(id: string, data: LampUpdate) => Lamp>(),
+  delete: jest.fn<(id: string) => void>(),
 } as jest.Mocked<LampRepository>;
 
 describe('Service', () => {
@@ -29,8 +31,8 @@ describe('Service', () => {
   beforeEach(() => {
     service = new Service(mockRepository);
     mockReply = {
-      code: jest.fn().mockReturnThis(),
-      send: jest.fn().mockReturnThis(),
+      code: jest.fn().mockReturnThis() as any,
+      send: jest.fn().mockReturnThis() as any,
     };
     jest.clearAllMocks();
   });
