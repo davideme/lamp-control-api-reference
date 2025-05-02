@@ -1,79 +1,72 @@
 # Lamp Control API
 
-A TypeScript implementation of a RESTful API for controlling lamps, demonstrating CRUD operations and following best practices.
+A comprehensive API for controlling lamps, built with TypeScript.
 
 ## Features
 
-- RESTful API endpoints for lamp management
-- OpenAPI 3.0 specification
-- TypeScript implementation with strong typing
-- In-memory repository for data storage
-- Comprehensive test coverage
-- Fastify web framework
-- Jest and Supertest for testing
+- Multiple API interfaces:
+  - RESTful API with Express and OpenAPI 3.0
+  [ ] GraphQL API with Apollo Server
+  [ ] gRPC API with Protocol Buffers
+- CRUD operations for managing lamps
+- Toggle lamp on/off functionality
+- OpenAPI/Swagger documentation
+[ ] Rate limiting and request throttling
+[ ] Performance monitoring with Prometheus metrics
+[ ] Structured logging with Winston
+[ ] Multiple database support (MySQL, PostgreSQL, MongoDB)
+- Comprehensive testing suite with >80% coverage
 
-## API Endpoints
+## Architecture
 
-### List Lamps
-- **GET** `/v1/lamps`
-- Returns a list of all lamps
-- Optional query parameter: `limit` (number)
+The project follows a clean architecture pattern with the following layers:
 
-### Get Lamp
-- **GET** `/v1/lamps/{lampId}`
-- Returns details of a specific lamp
-- Returns 404 if lamp not found
+```
+src/
+├── domain/           # Business logic and domain models
+│   ├── models/       # Domain entities
+│   ├── services/     # Business logic services
+│   ├── repositories/ # Repository interfaces
+│   └── errors/       # Domain-specific errors
+├── infrastructure/   # External interfaces and implementations
+│   ├── services/     # API routes
+│   └── repositories/ # Repository implementations
+└── utils/           # Shared utilities
+```
 
-### Create Lamp
-- **POST** `/v1/lamps`
-- Creates a new lamp
-- Request body: `{ "status": boolean }`
-- Returns 201 with created lamp details
+## Technology Stack
 
-### Update Lamp
-- **PUT** `/v1/lamps/{lampId}`
-- Updates a lamp's status
-- Request body: `{ "status": boolean }`
-- Returns 200 with updated lamp details
-- Returns 404 if lamp not found
-
-### Delete Lamp
-- **DELETE** `/v1/lamps/{lampId}`
-- Deletes a lamp
-- Returns 204 on success
-- Returns 404 if lamp not found
+- **Language**: TypeScript 5.x
+- **API Frameworks**:
+  - REST: Fastify with OpenAPI 3.0
+- **Testing**: Jest with Supertest
 
 ## Prerequisites
 
-- Node.js 22 or later
-- npm 9 or later
+- Node.js >= 22
+- npm >= 10
 
 ## Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/lamp-control-api.git
-cd lamp-control-api
-```
+   ```bash
+   git clone <repository-url>
+   cd lamp-control-api/src/typescript
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
-
-3. Generate TypeScript types from OpenAPI specification:
-```bash
-npm run generate-types
-```
+   ```bash
+   npm install
+   ```
 
 ## Development
 
-1. Start the development server:
+Start the development server with hot reloading:
 ```bash
 npm run dev
 ```
 
-The server will start on port 8080.
+The server will be available at `http://localhost:3000`.
 
 ## Testing
 
@@ -82,69 +75,20 @@ Run the test suite:
 npm test
 ```
 
-Run tests in watch mode:
-```bash
-npm run test:watch
-```
-
-Generate coverage report:
+Run tests with coverage:
 ```bash
 npm run test:coverage
 ```
 
-## Project Structure
+## API Documentation
 
-```
-src/
-├── domain/           # Business logic and domain models
-│   ├── models/       # Domain entities
-│   │   └── lamp.ts   # Lamp domain model
-│   ├── services/     # Business logic services
-│   │   └── lamp.service.ts
-│   ├── repositories/ # Repository interfaces
-│   │   └── lamp.repository.ts
-│   └── errors/       # Domain-specific errors
-│       └── lamp-not-found.error.ts
-├── infrastructure/   # External interfaces and implementations
-│   ├── routes/       # API routes
-│   │   └── lamp.routes.ts
-│   ├── middleware/   # Express middleware
-│   └── repositories/ # Repository implementations
-│       └── in-memory-lamp.repository.ts
-└── utils/           # Shared utilities
-```
+The API documentation is available at `http://localhost:3000/api-docs` when the server is running.
 
-## TypeScript Configuration
+### Endpoints
 
-The project uses TypeScript with the following key configurations:
-- ES modules support
-- Strict type checking
-- Node.js 22 configuration
-- Path aliases for cleaner imports
-
-## Testing Strategy
-
-- Unit tests for repository and service layers
-- Integration tests for API endpoints
-- Test coverage threshold of 80%
-- Jest and Supertest for testing
-- Mocked repository for isolated testing
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Fastify for the web framework
-- OpenAPI for API specification
-- Jest and Supertest for testing
-- TypeScript for type safety 
+- `GET /api/lamps` - List all lamps
+- `POST /api/lamps` - Create a new lamp
+- `GET /api/lamps/:id` - Get a lamp by ID
+- `PATCH /api/lamps/:id` - Update a lamp
+- `DELETE /api/lamps/:id` - Delete a lamp
+- `POST /api/lamps/:id/toggle` - Toggle a lamp on/off
