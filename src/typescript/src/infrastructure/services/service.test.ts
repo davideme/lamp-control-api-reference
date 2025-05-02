@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 import { jest } from '@jest/globals';
-import { LampNotFoundError } from '../../domain/errors/lamp-not-found.error';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
 import { Lamp, LampCreate, LampUpdate } from '../../domain/models/lamp';
 import { Service } from './service';
 import type { FastifyRequest, FastifyReply } from 'fastify';
+import { LampNotFoundError } from '../../domain/errors/DomainErrors';
 
 // Mock Fastify types
 type MockFastifyRequest<T = unknown> = Partial<FastifyRequest> & T;

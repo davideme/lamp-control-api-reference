@@ -1,4 +1,4 @@
-import { LampNotFoundError } from '../../domain/errors/lamp-not-found.error';
+import { LampNotFoundError } from '../../domain/errors/DomainErrors';
 import { Lamp } from '../../domain/models/lamp';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
 
@@ -26,7 +26,7 @@ export class InMemoryLampRepository implements LampRepository {
   update(id: string, lamp: Partial<Lamp>): Lamp {
     const existingLamp = this.lamps.get(id);
     if (!existingLamp) {
-      throw new LampNotFoundError('Lamp not found');
+      throw new LampNotFoundError(id);
     }
     const updatedLamp = { ...existingLamp, ...lamp };
     this.lamps.set(id, updatedLamp);
@@ -35,7 +35,7 @@ export class InMemoryLampRepository implements LampRepository {
 
   delete(id: string): void {
     if (!this.lamps.has(id)) {
-      throw new LampNotFoundError('Lamp not found');
+      throw new LampNotFoundError(id);
     }
     this.lamps.delete(id);
   }
