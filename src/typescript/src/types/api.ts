@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  "/lamps": {
+  '/lamps': {
     parameters: {
       query?: never;
       header?: never;
@@ -12,17 +12,17 @@ export interface paths {
       cookie?: never;
     };
     /** List all lamps */
-    get: operations["listLamps"];
+    get: operations['listLamps'];
     put?: never;
     /** Create a new lamp */
-    post: operations["createLamp"];
+    post: operations['createLamp'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/lamps/{lampId}": {
+  '/lamps/{lampId}': {
     parameters: {
       query?: never;
       header?: never;
@@ -30,12 +30,12 @@ export interface paths {
       cookie?: never;
     };
     /** Get a specific lamp */
-    get: operations["getLamp"];
+    get: operations['getLamp'];
     /** Update a lamp's status */
-    put: operations["updateLamp"];
+    put: operations['updateLamp'];
     post?: never;
     /** Delete a lamp */
-    delete: operations["deleteLamp"];
+    delete: operations['deleteLamp'];
     options?: never;
     head?: never;
     patch?: never;
@@ -86,7 +86,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Lamp"][];
+          'application/json': components['schemas']['Lamp'][];
         };
       };
     };
@@ -100,7 +100,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LampCreate"];
+        'application/json': components['schemas']['LampCreate'];
       };
     };
     responses: {
@@ -110,7 +110,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Lamp"];
+          'application/json': components['schemas']['Lamp'];
         };
       };
     };
@@ -132,7 +132,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Lamp"];
+          'application/json': components['schemas']['Lamp'];
         };
       };
       /** @description Lamp not found */
@@ -155,7 +155,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LampUpdate"];
+        'application/json': components['schemas']['LampUpdate'];
       };
     };
     responses: {
@@ -165,7 +165,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Lamp"];
+          'application/json': components['schemas']['Lamp'];
         };
       };
       /** @description Lamp not found */

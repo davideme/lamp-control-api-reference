@@ -1,17 +1,15 @@
-import { InMemoryLampRepository } from "./in-memory-lamp.repository";
-import type { components } from "../../types/api";
+import { InMemoryLampRepository } from './in-memory-lamp.repository';
+import type { components } from '../../types/api';
 
-type Lamp = components["schemas"]["Lamp"];
-
-describe("InMemoryLampRepository", () => {
+describe('InMemoryLampRepository', () => {
   let repository: InMemoryLampRepository;
 
   beforeEach(() => {
     repository = new InMemoryLampRepository();
   });
 
-  describe("findAll", () => {
-    it("should return empty array when no lamps exist", () => {
+  describe('findAll', () => {
+    it('should return empty array when no lamps exist', () => {
       // Act
       const result = repository.findAll();
 
@@ -19,7 +17,7 @@ describe("InMemoryLampRepository", () => {
       expect(result).toEqual([]);
     });
 
-    it("should return all lamps when no limit is specified", () => {
+    it('should return all lamps when no limit is specified', () => {
       // Arrange
       const lamp1 = repository.create({ status: true });
       const lamp2 = repository.create({ status: false });
@@ -33,7 +31,7 @@ describe("InMemoryLampRepository", () => {
       expect(result).toContainEqual(lamp2);
     });
 
-    it("should return limited number of lamps when limit is specified", () => {
+    it('should return limited number of lamps when limit is specified', () => {
       // Arrange
       repository.create({ status: true });
       repository.create({ status: false });
@@ -46,8 +44,8 @@ describe("InMemoryLampRepository", () => {
     });
   });
 
-  describe("findById", () => {
-    it("should return lamp when it exists", () => {
+  describe('findById', () => {
+    it('should return lamp when it exists', () => {
       // Arrange
       const lamp = repository.create({ status: true });
 
@@ -58,17 +56,17 @@ describe("InMemoryLampRepository", () => {
       expect(result).toEqual(lamp);
     });
 
-    it("should return undefined when lamp does not exist", () => {
+    it('should return undefined when lamp does not exist', () => {
       // Act
-      const result = repository.findById("nonexistent");
+      const result = repository.findById('nonexistent');
 
       // Assert
       expect(result).toBeUndefined();
     });
   });
 
-  describe("create", () => {
-    it("should create a new lamp with generated UUID", () => {
+  describe('create', () => {
+    it('should create a new lamp with generated UUID', () => {
       // Arrange
       const lampData = { status: true };
 
@@ -81,7 +79,7 @@ describe("InMemoryLampRepository", () => {
       expect(repository.findById(result.id)).toEqual(result);
     });
 
-    it("should create multiple lamps with different UUIDs", () => {
+    it('should create multiple lamps with different UUIDs', () => {
       // Arrange
       const lampData = { status: true };
 
@@ -95,8 +93,8 @@ describe("InMemoryLampRepository", () => {
     });
   });
 
-  describe("update", () => {
-    it("should update existing lamp", () => {
+  describe('update', () => {
+    it('should update existing lamp', () => {
       // Arrange
       const lamp = repository.create({ status: true });
       const updateData = { status: false };
@@ -112,17 +110,17 @@ describe("InMemoryLampRepository", () => {
       });
     });
 
-    it("should throw LampNotFoundError when lamp does not exist", () => {
+    it('should throw LampNotFoundError when lamp does not exist', () => {
       // Act & Assert
-      expect(() => repository.update("nonexistent", { status: false })).toThrow(
+      expect(() => repository.update('nonexistent', { status: false })).toThrow(
         expect.objectContaining({
-          name: "LampNotFoundError",
-          message: "Lamp not found",
+          name: 'LampNotFoundError',
+          message: 'Lamp not found',
         }),
       );
     });
 
-    it("should only update specified fields", () => {
+    it('should only update specified fields', () => {
       // Arrange
       const lamp = repository.create({ status: true });
       const updateData = { status: false };
@@ -136,8 +134,8 @@ describe("InMemoryLampRepository", () => {
     });
   });
 
-  describe("delete", () => {
-    it("should delete existing lamp", () => {
+  describe('delete', () => {
+    it('should delete existing lamp', () => {
       // Arrange
       const lamp = repository.create({ status: true });
 
@@ -149,17 +147,17 @@ describe("InMemoryLampRepository", () => {
       expect(repository.findAll()).toHaveLength(0);
     });
 
-    it("should throw LampNotFoundError when lamp does not exist", () => {
+    it('should throw LampNotFoundError when lamp does not exist', () => {
       // Act & Assert
-      expect(() => repository.delete("nonexistent")).toThrow(
+      expect(() => repository.delete('nonexistent')).toThrow(
         expect.objectContaining({
-          name: "LampNotFoundError",
-          message: "Lamp not found",
+          name: 'LampNotFoundError',
+          message: 'Lamp not found',
         }),
       );
     });
 
-    it("should not affect other lamps when deleting one", () => {
+    it('should not affect other lamps when deleting one', () => {
       // Arrange
       const lamp1 = repository.create({ status: true });
       const lamp2 = repository.create({ status: false });

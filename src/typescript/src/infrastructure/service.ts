@@ -1,43 +1,41 @@
-import type { components, operations } from "../types/api";
-import type { FastifyRequest, FastifyReply } from "fastify";
-import { LampNotFoundError } from "../domain/errors/lamp-not-found.error";
-import { LampRepository } from "../domain/repositories/lamp.repository";
+import type { components, operations } from '../types/api';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { LampNotFoundError } from '../domain/errors/lamp-not-found.error';
+import { LampRepository } from '../domain/repositories/lamp.repository';
 
-type Lamp = components["schemas"]["Lamp"];
-type LampCreate = components["schemas"]["LampCreate"];
-type LampUpdate = components["schemas"]["LampUpdate"];
+type Lamp = components['schemas']['Lamp'];
 
 type ListLampsRequest = FastifyRequest<{
   Querystring: { limit?: string };
 }>;
 type ListLampsReply = FastifyReply<{
-  Reply: operations["listLamps"]["responses"][200]["content"]["application/json"];
+  Reply: operations['listLamps']['responses'][200]['content']['application/json'];
 }>;
 
 type GetLampRequest = FastifyRequest<{
-  Params: operations["getLamp"]["parameters"]["path"];
+  Params: operations['getLamp']['parameters']['path'];
 }>;
 type GetLampReply = FastifyReply<{
-  Reply: operations["getLamp"]["responses"][200]["content"]["application/json"];
+  Reply: operations['getLamp']['responses'][200]['content']['application/json'];
 }>;
 
 type CreateLampRequest = FastifyRequest<{
-  Body: operations["createLamp"]["requestBody"]["content"]["application/json"];
+  Body: operations['createLamp']['requestBody']['content']['application/json'];
 }>;
 type CreateLampReply = FastifyReply<{
-  Reply: operations["createLamp"]["responses"][201]["content"]["application/json"];
+  Reply: operations['createLamp']['responses'][201]['content']['application/json'];
 }>;
 
 type UpdateLampRequest = FastifyRequest<{
-  Params: operations["updateLamp"]["parameters"]["path"];
-  Body: operations["updateLamp"]["requestBody"]["content"]["application/json"];
+  Params: operations['updateLamp']['parameters']['path'];
+  Body: operations['updateLamp']['requestBody']['content']['application/json'];
 }>;
 type UpdateLampReply = FastifyReply<{
-  Reply: operations["updateLamp"]["responses"][200]["content"]["application/json"];
+  Reply: operations['updateLamp']['responses'][200]['content']['application/json'];
 }>;
 
 type DeleteLampRequest = FastifyRequest<{
-  Params: operations["deleteLamp"]["parameters"]["path"];
+  Params: operations['deleteLamp']['parameters']['path'];
 }>;
 type DeleteLampReply = FastifyReply<{
   Reply: void;
@@ -47,10 +45,7 @@ type DeleteLampReply = FastifyReply<{
 export class Service {
   constructor(private readonly repository: LampRepository) {}
 
-  async listLamps(
-    request: ListLampsRequest,
-    reply: ListLampsReply,
-  ): Promise<Lamp[]> {
+  async listLamps(request: ListLampsRequest, reply: ListLampsReply): Promise<Lamp[]> {
     const { limit } = request.query;
     const limitNumber = limit ? parseInt(limit) : undefined;
     return this.repository.findAll(limitNumber);
@@ -67,20 +62,14 @@ export class Service {
     return lamp;
   }
 
-  async createLamp(
-    request: CreateLampRequest,
-    reply: CreateLampReply,
-  ): Promise<Lamp> {
+  async createLamp(request: CreateLampRequest, reply: CreateLampReply): Promise<Lamp> {
     const body = request.body;
     const newLamp = this.repository.create({ status: body.status });
     reply.code(201).send(newLamp);
     return newLamp;
   }
 
-  async updateLamp(
-    request: UpdateLampRequest,
-    reply: UpdateLampReply,
-  ): Promise<Lamp> {
+  async updateLamp(request: UpdateLampRequest, reply: UpdateLampReply): Promise<Lamp> {
     const { lampId } = request.params;
     const body = request.body;
     try {
@@ -93,10 +82,7 @@ export class Service {
     }
   }
 
-  async deleteLamp(
-    request: DeleteLampRequest,
-    reply: DeleteLampReply,
-  ): Promise<void> {
+  async deleteLamp(request: DeleteLampRequest, reply: DeleteLampReply): Promise<void> {
     const { lampId } = request.params;
     try {
       this.repository.delete(lampId);
