@@ -2,8 +2,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fastify from 'fastify'
 import fastifyOpenapiGlue from 'fastify-openapi-glue';
-import Service from './service.js';
-import Security from './security.js';
+import Service from './service';
+import Security from './security';
 
 const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
@@ -21,10 +21,6 @@ const server = fastify({
 })
 
 server.register(fastifyOpenapiGlue, options)
-
-server.get('/ping', async (request, reply) => {
-  return 'pong\n'
-})
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {

@@ -1,17 +1,53 @@
-import type { components } from './types/api';
+import type { components, operations } from './types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 type Lamp = components['schemas']['Lamp'];
 type LampCreate = components['schemas']['LampCreate'];
 type LampUpdate = components['schemas']['LampUpdate'];
 
+type ListLampsRequest = FastifyRequest<{
+    Querystring: { limit?: string };
+}>;
+type ListLampsReply = FastifyReply<{
+    Reply: operations['listLamps']['responses'][200]['content']['application/json'];
+}>;
+
+type GetLampRequest = FastifyRequest<{
+    Params: operations['getLamp']['parameters']['path'];
+}>;
+type GetLampReply = FastifyReply<{
+    Reply: operations['getLamp']['responses'][200]['content']['application/json'];
+}>;
+
+type CreateLampRequest = FastifyRequest<{
+    Body: operations['createLamp']['requestBody']['content']['application/json'];
+}>;
+type CreateLampReply = FastifyReply<{
+    Reply: operations['createLamp']['responses'][201]['content']['application/json'];
+}>;
+
+type UpdateLampRequest = FastifyRequest<{
+    Params: operations['updateLamp']['parameters']['path'];
+    Body: operations['updateLamp']['requestBody']['content']['application/json'];
+}>;
+type UpdateLampReply = FastifyReply<{
+    Reply: operations['updateLamp']['responses'][200]['content']['application/json'];
+}>;
+
+type DeleteLampRequest = FastifyRequest<{
+    Params: operations['deleteLamp']['parameters']['path'];
+}>;
+type DeleteLampReply = FastifyReply<{
+    Reply: void;
+}>;
+
 // service.ts
 export class Service {
     private lamps: Map<string, Lamp> = new Map();
 
     async listLamps(
-        request: FastifyRequest<{ Querystring: { limit?: string } }>,
-        reply: FastifyReply
+        request: ListLampsRequest,
+        reply: ListLampsReply
     ): Promise<Lamp[]> {
         const { limit } = request.query;
         let result = Array.from(this.lamps.values());
@@ -24,24 +60,24 @@ export class Service {
     }
 
     async getLamp(
-        request: FastifyRequest<{ Params: { lampId: string } }>,
-        reply: FastifyReply
-    ): Promise<Lamp | undefined> {
+        request: GetLampRequest,
+        reply: GetLampReply
+    ): Promise<Lamp> {
         const { lampId } = request.params;
         const lamp = this.lamps.get(lampId);
         
         if (!lamp) {
-            return reply.code(404).send({ error: 'Lamp not found' });
+            throw { statusCode: 404, message: 'Lamp not found' };
         }
         
         return lamp;
     }
 
     async createLamp(
-        request: FastifyRequest<{ Body: LampCreate }>,
-        reply: FastifyReply
+        request: CreateLampRequest,
+        reply: CreateLampReply
     ): Promise<Lamp> {
-        const body = request.body as LampCreate;
+        const body = request.body;
         const newLamp: Lamp = {
             id: crypto.randomUUID(),
             status: body.status
@@ -52,18 +88,15 @@ export class Service {
     }
 
     async updateLamp(
-        request: FastifyRequest<{ 
-            Params: { lampId: string };
-            Body: LampUpdate;
-        }>,
-        reply: FastifyReply
-    ): Promise<Lamp | undefined> {
+        request: UpdateLampRequest,
+        reply: UpdateLampReply
+    ): Promise<Lamp> {
         const { lampId } = request.params;
-        const body = request.body as LampUpdate;
+        const body = request.body;
         const lamp = this.lamps.get(lampId);
         
         if (!lamp) {
-            return reply.code(404).send({ error: 'Lamp not found' });
+            throw { statusCode: 404, message: 'Lamp not found' };
         }
         
         const updatedLamp: Lamp = {
@@ -76,17 +109,17 @@ export class Service {
     }
 
     async deleteLamp(
-        request: FastifyRequest<{ Params: { lampId: string } }>,
-        reply: FastifyReply
+        request: DeleteLampRequest,
+        reply: DeleteLampReply
     ): Promise<void> {
         const { lampId } = request.params;
         
         if (!this.lamps.has(lampId)) {
-            return reply.code(404).send({ error: 'Lamp not found' });
+            throw { statusCode: 404, message: 'Lamp not found' };
         }
         
         this.lamps.delete(lampId);
-        return reply.code(204).send();
+        reply.code(204).send();
     }
 }
 
