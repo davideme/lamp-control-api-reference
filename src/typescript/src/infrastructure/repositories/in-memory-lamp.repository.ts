@@ -1,5 +1,5 @@
 import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { Lamp } from '../../domain/models/lamp';
+import { Lamp } from '../../domain/models/Lamp';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
 
 export class InMemoryLampRepository implements LampRepository {

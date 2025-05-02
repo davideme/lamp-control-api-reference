@@ -1,4 +1,4 @@
-import { Lamp } from '../models/lamp';
+import { Lamp } from '../models/Lamp';
 
 export interface LampRepository {
   findAll(limit?: number): Lamp[];
