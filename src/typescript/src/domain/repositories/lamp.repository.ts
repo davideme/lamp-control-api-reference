@@ -1,6 +1,4 @@
-import type { components } from '../../infrastructure/types/api';
-
-type Lamp = components['schemas']['Lamp'];
+import { Lamp } from '../models/lamp';
 
 export interface LampRepository {
   findAll(limit?: number): Lamp[];

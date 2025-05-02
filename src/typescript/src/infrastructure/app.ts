@@ -2,9 +2,9 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fastify from 'fastify';
 import fastifyOpenapiGlue from 'fastify-openapi-glue';
-import Service from './service';
 import Security from './security';
 import { InMemoryLampRepository } from './repositories/in-memory-lamp.repository';
+import Service from './services/service';
 
 const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
