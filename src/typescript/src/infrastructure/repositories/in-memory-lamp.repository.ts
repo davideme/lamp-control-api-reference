@@ -1,21 +1,9 @@
-import type { components } from './types/api';
+import { LampNotFoundError } from '../../domain/errors/lamp-not-found.error';
+import { LampRepository } from '../../domain/repositories/lamp.repository';
+import type { components } from '../../types/api';
 
 type Lamp = components['schemas']['Lamp'];
 
-export class LampNotFoundError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'LampNotFoundError';
-    }
-}
-
-export interface LampRepository {
-    findAll(limit?: number): Lamp[];
-    findById(id: string): Lamp | undefined;
-    create(lamp: Omit<Lamp, 'id'>): Lamp;
-    update(id: string, lamp: Partial<Lamp>): Lamp;
-    delete(id: string): void;
-}
 
 export class InMemoryLampRepository implements LampRepository {
     private lamps: Map<string, Lamp> = new Map();

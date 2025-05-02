@@ -95,22 +95,23 @@ npm run test:coverage
 ## Project Structure
 
 ```
-.
-├── src/
-│   ├── app.ts           # Fastify application setup
-│   ├── index.ts         # Application entry point
-│   ├── repository.ts    # Data access layer
-│   ├── service.ts       # Business logic
-│   ├── security.ts      # Security handlers
-│   └── types/           # TypeScript types
-├── test/
-│   └── api.test.ts      # API endpoint tests
-├── docs/
-│   └── api/
-│       └── openapi.yaml # OpenAPI specification
-├── jest.config.js       # Jest configuration
-├── tsconfig.json        # TypeScript configuration
-└── package.json         # Project configuration
+src/
+├── domain/           # Business logic and domain models
+│   ├── models/       # Domain entities
+│   │   └── lamp.ts   # Lamp domain model
+│   ├── services/     # Business logic services
+│   │   └── lamp.service.ts
+│   ├── repositories/ # Repository interfaces
+│   │   └── lamp.repository.ts
+│   └── errors/       # Domain-specific errors
+│       └── lamp-not-found.error.ts
+├── infrastructure/   # External interfaces and implementations
+│   ├── routes/       # API routes
+│   │   └── lamp.routes.ts
+│   ├── middleware/   # Express middleware
+│   └── repositories/ # Repository implementations
+│       └── in-memory-lamp.repository.ts
+└── utils/           # Shared utilities
 ```
 
 ## TypeScript Configuration

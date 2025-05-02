@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { buildApp } from '../src/app';
+import { buildApp } from '../src/infrastructure/app';
 import supertest from 'supertest';
 
 describe('Lamp API Endpoints', () => {

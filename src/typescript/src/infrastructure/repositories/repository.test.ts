@@ -1,5 +1,5 @@
-import { InMemoryLampRepository } from './repository';
-import type { components } from './types/api';
+import { InMemoryLampRepository } from './in-memory-lamp.repository';
+import type { components } from '../../types/api';
 
 type Lamp = components['schemas']['Lamp'];
 

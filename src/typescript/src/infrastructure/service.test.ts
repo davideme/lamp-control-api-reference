@@ -1,6 +1,6 @@
 import { Service } from './service';
-import { LampRepository, LampNotFoundError } from './repository';
-import type { components } from './types/api';
+import { LampRepository, LampNotFoundError } from './repositories/repository';
+import type { components } from '../types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 type Lamp = components['schemas']['Lamp'];
