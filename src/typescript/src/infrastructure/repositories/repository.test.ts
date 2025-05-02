@@ -114,7 +114,7 @@ describe('InMemoryLampRepository', () => {
       expect(() => repository.update('nonexistent', { status: false })).toThrow(
         expect.objectContaining({
           name: 'LampNotFoundError',
-          message: "Lamp with ID nonexistent not found",
+          message: 'Lamp with ID nonexistent not found',
         }),
       );
     });
@@ -151,7 +151,7 @@ describe('InMemoryLampRepository', () => {
       expect(() => repository.delete('nonexistent')).toThrow(
         expect.objectContaining({
           name: 'LampNotFoundError',
-          message: "Lamp with ID nonexistent not found"
+          message: 'Lamp with ID nonexistent not found',
         }),
       );
     });
