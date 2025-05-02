@@ -63,7 +63,7 @@ export class Service {
         const lamp = this.repository.findById(lampId);
         
         if (!lamp) {
-            throw { statusCode: 404, message: 'Lamp not found' };
+            return reply.code(404).send();
         }
         
         return lamp;

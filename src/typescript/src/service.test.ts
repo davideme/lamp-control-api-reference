@@ -84,15 +84,16 @@ describe('Service', () => {
             expect(result).toEqual(lamp);
         });
 
-        it('should throw 404 error when lamp does not exist', async () => {
+        it('should return 404 when lamp does not exist', async () => {
             // Arrange
             const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { params: { lampId: 'nonexistent' } };
 
-            // Act & Assert
-            await expect(service.getLamp(mockRequest as any, mockReply as any)).rejects.toEqual({
-                statusCode: 404,
-                message: 'Lamp not found'
-            });
+            // Act
+            await service.getLamp(mockRequest as any, mockReply as any);
+
+            // Assert
+            expect(mockReply.code).toHaveBeenCalledWith(404);
+            expect(mockReply.send).toHaveBeenCalled();
         });
     });
 
@@ -146,10 +147,7 @@ describe('Service', () => {
             };
 
             // Act & Assert
-            await expect(service.updateLamp(mockRequest as any, mockReply as any)).rejects.toEqual({
-                statusCode: 404,
-                message: 'Lamp not found'
-            });
+            await expect(service.updateLamp(mockRequest as any, mockReply as any)).rejects.toThrow('Lamp not found');
         });
     });
 
@@ -173,10 +171,7 @@ describe('Service', () => {
             const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { params: { lampId: 'nonexistent' } };
 
             // Act & Assert
-            await expect(service.deleteLamp(mockRequest as any, mockReply as any)).rejects.toEqual({
-                statusCode: 404,
-                message: 'Lamp not found'
-            });
+            await expect(service.deleteLamp(mockRequest as any, mockReply as any)).rejects.toThrow('Lamp not found');
         });
     });
 }); 

@@ -2,6 +2,13 @@ import type { components } from './types/api';
 
 type Lamp = components['schemas']['Lamp'];
 
+class LampNotFoundError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'LampNotFoundError';
+    }
+}
+
 export interface LampRepository {
     findAll(limit?: number): Lamp[];
     findById(id: string): Lamp | undefined;
@@ -34,7 +41,7 @@ export class InMemoryLampRepository implements LampRepository {
     update(id: string, lamp: Partial<Lamp>): Lamp {
         const existingLamp = this.lamps.get(id);
         if (!existingLamp) {
-            throw { statusCode: 404, message: 'Lamp not found' };
+            throw new LampNotFoundError('Lamp not found');
         }
         const updatedLamp = { ...existingLamp, ...lamp };
         this.lamps.set(id, updatedLamp);
@@ -43,7 +50,7 @@ export class InMemoryLampRepository implements LampRepository {
 
     delete(id: string): void {
         if (!this.lamps.has(id)) {
-            throw { statusCode: 404, message: 'Lamp not found' };
+            throw new LampNotFoundError('Lamp not found');
         }
         this.lamps.delete(id);
     }
