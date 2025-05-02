@@ -1,6 +1,6 @@
 import { LampNotFoundError } from '../../domain/errors/DomainError';
 import { Lamp } from '../../domain/models/Lamp';
-import { LampRepository } from '../../domain/repositories/lamp.repository';
+import { LampRepository } from '../../domain/repositories/LampRepository';
 
 export class InMemoryLampRepository implements LampRepository {
   private lamps: Map<string, Lamp> = new Map();

@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampRepository } from '../../domain/repositories/lamp.repository';
+import { LampRepository } from '../../domain/repositories/LampRepository';
 import { components, operations } from '../types/api';
 import { LampNotFoundError } from '../../domain/errors/DomainError';
 

@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { jest } from '@jest/globals';
-import { LampRepository } from '../../domain/repositories/lamp.repository';
+import { LampRepository } from '../../domain/repositories/LampRepository';
 import { Lamp, LampCreate, LampUpdate } from '../../domain/models/Lamp';
 import { Service } from './service';
 import type { FastifyRequest, FastifyReply } from 'fastify';
