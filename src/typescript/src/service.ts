@@ -1,5 +1,6 @@
 import type { components, operations } from './types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
+import { LampRepository } from './repository';
 
 type Lamp = components['schemas']['Lamp'];
 type LampCreate = components['schemas']['LampCreate'];
@@ -43,20 +44,15 @@ type DeleteLampReply = FastifyReply<{
 
 // service.ts
 export class Service {
-    private lamps: Map<string, Lamp> = new Map();
+    constructor(private readonly repository: LampRepository) {}
 
     async listLamps(
         request: ListLampsRequest,
         reply: ListLampsReply
     ): Promise<Lamp[]> {
         const { limit } = request.query;
-        let result = Array.from(this.lamps.values());
-        
-        if (limit && !isNaN(parseInt(limit))) {
-            result = result.slice(0, parseInt(limit));
-        }
-        
-        return result;
+        const limitNumber = limit ? parseInt(limit) : undefined;
+        return this.repository.findAll(limitNumber);
     }
 
     async getLamp(
@@ -64,7 +60,7 @@ export class Service {
         reply: GetLampReply
     ): Promise<Lamp> {
         const { lampId } = request.params;
-        const lamp = this.lamps.get(lampId);
+        const lamp = this.repository.findById(lampId);
         
         if (!lamp) {
             throw { statusCode: 404, message: 'Lamp not found' };
@@ -78,12 +74,7 @@ export class Service {
         reply: CreateLampReply
     ): Promise<Lamp> {
         const body = request.body;
-        const newLamp: Lamp = {
-            id: crypto.randomUUID(),
-            status: body.status
-        };
-        
-        this.lamps.set(newLamp.id, newLamp);
+        const newLamp = this.repository.create({ status: body.status });
         return reply.code(201).send(newLamp);
     }
 
@@ -93,19 +84,7 @@ export class Service {
     ): Promise<Lamp> {
         const { lampId } = request.params;
         const body = request.body;
-        const lamp = this.lamps.get(lampId);
-        
-        if (!lamp) {
-            throw { statusCode: 404, message: 'Lamp not found' };
-        }
-        
-        const updatedLamp: Lamp = {
-            ...lamp,
-            status: body.status
-        };
-        
-        this.lamps.set(lampId, updatedLamp);
-        return updatedLamp;
+        return this.repository.update(lampId, { status: body.status });
     }
 
     async deleteLamp(
@@ -113,12 +92,7 @@ export class Service {
         reply: DeleteLampReply
     ): Promise<void> {
         const { lampId } = request.params;
-        
-        if (!this.lamps.has(lampId)) {
-            throw { statusCode: 404, message: 'Lamp not found' };
-        }
-        
-        this.lamps.delete(lampId);
+        this.repository.delete(lampId);
         reply.code(204).send();
     }
 }
