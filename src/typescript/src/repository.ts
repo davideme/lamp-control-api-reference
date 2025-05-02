@@ -2,7 +2,7 @@ import type { components } from './types/api';
 
 type Lamp = components['schemas']['Lamp'];
 
-class LampNotFoundError extends Error {
+export class LampNotFoundError extends Error {
     constructor(message: string) {
         super(message);
         this.name = 'LampNotFoundError';

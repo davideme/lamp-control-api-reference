@@ -1,5 +1,5 @@
 import { Service } from './service';
-import { InMemoryLampRepository } from './repository';
+import { LampRepository, LampNotFoundError } from './repository';
 import type { components } from './types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
@@ -12,166 +12,208 @@ type MockFastifyReply = Partial<FastifyReply> & {
     send: jest.Mock;
 };
 
+// Mock repository
+const mockRepository = {
+    findAll: jest.fn<Lamp[], [number?]>(),
+    findById: jest.fn<Lamp | undefined, [string]>(),
+    create: jest.fn<Lamp, [Omit<Lamp, 'id'>]>(),
+    update: jest.fn<Lamp, [string, Partial<Lamp>]>(),
+    delete: jest.fn<void, [string]>(),
+} as jest.Mocked<LampRepository>;
+
 describe('Service', () => {
     let service: Service;
-    let repository: InMemoryLampRepository;
     let mockReply: MockFastifyReply;
 
     beforeEach(() => {
-        repository = new InMemoryLampRepository();
-        service = new Service(repository);
+        service = new Service(mockRepository);
         mockReply = {
             code: jest.fn().mockReturnThis(),
             send: jest.fn().mockReturnThis(),
         };
+        jest.clearAllMocks();
     });
 
     describe('listLamps', () => {
         it('should return empty array when no lamps exist', async () => {
             // Arrange
             const mockRequest: MockFastifyRequest<{ query: { limit?: string } }> = { query: {} };
+            mockRepository.findAll.mockReturnValue([]);
 
             // Act
             const result = await service.listLamps(mockRequest as any, mockReply as any);
 
             // Assert
             expect(result).toEqual([]);
+            expect(mockRepository.findAll).toHaveBeenCalledWith(undefined);
         });
 
         it('should return all lamps when no limit is specified', async () => {
             // Arrange
             const mockRequest: MockFastifyRequest<{ query: { limit?: string } }> = { query: {} };
-            const lamp1: Lamp = { id: '1', status: true };
-            const lamp2: Lamp = { id: '2', status: false };
-            repository.create({ status: true });
-            repository.create({ status: false });
+            const lamps: Lamp[] = [
+                { id: '1', status: true },
+                { id: '2', status: false }
+            ];
+            mockRepository.findAll.mockReturnValue(lamps);
 
             // Act
             const result = await service.listLamps(mockRequest as any, mockReply as any);
 
             // Assert
-            expect(result).toHaveLength(2);
-            expect(result[0].status).toBe(true);
-            expect(result[1].status).toBe(false);
+            expect(result).toEqual(lamps);
+            expect(mockRepository.findAll).toHaveBeenCalledWith(undefined);
         });
 
         it('should return limited number of lamps when limit is specified', async () => {
             // Arrange
             const mockRequest: MockFastifyRequest<{ query: { limit?: string } }> = { query: { limit: '1' } };
-            repository.create({ status: true });
-            repository.create({ status: false });
+            const lamps: Lamp[] = [
+                { id: '1', status: true },
+                { id: '2', status: false }
+            ];
+            mockRepository.findAll.mockReturnValue([lamps[0]]);
 
             // Act
             const result = await service.listLamps(mockRequest as any, mockReply as any);
 
             // Assert
-            expect(result).toHaveLength(1);
+            expect(result).toEqual([lamps[0]]);
+            expect(mockRepository.findAll).toHaveBeenCalledWith(1);
         });
     });
 
     describe('getLamp', () => {
         it('should return lamp when it exists', async () => {
             // Arrange
-            const lamp = repository.create({ status: true });
+            const lamp: Lamp = { id: '1', status: true };
             const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { 
                 params: { lampId: lamp.id } 
             };
+            mockRepository.findById.mockReturnValue(lamp);
 
             // Act
             const result = await service.getLamp(mockRequest as any, mockReply as any);
 
             // Assert
             expect(result).toEqual(lamp);
+            expect(mockRepository.findById).toHaveBeenCalledWith(lamp.id);
         });
 
         it('should return 404 when lamp does not exist', async () => {
             // Arrange
-            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { params: { lampId: 'nonexistent' } };
+            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { 
+                params: { lampId: 'nonexistent' } 
+            };
+            mockRepository.findById.mockReturnValue(undefined);
 
             // Act
             await service.getLamp(mockRequest as any, mockReply as any);
 
             // Assert
+            expect(mockRepository.findById).toHaveBeenCalledWith('nonexistent');
             expect(mockReply.code).toHaveBeenCalledWith(404);
             expect(mockReply.send).toHaveBeenCalled();
         });
     });
 
     describe('createLamp', () => {
-        it('should create a new lamp with generated UUID', async () => {
+        it('should create a new lamp', async () => {
             // Arrange
-            const mockRequest: MockFastifyRequest<{ body: { status: boolean } }> = { body: { status: true } };
-            let sentLamp: Lamp | undefined;
-
-            // Capture the lamp that was sent
-            mockReply.send.mockImplementation((lamp) => {
-                sentLamp = lamp as Lamp;
-                return mockReply;
-            });
+            const newLamp: Lamp = { id: '1', status: true };
+            const mockRequest: MockFastifyRequest<{ body: { status: boolean } }> = { 
+                body: { status: true } 
+            };
+            mockRepository.create.mockReturnValue(newLamp);
 
             // Act
-            await service.createLamp(mockRequest as any, mockReply as any);
+            const result = await service.createLamp(mockRequest as any, mockReply as any);
 
             // Assert
-            expect(sentLamp).toBeDefined();
-            expect(sentLamp!.id).toBeDefined();
-            expect(sentLamp!.status).toBe(true);
+            expect(result).toEqual(newLamp);
+            expect(mockRepository.create).toHaveBeenCalledWith({ status: true });
             expect(mockReply.code).toHaveBeenCalledWith(201);
-            expect(mockReply.send).toHaveBeenCalledWith(sentLamp);
-            expect(repository.findById(sentLamp!.id)).toEqual(sentLamp);
+            expect(mockReply.send).toHaveBeenCalledWith(newLamp);
         });
     });
 
     describe('updateLamp', () => {
         it('should update existing lamp', async () => {
             // Arrange
-            const lamp = repository.create({ status: true });
-            const mockRequest: MockFastifyRequest<{ params: { lampId: string }; body: { status: boolean } }> = {
-                params: { lampId: lamp.id },
+            const updatedLamp: Lamp = { id: '1', status: false };
+            const mockRequest: MockFastifyRequest<{ 
+                params: { lampId: string }; 
+                body: { status: boolean } 
+            }> = {
+                params: { lampId: '1' },
                 body: { status: false }
             };
+            mockRepository.update.mockReturnValue(updatedLamp);
 
             // Act
             const result = await service.updateLamp(mockRequest as any, mockReply as any);
 
             // Assert
-            expect(result).toEqual({ id: lamp.id, status: false });
-            expect(repository.findById(lamp.id)).toEqual({ id: lamp.id, status: false });
+            expect(result).toEqual(updatedLamp);
+            expect(mockRepository.update).toHaveBeenCalledWith('1', { status: false });
         });
 
-        it('should throw 404 error when lamp does not exist', async () => {
+        it('should return 404 when lamp does not exist', async () => {
             // Arrange
-            const mockRequest: MockFastifyRequest<{ params: { lampId: string }; body: { status: boolean } }> = {
+            const mockRequest: MockFastifyRequest<{ 
+                params: { lampId: string }; 
+                body: { status: boolean } 
+            }> = {
                 params: { lampId: 'nonexistent' },
                 body: { status: false }
             };
+            mockRepository.update.mockImplementation(() => {
+                throw new LampNotFoundError('Lamp not found');
+            });
 
-            // Act & Assert
-            await expect(service.updateLamp(mockRequest as any, mockReply as any)).rejects.toThrow('Lamp not found');
+            // Act
+            await service.updateLamp(mockRequest as any, mockReply as any);
+
+            // Assert
+            expect(mockRepository.update).toHaveBeenCalledWith('nonexistent', { status: false });
+            expect(mockReply.code).toHaveBeenCalledWith(404);
+            expect(mockReply.send).toHaveBeenCalled();
         });
     });
 
     describe('deleteLamp', () => {
         it('should delete existing lamp', async () => {
             // Arrange
-            const lamp = repository.create({ status: true });
-            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { params: { lampId: lamp.id } };
+            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { 
+                params: { lampId: '1' } 
+            };
+            mockRepository.delete.mockImplementation(() => {});
 
             // Act
             await service.deleteLamp(mockRequest as any, mockReply as any);
 
             // Assert
-            expect(repository.findById(lamp.id)).toBeUndefined();
+            expect(mockRepository.delete).toHaveBeenCalledWith('1');
             expect(mockReply.code).toHaveBeenCalledWith(204);
             expect(mockReply.send).toHaveBeenCalled();
         });
 
-        it('should throw 404 error when lamp does not exist', async () => {
+        it('should return 404 when lamp does not exist', async () => {
             // Arrange
-            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { params: { lampId: 'nonexistent' } };
+            const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = { 
+                params: { lampId: 'nonexistent' } 
+            };
+            mockRepository.delete.mockImplementation(() => {
+                throw new LampNotFoundError('Lamp not found');
+            });
 
-            // Act & Assert
-            await expect(service.deleteLamp(mockRequest as any, mockReply as any)).rejects.toThrow('Lamp not found');
+            // Act
+            await service.deleteLamp(mockRequest as any, mockReply as any);
+
+            // Assert
+            expect(mockRepository.delete).toHaveBeenCalledWith('nonexistent');
+            expect(mockReply.code).toHaveBeenCalledWith(404);
+            expect(mockReply.send).toHaveBeenCalled();
         });
     });
 }); 

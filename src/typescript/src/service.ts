@@ -1,6 +1,6 @@
 import type { components, operations } from './types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampRepository } from './repository';
+import { LampRepository, LampNotFoundError } from './repository';
 
 type Lamp = components['schemas']['Lamp'];
 type LampCreate = components['schemas']['LampCreate'];
@@ -75,7 +75,8 @@ export class Service {
     ): Promise<Lamp> {
         const body = request.body;
         const newLamp = this.repository.create({ status: body.status });
-        return reply.code(201).send(newLamp);
+        reply.code(201).send(newLamp);
+        return newLamp;
     }
 
     async updateLamp(
@@ -84,7 +85,14 @@ export class Service {
     ): Promise<Lamp> {
         const { lampId } = request.params;
         const body = request.body;
-        return this.repository.update(lampId, { status: body.status });
+        try {
+            return this.repository.update(lampId, { status: body.status });
+        } catch (error) {
+            if (error instanceof LampNotFoundError) {
+                return reply.code(404).send();
+            }
+            throw error;
+        }
     }
 
     async deleteLamp(
@@ -92,8 +100,15 @@ export class Service {
         reply: DeleteLampReply
     ): Promise<void> {
         const { lampId } = request.params;
-        this.repository.delete(lampId);
-        reply.code(204).send();
+        try {
+            this.repository.delete(lampId);
+            return reply.code(204).send();
+        } catch (error) {
+            if (error instanceof LampNotFoundError) {
+                return reply.code(404).send();
+            }
+            throw error;
+        }
     }
 }
 
