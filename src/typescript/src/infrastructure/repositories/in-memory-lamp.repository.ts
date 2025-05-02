@@ -1,6 +1,6 @@
 import { LampNotFoundError } from '../../domain/errors/lamp-not-found.error';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
-import type { components } from '../../types/api';
+import type { components } from '../types/api';
 
 type Lamp = components['schemas']['Lamp'];
 

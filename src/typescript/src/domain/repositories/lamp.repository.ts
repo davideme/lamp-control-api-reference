@@ -1,4 +1,4 @@
-import type { components } from '../../types/api';
+import type { components } from '../../infrastructure/types/api';
 
 type Lamp = components['schemas']['Lamp'];
 

@@ -1,5 +1,5 @@
 import { Service } from './service';
-import type { components } from '../types/api';
+import type { components } from './types/api';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { LampRepository } from '../domain/repositories/lamp.repository';
 import { LampNotFoundError } from '../domain/errors/lamp-not-found.error';
