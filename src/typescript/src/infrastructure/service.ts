@@ -45,7 +45,7 @@ type DeleteLampReply = FastifyReply<{
 export class Service {
   constructor(private readonly repository: LampRepository) {}
 
-  async listLamps(request: ListLampsRequest, reply: ListLampsReply): Promise<Lamp[]> {
+  async listLamps(request: ListLampsRequest, _reply: ListLampsReply): Promise<Lamp[]> {
     const { limit } = request.query;
     const limitNumber = limit ? parseInt(limit) : undefined;
     return this.repository.findAll(limitNumber);

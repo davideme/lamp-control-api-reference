@@ -1,5 +1,4 @@
 import { InMemoryLampRepository } from './in-memory-lamp.repository';
-import type { components } from '../../types/api';
 
 describe('InMemoryLampRepository', () => {
   let repository: InMemoryLampRepository;
