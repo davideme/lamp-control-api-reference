@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
 import { components, operations } from '../types/api';
-import { LampNotFoundError } from '../../domain/errors/DomainErrors';
+import { LampNotFoundError } from '../../domain/errors/DomainError';
 
 type Lamp = components['schemas']['Lamp'];
 

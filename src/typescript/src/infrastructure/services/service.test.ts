@@ -6,7 +6,7 @@ import { LampRepository } from '../../domain/repositories/lamp.repository';
 import { Lamp, LampCreate, LampUpdate } from '../../domain/models/lamp';
 import { Service } from './service';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampNotFoundError } from '../../domain/errors/DomainErrors';
+import { LampNotFoundError } from '../../domain/errors/DomainError';
 
 // Mock Fastify types
 type MockFastifyRequest<T = unknown> = Partial<FastifyRequest> & T;

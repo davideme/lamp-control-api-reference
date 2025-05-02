@@ -1,4 +1,4 @@
-import { LampNotFoundError } from '../../domain/errors/DomainErrors';
+import { LampNotFoundError } from '../../domain/errors/DomainError';
 import { Lamp } from '../../domain/models/lamp';
 import { LampRepository } from '../../domain/repositories/lamp.repository';
 
