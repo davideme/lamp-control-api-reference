@@ -19,7 +19,7 @@ class LampNotFoundError(Exception):
 class LampRepository:
     """Repository for managing lamp data with in-memory storage."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the repository with an empty lamp store."""
         self._lamps: dict[str, Lamp] = {}
 

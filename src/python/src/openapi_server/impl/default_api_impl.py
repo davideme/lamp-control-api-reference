@@ -10,10 +10,10 @@ from openapi_server.models.lamp_update import LampUpdate
 from openapi_server.repositories.lamp_repository import LampNotFoundError
 
 
-class DefaultApiImpl(BaseDefaultApi):
+class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
     """Implementation of the Default API with in-memory storage."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the API implementation with a lamp repository."""
         self._lamp_repository = get_lamp_repository()
 
