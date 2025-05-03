@@ -2,6 +2,8 @@
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
+from pydantic import StrictStr
+from typing import Any, List
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate
 from openapi_server.models.lamp_update import LampUpdate
@@ -13,36 +15,36 @@ class BaseDefaultApi:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         BaseDefaultApi.subclasses = BaseDefaultApi.subclasses + (cls,)
-    def create_lamp(
+    async def create_lamp(
         self,
         lamp_create: LampCreate,
     ) -> Lamp:
         ...
 
 
-    def delete_lamp(
+    async def delete_lamp(
         self,
-        lampId: str,
+        lampId: StrictStr,
     ) -> None:
         ...
 
 
-    def get_lamp(
+    async def get_lamp(
         self,
-        lampId: str,
+        lampId: StrictStr,
     ) -> Lamp:
         ...
 
 
-    def list_lamps(
+    async def list_lamps(
         self,
     ) -> List[Lamp]:
         ...
 
 
-    def update_lamp(
+    async def update_lamp(
         self,
-        lampId: str,
+        lampId: StrictStr,
         lamp_update: LampUpdate,
     ) -> Lamp:
         ...

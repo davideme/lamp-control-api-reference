@@ -14,6 +14,7 @@ from fastapi import (  # noqa: F401
     Depends,
     Form,
     Header,
+    HTTPException,
     Path,
     Query,
     Response,
@@ -22,6 +23,8 @@ from fastapi import (  # noqa: F401
 )
 
 from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from pydantic import StrictStr
+from typing import Any, List
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate
 from openapi_server.models.lamp_update import LampUpdate
@@ -46,7 +49,9 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 async def create_lamp(
     lamp_create: LampCreate = Body(None, description=""),
 ) -> Lamp:
-    ...
+    if not BaseDefaultApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseDefaultApi.subclasses[0]().create_lamp(lamp_create)
 
 
 @router.delete(
@@ -60,9 +65,11 @@ async def create_lamp(
     response_model_by_alias=True,
 )
 async def delete_lamp(
-    lampId: str = Path(..., description=""),
+    lampId: StrictStr = Path(..., description=""),
 ) -> None:
-    ...
+    if not BaseDefaultApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseDefaultApi.subclasses[0]().delete_lamp(lampId)
 
 
 @router.get(
@@ -76,9 +83,11 @@ async def delete_lamp(
     response_model_by_alias=True,
 )
 async def get_lamp(
-    lampId: str = Path(..., description=""),
+    lampId: StrictStr = Path(..., description=""),
 ) -> Lamp:
-    ...
+    if not BaseDefaultApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseDefaultApi.subclasses[0]().get_lamp(lampId)
 
 
 @router.get(
@@ -92,7 +101,9 @@ async def get_lamp(
 )
 async def list_lamps(
 ) -> List[Lamp]:
-    ...
+    if not BaseDefaultApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseDefaultApi.subclasses[0]().list_lamps()
 
 
 @router.put(
@@ -106,7 +117,9 @@ async def list_lamps(
     response_model_by_alias=True,
 )
 async def update_lamp(
-    lampId: str = Path(..., description=""),
+    lampId: StrictStr = Path(..., description=""),
     lamp_update: LampUpdate = Body(None, description=""),
 ) -> Lamp:
-    ...
+    if not BaseDefaultApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseDefaultApi.subclasses[0]().update_lamp(lampId, lamp_update)

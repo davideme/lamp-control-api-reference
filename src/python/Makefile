@@ -1,5 +1,5 @@
 # Variables
-OPENAPI_GENERATOR_VERSION := v7.3.0
+OPENAPI_GENERATOR_VERSION := v7.13.0
 OPENAPI_SPEC := docs/api/openapi.yaml
 OUTPUT_DIR := src/python
 GENERATOR_NAME := python-fastapi

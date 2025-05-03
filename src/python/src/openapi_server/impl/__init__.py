@@ -1,1 +1,0 @@
-"""Implementation package for the Lamp Control API.""" 
