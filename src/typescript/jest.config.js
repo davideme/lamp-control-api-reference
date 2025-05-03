@@ -34,4 +34,10 @@ export default {
             statements: 80,
         },
     },
-}; 
+    coverageReporters: [
+        "lcov",
+        "text",
+        "json",
+        "json-summary"
+      ],
+};
