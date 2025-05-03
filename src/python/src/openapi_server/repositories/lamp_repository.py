@@ -1,6 +1,5 @@
 """Repository for managing lamp data."""
 
-
 from openapi_server.models.lamp import Lamp
 
 
