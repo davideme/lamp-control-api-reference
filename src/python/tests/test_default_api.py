@@ -1,0 +1,103 @@
+# coding: utf-8
+
+from fastapi.testclient import TestClient
+
+
+from lamp_control_api.models.lamp import Lamp  # noqa: F401
+from lamp_control_api.models.lamp_create import LampCreate  # noqa: F401
+from lamp_control_api.models.lamp_update import LampUpdate  # noqa: F401
+
+
+def test_create_lamp(client: TestClient):
+    """Test case for create_lamp
+
+    Create a new lamp
+    """
+    lamp_create = {"status":1}
+
+    headers = {
+    }
+    response = client.request(
+        "POST",
+        "/lamps",
+        headers=headers,
+        json=lamp_create,
+    )
+
+    # uncomment below to assert the status code of the HTTP response
+    #assert response.status_code == 200
+
+
+def test_delete_lamp(client: TestClient):
+    """Test case for delete_lamp
+
+    Delete a lamp
+    """
+
+    headers = {
+    }
+    response = client.request(
+        "DELETE",
+        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        headers=headers,
+    )
+
+    # uncomment below to assert the status code of the HTTP response
+    #assert response.status_code == 200
+
+
+def test_get_lamp(client: TestClient):
+    """Test case for get_lamp
+
+    Get a specific lamp
+    """
+
+    headers = {
+    }
+    response = client.request(
+        "GET",
+        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        headers=headers,
+    )
+
+    # uncomment below to assert the status code of the HTTP response
+    #assert response.status_code == 200
+
+
+def test_list_lamps(client: TestClient):
+    """Test case for list_lamps
+
+    List all lamps
+    """
+
+    headers = {
+    }
+    response = client.request(
+        "GET",
+        "/lamps",
+        headers=headers,
+    )
+
+    # uncomment below to assert the status code of the HTTP response
+    #assert response.status_code == 200
+
+
+def test_update_lamp(client: TestClient):
+    """Test case for update_lamp
+
+    Update a lamp's status
+    """
+    lamp_update = {"status":1}
+
+    headers = {
+    }
+    response = client.request(
+        "PUT",
+        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        headers=headers,
+        json=lamp_update,
+    )
+
+    # uncomment below to assert the status code of the HTTP response
+    #assert response.status_code == 200
+
