@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+
 def test_create_lamp(client: TestClient):
     """Test case for create_lamp
 
