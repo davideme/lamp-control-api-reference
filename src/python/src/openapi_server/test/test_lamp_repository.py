@@ -1,6 +1,7 @@
 """Unit tests for the LampRepository class."""
 
 import pytest
+
 from openapi_server.models.lamp import Lamp
 from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
 

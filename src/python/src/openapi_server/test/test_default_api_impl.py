@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException
+
 from openapi_server.impl.default_api_impl import DefaultApiImpl
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate

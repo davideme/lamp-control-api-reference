@@ -1,1 +1,1 @@
-"""OpenAPI Server package.""" 
+"""OpenAPI Server package."""
