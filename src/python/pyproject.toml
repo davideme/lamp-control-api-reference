@@ -30,6 +30,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 package-mode = false
 
+
+[tool.poetry.scripts]
+run-server = "openapi_server.main:main"
+
 [tool.black]
 line-length = 100
 target-version = ["py312"]
@@ -75,6 +79,6 @@ skip_gitignore = true
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --cov=lamp_control --cov-report=term-missing"
+addopts = "-ra -q --cov=lamp_control_api --cov-report=term-missing"
 testpaths = ["tests"]
 asyncio_mode = "auto"
