@@ -1,12 +1,9 @@
-# coding: utf-8
 
-from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
+from typing import Dict, List  # noqa: F401
 
-from lamp_control_api.apis.default_api_base import BaseDefaultApi
 import openapi_server.impl
-
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
@@ -26,7 +23,6 @@ from lamp_control_api.models.lamp import Lamp
 from lamp_control_api.models.lamp_create import LampCreate
 from lamp_control_api.models.lamp_update import LampUpdate
 
-
 router = APIRouter()
 
 ns_pkg = openapi_server.impl
@@ -45,8 +41,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 )
 async def create_lamp(
     lamp_create: LampCreate = Body(None, description=""),
-) -> Lamp:
-    ...
+) -> Lamp: ...
 
 
 @router.delete(
@@ -61,8 +56,7 @@ async def create_lamp(
 )
 async def delete_lamp(
     lampId: str = Path(..., description=""),
-) -> None:
-    ...
+) -> None: ...
 
 
 @router.get(
@@ -77,22 +71,19 @@ async def delete_lamp(
 )
 async def get_lamp(
     lampId: str = Path(..., description=""),
-) -> Lamp:
-    ...
+) -> Lamp: ...
 
 
 @router.get(
     "/lamps",
     responses={
-        200: {"model": List[Lamp], "description": "A list of lamps"},
+        200: {"model": list[Lamp], "description": "A list of lamps"},
     },
     tags=["default"],
     summary="List all lamps",
     response_model_by_alias=True,
 )
-async def list_lamps(
-) -> List[Lamp]:
-    ...
+async def list_lamps() -> list[Lamp]: ...
 
 
 @router.put(
@@ -108,5 +99,4 @@ async def list_lamps(
 async def update_lamp(
     lampId: str = Path(..., description=""),
     lamp_update: LampUpdate = Body(None, description=""),
-) -> Lamp:
-    ...
+) -> Lamp: ...

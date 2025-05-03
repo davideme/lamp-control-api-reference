@@ -41,8 +41,8 @@ exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
-ignore = []
+lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+lint.ignore = []
 
 [tool.mypy]
 python_version = "3.12"

@@ -1,8 +1,5 @@
-# coding: utf-8
 
 from fastapi.testclient import TestClient
-
-
 from lamp_control_api.models.lamp import Lamp  # noqa: F401
 from lamp_control_api.models.lamp_create import LampCreate  # noqa: F401
 from lamp_control_api.models.lamp_update import LampUpdate  # noqa: F401
@@ -13,10 +10,9 @@ def test_create_lamp(client: TestClient):
 
     Create a new lamp
     """
-    lamp_create = {"status":1}
+    lamp_create = {"status": 1}
 
-    headers = {
-    }
+    headers = {}
     response = client.request(
         "POST",
         "/lamps",
@@ -33,11 +29,10 @@ def test_delete_lamp(client: TestClient):
     Delete a lamp
     """
 
-    headers = {
-    }
+    headers = {}
     response = client.request(
         "DELETE",
-        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        "/lamps/{lampId}".format(lampId="lamp_id_example"),
         headers=headers,
     )
 
@@ -50,11 +45,10 @@ def test_get_lamp(client: TestClient):
     Get a specific lamp
     """
 
-    headers = {
-    }
+    headers = {}
     response = client.request(
         "GET",
-        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        "/lamps/{lampId}".format(lampId="lamp_id_example"),
         headers=headers,
     )
 
@@ -67,8 +61,7 @@ def test_list_lamps(client: TestClient):
     List all lamps
     """
 
-    headers = {
-    }
+    headers = {}
     response = client.request(
         "GET",
         "/lamps",
@@ -83,13 +76,12 @@ def test_update_lamp(client: TestClient):
 
     Update a lamp's status
     """
-    lamp_update = {"status":1}
+    lamp_update = {"status": 1}
 
-    headers = {
-    }
+    headers = {}
     response = client.request(
         "PUT",
-        "/lamps/{lampId}".format(lampId='lamp_id_example'),
+        "/lamps/{lampId}".format(lampId="lamp_id_example"),
         headers=headers,
         json=lamp_update,
     )
