@@ -1,5 +1,5 @@
 import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { Lamp } from '../../domain/models/Lamp';
+import { Lamp, LampCreate, LampUpdate } from '../../domain/models/Lamp';
 import { LampRepository } from '../../domain/repositories/LampRepository';
 
 export class InMemoryLampRepository implements LampRepository {
@@ -14,7 +14,7 @@ export class InMemoryLampRepository implements LampRepository {
     return this.lamps.get(id);
   }
 
-  async create(lamp: Omit<Lamp, 'id'>): Promise<Lamp> {
+  async create(lamp: LampCreate): Promise<Lamp> {
     const newLamp: Lamp = {
       id: crypto.randomUUID(),
       ...lamp,
@@ -23,7 +23,7 @@ export class InMemoryLampRepository implements LampRepository {
     return newLamp;
   }
 
-  async update(id: string, lamp: Partial<Lamp>): Promise<Lamp> {
+  async update(id: string, lamp: LampUpdate): Promise<Lamp> {
     const existingLamp = this.lamps.get(id);
     if (!existingLamp) {
       throw new LampNotFoundError(id);

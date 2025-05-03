@@ -1,9 +1,9 @@
-import { Lamp } from '../models/Lamp';
+import { Lamp, LampCreate, LampUpdate } from '../models/Lamp';
 
 export interface LampRepository {
   findAll(limit?: number): Promise<Lamp[]>;
   findById(id: string): Promise<Lamp | undefined>;
-  create(lamp: Omit<Lamp, 'id'>): Promise<Lamp>;
-  update(id: string, lamp: Partial<Lamp>): Promise<Lamp>;
+  create(lamp: LampCreate): Promise<Lamp>;
+  update(id: string, lamp: LampUpdate): Promise<Lamp>;
   delete(id: string): Promise<void>;
 }
