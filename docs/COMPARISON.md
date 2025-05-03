@@ -17,7 +17,7 @@ This document provides a comparison of the different language implementations in
 
 | Language    | App Lines | Test Lines | Test/App Ratio | Coverage % |
 |------------|-----------|------------|----------------|------------|
-| TypeScript | 827 | 26218 | 37.80 | 85 |
+| TypeScript | 827 | 511 | 0.55 | 85 |
 ## Test Coverage
 
 | Language | Coverage % |
