@@ -1,4 +1,3 @@
-
 """
     Lamp Control API
 
@@ -9,7 +8,6 @@
 
     Do not edit the class manually.
 """
-
 
 from __future__ import annotations
 

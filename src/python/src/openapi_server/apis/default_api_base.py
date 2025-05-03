@@ -1,4 +1,3 @@
-
 from typing import Any, ClassVar, Dict, List, Tuple  # noqa: F401
 
 from openapi_server.models.lamp import Lamp

@@ -1,6 +1,5 @@
 """Repository for managing lamp data."""
 
-from typing import Dict, List, Optional
 
 from openapi_server.models.lamp import Lamp
 
@@ -23,7 +22,7 @@ class LampRepository:
 
     def __init__(self):
         """Initialize the repository with an empty lamp store."""
-        self._lamps: Dict[str, Lamp] = {}
+        self._lamps: dict[str, Lamp] = {}
 
     def create(self, lamp: Lamp) -> Lamp:
         """Create a new lamp.
@@ -37,7 +36,7 @@ class LampRepository:
         self._lamps[lamp.id] = lamp
         return lamp
 
-    def get(self, lamp_id: str) -> Optional[Lamp]:
+    def get(self, lamp_id: str) -> Lamp | None:
         """Get a specific lamp.
 
         Args:
@@ -48,7 +47,7 @@ class LampRepository:
         """
         return self._lamps.get(lamp_id)
 
-    def list(self) -> List[Lamp]:
+    def list(self) -> list[Lamp]:
         """List all lamps.
 
         Returns:
@@ -84,4 +83,4 @@ class LampRepository:
         """
         if lamp_id not in self._lamps:
             raise LampNotFoundError(lamp_id)
-        del self._lamps[lamp_id] 
+        del self._lamps[lamp_id]

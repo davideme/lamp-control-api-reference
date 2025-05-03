@@ -1,5 +1,3 @@
-
-
 from fastapi import Depends, Security  # noqa: F401
 from fastapi.openapi.models import OAuthFlowImplicit, OAuthFlows  # noqa: F401
 from fastapi.security import (  # noqa: F401
@@ -13,4 +11,3 @@ from fastapi.security import (  # noqa: F401
     SecurityScopes,
 )
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery  # noqa: F401
-

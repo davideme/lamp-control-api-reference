@@ -6,7 +6,7 @@ from openapi_server.apis.default_api_base import BaseDefaultApi
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate
 from openapi_server.models.lamp_update import LampUpdate
-from openapi_server.repositories.lamp_repository import LampRepository, LampNotFoundError
+from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
 
 
 class DefaultApiImpl(BaseDefaultApi):
@@ -42,6 +42,7 @@ class DefaultApiImpl(BaseDefaultApi):
             self._lamp_repository.delete(lamp_id)
         except LampNotFoundError:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")
 
     async def get_lamp(self, lamp_id: str) -> Lamp:
@@ -59,6 +60,7 @@ class DefaultApiImpl(BaseDefaultApi):
         lamp = self._lamp_repository.get(lamp_id)
         if lamp is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")
         return lamp
 
@@ -88,4 +90,5 @@ class DefaultApiImpl(BaseDefaultApi):
             return self._lamp_repository.update(updated_lamp)
         except LampNotFoundError:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")

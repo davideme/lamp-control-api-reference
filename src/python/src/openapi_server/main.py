@@ -1,4 +1,3 @@
-
 """
     Lamp Control API
 
@@ -9,7 +8,6 @@
 
     Do not edit the class manually.
 """
-
 
 from fastapi import FastAPI
 from openapi_server.apis.default_api import router as DefaultApiRouter
