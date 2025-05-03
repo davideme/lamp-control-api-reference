@@ -54,6 +54,23 @@ line-length = 100
 target-version = "py312"
 lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 lint.ignore = []
+lint.exclude = [
+    ".eggs",
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    # Add your specific files to ignore here
+    "src/openapi_server/apis/default_api.py",
+    "src/openapi_server/apis/default_api_base.py",
+    "src/openapi_server/main.py",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,test}/*" = ["PLR2004"]
 
 [tool.mypy]
 python_version = "3.12"

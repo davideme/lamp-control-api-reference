@@ -41,10 +41,10 @@ class DefaultApiImpl(BaseDefaultApi):
         """
         try:
             self._lamp_repository.delete(lamp_id)
-        except LampNotFoundError:
+        except LampNotFoundError as err:
             from fastapi import HTTPException
 
-            raise HTTPException(status_code=404, detail="Lamp not found")
+            raise HTTPException(status_code=404, detail="Lamp not found") from err
 
     async def get_lamp(self, lamp_id: str) -> Lamp:
         """Get a specific lamp.
@@ -89,7 +89,7 @@ class DefaultApiImpl(BaseDefaultApi):
         try:
             updated_lamp = Lamp(id=lamp_id, status=lamp_update.status)
             return self._lamp_repository.update(updated_lamp)
-        except LampNotFoundError:
+        except LampNotFoundError as err:
             from fastapi import HTTPException
 
-            raise HTTPException(status_code=404, detail="Lamp not found")
+            raise HTTPException(status_code=404, detail="Lamp not found") from err
