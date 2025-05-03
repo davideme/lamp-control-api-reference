@@ -16,7 +16,7 @@ To run the server, please execute the following from the root directory:
 poetry install
 
 # Run the server
-poetry run run-server
+poetry run uvicorn openapi_server.main:app --host 0.0.0.0 --port 8080
 ```
 
 and open your browser at `http://localhost:8080/docs/` to see the docs.

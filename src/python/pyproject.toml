@@ -30,10 +30,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 package-mode = false
 
-
-[tool.poetry.scripts]
-run-server = "openapi_server.main:main"
-
 [tool.black]
 line-length = 100
 target-version = ["py312"]
