@@ -3,10 +3,11 @@
 from uuid import uuid4
 
 from openapi_server.apis.default_api_base import BaseDefaultApi
+from openapi_server.dependencies import get_lamp_repository
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate
 from openapi_server.models.lamp_update import LampUpdate
-from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
+from openapi_server.repositories.lamp_repository import LampNotFoundError
 
 
 class DefaultApiImpl(BaseDefaultApi):
@@ -14,7 +15,7 @@ class DefaultApiImpl(BaseDefaultApi):
 
     def __init__(self):
         """Initialize the API implementation with a lamp repository."""
-        self._lamp_repository = LampRepository()
+        self._lamp_repository = get_lamp_repository()
 
     async def create_lamp(self, lamp_create: LampCreate) -> Lamp:
         """Create a new lamp.
