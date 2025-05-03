@@ -17,8 +17,7 @@ generate:
 	${DOCKER_RUN} generate \
 		-i /local/${OPENAPI_SPEC} \
 		-g ${GENERATOR_NAME} \
-		-o /local/${OUTPUT_DIR} \
-		--additional-properties=packageName=lamp_control_api,projectName=lamp-control-api
+		-o /local/${OUTPUT_DIR}
 
 # Clean generated files
 clean:

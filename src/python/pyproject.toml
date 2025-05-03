@@ -1,39 +1,9 @@
-[project]
-name = "lamp-control-api"
-version = "0.1.0"
-description = "Lamp Control API - A FastAPI-based REST API for controlling lamps"
-authors = [
-    {name = "Davide Mendolia",email = "davide@gokarumi.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "fastapi>=0.109.0",
-    "uvicorn>=0.27.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
-    "pytest-cov>=4.1.0",
-    "black>=24.1.0",
-    "ruff>=0.2.0",
-    "mypy>=1.8.0",
-    "types-requests>=2.31.0",
-]
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-package-mode = false
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 100
-target-version = ["py312"]
-include = '\.pyi?$'
+line-length = 88
 exclude = '''
 (
   /(
@@ -51,20 +21,6 @@ exclude = '''
 )
 '''
 
-[tool.ruff]
-line-length = 100
-target-version = "py312"
-lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
-lint.ignore = []
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-check_untyped_defs = true
-
 [tool.isort]
 profile = "black"
 skip = [
@@ -72,9 +28,3 @@ skip = [
     '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv',
 ]
 skip_gitignore = true
-
-[tool.pytest.ini_options]
-minversion = "8.0"
-addopts = "-ra -q --cov=lamp_control --cov-report=term-missing"
-testpaths = ["tests"]
-asyncio_mode = "auto"
