@@ -1,20 +1,20 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const sloc = require('sloc');
 const { glob } = require('glob');
 
 // Configuration
-const SRC_DIR = '../src/typescript';  // Path relative to tools directory
-const TEST_PATTERN = '../src/typescript/**/*.test.ts';
-const APP_PATTERN = '../src/typescript/src/**/*.ts';
+const SRC_DIR = path.resolve(__dirname, '../src/typescript');  // Using absolute path
+const TEST_PATTERN = path.join(SRC_DIR, '**/*.test.ts');
+const APP_PATTERN = path.join(SRC_DIR, 'src/**/*.ts');
 const OUTPUT_DIR = 'metrics_reports/typescript';
 
-// Common ignore patterns
+// Common ignore patterns - using absolute paths for more reliable ignore matching
 const COMMON_IGNORES = [
     '**/node_modules/**',
     '**/dist/**',
-    '**/.git/**'
+    '**/.git/**',
+    path.join(SRC_DIR, 'node_modules/**')  // Add explicit path to node_modules
 ];
 
 // Create output directory
@@ -88,84 +88,6 @@ async function getDetailedLOC(pattern, excludeTests = false) {
     }
 }
 
-// Function to get detailed Halstead metrics
-async function getDetailedHalsteadMetrics(pattern, excludeTests = false) {
-    try {
-        const globOptions = {
-            ignore: [
-                ...COMMON_IGNORES,
-                ...(excludeTests ? ['**/*.test.ts', '**/*.spec.ts'] : [])
-            ],
-            absolute: true
-        };
-        
-        const files = await glob(pattern, globOptions);
-        
-        if (files.length === 0) {
-            return null;
-        }
-
-        // Convert file paths to space-separated string, properly escaped
-        const filesArg = files.map(f => `"${f}"`).join(' ');
-        const result = execSync(`npx ts-complexity ${filesArg} --json`, { 
-            encoding: 'utf8',
-            maxBuffer: 1024 * 1024 * 10 // 10MB buffer
-        });
-        
-        if (!result.trim()) {
-            console.error('ts-complexity returned empty result');
-            return null;
-        }
-
-        const metrics = JSON.parse(result);
-        
-        const fileMetrics = metrics.map(file => ({
-            path: file.path,
-            name: path.basename(file.path),
-            halstead: file.halstead || null
-        }))
-        .filter(file => file.halstead)
-        .sort((a, b) => b.halstead.difficulty - a.halstead.difficulty);
-
-        if (fileMetrics.length === 0) {
-            return null;
-        }
-
-        // Calculate aggregated metrics
-        const aggregated = fileMetrics.reduce((acc, file) => {
-            const h = file.halstead;
-            acc.length = (acc.length || 0) + h.length;
-            acc.vocabulary = (acc.vocabulary || 0) + h.vocabulary;
-            acc.volume = (acc.volume || 0) + h.volume;
-            acc.difficulty = (acc.difficulty || 0) + h.difficulty;
-            acc.effort = (acc.effort || 0) + h.effort;
-            acc.time = (acc.time || 0) + h.time;
-            acc.bugs = (acc.bugs || 0) + h.bugs;
-            acc.fileCount = (acc.fileCount || 0) + 1;
-            return acc;
-        }, {});
-
-        // Calculate averages
-        const averages = {
-            difficulty: aggregated.difficulty / aggregated.fileCount,
-            bugs: aggregated.bugs / aggregated.fileCount,
-            effort: aggregated.effort / aggregated.fileCount,
-            volume: aggregated.volume / aggregated.fileCount
-        };
-
-        return {
-            total: aggregated,
-            averages,
-            files: fileMetrics
-        };
-    } catch (error) {
-        console.error(`Error getting Halstead metrics for ${pattern}:`, error);
-        if (error.stdout) console.error('stdout:', error.stdout);
-        if (error.stderr) console.error('stderr:', error.stderr);
-        return null;
-    }
-}
-
 // Main function to run metrics
 async function runMetrics() {
     console.log('Analyzing TypeScript metrics...\n');
@@ -173,8 +95,6 @@ async function runMetrics() {
     // Get detailed metrics
     const appLOC = await getDetailedLOC(APP_PATTERN, true);  // Exclude test files
     const testLOC = await getDetailedLOC(TEST_PATTERN);
-    const appHalstead = await getDetailedHalsteadMetrics(APP_PATTERN, true);  // Exclude test files
-    const testHalstead = await getDetailedHalsteadMetrics(TEST_PATTERN);
 
     // Generate report
     const report = {
@@ -197,16 +117,14 @@ async function runMetrics() {
                 totals: appLOC.totals,
                 averages: appLOC.averages,
                 files: appLOC.files
-            },
-            halstead: appHalstead
+            }
         },
         tests: {
             lineMetrics: {
                 totals: testLOC.totals,
                 averages: testLOC.averages,
                 files: testLOC.files
-            },
-            halstead: testHalstead
+            }
         }
     };
 
@@ -274,4 +192,4 @@ async function runMetrics() {
 }
 
 // Run the metrics
-runMetrics().catch(console.error); 
+runMetrics().catch(console.error);
