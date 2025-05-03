@@ -10,9 +10,12 @@ requires-python = ">=3.12"
 dependencies = [
 ]
 
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 package-mode = false
-
 
 [tool.black]
 line-length = 100
@@ -62,7 +65,3 @@ minversion = "8.0"
 addopts = "-ra -q --cov=lamp_control --cov-report=term-missing"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
