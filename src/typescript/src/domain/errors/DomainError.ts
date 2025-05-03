@@ -11,15 +11,3 @@ export class LampNotFoundError extends DomainError {
     super(`Lamp with ID ${id} not found`);
   }
 }
-
-export class ValidationError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
-
-export class InvalidOperationError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}

@@ -18,9 +18,12 @@
   },
   "overrides": [
     {
-      "files": ["tests/**/*.ts"],
+      "files": ["test/**/*.ts", "**/*.test.ts"],
       "env": {
         "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
       }
     }
   ]

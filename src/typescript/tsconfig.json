@@ -1,28 +1,17 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "lib": ["ES2022"],
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": ".",
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
-} 
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
