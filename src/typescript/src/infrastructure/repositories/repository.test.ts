@@ -1,4 +1,4 @@
-import { InMemoryLampRepository } from './in-memory-lamp.repository';
+import { InMemoryLampRepository } from './InMemoryLampRepository';
 
 describe('InMemoryLampRepository', () => {
   let repository: InMemoryLampRepository;
