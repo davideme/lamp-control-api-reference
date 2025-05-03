@@ -24,8 +24,7 @@ def test_create_lamp(client: TestClient):
         json=lamp_create,
     )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_delete_lamp(client: TestClient):
@@ -42,8 +41,7 @@ def test_delete_lamp(client: TestClient):
         headers=headers,
     )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_get_lamp(client: TestClient):
@@ -60,8 +58,7 @@ def test_get_lamp(client: TestClient):
         headers=headers,
     )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_list_lamps(client: TestClient):
@@ -78,8 +75,7 @@ def test_list_lamps(client: TestClient):
         headers=headers,
     )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_update_lamp(client: TestClient):
@@ -98,6 +94,4 @@ def test_update_lamp(client: TestClient):
         json=lamp_update,
     )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
-
+    assert response.status_code == 200
