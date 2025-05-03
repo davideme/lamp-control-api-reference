@@ -13,8 +13,11 @@ dependencies = [
 [tool.poetry]
 package-mode = false
 
+
 [tool.black]
-line-length = 88
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
 exclude = '''
 (
   /(
@@ -32,6 +35,20 @@ exclude = '''
 )
 '''
 
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
 [tool.isort]
 profile = "black"
 skip = [
@@ -39,6 +56,12 @@ skip = [
     '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv',
 ]
 skip_gitignore = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --cov=lamp_control --cov-report=term-missing"
+testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
