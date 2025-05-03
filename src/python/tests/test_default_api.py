@@ -1,4 +1,3 @@
-
 from fastapi.testclient import TestClient
 from lamp_control_api.models.lamp import Lamp  # noqa: F401
 from lamp_control_api.models.lamp_create import LampCreate  # noqa: F401

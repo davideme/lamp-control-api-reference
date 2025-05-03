@@ -1,5 +1,5 @@
 """Default API implementation for the Lamp Control API."""
-from typing import Dict, List
+
 from uuid import uuid4
 
 from openapi_server.apis.default_api_base import BaseDefaultApi
@@ -13,7 +13,7 @@ class DefaultApiImpl(BaseDefaultApi):
 
     def __init__(self):
         """Initialize the API implementation with an empty lamp store."""
-        self._lamps: Dict[str, Lamp] = {}
+        self._lamps: dict[str, Lamp] = {}
 
     async def create_lamp(self, lamp_create: LampCreate) -> Lamp:
         """Create a new lamp.
@@ -40,6 +40,7 @@ class DefaultApiImpl(BaseDefaultApi):
         """
         if lamp_id not in self._lamps:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")
         del self._lamps[lamp_id]
 
@@ -57,10 +58,11 @@ class DefaultApiImpl(BaseDefaultApi):
         """
         if lamp_id not in self._lamps:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")
         return self._lamps[lamp_id]
 
-    async def list_lamps(self) -> List[Lamp]:
+    async def list_lamps(self) -> list[Lamp]:
         """List all lamps.
 
         Returns:
@@ -83,8 +85,9 @@ class DefaultApiImpl(BaseDefaultApi):
         """
         if lamp_id not in self._lamps:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Lamp not found")
-        
+
         lamp = self._lamps[lamp_id]
         lamp.status = lamp_update.status
-        return lamp 
+        return lamp

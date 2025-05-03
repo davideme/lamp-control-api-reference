@@ -1,12 +1,9 @@
-# coding: utf-8
 
-from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
+from typing import Any, Dict, List  # noqa: F401
 
-from openapi_server.apis.default_api_base import BaseDefaultApi
 import openapi_server.impl
-
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
@@ -21,14 +18,12 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
-
+from openapi_server.apis.default_api_base import BaseDefaultApi
 from openapi_server.models.extra_models import TokenModel  # noqa: F401
-from pydantic import StrictStr
-from typing import Any, List
 from openapi_server.models.lamp import Lamp
 from openapi_server.models.lamp_create import LampCreate
 from openapi_server.models.lamp_update import LampUpdate
-
+from pydantic import StrictStr
 
 router = APIRouter()
 
@@ -93,14 +88,13 @@ async def get_lamp(
 @router.get(
     "/lamps",
     responses={
-        200: {"model": List[Lamp], "description": "A list of lamps"},
+        200: {"model": list[Lamp], "description": "A list of lamps"},
     },
     tags=["default"],
     summary="List all lamps",
     response_model_by_alias=True,
 )
-async def list_lamps(
-) -> List[Lamp]:
+async def list_lamps() -> list[Lamp]:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
     return await BaseDefaultApi.subclasses[0]().list_lamps()
