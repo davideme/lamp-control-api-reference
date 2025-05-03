@@ -1,12 +1,12 @@
 # Variables
 OPENAPI_GENERATOR_VERSION := v7.3.0
-OPENAPI_SPEC := ../../docs/api/openapi.yaml
-OUTPUT_DIR := src
+OPENAPI_SPEC := docs/api/openapi.yaml
+OUTPUT_DIR := src/python
 GENERATOR_NAME := python-fastapi
 
 # Docker command with common options
 DOCKER_RUN := docker run --rm \
-	-v ${PWD}:/local \
+	-v ${PWD}/../..:/local \
 	openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION}
 
 .PHONY: generate clean validate
