@@ -1,9 +1,9 @@
 import { Lamp } from '../models/Lamp';
 
 export interface LampRepository {
-  findAll(limit?: number): Lamp[];
-  findById(id: string): Lamp | undefined;
-  create(lamp: Omit<Lamp, 'id'>): Lamp;
-  update(id: string, lamp: Partial<Lamp>): Lamp;
-  delete(id: string): void;
+  findAll(limit?: number): Promise<Lamp[]>;
+  findById(id: string): Promise<Lamp | undefined>;
+  create(lamp: Omit<Lamp, 'id'>): Promise<Lamp>;
+  update(id: string, lamp: Partial<Lamp>): Promise<Lamp>;
+  delete(id: string): Promise<void>;
 }

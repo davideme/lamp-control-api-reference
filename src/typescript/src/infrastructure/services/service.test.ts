@@ -10,18 +10,15 @@ import { LampNotFoundError } from '../../domain/errors/DomainError';
 
 // Mock Fastify types
 type MockFastifyRequest<T = unknown> = Partial<FastifyRequest> & T;
-type MockFastifyReply = Partial<FastifyReply> & {
-  code: jest.Mock;
-  send: jest.Mock;
-};
+type MockFastifyReply = Partial<FastifyReply>;
 
 // Mock repository
 const mockRepository = {
-  findAll: jest.fn<(limit?: number) => Lamp[]>(),
-  findById: jest.fn<(id: string) => Lamp | undefined>(),
-  create: jest.fn<(data: LampCreate) => Lamp>(),
-  update: jest.fn<(id: string, data: LampUpdate) => Lamp>(),
-  delete: jest.fn<(id: string) => void>(),
+  findAll: jest.fn<(limit?: number) => Promise<Lamp[]>>(),
+  findById: jest.fn<(id: string) => Promise<Lamp | undefined>>(),
+  create: jest.fn<(data: LampCreate) => Promise<Lamp>>(),
+  update: jest.fn<(id: string, data: LampUpdate) => Promise<Lamp>>(),
+  delete: jest.fn<(id: string) => Promise<void>>(),
 } as jest.Mocked<LampRepository>;
 
 describe('Service', () => {
@@ -43,7 +40,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ query: { limit?: string } }> = {
         query: {},
       };
-      mockRepository.findAll.mockReturnValue([]);
+      mockRepository.findAll.mockResolvedValue([]);
 
       // Act
       const result = await service.listLamps(mockRequest as any, mockReply as any);
@@ -62,7 +59,7 @@ describe('Service', () => {
         { id: '1', status: true },
         { id: '2', status: false },
       ];
-      mockRepository.findAll.mockReturnValue(lamps);
+      mockRepository.findAll.mockResolvedValue(lamps);
 
       // Act
       const result = await service.listLamps(mockRequest as any, mockReply as any);
@@ -81,7 +78,7 @@ describe('Service', () => {
         { id: '1', status: true },
         { id: '2', status: false },
       ];
-      mockRepository.findAll.mockReturnValue([lamps[0]]);
+      mockRepository.findAll.mockResolvedValue([lamps[0]]);
 
       // Act
       const result = await service.listLamps(mockRequest as any, mockReply as any);
@@ -99,7 +96,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
         params: { lampId: lamp.id },
       };
-      mockRepository.findById.mockReturnValue(lamp);
+      mockRepository.findById.mockResolvedValue(lamp);
 
       // Act
       const result = await service.getLamp(mockRequest as any, mockReply as any);
@@ -114,7 +111,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
         params: { lampId: 'nonexistent' },
       };
-      mockRepository.findById.mockReturnValue(undefined);
+      mockRepository.findById.mockResolvedValue(undefined);
 
       // Act
       await service.getLamp(mockRequest as any, mockReply as any);
@@ -133,7 +130,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ body: { status: boolean } }> = {
         body: { status: true },
       };
-      mockRepository.create.mockReturnValue(newLamp);
+      mockRepository.create.mockResolvedValue(newLamp);
 
       // Act
       const result = await service.createLamp(mockRequest as any, mockReply as any);
@@ -157,7 +154,7 @@ describe('Service', () => {
         params: { lampId: '1' },
         body: { status: false },
       };
-      mockRepository.update.mockReturnValue(updatedLamp);
+      mockRepository.update.mockResolvedValue(updatedLamp);
 
       // Act
       const result = await service.updateLamp(mockRequest as any, mockReply as any);
@@ -178,9 +175,7 @@ describe('Service', () => {
         params: { lampId: 'nonexistent' },
         body: { status: false },
       };
-      mockRepository.update.mockImplementation(() => {
-        throw new LampNotFoundError('Lamp not found');
-      });
+      mockRepository.update.mockRejectedValue(new LampNotFoundError('nonexistent'));
 
       // Act
       await service.updateLamp(mockRequest as any, mockReply as any);
@@ -200,7 +195,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
         params: { lampId: '1' },
       };
-      mockRepository.delete.mockImplementation(() => {});
+      mockRepository.delete.mockResolvedValue(undefined);
 
       // Act
       await service.deleteLamp(mockRequest as any, mockReply as any);
@@ -216,9 +211,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
         params: { lampId: 'nonexistent' },
       };
-      mockRepository.delete.mockImplementation(() => {
-        throw new LampNotFoundError('Lamp not found');
-      });
+      mockRepository.delete.mockRejectedValue(new LampNotFoundError('nonexistent'));
 
       // Act
       await service.deleteLamp(mockRequest as any, mockReply as any);

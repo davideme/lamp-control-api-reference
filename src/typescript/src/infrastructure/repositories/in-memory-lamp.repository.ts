@@ -5,16 +5,16 @@ import { LampRepository } from '../../domain/repositories/LampRepository';
 export class InMemoryLampRepository implements LampRepository {
   private lamps: Map<string, Lamp> = new Map();
 
-  findAll(limit?: number): Lamp[] {
+  async findAll(limit?: number): Promise<Lamp[]> {
     const lamps = Array.from(this.lamps.values());
     return limit ? lamps.slice(0, limit) : lamps;
   }
 
-  findById(id: string): Lamp | undefined {
+  async findById(id: string): Promise<Lamp | undefined> {
     return this.lamps.get(id);
   }
 
-  create(lamp: Omit<Lamp, 'id'>): Lamp {
+  async create(lamp: Omit<Lamp, 'id'>): Promise<Lamp> {
     const newLamp: Lamp = {
       id: crypto.randomUUID(),
       ...lamp,
@@ -23,7 +23,7 @@ export class InMemoryLampRepository implements LampRepository {
     return newLamp;
   }
 
-  update(id: string, lamp: Partial<Lamp>): Lamp {
+  async update(id: string, lamp: Partial<Lamp>): Promise<Lamp> {
     const existingLamp = this.lamps.get(id);
     if (!existingLamp) {
       throw new LampNotFoundError(id);
@@ -33,7 +33,7 @@ export class InMemoryLampRepository implements LampRepository {
     return updatedLamp;
   }
 
-  delete(id: string): void {
+  async delete(id: string): Promise<void> {
     if (!this.lamps.has(id)) {
       throw new LampNotFoundError(id);
     }
