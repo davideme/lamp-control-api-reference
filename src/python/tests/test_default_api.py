@@ -11,7 +11,7 @@ def test_create_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "POST",
-        "/lamps",
+        "/v1/lamps",
         headers=headers,
         json=lamp_create,
     )
@@ -30,7 +30,7 @@ def test_delete_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "POST",
-        "/lamps",
+        "/v1/lamps",
         headers=headers,
         json=lamp_create,
     )
@@ -38,7 +38,7 @@ def test_delete_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "DELETE",
-        "/lamps/{lampId}".format(lampId=response.json()["id"]),
+        "/v1/lamps/{lampId}".format(lampId=response.json()["id"]),
         headers=headers,
     )
 
@@ -54,7 +54,7 @@ def test_get_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "GET",
-        "/lamps/{lampId}".format(lampId="lamp_id_example"),
+        "/v1/lamps/{lampId}".format(lampId="lamp_id_example"),
         headers=headers,
     )
 
@@ -70,7 +70,7 @@ def test_list_lamps(client: TestClient):
     headers = {}
     response = client.request(
         "GET",
-        "/lamps",
+        "/v1/lamps",
         headers=headers,
     )
 
@@ -87,7 +87,7 @@ def test_update_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "POST",
-        "/lamps",
+        "/v1/lamps",
         headers=headers,
         json=lamp_create,
     )
@@ -97,7 +97,7 @@ def test_update_lamp(client: TestClient):
     headers = {}
     response = client.request(
         "PUT",
-        "/lamps/{lampId}".format(lampId=response.json()["id"]),
+        "/v1/lamps/{lampId}".format(lampId=response.json()["id"]),
         headers=headers,
         json=lamp_update,
     )
