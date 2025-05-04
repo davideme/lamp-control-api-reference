@@ -2,7 +2,7 @@ import importlib
 import pkgutil
 from typing import Any, Dict, List  # noqa: F401
 
-import openapi_server.impl
+import src.openapi_server.impl
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
@@ -17,16 +17,16 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
-from openapi_server.apis.default_api_base import BaseDefaultApi
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
-from openapi_server.models.lamp import Lamp
-from openapi_server.models.lamp_create import LampCreate
-from openapi_server.models.lamp_update import LampUpdate
+from src.openapi_server.apis.default_api_base import BaseDefaultApi
+from src.openapi_server.models.extra_models import TokenModel  # noqa: F401
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.models.lamp_create import LampCreate
+from src.openapi_server.models.lamp_update import LampUpdate
 from pydantic import StrictStr
 
 router = APIRouter()
 
-ns_pkg = openapi_server.impl
+ns_pkg = src.openapi_server.impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 

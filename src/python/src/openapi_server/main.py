@@ -10,7 +10,7 @@
 """
 
 from fastapi import FastAPI
-from openapi_server.apis.default_api import router as DefaultApiRouter
+from src.openapi_server.apis.default_api import router as DefaultApiRouter
 
 app = FastAPI(
     title="Lamp Control API",
@@ -18,4 +18,4 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.include_router(DefaultApiRouter)
+app.include_router(DefaultApiRouter, prefix="/v1")

@@ -1,8 +1,8 @@
 from typing import Any, ClassVar, Dict, List, Tuple  # noqa: F401
 
-from openapi_server.models.lamp import Lamp
-from openapi_server.models.lamp_create import LampCreate
-from openapi_server.models.lamp_update import LampUpdate
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.models.lamp_create import LampCreate
+from src.openapi_server.models.lamp_update import LampUpdate
 from pydantic import StrictStr
 
 
