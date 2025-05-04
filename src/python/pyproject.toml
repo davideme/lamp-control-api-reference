@@ -98,6 +98,6 @@ skip_gitignore = true
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --cov=lamp_control_api --cov-report=term-missing"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
 testpaths = ["tests"]
 asyncio_mode = "auto"
