@@ -1,4 +1,4 @@
-# ADR 010: Python Version Selection
+# ADR 002: Python Version Selection
 
 ## Status
 
@@ -15,11 +15,13 @@ We will use Python 3.12 as the primary Python version for this project, with a m
 Key factors influencing this decision:
 
 1. **Support Timeline**
+
    - Released: October 2023
    - Security Support Until: October 2028
    - Provides 3.5 years of remaining security maintenance
 
 2. **Technical Benefits**
+
    - ~5% performance improvement over Python 3.11
    - Enhanced error messages for better debugging
    - Improved type annotation syntax and checking
@@ -28,6 +30,7 @@ Key factors influencing this decision:
    - Support for the buffer protocol
 
 3. **Ecosystem Compatibility**
+
    - Wide adoption by major libraries and frameworks
    - Mature tooling support
    - Active security maintenance
@@ -43,11 +46,13 @@ Key factors influencing this decision:
 ### Positive
 
 1. **Long-term Stability**
+
    - Security updates guaranteed until October 2028
    - Stable API and feature set
    - Regular maintenance releases
 
 2. **Development Experience**
+
    - Modern language features
    - Improved performance
    - Better error messages and debugging
@@ -61,6 +66,7 @@ Key factors influencing this decision:
 ### Negative
 
 1. **Version Management**
+
    - Development environments must maintain Python 3.12
    - CI/CD pipelines need specific version configuration
    - Some older libraries might not be fully optimized
@@ -72,6 +78,7 @@ Key factors influencing this decision:
 ## Alternatives Considered
 
 1. **Python 3.13**
+
    - **Why Not Selected:**
      - Released October 2024 (6 months ago)
      - Still in early adoption phase
@@ -80,6 +87,7 @@ Key factors influencing this decision:
      - Some key dependencies not yet fully tested
 
 2. **Python 3.11**
+
    - **Why Not Selected:**
      - Support ends October 2027 (2.5 years remaining)
      - Lacks improved type checking features of 3.12
@@ -98,6 +106,7 @@ Key factors influencing this decision:
 ## Implementation Notes
 
 1. Development Environment Setup:
+
    ```bash
    python3.12 -m venv venv
    source venv/bin/activate
@@ -105,6 +114,7 @@ Key factors influencing this decision:
    ```
 
 2. Dependencies:
+
    - All dependencies will specify minimum Python 3.12 compatibility
    - `requirements.txt` will include version pins
    - Development tools will be configured for Python 3.12
@@ -118,4 +128,4 @@ Key factors influencing this decision:
 
 1. [Python Status and Release Schedule](https://devguide.python.org/versions/)
 2. [Python 3.12 Release Notes](https://docs.python.org/3.12/whatsnew/3.12.html)
-3. [PEP 693 – Python 3.12 Release Schedule](https://peps.python.org/pep-0693/) 
+3. [PEP 693 – Python 3.12 Release Schedule](https://peps.python.org/pep-0693/)
