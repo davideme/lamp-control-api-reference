@@ -51,10 +51,20 @@ def test_get_lamp(client: TestClient):
     Get a specific lamp
     """
 
+    lamp_create = {"status": True}
+
+    headers = {}
+    response = client.request(
+        "POST",
+        "/v1/lamps",
+        headers=headers,
+        json=lamp_create,
+    )
+
     headers = {}
     response = client.request(
         "GET",
-        "/v1/lamps/{lampId}".format(lampId="lamp_id_example"),
+        "/v1/lamps/{lampId}".format(lampId=response.json()["id"]),
         headers=headers,
     )
 

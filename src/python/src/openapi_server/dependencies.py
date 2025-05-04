@@ -2,6 +2,8 @@
 
 from src.openapi_server.repositories.lamp_repository import LampRepository
 
+repository = LampRepository()
+
 
 def get_lamp_repository() -> LampRepository:
     """Get a lamp repository instance.
@@ -9,4 +11,4 @@ def get_lamp_repository() -> LampRepository:
     Returns:
         A lamp repository instance.
     """
-    return LampRepository()
+    return repository
