@@ -1,0 +1,103 @@
+[project]
+name = "lamp-control-api"
+version = "0.1.0"
+description = "Lamp Control API - A FastAPI-based REST API for controlling lamps"
+authors = [
+    {name = "Davide Mendolia",email = "davide@gokarumi.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12.9"
+fastapi = {extras = ["standard"], version = "^0.115.12"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"
+pytest-cov = "^6.1.1"
+black = "^24.1.0"
+ruff = "^0.2.0"
+mypy = "^1.15.0"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+lint.ignore = []
+lint.exclude = [
+    ".eggs",
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    # Add your specific files to ignore here
+    "src/openapi_server/apis/default_api.py",
+    "src/openapi_server/apis/default_api_base.py",
+    "src/openapi_server/main.py",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,test}/*" = ["PLR2004"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+exclude = [
+    'src/openapi_server/test/',
+    'src/openapi_server/models/lamp_update\.py',
+    'src/openapi_server/models/lamp_create\.py',
+    'src/openapi_server/models/lamp\.py',
+    'src/openapi_server/apis/default_api_base\.py',
+    'src/openapi_server/apis/default_api\.py',
+    'tests/',
+]
+
+[tool.isort]
+profile = "black"
+skip = [
+    '.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox',
+    '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv',
+]
+skip_gitignore = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
+python_files = ["test_*.py", "*_test.py"]
+asyncio_mode = "auto"

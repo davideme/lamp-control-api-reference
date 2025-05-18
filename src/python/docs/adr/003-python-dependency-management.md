@@ -1,4 +1,4 @@
-# ADR 011: Python Dependency Management Tool Selection 
+# ADR 003: Python Dependency Management Tool Selection
 
 ## Status
 
@@ -7,6 +7,7 @@ Accepted
 ## Context
 
 For the Python implementation of the Lamp Control API, we need to choose a dependency management tool that will handle:
+
 - Virtual environment management
 - Package installation and version locking
 - Development vs production dependencies
@@ -14,6 +15,7 @@ For the Python implementation of the Lamp Control API, we need to choose a depen
 - Easy integration with CI/CD pipelines
 
 Current popular options include:
+
 1. pip + venv + requirements.txt
 2. Poetry
 3. Pipenv
@@ -29,18 +31,21 @@ We will use **Poetry** as our dependency management tool for this project.
 ### Why Poetry?
 
 1. **Modern Package Management**
+
    - Deterministic builds through poetry.lock file
    - Semantic versioning support
    - Handles dependencies and sub-dependencies effectively
    - Built-in virtual environment management
 
 2. **Project Structure**
+
    - Uses standardized `pyproject.toml` (PEP 517/518)
    - Clear separation of dev and production dependencies
    - Built-in build system
    - Package publishing capabilities
 
 3. **Developer Experience**
+
    - Intuitive CLI commands
    - Fast dependency resolution
    - Excellent documentation
@@ -56,6 +61,7 @@ We will use **Poetry** as our dependency management tool for this project.
 ### Comparison with Alternatives
 
 #### pip + venv + requirements.txt
+
 - ✗ Manual virtual environment management
 - ✗ No built-in dependency resolution
 - ✗ Requires multiple files for dev/prod dependencies
@@ -63,6 +69,7 @@ We will use **Poetry** as our dependency management tool for this project.
 - ✓ Simple to understand
 
 #### Pipenv
+
 - ✗ Slower dependency resolution
 - ✗ Less active development
 - ✗ Some historical stability issues
@@ -70,6 +77,7 @@ We will use **Poetry** as our dependency management tool for this project.
 - ✓ Pipfile is human-readable
 
 #### PDM
+
 - ✓ Modern PEP 582 support
 - ✓ Fast dependency resolution
 - ✗ Smaller community
@@ -77,6 +85,7 @@ We will use **Poetry** as our dependency management tool for this project.
 - ✗ Fewer integrations available
 
 #### Hatch
+
 - ✓ All-in-one project management
 - ✓ Built-in testing/publishing
 - ✗ Newer tool with smaller adoption
@@ -87,11 +96,13 @@ We will use **Poetry** as our dependency management tool for this project.
 
 1. Remove existing pip/venv setup from documentation
 2. Initialize project with Poetry:
+
    ```bash
    poetry init
    ```
 
 3. Create `pyproject.toml` with:
+
    ```toml
    [tool.poetry]
    name = "lamp-control-api"
@@ -123,6 +134,7 @@ We will use **Poetry** as our dependency management tool for this project.
 ## Consequences
 
 ### Positive
+
 - More reliable dependency management
 - Better developer experience
 - Standardized project structure
@@ -130,11 +142,13 @@ We will use **Poetry** as our dependency management tool for this project.
 - Future-proof tooling choice
 
 ### Negative
+
 - Learning curve for developers new to Poetry
 - Slightly more complex than basic pip+requirements.txt
 - Need to update existing documentation and scripts
 
 ### Neutral
+
 - Need to maintain `pyproject.toml` and `poetry.lock` files
 - Different workflow from traditional pip-based projects
 
@@ -142,4 +156,4 @@ We will use **Poetry** as our dependency management tool for this project.
 
 - [Poetry Documentation](https://python-poetry.org/)
 - [PEP 517 -- Build System Support](https://www.python.org/dev/peps/pep-0517/)
-- [PEP 518 -- Build System Requirements](https://www.python.org/dev/peps/pep-0518/) 
+- [PEP 518 -- Build System Requirements](https://www.python.org/dev/peps/pep-0518/)

@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  description: |
+    A simple API for controlling lamps, demonstrating CRUD operations.
+  title: Lamp Control API
+  version: 1.0.0
+servers:
+- url: /v1
+paths:
+  /lamps:
+    get:
+      operationId: listLamps
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Lamp'
+                type: array
+          description: A list of lamps
+      summary: List all lamps
+    post:
+      operationId: createLamp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LampCreate'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lamp'
+          description: Lamp created successfully
+      summary: Create a new lamp
+  /lamps/{lampId}:
+    delete:
+      operationId: deleteLamp
+      parameters:
+      - explode: false
+        in: path
+        name: lampId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Lamp deleted successfully
+        "404":
+          description: Lamp not found
+      summary: Delete a lamp
+    get:
+      operationId: getLamp
+      parameters:
+      - explode: false
+        in: path
+        name: lampId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lamp'
+          description: Lamp details
+        "404":
+          description: Lamp not found
+      summary: Get a specific lamp
+    put:
+      operationId: updateLamp
+      parameters:
+      - explode: false
+        in: path
+        name: lampId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LampUpdate'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lamp'
+          description: Lamp updated successfully
+        "404":
+          description: Lamp not found
+      summary: Update a lamp's status
+components:
+  schemas:
+    Lamp:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: true
+      properties:
+        id:
+          description: Unique identifier for the lamp
+          format: uuid
+          title: id
+          type: string
+        status:
+          description: Whether the lamp is turned on (true) or off (false)
+          title: status
+          type: boolean
+      required:
+      - id
+      - status
+      title: Lamp
+      type: object
+    LampCreate:
+      example:
+        status: true
+      properties:
+        status:
+          description: Initial status of the lamp (on/off)
+          title: status
+          type: boolean
+      required:
+      - status
+      title: LampCreate
+      type: object
+    LampUpdate:
+      example:
+        status: true
+      properties:
+        status:
+          description: New status of the lamp (on/off)
+          title: status
+          type: boolean
+      required:
+      - status
+      title: LampUpdate
+      type: object
