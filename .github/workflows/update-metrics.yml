@@ -122,7 +122,7 @@ jobs:
 
           # Exclude test files if not_match is set
           if [ -n "${{ matrix.not_match }}" ]; then
-            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match '(/tests/|/test[^/]*\.[^/]+$|/[^/]*test\.[^/]+$)' --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
             echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
