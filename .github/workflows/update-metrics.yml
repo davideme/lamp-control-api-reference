@@ -118,7 +118,7 @@ jobs:
       - name: Upload SCC JSON results
         uses: actions/upload-artifact@v4
         with:
-          name: scc-json
+          name: scc-json-${{ matrix.folder }}
           path: docs/loc/scc-*.json
 
   commit-scc-results:
@@ -129,10 +129,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download SCC JSON results
+      - name: Download all SCC JSON results
         uses: actions/download-artifact@v4
         with:
-          name: scc-json
           path: docs/loc
       - name: Fix permissions for SCC output
         run: |
