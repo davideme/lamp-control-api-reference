@@ -97,9 +97,9 @@ jobs:
       matrix:
         include:
           - folder: typescript
-            not_match: '.*\\.test\\.ts$|/tests/'
+            not_match: '\\.test\\.ts$|/tests/'
           - folder: python
-            not_match: '^test_.*|/tests/'
+            not_match: '/tests/|/test_.*\\.py$'
           - folder: java
             not_match: ''
           - folder: php
