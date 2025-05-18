@@ -42,9 +42,7 @@ class TestDefaultApiImpl:
         """Test creating a new lamp."""
         # Arrange
         lamp_create = LampCreate(status=True)
-        expected_lamp = Lamp(
-            id="generated-uuid", status=True
-        )
+        expected_lamp = Lamp(id="generated-uuid", status=True)
         mock_lamp_repository.create.return_value = expected_lamp
 
         # Act
@@ -99,9 +97,7 @@ class TestDefaultApiImpl:
         """Test updating an existing lamp."""
         # Arrange
         lamp_update = LampUpdate(status=True)
-        updated_lamp = Lamp(
-            id=sample_lamp.id, status=True
-        )
+        updated_lamp = Lamp(id=sample_lamp.id, status=True)
         mock_lamp_repository.update.return_value = updated_lamp
 
         # Act
