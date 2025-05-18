@@ -115,6 +115,11 @@ jobs:
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Fix permissions for SCC output
+        run: |
+          sudo chown -R $(id -u):$(id -g) docs/loc
+          sudo chmod -R u+rw docs/loc  
+
       - name: Upload SCC JSON results
         uses: actions/upload-artifact@v4
         with:
@@ -133,10 +138,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: docs/loc
-      - name: Fix permissions for SCC output
-        run: |
-          sudo chown -R $(id -u):$(id -g) docs/loc || true
-          sudo chmod -R u+rw docs/loc || true
+
       - name: Commit SCC JSON results
         run: |
           git config --global user.name 'github-actions[bot]'
