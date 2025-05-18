@@ -103,4 +103,6 @@ jobs:
         run: |
           output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }}" >> $GITHUB_STEP_SUMMARY
-          echo "$output" >> $GITHUB_STEP_SUMMARY 
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY 
