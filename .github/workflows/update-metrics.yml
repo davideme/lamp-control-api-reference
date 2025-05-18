@@ -101,7 +101,7 @@ jobs:
       - name: Count lines in src/${{ matrix.folder }}
         id: scc
         run: |
-          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi tabular=stdout,json=/pwd/tools/scc-${{ matrix.folder }}.json /pwd/src/${{ matrix.folder }})
+          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output" >> $GITHUB_STEP_SUMMARY
