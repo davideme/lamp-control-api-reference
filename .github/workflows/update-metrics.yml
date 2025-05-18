@@ -90,3 +90,61 @@ jobs:
         git add docs/COMPARISON.md
         git commit -m "docs: update code metrics in COMPARISON.md" || exit 0
         git push 
+
+  scc-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: [typescript, python, java, php, ruby, go]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Count lines in src/${{ matrix.folder }}
+        id: scc
+        run: |
+          # Regular analysis (all files)
+          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
+          echo "## SCC Output for ${{ matrix.folder }} (all files)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Fix permissions for SCC output
+        run: |
+          sudo chown -R $(id -u):$(id -g) docs/loc
+          sudo chmod -R u+rw docs/loc  
+
+      - name: Upload SCC JSON results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scc-json-${{ matrix.folder }}
+          path: |
+            docs/loc/scc-${{ matrix.folder }}.json
+            docs/loc/scc-${{ matrix.folder }}-no-tests.json
+
+  commit-scc-results:
+    runs-on: ubuntu-latest
+    needs: scc-matrix
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download all SCC JSON results
+        uses: actions/download-artifact@v4
+        with:
+          path: docs/loc
+
+      - name: Commit SCC JSON results
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/loc/**/*.json || true
+          git commit -m "chore: update SCC code metrics JSON files" || exit 0
+          git push
