@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        folder: [go, java, php, python, ruby, types, typescript]
+        folder: [typescript, python, java, php, ruby, go]
     steps:
       - uses: actions/checkout@v4
       - name: Count lines in src/${{ matrix.folder }}
