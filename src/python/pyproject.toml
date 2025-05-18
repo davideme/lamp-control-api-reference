@@ -99,5 +99,5 @@ skip_gitignore = true
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-ra -q --cov=src --cov-report=term-missing"
-testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
 asyncio_mode = "auto"

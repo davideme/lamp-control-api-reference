@@ -2,8 +2,8 @@
 
 import pytest
 
-from openapi_server.models.lamp import Lamp
-from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.repositories.lamp_repository import LampRepository, LampNotFoundError
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def repository():
 @pytest.fixture
 def sample_lamp():
     """Fixture that provides a sample lamp for testing."""
-    return Lamp(id="test-lamp-1", name="Test Lamp", is_on=False, brightness=50, color="white")
+    return Lamp(id="test-lamp-1", status=True)
 
 
 class TestLampRepository:
@@ -54,7 +54,7 @@ class TestLampRepository:
         # Arrange
         repository.create(sample_lamp)
         another_lamp = Lamp(
-            id="test-lamp-2", name="Another Lamp", is_on=True, brightness=75, color="red"
+            id="test-lamp-2", status=True
         )
         repository.create(another_lamp)
 
@@ -71,7 +71,7 @@ class TestLampRepository:
         # Arrange
         repository.create(sample_lamp)
         updated_lamp = Lamp(
-            id=sample_lamp.id, name="Updated Lamp", is_on=True, brightness=100, color="blue"
+            id=sample_lamp.id, status=True
         )
 
         # Act
