@@ -95,14 +95,36 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        folder: [typescript, python, java, php, ruby, go]
+        include:
+          - folder: typescript
+            not_match: '.*\\.test\\.ts$|/tests/'
+          - folder: python
+            not_match: '^test_.*|/tests/'
+          - folder: java
+            not_match: ''
+          - folder: php
+            not_match: ''
+          - folder: ruby
+            not_match: ''
+          - folder: go
+            not_match: ''
     steps:
       - uses: actions/checkout@v4
       - name: Count lines in src/${{ matrix.folder }}
         id: scc
         run: |
+          # Regular analysis (all files)
           output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
-          echo "## SCC Output for ${{ matrix.folder }}" >> $GITHUB_STEP_SUMMARY
+          echo "## SCC Output for ${{ matrix.folder }} (all files)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY 
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Exclude test files if not_match is set
+          if [ -n "${{ matrix.not_match }}" ]; then
+            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match '${{ matrix.not_match }}' --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+            echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi 

@@ -2,7 +2,7 @@
 export default {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    roots: ['<rootDir>/src', '<rootDir>/test'],
+    roots: ["<rootDir>/src/", "<rootDir>/tests/"],
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -21,7 +21,7 @@ export default {
             },
         ],
     },
-    testMatch: ['**/*.test.ts', '**/test/**/*.ts'],
+    testMatch: ['**/*.test.ts', '**/tests/**/*.ts'],
     collectCoverageFrom: [
         'src/**/*.ts',
         '!src/types/**/*.ts',
