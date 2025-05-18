@@ -96,14 +96,12 @@ jobs:
     strategy:
       matrix:
         folder: [go, java, php, python, ruby, types, typescript]
-    env:
-      SCC_IMAGE: ghcr.io/boyter/scc:sha256-c83befd2916ef860ae41ce592ed681804efaa6a8d0eb51da5237531229d66c51
     steps:
       - uses: actions/checkout@v4
       - name: Count lines in src/${{ matrix.folder }}
         id: scc
         run: |
-          output=$(docker run --rm -v "$PWD:/repo" $SCC_IMAGE /repo/src/${{ matrix.folder }})
+          output=$(docker run --rm -v "$PWD:/repo" ghcr.io/boyter/scc:v3.5.0 /repo/src/${{ matrix.folder }})
           echo "scc_output<<EOF" >> $GITHUB_OUTPUT
           echo "$output" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT 
