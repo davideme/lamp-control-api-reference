@@ -95,36 +95,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - folder: typescript
-            not_match: '(/tests/|/test[^/]*\.[^/]+$|/[^/]*test\.[^/]+$)'
-          - folder: python
-            not_match: '(/tests/|/test[^/]*\.[^/]+$|/[^/]*test\.[^/]+$)'
-          - folder: java
-            not_match: ''
-          - folder: php
-            not_match: ''
-          - folder: ruby
-            not_match: ''
-          - folder: go
-            not_match: ''
+        folder: [typescript, python, java, php, ruby, go]
+
     steps:
       - uses: actions/checkout@v4
       - name: Count lines in src/${{ matrix.folder }}
         id: scc
         run: |
           # Regular analysis (all files)
-          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
+          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }} (all files)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          # Exclude test files if not_match is set
-          if [ -n "${{ matrix.not_match }}" ]; then
-            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/tools/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
-            echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi 
+          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit SCC JSON results
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/loc/scc-*.json || true
+          git commit -m "chore: update SCC code metrics JSON files" || exit 0
+          git push
