@@ -83,7 +83,7 @@ jobs:
             app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-tests.json)
             total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}.json)
             test_lines=$((total_lines - app_lines))
-            if [[ "$app_lines" != "0" && "$app_lines" != "" ]]; then
+            if [[ "$app_lines" =~ ^[0-9]+$ && "$app_lines" -ne 0 ]]; then
               ratio=$(awk "BEGIN {printf \"%.2f\", $test_lines/$app_lines}")
             else
               ratio="N/A"
