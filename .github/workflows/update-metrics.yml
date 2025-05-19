@@ -154,11 +154,14 @@ jobs:
           echo "| Language   | App Lines | Test Lines |"
           echo "|------------|-----------|------------|"
 
-          for lang in typescript python java php ruby go; do
-            # Capitalize the language name for matching SCC output
-            lang_name=$(echo $lang | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
-            app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${lang}/scc-${lang}-no-tests.json)
-            total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${lang}/scc-${lang}.json)
+          # Define language display names and corresponding folder names
+          langs=("TypeScript:typescript" "Python:python" "Java:java" "PHP:php" "Ruby:ruby" "Go:go")
+
+          for entry in "${langs[@]}"; do
+            lang_name="${entry%%:*}"
+            folder="${entry##*:}"
+            app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-tests.json)
+            total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}.json)
             test_lines=$((total_lines - app_lines))
             echo "| $lang_name | $app_lines | $test_lines |"
           done
