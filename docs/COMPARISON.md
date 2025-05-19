@@ -2,32 +2,12 @@
 
 This document provides a comparison of the different language implementations in this repository.
 
-## Lines of Code
-
-| Language | REST API | GraphQL | gRPC | Total |
-|----------|----------|---------|------|-------|
-| TypeScript | TBD      | TBD     | TBD  | TBD   |
-| Python   | TBD      | TBD     | TBD  | TBD   |
-| Java     | TBD      | TBD     | TBD  | TBD   |
-| PHP      | TBD      | TBD     | TBD  | TBD   |
-| Ruby     | TBD      | TBD     | TBD  | TBD   |
-| Go       | TBD      | TBD     | TBD  | TBD   |
-
 ## Code Metrics
 
 | Language    | App Lines | Test Lines | Test/App Ratio | Coverage % |
 |------------|-----------|------------|----------------|------------|
 | TypeScript | 827 | 511 | 0.55 | 85 |
-## Test Coverage
 
-| Language | Coverage % |
-|----------|------------|
-| TypeScript | TBD        |
-| Python   | TBD        |
-| Java     | TBD        |
-| PHP      | TBD        |
-| Ruby     | TBD        |
-| Go       | TBD        |
 
 ## API Interface Comparison
 
