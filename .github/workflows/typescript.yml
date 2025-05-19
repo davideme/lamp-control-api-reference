@@ -12,6 +12,9 @@ on:
       - 'src/typescript/**'
       - '.github/workflows/typescript.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -90,6 +93,6 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add coverage/coverage-summary.json || true
+        git add -f coverage/coverage-summary.json || true
         git commit -m "chore: update coverage summary" || exit 0
         git push
