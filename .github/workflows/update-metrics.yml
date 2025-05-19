@@ -155,8 +155,10 @@ jobs:
           echo "|------------|-----------|------------|"
 
           for lang in typescript python java php ruby go; do
-            app_lines=$(jq '[.[].Code]' docs/loc/scc-json-${lang}/scc-${lang}-no-tests.json | jq 'add')
-            total_lines=$(jq '[.[].Code]' docs/loc/scc-json-${lang}/scc-${lang}.json | jq 'add')
+            # Capitalize the language name for matching SCC output
+            lang_name=$(echo $lang | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+            app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${lang}/scc-${lang}-no-tests.json)
+            total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${lang}/scc-${lang}.json)
             test_lines=$((total_lines - app_lines))
-            echo "| $(echo $lang | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') | $app_lines | $test_lines |"
+            echo "| $lang_name | $app_lines | $test_lines |"
           done
