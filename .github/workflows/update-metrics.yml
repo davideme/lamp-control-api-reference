@@ -155,8 +155,8 @@ jobs:
           echo "|------------|-----------|------------|"
 
           for lang in typescript python java php ruby go; do
-            app_lines=$(jq '[.[].Code]' docs/loc/scc-${lang}-no-tests.json | jq 'add')
-            total_lines=$(jq '[.[].Code]' docs/loc/scc-${lang}.json | jq 'add')
+            app_lines=$(jq '[.[].Code]' docs/loc/scc-json-${lang}/scc-${lang}-no-tests.json | jq 'add')
+            total_lines=$(jq '[.[].Code]' docs/loc/scc-json-${lang}/scc-${lang}.json | jq 'add')
             test_lines=$((total_lines - app_lines))
             echo "| $(echo $lang | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') | $app_lines | $test_lines |"
           done
