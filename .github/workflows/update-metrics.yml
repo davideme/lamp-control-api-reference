@@ -11,86 +11,6 @@ permissions:
   contents: write
 
 jobs:
-  update-metrics:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: tools/package-lock.json
-
-    - name: Install dependencies
-      run: |
-        cd tools
-        npm ci
-        cd ../src/typescript
-        npm ci
-
-    - name: Run TypeScript tests with coverage
-      run: |
-        cd src/typescript
-        npm run test:coverage
-        COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
-
-    - name: Run TypeScript metrics analysis
-      run: |
-        cd tools
-        
-        # Run the metrics analysis
-        node typescript-metrics.js
-        
-        # Get the latest metrics file
-        METRICS_FILE=$(ls -t metrics_reports/typescript/metrics-*.json | head -n1)
-        
-        if [ ! -f "$METRICS_FILE" ]; then
-          echo "No metrics file found"
-          exit 1
-        fi
-        
-        # Extract metrics from the JSON file
-        APP_LINES=$(jq -r '.summary.application.lines.total // 0' "$METRICS_FILE")
-        TEST_LINES=$(jq -r '.summary.tests.lines.total // 0' "$METRICS_FILE")
-        TEST_RATIO=$(jq -r '.summary.ratios.testToCode // "N/A"' "$METRICS_FILE")
-        
-        # Get coverage from the previous step
-        COVERAGE=$(cat ../src/typescript/coverage/coverage-summary.json | jq -r '.total.lines.pct')
-        
-        # Create the metrics table
-        {
-          echo "| Language    | App Lines | Test Lines | Test/App Ratio | Coverage % |"
-          echo "|------------|-----------|------------|----------------|------------|"
-          echo "| TypeScript | $APP_LINES | $TEST_LINES | $TEST_RATIO | $COVERAGE |"
-        } > metrics.md
-
-    - name: Update COMPARISON.md
-      run: |
-        # Read the current metrics
-        METRICS=$(cat tools/metrics.md)
-        
-        # Update the metrics section in COMPARISON.md
-        awk -v metrics="$METRICS" '
-        BEGIN { p=1 }
-        /^## Code Metrics$/ { p=0; print; print ""; print metrics; next }
-        /^##[^#]/ { p=1 }
-        p { print }
-        ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
-        mv docs/COMPARISON.md.tmp docs/COMPARISON.md
-
-    - name: Commit changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add docs/COMPARISON.md
-        git commit -m "docs: update code metrics in COMPARISON.md" || exit 0
-        git push 
-
   scc-matrix:
     runs-on: ubuntu-latest
     strategy:
@@ -151,8 +71,8 @@ jobs:
 
       - name: Generate SCC table
         run: |
-          echo "| Language   | App Lines | Test Lines | Test/App Ratio |"
-          echo "|------------|-----------|------------|---------------|"
+          echo "| Language   | App Lines | Test Lines | Test/App Ratio |" > tools/metrics.md
+          echo "|------------|-----------|------------|---------------|" >> tools/metrics.md
 
           # Define language display names and corresponding folder names
           langs=("TypeScript:typescript" "Python:python" "Java:java" "PHP:php" "Ruby:ruby" "Go:go")
@@ -168,5 +88,27 @@ jobs:
             else
               ratio="N/A"
             fi
-            echo "| $lang_name | $app_lines | $test_lines | $ratio |"
+            echo "| $lang_name | $app_lines | $test_lines | $ratio |" >> tools/metrics.md
           done
+
+      - name: Update COMPARISON.md
+        run: |
+          # Read the current metrics
+          METRICS=$(cat tools/metrics.md)
+          
+          # Update the metrics section in COMPARISON.md
+          awk -v metrics="$METRICS" '
+          BEGIN { p=1 }
+          /^## Code Metrics$/ { p=0; print; print ""; print metrics; next }
+          /^##[^#]/ { p=1 }
+          p { print }
+          ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
+          mv docs/COMPARISON.md.tmp docs/COMPARISON.md
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/COMPARISON.md
+          git commit -m "docs: update code metrics in COMPARISON.md" || exit 0
+          git push 
