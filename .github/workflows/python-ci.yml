@@ -123,6 +123,10 @@ jobs:
       run: |
         poetry run pytest --cov=src --cov-report=json:coverage/coverage.json
 
+    - name: Force add coverage summary
+      if: github.ref == 'refs/heads/main'
+      run: git add -f coverage/coverage.json
+
     - name: Create Pull Request for coverage summary
       if: github.ref == 'refs/heads/main'
       uses: peter-evans/create-pull-request@v6

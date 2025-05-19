@@ -88,6 +88,10 @@ jobs:
           exit 1
         fi
 
+    - name: Force add coverage summary
+      if: github.ref == 'refs/heads/main'
+      run: git add -f coverage/coverage-summary.json
+
     - name: Create Pull Request for coverage summary
       if: github.ref == 'refs/heads/main'
       uses: peter-evans/create-pull-request@v6
