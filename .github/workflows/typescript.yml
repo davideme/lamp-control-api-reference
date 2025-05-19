@@ -84,3 +84,12 @@ jobs:
           echo "Test coverage is below 80% (Current: $COVERAGE%)"
           exit 1
         fi
+
+    - name: Commit coverage summary
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add coverage/coverage-summary.json || true
+        git commit -m "chore: update coverage summary" || exit 0
+        git push
