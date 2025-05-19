@@ -128,7 +128,7 @@ jobs:
             docs/loc/scc-${{ matrix.folder }}.json
             docs/loc/scc-${{ matrix.folder }}-no-tests.json
 
-  commit-scc-results:
+  scc-results:
     runs-on: ubuntu-latest
     needs: scc-matrix
     if: always()
@@ -148,3 +148,18 @@ jobs:
           git add docs/loc/**/*.json || true
           git commit -m "chore: update SCC code metrics JSON files" || exit 0
           git push
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate SCC table
+        run: |
+          echo "| Language   | App Lines | Test Lines |"
+          echo "|------------|-----------|------------|"
+
+          for lang in typescript python java php ruby go; do
+            app_lines=$(jq '[.[].Code]' docs/loc/scc-${lang}-no-tests.json | jq 'add')
+            total_lines=$(jq '[.[].Code]' docs/loc/scc-${lang}.json | jq 'add')
+            test_lines=$((total_lines - app_lines))
+            echo "| $(echo $lang | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') | $app_lines | $test_lines |"
+          done
