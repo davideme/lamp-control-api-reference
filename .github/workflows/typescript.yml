@@ -12,6 +12,9 @@ on:
       - 'src/typescript/**'
       - '.github/workflows/typescript.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

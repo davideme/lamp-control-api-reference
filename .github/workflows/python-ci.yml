@@ -12,6 +12,9 @@ on:
       - 'src/python/**'
       - '.github/workflows/python-ci.yml'
 
+permissions:
+  contents: write
+
 jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
