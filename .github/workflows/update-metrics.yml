@@ -149,9 +149,6 @@ jobs:
           git commit -m "chore: update SCC code metrics JSON files" || exit 0
           git push
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Generate SCC table
         run: |
           echo "| Language   | App Lines | Test Lines |"
