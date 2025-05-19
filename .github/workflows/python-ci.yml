@@ -118,4 +118,15 @@ jobs:
         MYSQL_DATABASE: lamp_test
         MONGODB_URI: mongodb://localhost:27017/lamp_test
       run: |
-        poetry run pytest --cov=lamp_control --cov-report=xml
+        poetry run pytest --cov=src --cov-report=json:coverage/coverage.json
+
+    - name: Create Pull Request for coverage summary
+      if: github.ref == 'refs/heads/main'
+      uses: peter-evans/create-pull-request@v6
+      with:
+        commit-message: "chore: update coverage summary"
+        title: "chore: update coverage summary"
+        body: "Automated PR to update coverage/coverage.json after test run."
+        branch: "ci/python-coverage-update"
+        add-paths: |
+          coverage/coverage.json
