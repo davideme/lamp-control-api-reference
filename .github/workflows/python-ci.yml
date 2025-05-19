@@ -135,5 +135,3 @@ jobs:
         title: "chore: update coverage summary"
         body: "Automated PR to update coverage/coverage.json after test run."
         branch: "ci/python-coverage-update"
-        add-paths: |
-          coverage/coverage.json

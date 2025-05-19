@@ -100,5 +100,3 @@ jobs:
         title: "chore: update coverage summary"
         body: "Automated PR to update coverage/coverage-summary.json after test run."
         branch: "ci/typescript-coverage-update"
-        add-paths: |
-          coverage/coverage-summary.json
