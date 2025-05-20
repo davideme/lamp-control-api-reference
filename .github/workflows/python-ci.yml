@@ -11,6 +11,7 @@ on:
     paths:
       - 'src/python/**'
       - '.github/workflows/python-ci.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
