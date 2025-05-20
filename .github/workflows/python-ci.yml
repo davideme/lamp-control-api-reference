@@ -13,10 +13,6 @@ on:
       - '.github/workflows/python-ci.yml'
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
@@ -24,6 +20,8 @@ jobs:
     permissions:
       checks: write
       issues: write
+      contents: write
+      pull-requests: write    
     defaults:
       run:
         working-directory: src/python
