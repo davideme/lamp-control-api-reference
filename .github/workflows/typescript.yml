@@ -23,6 +23,8 @@ jobs:
     permissions:
       checks: write
       issues: write
+      contents: write
+      pull-requests: write
     defaults:
       run:
         working-directory: src/typescript
