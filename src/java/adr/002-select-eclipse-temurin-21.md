@@ -46,5 +46,3 @@ The project will use **Eclipse Temurin 21** as the default Java runtime implemen
 
 **Note:**
 For components requiring optimized startup or minimal runtime footprint (e.g., serverless functions or CLI utilities), the team will assess **GraalVM native image** as an exception, with a clear evaluation of compatibility and build pipeline complexity. For all other services, **Eclipse Temurin 21** remains the standard.
-
-Let me know if you want a tabular comparison, further elaboration, or adaptation for a specific audience.

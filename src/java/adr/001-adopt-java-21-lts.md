@@ -40,7 +40,3 @@ The project will use **Java 21 (LTS)** as the standard runtime and language vers
 * [Oracle Java SE Support Roadmap](https://www.oracle.com/java/technologies/java-se-support-roadmap.html)
 * [Java 21 Release Notes](https://openjdk.org/projects/jdk/21/)
 * [Java Release Cadence](https://openjdk.org/projects/jdk/)
-
----
-
-Let me know if you need additional details or organization-specific requirements included.
