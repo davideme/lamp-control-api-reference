@@ -69,10 +69,31 @@ jobs:
           git commit -m "chore: update SCC code metrics JSON files" || exit 0
           git push
 
+      - name: Extract code coverage percentages
+        id: coverage
+        run: |
+          # TypeScript coverage
+          if [ -f src/typescript/coverage/coverage-summary.json ]; then
+            TS_COVERAGE=$(jq '.total.lines.pct' src/typescript/coverage/coverage-summary.json)
+          else
+            TS_COVERAGE="N/A"
+          fi
+          echo "TypeScript coverage: $TS_COVERAGE"
+          echo "TS_COVERAGE=$TS_COVERAGE" >> $GITHUB_ENV
+
+          # Python coverage
+          if [ -f src/python/coverage/coverage.json ]; then
+            PY_COVERAGE=$(jq '.totals.percent_covered | floor' src/python/coverage/coverage.json)
+          else
+            PY_COVERAGE="N/A"
+          fi
+          echo "Python coverage: $PY_COVERAGE"
+          echo "PY_COVERAGE=$PY_COVERAGE" >> $GITHUB_ENV
+
       - name: Generate SCC table
         run: |
-          echo "| Language   | App Lines | Test Lines | Test/App Ratio |" > tools/metrics.md
-          echo "|------------|-----------|------------|---------------|" >> tools/metrics.md
+          echo "| Language   | App Lines | Test Lines | Test/App Ratio | Coverage (%) |" > tools/metrics.md
+          echo "|------------|-----------|------------|---------------|--------------|" >> tools/metrics.md
 
           # Define language display names and corresponding folder names
           langs=("TypeScript:typescript" "Python:python" "Java:java" "PHP:php" "Ruby:ruby" "Go:go")
@@ -88,7 +109,17 @@ jobs:
             else
               ratio="N/A"
             fi
-            echo "| $lang_name | $app_lines | $test_lines | $ratio |" >> tools/metrics.md
+
+            # Add coverage
+            if [[ "$lang_name" == "TypeScript" ]]; then
+              coverage="${TS_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "Python" ]]; then
+              coverage="${PY_COVERAGE:-N/A}"
+            else
+              coverage="N/A"
+            fi
+
+            echo "| $lang_name | $app_lines | $test_lines | $ratio | $coverage |" >> tools/metrics.md
           done
 
       - name: Update COMPARISON.md
