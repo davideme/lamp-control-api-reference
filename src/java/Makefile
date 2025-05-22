@@ -1,3 +1,5 @@
+# Makefile for generating and validating Java Spring server stubs from OpenAPI spec
+
 # Variables
 OPENAPI_GENERATOR_VERSION := v7.13.0
 OPENAPI_SPEC := docs/api/openapi.yaml
@@ -9,15 +11,16 @@ DOCKER_RUN := docker run --rm \
 	-v ${PWD}/../..:/local \
 	openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION}
 
-.PHONY: generate clean validate
+.PHONY: generate clean validate help
 
-# Generate FastAPI server stub
+# Generate Spring server stub
 generate:
-	@echo "Generating FastAPI server stub..."
+	@echo "Generating Spring server stub..."
 	${DOCKER_RUN} generate \
 		-i /local/${OPENAPI_SPEC} \
 		-g ${GENERATOR_NAME} \
-		-o /local/${OUTPUT_DIR}
+		-o /local/${OUTPUT_DIR} \
+		--additional-properties=async=true,useSpringBoot3=true,useOptional=true,hideGenerationTimestamp=true,performBeanValidation=true
 
 # Clean generated files
 clean:
@@ -32,7 +35,7 @@ validate:
 # Help target
 help:
 	@echo "Available targets:"
-	@echo "  generate  - Generate FastAPI server stub"
+	@echo "  generate  - Generate Spring server stub"
 	@echo "  clean    - Remove generated files"
 	@echo "  validate - Validate OpenAPI specification"
 	@echo "  help     - Show this help message" 
