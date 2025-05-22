@@ -23,13 +23,13 @@ jobs:
         id: scc
         run: |
           # Regular analysis (all files)
-          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
+          output=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }} (all files)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness --not-match 'tests' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
