@@ -8,7 +8,7 @@ This document provides a comparison of the different language implementations in
 |------------|-----------|------------|---------------|--------------|
 | TypeScript | 365 | 343 | 0.94 | 85 |
 | Python | 346 | 215 | 0.62 | 86 |
-| Java | 549 | 0 | 0.00 | N/A |
+| Java | 536 | 0 | 0.00 | N/A |
 | PHP | null | 0 | N/A | N/A |
 | Ruby | null | 0 | N/A | N/A |
 | Go | null | 0 | N/A | N/A |
