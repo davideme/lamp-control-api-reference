@@ -12,7 +12,8 @@ public class RFC3339DateFormat extends DateFormat {
   private static final long serialVersionUID = 1L;
   private static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
-  private final StdDateFormat fmt = new StdDateFormat().withTimeZone(TIMEZONE_Z).withColonInTimeZone(true);
+  private final StdDateFormat fmt =
+      new StdDateFormat().withTimeZone(TIMEZONE_Z).withColonInTimeZone(true);
 
   public RFC3339DateFormat() {
     super();
@@ -25,7 +26,8 @@ public class RFC3339DateFormat extends DateFormat {
   }
 
   @Override
-  public StringBuffer format(final Date date, final StringBuffer toAppendTo, final FieldPosition fieldPosition) {
+  public StringBuffer format(
+      final Date date, final StringBuffer toAppendTo, final FieldPosition fieldPosition) {
     return fmt.format(date, toAppendTo, fieldPosition);
   }
 

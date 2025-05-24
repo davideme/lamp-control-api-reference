@@ -9,8 +9,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 
 @SpringBootApplication(nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
-@ComponentScan(basePackages = { "org.openapitools", "org.openapitools.api",
-    "org.openapitools.configuration" }, nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
+@ComponentScan(
+    basePackages = {"org.openapitools", "org.openapitools.api", "org.openapitools.configuration"},
+    nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
 public class OpenApiGeneratorApplication {
 
   public static void main(final String[] args) {
