@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class SpringDocConfiguration {
 
   @Bean(name = "org.openapitools.configuration.SpringDocConfiguration.apiInfo")
-  OpenAPI apiInfo() {
+  public OpenAPI apiInfo() {
     return new OpenAPI()
         .info(
             new Info()

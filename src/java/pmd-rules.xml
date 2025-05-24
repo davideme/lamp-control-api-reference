@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Custom PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 
+                             https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    
+    <description>Custom PMD ruleset for the project</description>
+    
+    <!-- Include all bestpractices rules -->
+    <rule ref="category/java/bestpractices.xml" />
+    
+    <!-- Include all codestyle rules except AtLeastOneConstructor -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor" />
+    </rule>
+    
+    <!-- Include all design rules -->
+    <rule ref="category/java/design.xml" />
+    
+    <!-- Include all errorprone rules -->
+    <rule ref="category/java/errorprone.xml" />
+    
+    <!-- Include all performance rules -->
+    <rule ref="category/java/performance.xml" />
+    
+    <!-- Include all security rules -->
+    <rule ref="category/java/security.xml" />
+    
+</ruleset>
