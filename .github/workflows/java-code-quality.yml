@@ -68,24 +68,3 @@ jobs:
       working-directory: ./src/java
       run: mvn checkstyle:checkstyle
       if: always()
-    
-    - name: Upload SpotBugs results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: spotbugs-results
-        path: src/java/target/spotbugsXml.xml
-    
-    - name: Upload PMD results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: pmd-results
-        path: src/java/target/pmd.xml
-    
-    - name: Upload Checkstyle results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: checkstyle-results
-        path: src/java/target/checkstyle-result.xml
