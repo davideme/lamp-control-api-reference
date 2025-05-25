@@ -35,4 +35,11 @@
         <Class name="~.*Application" />
     </Match>
 
+    <!-- Exclude EI_EXPOSE_REP2 for Spring dependency injection in controllers -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="~.*\.controller\..*" />
+        <Method name="&lt;init&gt;" />
+    </Match>
+
 </FindBugsFilter>
