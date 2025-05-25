@@ -11,10 +11,8 @@ import org.openapitools.repository.LampRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * In-memory implementation of the LampRepository. This implementation uses a
- * ConcurrentHashMap to
- * store lamp entities in memory, providing thread-safe operations suitable for
- * testing and
+ * In-memory implementation of the LampRepository. This implementation uses a ConcurrentHashMap to
+ * store lamp entities in memory, providing thread-safe operations suitable for testing and
  * development environments.
  */
 @Repository

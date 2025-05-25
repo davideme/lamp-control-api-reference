@@ -4,8 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Entity class representing a Lamp in the system. This is a simple POJO without
- * persistence
+ * Entity class representing a Lamp in the system. This is a simple POJO without persistence
  * annotations, suitable for in-memory storage.
  */
 public class LampEntity {
@@ -13,8 +12,7 @@ public class LampEntity {
   private UUID id;
   private Boolean status;
 
-  public LampEntity() {
-  }
+  public LampEntity() {}
 
   public LampEntity(final Boolean status) {
     this.status = status;

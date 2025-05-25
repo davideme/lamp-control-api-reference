@@ -6,8 +6,7 @@ import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 
 /**
- * In-memory repository interface for Lamp entities. This interface defines the
- * contract for lamp
+ * In-memory repository interface for Lamp entities. This interface defines the contract for lamp
  * data operations without being tied to any specific persistence mechanism.
  */
 public interface LampRepository {

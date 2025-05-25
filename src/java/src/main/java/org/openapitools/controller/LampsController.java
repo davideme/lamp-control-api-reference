@@ -83,13 +83,15 @@ public class LampsController implements LampsApi {
     return CompletableFuture.supplyAsync(
         () -> {
           final List<LampEntity> entities = lampRepository.findAll();
-          final List<Lamp> lamps = entities.stream().map(lampMapper::toModel).collect(Collectors.toList());
+          final List<Lamp> lamps =
+              entities.stream().map(lampMapper::toModel).collect(Collectors.toList());
           return ResponseEntity.ok().body(lamps);
         });
   }
 
   @Override
-  public CompletableFuture<ResponseEntity<Lamp>> updateLamp(final String lampId, final LampUpdate lampUpdate) {
+  public CompletableFuture<ResponseEntity<Lamp>> updateLamp(
+      final String lampId, final LampUpdate lampUpdate) {
     return CompletableFuture.supplyAsync(
         () -> {
           try {
