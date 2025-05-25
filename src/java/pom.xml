@@ -303,20 +303,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>report-json</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/site/jacoco-json</outputDirectory>
-                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                            <formats>
-                                <format>XML</format>
-                            </formats>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>check</id>
                         <goals>
                             <goal>check</goal>

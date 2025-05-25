@@ -24,6 +24,7 @@ hs_err_pid*
 replay_pid*
 
 target/
+!target/site/jacoco/jacoco.xml
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

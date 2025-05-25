@@ -90,6 +90,27 @@ jobs:
           echo "Python coverage: $PY_COVERAGE"
           echo "PY_COVERAGE=$PY_COVERAGE" >> $GITHUB_ENV
 
+          # Java coverage
+          if [ -f src/java/target/site/jacoco/jacoco.xml ]; then
+            # Extract line coverage from JaCoCo XML (final counters for lines)
+            JAVA_MISSED=$(xmllint --xpath "//report/counter[@type='LINE']/@missed" src/java/target/site/jacoco/jacoco.xml | grep -o '[0-9]*')
+            JAVA_COVERED=$(xmllint --xpath "//report/counter[@type='LINE']/@covered" src/java/target/site/jacoco/jacoco.xml | grep -o '[0-9]*')
+            if [[ "$JAVA_MISSED" =~ ^[0-9]+$ && "$JAVA_COVERED" =~ ^[0-9]+$ ]]; then
+              JAVA_TOTAL=$((JAVA_MISSED + JAVA_COVERED))
+              if [ "$JAVA_TOTAL" -gt 0 ]; then
+                JAVA_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($JAVA_COVERED/$JAVA_TOTAL)*100}")
+              else
+                JAVA_COVERAGE="0"
+              fi
+            else
+              JAVA_COVERAGE="N/A"
+            fi
+          else
+            JAVA_COVERAGE="N/A"
+          fi
+          echo "Java coverage: $JAVA_COVERAGE"
+          echo "JAVA_COVERAGE=$JAVA_COVERAGE" >> $GITHUB_ENV
+
       - name: Generate SCC table
         run: |
           echo "| Language   | App Lines | Test Lines | Test/App Ratio | Coverage (%) |" > tools/metrics.md
@@ -115,6 +136,8 @@ jobs:
               coverage="${TS_COVERAGE:-N/A}"
             elif [[ "$lang_name" == "Python" ]]; then
               coverage="${PY_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "Java" ]]; then
+              coverage="${JAVA_COVERAGE:-N/A}"
             else
               coverage="N/A"
             fi
