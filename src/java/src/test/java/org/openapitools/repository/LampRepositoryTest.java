@@ -174,4 +174,73 @@ class LampRepositoryTest {
     // Then
     assertThat(lampRepository.count()).isEqualTo(2);
   }
+
+  @Test
+  void getAllIds_ShouldReturnAllLampIds() {
+    // Given
+    InMemoryLampRepository inMemoryRepo = (InMemoryLampRepository) lampRepository;
+    LampEntity lamp1 = new LampEntity(true);
+    LampEntity lamp2 = new LampEntity(false);
+    LampEntity savedLamp1 = lampRepository.save(lamp1);
+    LampEntity savedLamp2 = lampRepository.save(lamp2);
+
+    // When
+    java.util.Set<UUID> ids = inMemoryRepo.getAllIds();
+
+    // Then
+    assertThat(ids).hasSize(2);
+    assertThat(ids).containsExactlyInAnyOrder(savedLamp1.getId(), savedLamp2.getId());
+  }
+
+  @Test
+  void getAllIds_WithEmptyRepository_ShouldReturnEmptySet() {
+    // Given
+    InMemoryLampRepository inMemoryRepo = (InMemoryLampRepository) lampRepository;
+
+    // When
+    java.util.Set<UUID> ids = inMemoryRepo.getAllIds();
+
+    // Then
+    assertThat(ids).isEmpty();
+  }
+
+  @Test
+  void isEmpty_WithEmptyRepository_ShouldReturnTrue() {
+    // Given
+    InMemoryLampRepository inMemoryRepo = (InMemoryLampRepository) lampRepository;
+
+    // When
+    boolean result = inMemoryRepo.isEmpty();
+
+    // Then
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  void isEmpty_WithLamps_ShouldReturnFalse() {
+    // Given
+    InMemoryLampRepository inMemoryRepo = (InMemoryLampRepository) lampRepository;
+    lampRepository.save(new LampEntity(true));
+
+    // When
+    boolean result = inMemoryRepo.isEmpty();
+
+    // Then
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void isEmpty_AfterClearingRepository_ShouldReturnTrue() {
+    // Given
+    InMemoryLampRepository inMemoryRepo = (InMemoryLampRepository) lampRepository;
+    lampRepository.save(new LampEntity(true));
+    lampRepository.save(new LampEntity(false));
+
+    // When
+    lampRepository.deleteAll();
+    boolean result = inMemoryRepo.isEmpty();
+
+    // Then
+    assertThat(result).isTrue();
+  }
 }
