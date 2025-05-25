@@ -91,10 +91,11 @@ class RFC3339DateFormatTest {
     // Then
     assertThat(newFormat).isNotNull();
     assertThat(newFormat.getCalendar()).isNotNull();
-    // The format might use GMT or UTC, both are equivalent for our purposes
+    // The format might use GMT, UTC, or Etc/UTC, all are equivalent for our
+    // purposes
     final TimeZone timeZone = newFormat.getTimeZone();
-    assertThat(timeZone.getID()).isIn("UTC", "GMT");
-    assertThat(timeZone.getRawOffset()).isZero(); // Both UTC and GMT have zero offset
+    assertThat(timeZone.getID()).isIn("UTC", "GMT", "Etc/UTC");
+    assertThat(timeZone.getRawOffset()).isZero(); // All these timezones have zero offset
   }
 
   @Test
