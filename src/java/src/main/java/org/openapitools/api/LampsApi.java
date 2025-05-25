@@ -48,31 +48,22 @@ public interface LampsApi {
     /**
      * POST /lamps : Create a new lamp
      *
-     * @param lampCreate  (required)
+     * @param lampCreate (required)
      * @return Lamp created successfully (status code 201)
      */
-    @Operation(
-        operationId = "createLamp",
-        summary = "Create a new lamp",
-        responses = {
+    @Operation(operationId = "createLamp", summary = "Create a new lamp", responses = {
             @ApiResponse(responseCode = "201", description = "Lamp created successfully", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
             })
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.POST,
-        value = "/lamps",
-        produces = { "application/json" },
-        consumes = { "application/json" }
-    )
-    
+    })
+    @RequestMapping(method = RequestMethod.POST, value = "/lamps", produces = { "application/json" }, consumes = {
+            "application/json" })
+
     default CompletableFuture<ResponseEntity<Lamp>> createLamp(
-        @Parameter(name = "LampCreate", description = "", required = true) @Valid @RequestBody LampCreate lampCreate
-    ) {
-        return CompletableFuture.supplyAsync(()-> {
+            @Parameter(name = "LampCreate", description = "", required = true) @Valid @RequestBody LampCreate lampCreate) {
+        return CompletableFuture.supplyAsync(() -> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                         String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
@@ -84,65 +75,46 @@ public interface LampsApi {
         }, Runnable::run);
 
     }
-
 
     /**
      * DELETE /lamps/{lampId} : Delete a lamp
      *
-     * @param lampId  (required)
+     * @param lampId (required)
      * @return Lamp deleted successfully (status code 204)
      *         or Lamp not found (status code 404)
      */
-    @Operation(
-        operationId = "deleteLamp",
-        summary = "Delete a lamp",
-        responses = {
+    @Operation(operationId = "deleteLamp", summary = "Delete a lamp", responses = {
             @ApiResponse(responseCode = "204", description = "Lamp deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.DELETE,
-        value = "/lamps/{lampId}"
-    )
-    
+    })
+    @RequestMapping(method = RequestMethod.DELETE, value = "/lamps/{lampId}")
+
     default CompletableFuture<ResponseEntity<Void>> deleteLamp(
-        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId
-    ) {
+            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId) {
         return CompletableFuture.completedFuture(new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED));
 
     }
 
-
     /**
      * GET /lamps/{lampId} : Get a specific lamp
      *
-     * @param lampId  (required)
+     * @param lampId (required)
      * @return Lamp details (status code 200)
      *         or Lamp not found (status code 404)
      */
-    @Operation(
-        operationId = "getLamp",
-        summary = "Get a specific lamp",
-        responses = {
+    @Operation(operationId = "getLamp", summary = "Get a specific lamp", responses = {
             @ApiResponse(responseCode = "200", description = "Lamp details", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
             }),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/lamps/{lampId}",
-        produces = { "application/json" }
-    )
-    
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/lamps/{lampId}", produces = { "application/json" })
+
     default CompletableFuture<ResponseEntity<Lamp>> getLamp(
-        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId
-    ) {
-        return CompletableFuture.supplyAsync(()-> {
+            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId) {
+        return CompletableFuture.supplyAsync(() -> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                         String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
@@ -154,34 +126,24 @@ public interface LampsApi {
         }, Runnable::run);
 
     }
-
 
     /**
      * GET /lamps : List all lamps
      *
      * @return A list of lamps (status code 200)
      */
-    @Operation(
-        operationId = "listLamps",
-        summary = "List all lamps",
-        responses = {
+    @Operation(operationId = "listLamps", summary = "List all lamps", responses = {
             @ApiResponse(responseCode = "200", description = "A list of lamps", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Lamp.class)))
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Lamp.class)))
             })
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/lamps",
-        produces = { "application/json" }
-    )
-    
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/lamps", produces = { "application/json" })
     default CompletableFuture<ResponseEntity<List<Lamp>>> listLamps(
-        
+
     ) {
-        return CompletableFuture.supplyAsync(()-> {
+        return CompletableFuture.supplyAsync(() -> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                         String exampleString = "[ { \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }, { \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true } ]";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
@@ -194,39 +156,29 @@ public interface LampsApi {
 
     }
 
-
     /**
      * PUT /lamps/{lampId} : Update a lamp&#39;s status
      *
-     * @param lampId  (required)
-     * @param lampUpdate  (required)
+     * @param lampId     (required)
+     * @param lampUpdate (required)
      * @return Lamp updated successfully (status code 200)
      *         or Lamp not found (status code 404)
      */
-    @Operation(
-        operationId = "updateLamp",
-        summary = "Update a lamp's status",
-        responses = {
+    @Operation(operationId = "updateLamp", summary = "Update a lamp's status", responses = {
             @ApiResponse(responseCode = "200", description = "Lamp updated successfully", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
             }),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.PUT,
-        value = "/lamps/{lampId}",
-        produces = { "application/json" },
-        consumes = { "application/json" }
-    )
-    
+    })
+    @RequestMapping(method = RequestMethod.PUT, value = "/lamps/{lampId}", produces = {
+            "application/json" }, consumes = { "application/json" })
+
     default CompletableFuture<ResponseEntity<Lamp>> updateLamp(
-        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId,
-        @Parameter(name = "LampUpdate", description = "", required = true) @Valid @RequestBody LampUpdate lampUpdate
-    ) {
-        return CompletableFuture.supplyAsync(()-> {
+            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId,
+            @Parameter(name = "LampUpdate", description = "", required = true) @Valid @RequestBody LampUpdate lampUpdate) {
+        return CompletableFuture.supplyAsync(() -> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                         String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
