@@ -7,21 +7,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class LampMapper {
 
-  public Lamp toModel(LampEntity entity) {
-    if (entity == null) {
-      return null;
+  public Lamp toModel(final LampEntity entity) {
+    Lamp result = null;
+    if (entity != null) {
+      result = new Lamp(entity.getId(), entity.getStatus());
     }
-    return new Lamp(entity.getId(), entity.getStatus());
+    return result;
   }
 
-  public LampEntity toEntity(Lamp lamp) {
-    if (lamp == null) {
-      return null;
+  public LampEntity toEntity(final Lamp lamp) {
+    LampEntity result = null;
+    if (lamp != null) {
+      result = new LampEntity(lamp.getId(), lamp.getStatus());
     }
-    return new LampEntity(lamp.getId(), lamp.getStatus());
+    return result;
   }
 
-  public LampEntity toEntity(Boolean status) {
+  public LampEntity toEntity(final Boolean status) {
     return new LampEntity(status);
   }
 }

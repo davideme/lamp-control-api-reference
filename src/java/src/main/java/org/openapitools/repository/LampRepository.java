@@ -6,7 +6,8 @@ import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 
 /**
- * In-memory repository interface for Lamp entities. This interface defines the contract for lamp
+ * In-memory repository interface for Lamp entities. This interface defines the
+ * contract for lamp
  * data operations without being tied to any specific persistence mechanism.
  */
 public interface LampRepository {
@@ -21,10 +22,10 @@ public interface LampRepository {
   /**
    * Find a lamp entity by its ID.
    *
-   * @param id the lamp ID
+   * @param lampId the lamp ID
    * @return optional containing the lamp entity if found
    */
-  Optional<LampEntity> findById(UUID id);
+  Optional<LampEntity> findById(UUID lampId);
 
   /**
    * Save a lamp entity (create or update).
@@ -37,17 +38,17 @@ public interface LampRepository {
   /**
    * Check if a lamp entity exists by ID.
    *
-   * @param id the lamp ID
+   * @param lampId the lamp ID
    * @return true if the entity exists
    */
-  boolean existsById(UUID id);
+  boolean existsById(UUID lampId);
 
   /**
    * Delete a lamp entity by ID.
    *
-   * @param id the lamp ID
+   * @param lampId the lamp ID
    */
-  void deleteById(UUID id);
+  void deleteById(UUID lampId);
 
   /** Delete all lamp entities. */
   void deleteAll();

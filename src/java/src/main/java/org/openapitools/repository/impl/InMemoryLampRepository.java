@@ -11,8 +11,10 @@ import org.openapitools.repository.LampRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * In-memory implementation of the LampRepository. This implementation uses a ConcurrentHashMap to
- * store lamp entities in memory, providing thread-safe operations suitable for testing and
+ * In-memory implementation of the LampRepository. This implementation uses a
+ * ConcurrentHashMap to
+ * store lamp entities in memory, providing thread-safe operations suitable for
+ * testing and
  * development environments.
  */
 @Repository
@@ -26,18 +28,18 @@ public class InMemoryLampRepository implements LampRepository {
   }
 
   @Override
-  public Optional<LampEntity> findById(UUID id) {
-    return Optional.ofNullable(lamps.get(id));
+  public Optional<LampEntity> findById(final UUID lampId) {
+    return Optional.ofNullable(lamps.get(lampId));
   }
 
   @Override
-  public LampEntity save(LampEntity entity) {
+  public LampEntity save(final LampEntity entity) {
     if (entity.getId() == null) {
       entity.setId(UUID.randomUUID());
     }
 
     // Create a copy to avoid external modifications
-    LampEntity copy = new LampEntity();
+    final LampEntity copy = new LampEntity();
     copy.setId(entity.getId());
     copy.setStatus(entity.getStatus());
 
@@ -46,13 +48,13 @@ public class InMemoryLampRepository implements LampRepository {
   }
 
   @Override
-  public boolean existsById(UUID id) {
-    return lamps.containsKey(id);
+  public boolean existsById(final UUID lampId) {
+    return lamps.containsKey(lampId);
   }
 
   @Override
-  public void deleteById(UUID id) {
-    lamps.remove(id);
+  public void deleteById(final UUID lampId) {
+    lamps.remove(lampId);
   }
 
   @Override
