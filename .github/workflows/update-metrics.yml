@@ -92,9 +92,9 @@ jobs:
 
           # Java coverage
           if [ -f src/java/target/site/jacoco/jacoco.xml ]; then
-            # Extract line coverage from JaCoCo XML (final counters for lines)
-            JAVA_MISSED=$(xmllint --xpath "//report/counter[@type='LINE']/@missed" src/java/target/site/jacoco/jacoco.xml | grep -o '[0-9]*')
-            JAVA_COVERED=$(xmllint --xpath "//report/counter[@type='LINE']/@covered" src/java/target/site/jacoco/jacoco.xml | grep -o '[0-9]*')
+            # Extract line coverage from JaCoCo XML using grep and sed
+            JAVA_MISSED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
+            JAVA_COVERED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
             if [[ "$JAVA_MISSED" =~ ^[0-9]+$ && "$JAVA_COVERED" =~ ^[0-9]+$ ]]; then
               JAVA_TOTAL=$((JAVA_MISSED + JAVA_COVERED))
               if [ "$JAVA_TOTAL" -gt 0 ]; then

@@ -23,7 +23,11 @@
 hs_err_pid*
 replay_pid*
 
-target/
+target/*
+!target/site/
+target/site/*
+!target/site/jacoco/
+target/site/jacoco/*
 !target/site/jacoco/jacoco.xml
 pom.xml.tag
 pom.xml.releaseBackup
