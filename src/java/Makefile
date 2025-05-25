@@ -20,7 +20,7 @@ generate:
 		-i /local/${OPENAPI_SPEC} \
 		-g ${GENERATOR_NAME} \
 		-o /local/${OUTPUT_DIR} \
-		--additional-properties=async=true,useSpringBoot3=true,useOptional=true,hideGenerationTimestamp=true,performBeanValidation=true
+		--additional-properties=async=true,useSpringBoot3=true,useOptional=true,hideGenerationTimestamp=true,performBeanValidation=true,interfaceOnly=true
 
 # Clean generated files
 clean:
