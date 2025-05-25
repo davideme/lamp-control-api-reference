@@ -5,10 +5,13 @@ on:
     branches: [ main, develop ]
     paths:
       - 'src/java/**'
+      - '.github/workflows/java-code-quality.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'src/java/**'
+      - '.github/workflows/java-code-quality.yml'
+  workflow_dispatch:
 
 jobs:
   code-quality:
