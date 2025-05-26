@@ -2,15 +2,15 @@ name: TypeScript CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'src/typescript/**'
-      - '.github/workflows/typescript.yml'
+      - '.github/workflows/typescript-ci.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'src/typescript/**'
-      - '.github/workflows/typescript.yml'
+      - '.github/workflows/typescript-ci.yml'
   workflow_dispatch:
 
 permissions:

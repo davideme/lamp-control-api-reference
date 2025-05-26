@@ -1,10 +1,6 @@
 name: Update Code Metrics
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'typescript/**'
   workflow_dispatch:
 
 permissions:
