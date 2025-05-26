@@ -1,10 +1,6 @@
 name: Update Code Metrics
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'typescript/**'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        folder: [typescript, python, java, php, ruby, go]
+        folder: [typescript, python, java, csharp, php, go, kotlin, ruby]
 
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +113,7 @@ jobs:
           echo "|------------|-----------|------------|---------------|--------------|" >> tools/metrics.md
 
           # Define language display names and corresponding folder names
-          langs=("TypeScript:typescript" "Python:python" "Java:java" "PHP:php" "Ruby:ruby" "Go:go")
+          langs=("TypeScript:typescript" "Python:python" "Java:java" "C#:csharp" "PHP:php" "Go:go" "Kotlin:kotlin" "Ruby:ruby")
 
           for entry in "${langs[@]}"; do
             lang_name="${entry%%:*}"

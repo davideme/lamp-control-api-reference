@@ -1,6 +1,7 @@
 # ADR 001: Use Boolean for Lamp Status
 
 ## Status
+
 Accepted
 
 ## Context

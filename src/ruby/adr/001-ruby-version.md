@@ -1,7 +1,12 @@
-# ADR: Select Ruby Version for New Project
+# ADR 001: Select Ruby Version for New Project
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 

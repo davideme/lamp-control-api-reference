@@ -1,7 +1,12 @@
-# ADR: Select Framework for Building a REST API in Ruby (2025)
+# ADR 002: Select Framework for Building a REST API in Ruby
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 

@@ -1,12 +1,15 @@
 # ADR 001: Project Setup and Language Selection
 
 ## Status
+
 Accepted
 
 ## Context
+
 We need to establish the foundation for the lamp control API project. This includes selecting the primary programming language and setting up the initial project structure.
 
 ## Decision
+
 We have chosen TypeScript as our primary programming language for the following reasons:
 
 1. **Type Safety**: TypeScript provides static typing, which helps catch errors at compile time and improves code quality.

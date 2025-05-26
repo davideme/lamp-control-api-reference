@@ -1,11 +1,18 @@
 # ADR 002: Selection of HTTP Routing Framework for Go REST API
 
-**Status**: Accepted
-**Date**: 2025-05-26
-**Author**: \[Your Name]
-**Context**: Our project requires a reliable, maintainable, and idiomatic HTTP routing solution for building a RESTful API in Go. The decision must align with our team's expertise, project requirements, and long-term maintainability goals.([dotnettricks.com][1], [Reddit][2])
+## Status
 
-## Considered Options
+Accepted
+
+## Date
+
+2025-05-26
+
+## Context
+
+Our project requires a reliable, maintainable, and idiomatic HTTP routing solution for building a RESTful API in Go. The decision must align with our team's expertise, project requirements, and long-term maintainability goals.
+
+## Alternatives Considered
 
 1. **Chi**
 

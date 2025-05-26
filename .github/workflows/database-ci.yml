@@ -1,20 +1,20 @@
-name: Database Schema Tests
+name: Database CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'database/**'
       - 'docker-compose.yml'
       - 'test-databases.sh'
-      - '.github/workflows/database-tests.yml'
+      - '.github/workflows/database-ci.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'database/**'
       - 'docker-compose.yml'
       - 'test-databases.sh'
-      - '.github/workflows/database-tests.yml'
+      - '.github/workflows/database-ci.yml'
 
 jobs:
   test:

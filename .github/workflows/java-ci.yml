@@ -1,16 +1,16 @@
-name: Java Code Quality
+name: Java CI
 
 on:
   push:
     branches: [ main, develop ]
     paths:
       - 'src/java/**'
-      - '.github/workflows/java-code-quality.yml'
+      - '.github/workflows/java-ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'src/java/**'
-      - '.github/workflows/java-code-quality.yml'
+      - '.github/workflows/java-ci.yml'
   workflow_dispatch:
 
 jobs:

@@ -1,15 +1,18 @@
-name: SQL Linting
+name: SQL CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'database/sql/**'
       - '.sqlfluff'
+      - '.github/workflows/sql-ci.yml'
   pull_request:
+    branches: [ main, develop ]
     paths:
       - 'database/sql/**'
       - '.sqlfluff'
+      - '.github/workflows/sql-ci.yml'
 
 jobs:
   sql-lint:

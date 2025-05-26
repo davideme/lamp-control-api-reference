@@ -1,7 +1,12 @@
-# ADR: Select ASP.NET Core (.NET 8 LTS) for REST API Development
+# ADR 002: Select ASP.NET Core (.NET 8 LTS) for REST API Development
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 
