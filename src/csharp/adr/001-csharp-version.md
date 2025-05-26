@@ -1,7 +1,12 @@
-# ADR: Choose C# 12.0 and .NET 8 for New Project
+# ADR 001: Choose C# 12.0 and .NET 8 for New Project
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 

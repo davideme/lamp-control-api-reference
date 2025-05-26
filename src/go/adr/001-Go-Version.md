@@ -1,17 +1,22 @@
-**ADR-001: Selection of Go Version for New Project**
+# ADR 001: Selection of Go Version for New Project
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
 
-### Context
+Accepted
+
+## Date
+
+2025-05-26
+
+## Context
 
 We are starting a new Go project and need to choose the appropriate Go version. The selected version should be stable, actively supported, and compatible with modern tooling and libraries.
 
-### Decision
+## Decision
 
 We will use **Go 1.24.3** as the required version for development and deployment.
 
-### Alternatives Considered
+## Alternatives Considered
 
 * **Go 1.23.x:**
 
@@ -28,7 +33,7 @@ We will use **Go 1.24.3** as the required version for development and deployment
   * **Pros:** Early access to upcoming features.
   * **Cons:** Not intended for production use. APIs may change, stability is not guaranteed, and there is no official support.
 
-### Rationale
+## Rationale
 
 Go 1.24.3 is the latest stable version, offers the strongest security posture, and provides access to important language improvements such as generic type aliases and enhanced WebAssembly support. It is widely supported by the ecosystem and is the recommended baseline for new projects.
 

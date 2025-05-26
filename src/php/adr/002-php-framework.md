@@ -1,7 +1,12 @@
-# ADR-002: Select PHP Framework and Version for REST API
+# ADR 002: Select PHP Framework and Version for REST API
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 

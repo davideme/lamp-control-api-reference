@@ -1,7 +1,12 @@
-# ADR: Select Runtime for Kotlin Project
+# ADR 002: Select Runtime for Kotlin Project
 
-**Status:** Accepted
-**Date:** 2025-05-26
+## Status
+
+Accepted
+
+## Date
+
+2025-05-26
 
 ## Context
 
