@@ -9,9 +9,11 @@ This document provides a comparison of the different language implementations in
 | TypeScript | 365 | 343 | 0.94 | 85 |
 | Python | 346 | 215 | 0.62 | 86 |
 | Java | 691 | 619 | 0.90 | 100 |
+| C# | null | 0 | N/A | N/A |
 | PHP | null | 0 | N/A | N/A |
-| Ruby | null | 0 | N/A | N/A |
 | Go | null | 0 | N/A | N/A |
+| Kotlin | null | 0 | N/A | N/A |
+| Ruby | null | 0 | N/A | N/A |
 ## API Interface Comparison
 
 ### REST API
