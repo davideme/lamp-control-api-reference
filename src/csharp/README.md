@@ -97,8 +97,8 @@ The project includes a comprehensive CI/CD pipeline (`.github/workflows/csharp-c
 
 #### 1. **Code Quality & Build**
 - Restores NuGet packages
-- Checks code formatting (`make format-check`)
-- Runs static analysis (`make lint`)
+- Checks code formatting (`dotnet format --verify-no-changes`)
+- Runs static analysis (`dotnet build` with analyzers)
 - Builds the application
 - Runs tests (when available)
 - Uploads build artifacts

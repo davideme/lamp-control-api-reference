@@ -42,10 +42,9 @@
     <Message Text="Running static analysis..." Importance="high" />
     <Exec Command="dotnet build --verbosity normal --configuration Release" />
   </Target>
-
   <Target Name="SecurityScan" DependsOnTargets="Restore">
     <Message Text="Scanning for vulnerable packages..." Importance="high" />
-    <Exec Command="dotnet list package --vulnerable --include-transitive" />
+    <Exec Command="dotnet list $(MSBuildProjectFile) package --vulnerable --include-transitive" />
   </Target>
   <Target Name="RunDev" DependsOnTargets="Build">
     <Message Text="Starting development server..." Importance="high" />
