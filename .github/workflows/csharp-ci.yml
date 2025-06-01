@@ -57,7 +57,7 @@ jobs:
         # When tests are added, use: dotnet test --configuration Release --logger trx --results-directory ./TestResults
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: csharp-build-artifacts
@@ -97,7 +97,7 @@ jobs:
         fi
     
     - name: Upload security scan results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-scan-results
@@ -131,7 +131,7 @@ jobs:
       run: dotnet publish LampControlApi/LampControlApi.csproj --configuration Release --no-build --output ./publish
     
     - name: Upload publish artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: csharp-publish-artifacts
         path: src/csharp/publish/
@@ -181,7 +181,7 @@ jobs:
         fi
     
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: coverage-report
@@ -219,7 +219,7 @@ jobs:
         dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
     
     - name: Upload dependency report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dependency-report
         path: src/csharp/dependency-report.md
