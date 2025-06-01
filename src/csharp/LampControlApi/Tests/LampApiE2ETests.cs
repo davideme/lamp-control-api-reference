@@ -6,10 +6,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LampControlApi.E2E
 {
+    public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+    {
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            // Set content root to the project directory
+            var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../LampControlApi"));
+            builder.UseContentRoot(projectDir);
+        }
+    }
+
     [TestClass]
     public class LampApiE2ETests
     {
-        private static WebApplicationFactory<Program> _factory = null!;
+        private static CustomWebApplicationFactory _factory = null!;
         private static HttpClient _client = null!;
 
         /// <summary>
@@ -19,7 +29,7 @@ namespace LampControlApi.E2E
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            _factory = new WebApplicationFactory<Program>();
+            _factory = new CustomWebApplicationFactory();
             _client = _factory.CreateClient();
         }
 
