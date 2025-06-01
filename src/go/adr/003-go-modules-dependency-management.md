@@ -140,24 +140,34 @@ go list -u -m all
 ### Build and Development Workflow
 
 ```bash
-# Build the application
+# Using Go commands directly
 go build ./cmd/api
-
-# Run the application
 go run ./cmd/api
-
-# Run tests
 go test ./...
-
-# Run tests with coverage
 go test -cover ./...
 
-# Build for different platforms
+# Cross-compilation
 GOOS=linux GOARCH=amd64 go build ./cmd/api
 GOOS=windows GOARCH=amd64 go build ./cmd/api
 
 # Install the binary
 go install ./cmd/api
+
+# Code quality (direct commands)
+go fmt ./...                   # Format code
+goimports -w .                 # Format imports
+go vet ./...                   # Built-in static analysis
+golangci-lint run             # Community meta-linter
+staticcheck ./...             # Third-party static analyzer
+
+# Typical Go project workflow using Makefile
+make tools                    # Install development tools
+make fmt                      # Format code
+make vet                      # Run static analysis
+make lint                     # Run comprehensive linting
+make test                     # Run tests
+make build                    # Build application
+make clean                    # Clean artifacts
 ```
 
 ## Project Structure
@@ -166,6 +176,7 @@ go install ./cmd/api
 lamp-control-api-go/
 ├── go.mod                 # Module definition and dependencies
 ├── go.sum                 # Dependency checksums
+├── Makefile               # Build automation and task orchestration
 ├── cmd/
 │   └── api/
 │       └── main.go        # Application entry point
@@ -176,6 +187,78 @@ lamp-control-api-go/
 ├── pkg/
 │   └── api/               # Public API interfaces
 └── vendor/                # Vendored dependencies (optional)
+```
+
+### Example Makefile for Go Projects
+
+```makefile
+.PHONY: build clean test coverage lint fmt vet staticcheck tools
+
+# Build variables
+BINARY_NAME=lamp-control-api
+BUILD_DIR=./cmd/api
+OUTPUT_DIR=./bin
+
+# Build the application
+build:
+	go build -o $(OUTPUT_DIR)/$(BINARY_NAME) $(BUILD_DIR)
+
+# Run the application
+run:
+	go run $(BUILD_DIR)
+
+# Clean build artifacts
+clean:
+	rm -rf $(OUTPUT_DIR)
+	go clean
+
+# Run tests
+test:
+	go test -v ./...
+
+# Run tests with coverage
+coverage:
+	go test -cover -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+
+# Format code
+fmt:
+	go fmt ./...
+	goimports -w .
+
+# Run go vet
+vet:
+	go vet ./...
+
+# Run staticcheck
+staticcheck:
+	staticcheck ./...
+
+# Run golangci-lint
+lint:
+	golangci-lint run
+
+# Run all quality checks
+check: fmt vet staticcheck lint test
+
+# Install development tools
+tools:
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+
+# Cross-compilation targets
+build-linux:
+	GOOS=linux GOARCH=amd64 go build -o $(OUTPUT_DIR)/$(BINARY_NAME)-linux $(BUILD_DIR)
+
+build-windows:
+	GOOS=windows GOARCH=amd64 go build -o $(OUTPUT_DIR)/$(BINARY_NAME)-windows.exe $(BUILD_DIR)
+
+build-mac:
+	GOOS=darwin GOARCH=amd64 go build -o $(OUTPUT_DIR)/$(BINARY_NAME)-mac $(BUILD_DIR)
+
+# Build for all platforms
+build-all: build-linux build-windows build-mac
 ```
 
 ## Alternatives Considered
@@ -258,6 +341,24 @@ export GOSUMDB=sum.golang.org
    - Remove replace directives before committing
    - Use `go work` for multi-module development
 
+4. **Code Quality Tools (Separate from Go Modules)**
+   - **Built-in Tools**: `go fmt`, `go vet`, `goimports` (part of Go toolchain)
+   - **External Tools**: Install separately and run directly
+   - **Common Practice**: Use Makefile to orchestrate all development tasks
+     ```bash
+     # Install external linting tools
+     go install honnef.co/go/tools/cmd/staticcheck@latest
+     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+     go install golang.org/x/tools/cmd/goimports@latest
+     
+     # Typical Makefile targets for Go projects
+     make fmt          # Format code
+     make lint         # Run linting
+     make test         # Run tests
+     make build        # Build application
+     make clean        # Clean build artifacts
+     ```
+
 ### CI/CD Integration
 
 ```bash
@@ -272,6 +373,18 @@ go test -mod=readonly ./...
 
 # Build with specific module mode
 go build -mod=readonly ./cmd/api
+
+# Typical CI/CD workflow using Makefile
+make tools                     # Install development tools
+make check                     # Run all quality checks (fmt, vet, lint, test)
+make build                     # Build the application
+
+# Or run individual steps
+make fmt                       # Format code
+make vet                       # Built-in static analysis
+make staticcheck               # External static analyzer
+make lint                      # Comprehensive linting suite
+make test                      # Run tests
 ```
 
 ### Security Considerations
