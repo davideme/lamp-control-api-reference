@@ -40,7 +40,7 @@ clean:
 
 # Run tests
 test: build
-	@echo "No tests found. Consider adding test projects."
+	dotnet test $(PROJECT_FILE)
 
 # Format code
 format format-fix:

@@ -15,8 +15,6 @@ namespace LampControlApi.Services
         /// </summary>
         public InMemoryLampRepository()
         {
-            // Seed with some initial data
-            SeedData();
         }
 
         /// <inheritdoc/>
@@ -62,34 +60,6 @@ namespace LampControlApi.Services
         {
             var removed = _lamps.TryRemove(id, out _);
             return Task.FromResult(removed);
-        }
-
-        /// <summary>
-        /// Seeds the repository with initial data
-        /// </summary>
-        private void SeedData()
-        {
-            var lamp1 = new Lamp
-            {
-                Id = Guid.Parse("123e4567-e89b-12d3-a456-426614174000"),
-                Status = true
-            };
-
-            var lamp2 = new Lamp
-            {
-                Id = Guid.Parse("123e4567-e89b-12d3-a456-426614174001"),
-                Status = false
-            };
-
-            var lamp3 = new Lamp
-            {
-                Id = Guid.Parse("123e4567-e89b-12d3-a456-426614174002"),
-                Status = true
-            };
-
-            _lamps[lamp1.Id] = lamp1;
-            _lamps[lamp2.Id] = lamp2;
-            _lamps[lamp3.Id] = lamp3;
         }
     }
 }

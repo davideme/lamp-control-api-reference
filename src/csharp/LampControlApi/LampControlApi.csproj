@@ -21,6 +21,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,12 +52,9 @@
   <Target Name="RunDev" DependsOnTargets="Build">
     <Message Text="Starting development server..." Importance="high" />
     <Exec Command="dotnet run --environment Development" />
-  </Target>
-  <Target Name="Test" DependsOnTargets="Build">
+  </Target>  <Target Name="Test" DependsOnTargets="Build">
     <Message Text="Running tests..." Importance="high" />
-    <Message Text="No tests found. Consider adding test projects." Importance="normal" />
-    <!-- When tests are added, uncomment the line below: -->
-    <!-- Exec Command="dotnet test" -->
+    <Exec Command="dotnet test" />
   </Target>
 
   <Target Name="CodeQuality" DependsOnTargets="FormatCheck;Lint">

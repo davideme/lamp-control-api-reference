@@ -22,17 +22,17 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test that the repository is seeded with initial data
+        /// Test that the repository starts empty
         /// </summary>
         /// <returns>A task</returns>
         [TestMethod]
-        public async Task GetAllAsync_ShouldReturnSeededData()
+        public async Task GetAllAsync_ShouldReturnEmptyCollection()
         {
             // Act
             var lamps = await _repository.GetAllAsync();
 
             // Assert
-            Assert.AreEqual(3, lamps.Count);
+            Assert.AreEqual(0, lamps.Count);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace LampControlApi.Tests
             // Assert
             Assert.AreEqual(newLamp.Id, createdLamp.Id);
             Assert.AreEqual(newLamp.Status, createdLamp.Status);
-            Assert.AreEqual(4, allLamps.Count);
+            Assert.AreEqual(1, allLamps.Count);
         }
 
         /// <summary>
@@ -68,14 +68,20 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var expectedId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
+            var lamp = new Lamp
+            {
+                Id = expectedId,
+                Status = true
+            };
+            await _repository.CreateAsync(lamp);
 
             // Act
-            var lamp = await _repository.GetByIdAsync(expectedId);
+            var retrievedLamp = await _repository.GetByIdAsync(expectedId);
 
             // Assert
-            Assert.IsNotNull(lamp);
-            Assert.AreEqual(expectedId, lamp.Id);
-            Assert.IsTrue(lamp.Status);
+            Assert.IsNotNull(retrievedLamp);
+            Assert.AreEqual(expectedId, retrievedLamp.Id);
+            Assert.IsTrue(retrievedLamp.Status);
         }
 
         /// <summary>
@@ -87,13 +93,17 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.Parse("123e4567-e89b-12d3-a456-426614174001");
-            var existingLamp = await _repository.GetByIdAsync(lampId);
-            Assert.IsNotNull(existingLamp);
+            var initialLamp = new Lamp
+            {
+                Id = lampId,
+                Status = false
+            };
+            await _repository.CreateAsync(initialLamp);
 
             var updatedLamp = new Lamp
             {
                 Id = lampId,
-                Status = !existingLamp.Status // Flip the status
+                Status = true // Flip the status
             };
 
             // Act
@@ -114,6 +124,12 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.Parse("123e4567-e89b-12d3-a456-426614174002");
+            var lamp = new Lamp
+            {
+                Id = lampId,
+                Status = true
+            };
+            await _repository.CreateAsync(lamp);
 
             // Act
             var deleted = await _repository.DeleteAsync(lampId);
@@ -121,7 +137,7 @@ namespace LampControlApi.Tests
 
             // Assert
             Assert.IsTrue(deleted);
-            Assert.AreEqual(2, allLamps.Count);
+            Assert.AreEqual(0, allLamps.Count);
             Assert.IsFalse(allLamps.Any(l => l.Id == lampId));
         }
 
