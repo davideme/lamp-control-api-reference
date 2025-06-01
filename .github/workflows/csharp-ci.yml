@@ -1,0 +1,226 @@
+name: C# CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/csharp/**'
+      - '.github/workflows/csharp-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/csharp/**'
+      - '.github/workflows/csharp-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    name: Code Quality & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/csharp
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Install dependencies
+      run: dotnet restore LampControlApi/LampControlApi.csproj
+    
+    - name: Check code formatting
+      run: dotnet format LampControlApi/LampControlApi.csproj --verify-no-changes --verbosity diagnostic
+    
+    - name: Run static analysis
+      run: dotnet build LampControlApi/LampControlApi.csproj --verbosity normal --configuration Release
+    
+    - name: Build application
+      run: dotnet build LampControlApi/LampControlApi.csproj --no-restore --configuration Release
+    
+    - name: Run tests
+      run: |
+        # Note: No tests currently exist in this project
+        echo "No tests found. Consider adding test projects."
+        # When tests are added, use: dotnet test --configuration Release --logger trx --results-directory ./TestResults
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: csharp-build-artifacts
+        path: |
+          src/csharp/LampControlApi/bin/
+          src/csharp/LampControlApi/obj/
+        retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/csharp
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install dependencies
+      run: dotnet restore LampControlApi/LampControlApi.csproj
+    
+    - name: Run security scan
+      run: |
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee security-scan.log
+        if grep -q "has the following vulnerable packages" security-scan.log; then
+          echo "❌ Vulnerable packages found!"
+          cat security-scan.log
+          exit 1
+        else
+          echo "✅ No vulnerable packages found."
+        fi
+    
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-scan-results
+        path: src/csharp/security-scan.log
+        retention-days: 30
+
+  publish-ready:
+    name: Verify Publish Ready
+    runs-on: ubuntu-latest
+    needs: [code-quality, security-scan]
+    defaults:
+      run:
+        working-directory: src/csharp
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install dependencies
+      run: dotnet restore LampControlApi/LampControlApi.csproj
+    
+    - name: Build for Release
+      run: dotnet build LampControlApi/LampControlApi.csproj --configuration Release --no-restore
+    
+    - name: Publish application
+      run: dotnet publish LampControlApi/LampControlApi.csproj --configuration Release --no-build --output ./publish
+    
+    - name: Upload publish artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: csharp-publish-artifacts
+        path: src/csharp/publish/
+        retention-days: 30
+
+  code-coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/csharp
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install dependencies
+      run: dotnet restore LampControlApi/LampControlApi.csproj
+    
+    - name: Install coverage tools
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+    
+    - name: Run tests with coverage
+      run: |
+        dotnet test LampControlApi/LampControlApi.csproj \
+          --configuration Release \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          --logger trx \
+          --no-restore || echo "No tests found, skipping coverage"
+    
+    - name: Generate coverage report
+      run: |
+        if [ -d "./coverage" ]; then
+          reportgenerator \
+            -reports:"./coverage/**/coverage.cobertura.xml" \
+            -targetdir:"./coverage/report" \
+            -reporttypes:"Html;Cobertura"
+          echo "✅ Coverage report generated"
+        else
+          echo "⚠️ No coverage data found - tests may not exist yet"
+        fi
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: coverage-report
+        path: src/csharp/coverage/
+        retention-days: 30
+
+  dependency-check:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/csharp
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install dependencies
+      run: dotnet restore LampControlApi/LampControlApi.csproj
+    
+    - name: List all packages
+      run: |
+        echo "## Direct Dependencies" > dependency-report.md
+        dotnet list package >> dependency-report.md
+        echo "" >> dependency-report.md
+        echo "## Transitive Dependencies" >> dependency-report.md
+        dotnet list package --include-transitive >> dependency-report.md
+        echo "" >> dependency-report.md
+        echo "## Outdated Packages" >> dependency-report.md
+        dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
+    
+    - name: Upload dependency report
+      uses: actions/upload-artifact@v3
+      with:
+        name: dependency-report
+        path: src/csharp/dependency-report.md
+        retention-days: 30

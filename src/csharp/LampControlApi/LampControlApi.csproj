@@ -27,4 +27,43 @@
     <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
 
+  <!-- Custom MSBuild Targets for Development Tasks -->
+  <Target Name="Format" DependsOnTargets="Restore">
+    <Message Text="Formatting code..." Importance="high" />
+    <Exec Command="dotnet format --include-generated" />
+  </Target>
+
+  <Target Name="FormatCheck" DependsOnTargets="Restore">
+    <Message Text="Checking code formatting..." Importance="high" />
+    <Exec Command="dotnet format --verify-no-changes --verbosity diagnostic" />
+  </Target>
+
+  <Target Name="Lint" DependsOnTargets="Restore">
+    <Message Text="Running static analysis..." Importance="high" />
+    <Exec Command="dotnet build --verbosity normal --configuration Release" />
+  </Target>
+
+  <Target Name="SecurityScan" DependsOnTargets="Restore">
+    <Message Text="Scanning for vulnerable packages..." Importance="high" />
+    <Exec Command="dotnet list package --vulnerable --include-transitive" />
+  </Target>
+  <Target Name="RunDev" DependsOnTargets="Build">
+    <Message Text="Starting development server..." Importance="high" />
+    <Exec Command="dotnet run --environment Development" />
+  </Target>
+  <Target Name="Test" DependsOnTargets="Build">
+    <Message Text="Running tests..." Importance="high" />
+    <Message Text="No tests found. Consider adding test projects." Importance="normal" />
+    <!-- When tests are added, uncomment the line below: -->
+    <!-- Exec Command="dotnet test" -->
+  </Target>
+
+  <Target Name="CodeQuality" DependsOnTargets="FormatCheck;Lint">
+    <Message Text="All code quality checks passed!" Importance="high" />
+  </Target>
+
+  <Target Name="CI" DependsOnTargets="FormatCheck;Lint;Test;Build">
+    <Message Text="CI pipeline completed successfully!" Importance="high" />
+  </Target>
+
 </Project>
