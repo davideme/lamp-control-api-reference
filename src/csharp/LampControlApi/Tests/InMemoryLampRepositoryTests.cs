@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace LampControlApi.Tests
 {
     /// <summary>
-    /// Unit tests for the InMemoryLampRepository
+    /// Unit tests for the InMemoryLampRepository.
     /// </summary>
     [TestClass]
     public class InMemoryLampRepositoryTests
@@ -13,7 +13,7 @@ namespace LampControlApi.Tests
         private InMemoryLampRepository _repository = null!;
 
         /// <summary>
-        /// Initialize test setup
+        /// Initialize test setup.
         /// </summary>
         [TestInitialize]
         public void Setup()
@@ -22,9 +22,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test that the repository starts empty
+        /// Test that the repository starts empty.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetAllAsync_ShouldReturnEmptyCollection()
         {
@@ -36,9 +36,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test creating a new lamp
+        /// Test creating a new lamp.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task CreateAsync_ShouldAddNewLamp()
         {

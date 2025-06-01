@@ -4,11 +4,11 @@ using LampControlApi.Controllers;
 namespace LampControlApi.Services
 {
     /// <summary>
-    /// In-memory implementation of the lamp repository
+    /// In-memory implementation of the lamp repository.
     /// </summary>
     public class InMemoryLampRepository : ILampRepository
     {
-        private readonly ConcurrentDictionary<Guid, Lamp> _lamps = new();
+        private readonly ConcurrentDictionary<Guid, Lamp> _lamps = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryLampRepository"/> class.

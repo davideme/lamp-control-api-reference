@@ -3,7 +3,7 @@ using LampControlApi.Controllers;
 namespace LampControlApi.Services
 {
     /// <summary>
-    /// Implementation of the IController interface
+    /// Implementation of the IController interface.
     /// </summary>
     public class LampControllerImplementation : IController
     {
@@ -12,7 +12,7 @@ namespace LampControlApi.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="LampControllerImplementation"/> class.
         /// </summary>
-        /// <param name="lampRepository">The lamp repository</param>
+        /// <param name="lampRepository">The lamp repository.</param>
         public LampControllerImplementation(ILampRepository lampRepository)
         {
             _lampRepository = lampRepository ?? throw new ArgumentNullException(nameof(lampRepository));
@@ -46,18 +46,18 @@ namespace LampControlApi.Services
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
-                throw new ArgumentException("Lamp ID cannot be null or empty", nameof(lampId));
+                throw new ArgumentException("Lamp ID cannot be null or empty.", nameof(lampId));
             }
 
             if (!Guid.TryParse(lampId, out var id))
             {
-                throw new ArgumentException("Invalid lamp ID format", nameof(lampId));
+                throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
             var lamp = await _lampRepository.GetByIdAsync(id);
             if (lamp == null)
             {
-                throw new KeyNotFoundException($"Lamp with ID {lampId} not found");
+                throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");
             }
 
             return lamp;
@@ -68,7 +68,7 @@ namespace LampControlApi.Services
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
-                throw new ArgumentException("Lamp ID cannot be null or empty", nameof(lampId));
+                throw new ArgumentException("Lamp ID cannot be null or empty.", nameof(lampId));
             }
 
             if (body == null)
@@ -78,19 +78,19 @@ namespace LampControlApi.Services
 
             if (!Guid.TryParse(lampId, out var id))
             {
-                throw new ArgumentException("Invalid lamp ID format", nameof(lampId));
+                throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
             var existingLamp = await _lampRepository.GetByIdAsync(id);
             if (existingLamp == null)
             {
-                throw new KeyNotFoundException($"Lamp with ID {lampId} not found");
+                throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");
             }
 
             existingLamp.Status = body.Status;
             var updatedLamp = await _lampRepository.UpdateAsync(existingLamp);
 
-            return updatedLamp!; // We know it exists since we just checked
+            return updatedLamp!; // We know it exists since we just checked.
         }
 
         /// <inheritdoc/>
@@ -98,12 +98,12 @@ namespace LampControlApi.Services
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
-                throw new ArgumentException("Lamp ID cannot be null or empty", nameof(lampId));
+                throw new ArgumentException("Lamp ID cannot be null or empty.", nameof(lampId));
             }
 
             if (!Guid.TryParse(lampId, out var id))
             {
-                throw new ArgumentException("Invalid lamp ID format", nameof(lampId));
+                throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
             var deleted = await _lampRepository.DeleteAsync(id);

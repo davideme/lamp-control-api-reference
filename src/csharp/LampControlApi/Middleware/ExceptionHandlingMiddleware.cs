@@ -4,18 +4,23 @@ using System.Text.Json;
 namespace LampControlApi.Middleware
 {
     /// <summary>
-    /// Middleware for handling exceptions and converting them to appropriate HTTP responses
+    /// Middleware for handling exceptions and converting them to appropriate HTTP responses.
     /// </summary>
     public class ExceptionHandlingMiddleware
     {
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
-        /// <param name="next">The next delegate</param>
-        /// <param name="logger">The logger</param>
+        /// <param name="next">The next delegate.</param>
+        /// <param name="logger">The logger.</param>
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
@@ -23,10 +28,10 @@ namespace LampControlApi.Middleware
         }
 
         /// <summary>
-        /// Invokes the middleware
+        /// Invokes the middleware.
         /// </summary>
-        /// <param name="context">The HTTP context</param>
-        /// <returns>A task</returns>
+        /// <param name="context">The HTTP context.</param>
+        /// <returns>A task.</returns>
         public async Task InvokeAsync(HttpContext context)
         {
             try
@@ -40,14 +45,14 @@ namespace LampControlApi.Middleware
         }
 
         /// <summary>
-        /// Handles exceptions and converts them to HTTP responses
+        /// Handles exceptions and converts them to HTTP responses.
         /// </summary>
-        /// <param name="context">The HTTP context</param>
-        /// <param name="exception">The exception</param>
-        /// <returns>A task</returns>
+        /// <param name="context">The HTTP context.</param>
+        /// <param name="exception">The exception.</param>
+        /// <returns>A task.</returns>
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            _logger.LogError(exception, "An unhandled exception occurred");
+            _logger.LogError(exception, "An unhandled exception occurred.");
 
             var response = new
             {
@@ -69,10 +74,5 @@ namespace LampControlApi.Middleware
 
             await context.Response.WriteAsync(jsonResponse);
         }
-
-        private static readonly JsonSerializerOptions JsonOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
     }
 }

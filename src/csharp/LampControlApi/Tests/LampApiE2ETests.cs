@@ -12,6 +12,10 @@ namespace LampControlApi.E2E
         private static WebApplicationFactory<Program> _factory = null!;
         private static HttpClient _client = null!;
 
+        /// <summary>
+        /// Initializes the test class.
+        /// </summary>
+        /// <param name="context">Test context.</param>
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
@@ -19,6 +23,9 @@ namespace LampControlApi.E2E
             _client = _factory.CreateClient();
         }
 
+        /// <summary>
+        /// Cleans up the test class.
+        /// </summary>
         [ClassCleanup]
         public static void ClassCleanup()
         {
