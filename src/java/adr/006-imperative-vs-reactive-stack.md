@@ -1,4 +1,4 @@
-# ADR 005: Imperative Async vs Reactive (Flux/Mono) Stack
+# ADR 006: Imperative Async vs Reactive (Flux/Mono) Stack
 Status: Proposed
 Date: 2025-05-21
 

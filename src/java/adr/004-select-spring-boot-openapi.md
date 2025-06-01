@@ -1,4 +1,4 @@
-# ADR 003: Select Spring Boot 3.x with OpenAPI Generator for Contract-First API Implementation
+# ADR 004: Select Spring Boot 3.x with OpenAPI Generator for Contract-First API Implementation
 
 **Status:** Proposed
 **Date:** 2025-05-21

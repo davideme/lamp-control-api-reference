@@ -1,4 +1,4 @@
-# ADR 003: Use NSwag in Debian Container for OpenAPI Stub Generation
+# ADR 004: Use NSwag in Debian Container for OpenAPI Stub Generation
 
 ## Status
 

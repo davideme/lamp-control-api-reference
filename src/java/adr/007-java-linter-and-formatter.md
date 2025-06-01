@@ -1,4 +1,4 @@
-# ADR 006: Java Linter and Formatter Selection
+# ADR 007: Java Linter and Formatter Selection
 
 **Status:** Proposed
 **Date:** 2025-05-24

@@ -1,4 +1,4 @@
-# ADR 008: Maven as Build Tool and Dependency Manager
+# ADR 003: Maven as Build Tool and Dependency Manager
 
 **Status:** Accepted  
 **Date:** 2025-06-01

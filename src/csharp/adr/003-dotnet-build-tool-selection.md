@@ -1,4 +1,4 @@
-# ADR 004: .NET CLI and NuGet as Build Tool and Package Manager
+# ADR 003: .NET CLI and NuGet as Build Tool and Package Manager
 
 ## Status
 
