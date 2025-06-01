@@ -60,9 +60,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test getting a lamp by ID
+        /// Test getting a lamp by ID.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetByIdAsync_ShouldReturnCorrectLamp()
         {
@@ -85,9 +85,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test updating an existing lamp
+        /// Test updating an existing lamp.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateAsync_ShouldModifyExistingLamp()
         {
@@ -116,9 +116,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test deleting a lamp
+        /// Test deleting a lamp.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteAsync_ShouldRemoveLamp()
         {
@@ -142,9 +142,9 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test deleting a non-existent lamp
+        /// Test deleting a non-existent lamp.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteAsync_NonExistentLamp_ShouldReturnFalse()
         {

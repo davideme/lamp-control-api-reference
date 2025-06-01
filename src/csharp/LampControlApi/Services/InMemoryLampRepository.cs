@@ -8,7 +8,9 @@ namespace LampControlApi.Services
     /// </summary>
     public class InMemoryLampRepository : ILampRepository
     {
-        private readonly ConcurrentDictionary<Guid, Lamp> _lamps = new ();
+#pragma warning disable SA1000 // KeywordsMustBeSpacedCorrectly
+        private readonly ConcurrentDictionary<Guid, Lamp> _lamps = new();
+#pragma warning restore SA1000 // KeywordsMustBeSpacedCorrectly
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryLampRepository"/> class.

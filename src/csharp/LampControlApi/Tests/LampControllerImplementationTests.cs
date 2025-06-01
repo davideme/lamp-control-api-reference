@@ -37,7 +37,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that ListLampsAsync returns empty collection when repository is empty.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task ListLampsAsync_WhenRepositoryEmpty_ShouldReturnEmptyCollection()
         {
@@ -57,7 +57,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that ListLampsAsync returns all lamps from repository.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task ListLampsAsync_WithLampsInRepository_ShouldReturnAllLamps()
         {
@@ -83,7 +83,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that CreateLampAsync throws ArgumentNullException when body is null.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task CreateLampAsync_WithNullBody_ShouldThrowArgumentNullException()
         {
@@ -94,7 +94,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that CreateLampAsync creates lamp with correct properties.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task CreateLampAsync_WithValidBody_ShouldCreateLampWithCorrectProperties()
         {
@@ -125,7 +125,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that CreateLampAsync generates new GUID for lamp ID.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task CreateLampAsync_ShouldGenerateNewGuidForLampId()
         {
@@ -148,7 +148,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync throws ArgumentException when lampId is null.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WithNullLampId_ShouldThrowArgumentException()
         {
@@ -160,7 +160,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync throws ArgumentException when lampId is empty.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WithEmptyLampId_ShouldThrowArgumentException()
         {
@@ -172,7 +172,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync throws ArgumentException when lampId is whitespace.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WithWhitespaceLampId_ShouldThrowArgumentException()
         {
@@ -184,7 +184,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync throws ArgumentException when lampId is invalid GUID format.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WithInvalidGuidFormat_ShouldThrowArgumentException()
         {
@@ -197,7 +197,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync throws KeyNotFoundException when lamp is not found.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WhenLampNotFound_ShouldThrowKeyNotFoundException()
         {
@@ -213,7 +213,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that GetLampAsync returns lamp when found.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task GetLampAsync_WhenLampExists_ShouldReturnLamp()
         {
@@ -235,7 +235,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync throws ArgumentException when lampId is null.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WithNullLampId_ShouldThrowArgumentException()
         {
@@ -250,7 +250,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync throws ArgumentException when lampId is empty.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WithEmptyLampId_ShouldThrowArgumentException()
         {
@@ -265,7 +265,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync throws ArgumentNullException when body is null.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WithNullBody_ShouldThrowArgumentNullException()
         {
@@ -280,7 +280,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync throws ArgumentException when lampId is invalid GUID format.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WithInvalidGuidFormat_ShouldThrowArgumentException()
         {
@@ -296,7 +296,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync throws KeyNotFoundException when lamp is not found.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WhenLampNotFound_ShouldThrowKeyNotFoundException()
         {
@@ -313,7 +313,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync updates and returns lamp when found.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_WhenLampExists_ShouldUpdateAndReturnLamp()
         {
@@ -340,7 +340,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that UpdateLampAsync modifies the existing lamp's status.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task UpdateLampAsync_ShouldModifyExistingLampStatus()
         {
@@ -370,7 +370,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync throws ArgumentException when lampId is null.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WithNullLampId_ShouldThrowArgumentException()
         {
@@ -382,7 +382,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync throws ArgumentException when lampId is empty.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WithEmptyLampId_ShouldThrowArgumentException()
         {
@@ -394,7 +394,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync throws ArgumentException when lampId is whitespace.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WithWhitespaceLampId_ShouldThrowArgumentException()
         {
@@ -406,7 +406,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync throws ArgumentException when lampId is invalid GUID format.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WithInvalidGuidFormat_ShouldThrowArgumentException()
         {
@@ -419,7 +419,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync throws KeyNotFoundException when lamp is not found.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WhenLampNotFound_ShouldThrowKeyNotFoundException()
         {
@@ -435,7 +435,7 @@ namespace LampControlApi.Tests
         /// <summary>
         /// Test that DeleteLampAsync successfully deletes when lamp exists.
         /// </summary>
-        /// <returns>A task</returns>
+        /// <returns>A task.</returns>
         [TestMethod]
         public async Task DeleteLampAsync_WhenLampExists_ShouldDeleteSuccessfully()
         {

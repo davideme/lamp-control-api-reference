@@ -1,3 +1,4 @@
+#pragma warning disable SA1000 // KeywordsMustBeSpacedCorrectly
 using System.Net;
 using System.Text.Json;
 
