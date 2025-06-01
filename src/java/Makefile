@@ -1,4 +1,5 @@
-# Makefile for generating and validating Java Spring server stubs from OpenAPI spec
+# Makefile for OpenAPI code generation in Java Spring project
+# Maven handles all build, test, format, and lint tasks - use 'mvn' commands directly
 
 # Variables
 OPENAPI_GENERATOR_VERSION := v7.13.0
@@ -11,11 +12,11 @@ DOCKER_RUN := docker run --rm \
 	-v ${PWD}/../..:/local \
 	openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION}
 
-.PHONY: generate clean validate help format lint check-format
+.PHONY: generate clean validate help
 
 # Generate Spring server stub
 generate:
-	@echo "Generating Spring server stub..."
+	@echo "Generating Spring server stub from OpenAPI specification..."
 	${DOCKER_RUN} generate \
 		-i /local/${OPENAPI_SPEC} \
 		-g ${GENERATOR_NAME} \
@@ -24,7 +25,7 @@ generate:
 
 # Clean generated files
 clean:
-	@echo "Cleaning generated files..."
+	@echo "Cleaning generated OpenAPI files..."
 	rm -rf ${OUTPUT_DIR}/lamp_control_api
 
 # Validate OpenAPI specification
@@ -32,33 +33,20 @@ validate:
 	@echo "Validating OpenAPI specification..."
 	${DOCKER_RUN} validate -i /local/${OPENAPI_SPEC}
 
-# Format code using Spotless
-format:
-	@echo "Formatting code with Spotless..."
-	mvn spotless:apply
-
-# Check code formatting
-check-format:
-	@echo "Checking code formatting..."
-	mvn spotless:check
-
-# Run static analysis (linting)
-lint:
-	@echo "Running static analysis..."
-	mvn compile spotbugs:check pmd:check checkstyle:check
-
-# Run all quality checks
-quality-check: check-format lint
-	@echo "All quality checks completed"
-
 # Help target
 help:
+	@echo "OpenAPI Code Generation for Java Spring Boot Project"
+	@echo ""
 	@echo "Available targets:"
-	@echo "  generate      - Generate Spring server stub"
-	@echo "  clean         - Remove generated files"
-	@echo "  validate      - Validate OpenAPI specification"
-	@echo "  format        - Format code using Spotless"
-	@echo "  check-format  - Check if code is formatted correctly"
-	@echo "  lint          - Run static analysis (SpotBugs, PMD, Checkstyle)"
-	@echo "  quality-check - Run all quality checks (format + lint)"
-	@echo "  help          - Show this help message" 
+	@echo "  generate  - Generate Spring server stub from OpenAPI spec"
+	@echo "  clean     - Remove generated OpenAPI files"
+	@echo "  validate  - Validate OpenAPI specification"
+	@echo "  help      - Show this help message"
+	@echo ""
+	@echo "For build tasks, use Maven directly:"
+	@echo "  mvn clean compile          - Clean and compile"
+	@echo "  mvn test                   - Run tests"
+	@echo "  mvn spotless:apply         - Format code"
+	@echo "  mvn spotless:check         - Check formatting"
+	@echo "  mvn spotbugs:check         - Run static analysis"
+	@echo "  mvn clean install          - Full build with tests" 

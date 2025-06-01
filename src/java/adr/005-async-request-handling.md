@@ -1,4 +1,4 @@
-# ADR 004: Asynchronous Request Handling for HTTP APIs
+# ADR 005: Asynchronous Request Handling for HTTP APIs
 Status: Proposed
 Date: 2025-05-21
 
