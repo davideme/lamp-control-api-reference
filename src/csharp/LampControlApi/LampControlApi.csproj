@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors />
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json" />
+  </ItemGroup>
+
+  <!-- Custom MSBuild Targets for Development Tasks -->
+  <Target Name="Format" DependsOnTargets="Restore">
+    <Message Text="Formatting code..." Importance="high" />
+    <Exec Command="dotnet format --include-generated" />
+  </Target>
+
+  <Target Name="FormatCheck" DependsOnTargets="Restore">
+    <Message Text="Checking code formatting..." Importance="high" />
+    <Exec Command="dotnet format --verify-no-changes --verbosity diagnostic" />
+  </Target>
+
+  <Target Name="Lint" DependsOnTargets="Restore">
+    <Message Text="Running static analysis..." Importance="high" />
+    <Exec Command="dotnet build --verbosity normal --configuration Release" />
+  </Target>
+  <Target Name="SecurityScan" DependsOnTargets="Restore">
+    <Message Text="Scanning for vulnerable packages..." Importance="high" />
+    <Exec Command="dotnet list $(MSBuildProjectFile) package --vulnerable --include-transitive" />
+  </Target>
+  <Target Name="RunDev" DependsOnTargets="Build">
+    <Message Text="Starting development server..." Importance="high" />
+    <Exec Command="dotnet run --environment Development" />
+  </Target>
+  <Target Name="Test" DependsOnTargets="Build">
+    <Message Text="Running tests..." Importance="high" />
+    <Message Text="No tests found. Consider adding test projects." Importance="normal" />
+    <!-- When tests are added, uncomment the line below: -->
+    <!-- Exec Command="dotnet test" -->
+  </Target>
+
+  <Target Name="CodeQuality" DependsOnTargets="FormatCheck;Lint">
+    <Message Text="All code quality checks passed!" Importance="high" />
+  </Target>
+
+  <Target Name="CI" DependsOnTargets="FormatCheck;Lint;Test;Build">
+    <Message Text="CI pipeline completed successfully!" Importance="high" />
+  </Target>
+
+</Project>

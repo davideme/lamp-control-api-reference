@@ -1,0 +1,58 @@
+# Global analyzer configuration for C# projects
+is_global = true
+
+# Code quality rules
+dotnet_analyzer_diagnostic.category-design.severity = suggestion
+dotnet_analyzer_diagnostic.category-globalization.severity = suggestion
+dotnet_analyzer_diagnostic.category-interoperability.severity = suggestion
+dotnet_analyzer_diagnostic.category-maintainability.severity = suggestion
+dotnet_analyzer_diagnostic.category-naming.severity = suggestion
+dotnet_analyzer_diagnostic.category-performance.severity = warning
+dotnet_analyzer_diagnostic.category-reliability.severity = warning
+dotnet_analyzer_diagnostic.category-security.severity = error
+dotnet_analyzer_diagnostic.category-style.severity = suggestion
+dotnet_analyzer_diagnostic.category-usage.severity = warning
+
+# Specific rules
+# CA1303: Do not pass literals as localized parameters (we're not localizing)
+dotnet_diagnostic.CA1303.severity = none
+
+# CA1062: Validate arguments of public methods (handled by nullable reference types)
+dotnet_diagnostic.CA1062.severity = suggestion
+
+# CA2007: Consider calling ConfigureAwait on the awaited task (not needed in ASP.NET Core)
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1848: Use the LoggerMessage delegates
+dotnet_diagnostic.CA1848.severity = suggestion
+
+# IDE rules
+dotnet_diagnostic.IDE0058.severity = none  # Expression value is never used
+dotnet_diagnostic.IDE0060.severity = suggestion  # Remove unused parameter
+dotnet_diagnostic.IDE0061.severity = suggestion  # Use expression body for local functions
+dotnet_diagnostic.IDE0062.severity = suggestion  # Make local function static
+
+# StyleCop rules - customize as needed
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = none
+
+# SA1101: Prefix local calls with this
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1200: Using directives should be placed correctly
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1413: Use trailing comma in multi-line initializers
+dotnet_diagnostic.SA1413.severity = suggestion
+
+# SA1600: Elements should be documented
+dotnet_diagnostic.SA1600.severity = suggestion
+
+# SA1602: Enumeration items should be documented
+dotnet_diagnostic.SA1602.severity = none
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = none

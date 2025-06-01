@@ -1,0 +1,49 @@
+{
+    "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+    "settings": {
+        "documentationRules": {
+            "companyName": "Lamp Control API",
+            "copyrightText": "Copyright (c) {companyName}. All rights reserved.",
+            "xmlHeader": true,
+            "fileNamingConvention": "stylecop"
+        },
+        "orderingRules": {
+            "usingDirectivesPlacement": "outsideNamespace",
+            "elementOrder": [
+                "kind",
+                "accessibility",
+                "constant",
+                "static",
+                "readonly"
+            ]
+        },
+        "namingRules": {
+            "allowCommonHungarianPrefixes": true,
+            "allowedHungarianPrefixes": [
+                "db",
+                "id",
+                "is",
+                "my",
+                "no",
+                "to",
+                "ui"
+            ]
+        },
+        "maintainabilityRules": {
+            "topLevelTypes": [
+                "class",
+                "interface",
+                "struct",
+                "delegate",
+                "enum"
+            ]
+        },
+        "layoutRules": {
+            "newlineAtEndOfFile": "allow",
+            "allowConsecutiveUsings": true
+        },
+        "readabilityRules": {
+            "allowBuiltInTypeAliases": true
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable static analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    
+    <!-- Treat specific warnings as errors -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    
+    <!-- Code coverage -->
+    <CollectCoverage>true</CollectCoverage>
+    
+    <!-- Common package versions -->
+    <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
+    <NetAnalyzersVersion>8.0.0</NetAnalyzersVersion>
+  </PropertyGroup>
+
+  <!-- Global analyzer packages will be automatically discovered -->
+</Project>
