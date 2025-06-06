@@ -1,25 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
-using LampControlApi.Controllers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LampControlApi.E2E
 {
-    public class CustomWebApplicationFactory : WebApplicationFactory<Program>
-    {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            // Set content root to the project directory
-            var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../LampControlApi"));
-            builder.UseContentRoot(projectDir);
-        }
-    }
-
     [TestClass]
     public class LampApiE2ETests
     {
-        private static CustomWebApplicationFactory _factory = null!;
         private static HttpClient _client = null!;
 
         /// <summary>
@@ -29,8 +17,8 @@ namespace LampControlApi.E2E
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            _factory = new CustomWebApplicationFactory();
-            _client = _factory.CreateClient();
+            var factory = new CustomWebApplicationFactory();
+            _client = factory.CreateClient();
         }
 
         /// <summary>
@@ -40,7 +28,6 @@ namespace LampControlApi.E2E
         public static void ClassCleanup()
         {
             _client.Dispose();
-            _factory.Dispose();
         }
 
         [TestMethod]
