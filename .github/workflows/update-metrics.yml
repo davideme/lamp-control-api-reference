@@ -25,7 +25,11 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness --not-match 'test' --not-match 'test_|test\..[^/]+$' --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
+            --not-match '[Tt]ests?' \
+            --not-match '[Ss]pecs?' \
+            --not-match 'test_|test\..[^/]+$'
+            --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
@@ -68,44 +72,8 @@ jobs:
       - name: Extract code coverage percentages
         id: coverage
         run: |
-          # TypeScript coverage
-          if [ -f src/typescript/coverage/coverage-summary.json ]; then
-            TS_COVERAGE=$(jq '.total.lines.pct' src/typescript/coverage/coverage-summary.json)
-          else
-            TS_COVERAGE="N/A"
-          fi
-          echo "TypeScript coverage: $TS_COVERAGE"
-          echo "TS_COVERAGE=$TS_COVERAGE" >> $GITHUB_ENV
-
-          # Python coverage
-          if [ -f src/python/coverage/coverage.json ]; then
-            PY_COVERAGE=$(jq '.totals.percent_covered | floor' src/python/coverage/coverage.json)
-          else
-            PY_COVERAGE="N/A"
-          fi
-          echo "Python coverage: $PY_COVERAGE"
-          echo "PY_COVERAGE=$PY_COVERAGE" >> $GITHUB_ENV
-
-          # Java coverage
-          if [ -f src/java/target/site/jacoco/jacoco.xml ]; then
-            # Extract line coverage from JaCoCo XML using grep and sed
-            JAVA_MISSED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
-            JAVA_COVERED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
-            if [[ "$JAVA_MISSED" =~ ^[0-9]+$ && "$JAVA_COVERED" =~ ^[0-9]+$ ]]; then
-              JAVA_TOTAL=$((JAVA_MISSED + JAVA_COVERED))
-              if [ "$JAVA_TOTAL" -gt 0 ]; then
-                JAVA_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($JAVA_COVERED/$JAVA_TOTAL)*100}")
-              else
-                JAVA_COVERAGE="0"
-              fi
-            else
-              JAVA_COVERAGE="N/A"
-            fi
-          else
-            JAVA_COVERAGE="N/A"
-          fi
-          echo "Java coverage: $JAVA_COVERAGE"
-          echo "JAVA_COVERAGE=$JAVA_COVERAGE" >> $GITHUB_ENV
+          chmod +x scripts/extract-coverage.sh
+          ./scripts/extract-coverage.sh
 
       - name: Generate SCC table
         run: |
@@ -134,6 +102,16 @@ jobs:
               coverage="${PY_COVERAGE:-N/A}"
             elif [[ "$lang_name" == "Java" ]]; then
               coverage="${JAVA_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "C#" ]]; then
+              coverage="${CS_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "PHP" ]]; then
+              coverage="${PHP_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "Go" ]]; then
+              coverage="${GO_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "Kotlin" ]]; then
+              coverage="${KOTLIN_COVERAGE:-N/A}"
+            elif [[ "$lang_name" == "Ruby" ]]; then
+              coverage="${RUBY_COVERAGE:-N/A}"
             else
               coverage="N/A"
             fi
