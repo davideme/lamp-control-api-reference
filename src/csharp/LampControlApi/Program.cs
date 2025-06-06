@@ -1,6 +1,16 @@
+using LampControlApi.Controllers;
+using LampControlApi.Middleware;
+using LampControlApi.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers();
+
+// Register our services
+builder.Services.AddSingleton<ILampRepository, InMemoryLampRepository>();
+builder.Services.AddScoped<IController, LampControllerImplementation>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -14,29 +24,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add exception handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast(
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+// Map controllers
+app.MapControllers();
 
 app.Run();
 
-sealed record WeatherForecast(DateOnly date, int temperatureC, string? summary)
+/// <summary>
+/// Entry point for the LampControlApi application. This partial class is used for test accessibility.
+/// </summary>
+public partial class Program
 {
-    public int TemperatureF => 32 + (int)(temperatureC / 0.5556);
+    // Intentionally left blank. Used for test accessibility.
 }

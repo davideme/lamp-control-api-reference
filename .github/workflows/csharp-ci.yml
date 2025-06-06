@@ -52,10 +52,8 @@ jobs:
     
     - name: Run tests
       run: |
-        # Note: No tests currently exist in this project
-        echo "No tests found. Consider adding test projects."
-        # When tests are added, use: dotnet test --configuration Release --logger trx --results-directory ./TestResults
-    
+        dotnet test LampControlApi/LampControlApi.csproj --configuration Release --logger trx --results-directory ./TestResults
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: success()

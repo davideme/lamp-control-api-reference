@@ -45,5 +45,10 @@
         "readabilityRules": {
             "allowBuiltInTypeAliases": true
         }
+    },
+    "rules": {
+        "SA1000": {
+            "severity": "none"
+        }
     }
 }
