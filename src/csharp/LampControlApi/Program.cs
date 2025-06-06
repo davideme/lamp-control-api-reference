@@ -34,4 +34,10 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { } // Make Program public for test accessibility
+/// <summary>
+/// Entry point for the LampControlApi application. This partial class is used for test accessibility.
+/// </summary>
+public partial class Program
+{
+    // Intentionally left blank. Used for test accessibility.
+}
