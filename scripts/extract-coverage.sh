@@ -15,7 +15,6 @@ else
   TS_COVERAGE="N/A"
 fi
 echo "TypeScript coverage: $TS_COVERAGE"
-echo "TS_COVERAGE=$TS_COVERAGE" >> $GITHUB_ENV
 
 # Python coverage
 echo "Checking Python coverage..."
@@ -25,7 +24,6 @@ else
   PY_COVERAGE="N/A"
 fi
 echo "Python coverage: $PY_COVERAGE"
-echo "PY_COVERAGE=$PY_COVERAGE" >> $GITHUB_ENV
 
 # Java coverage
 echo "Checking Java coverage..."
@@ -47,7 +45,6 @@ else
   JAVA_COVERAGE="N/A"
 fi
 echo "Java coverage: $JAVA_COVERAGE"
-echo "JAVA_COVERAGE=$JAVA_COVERAGE" >> $GITHUB_ENV
 
 # C# coverage
 echo "Checking C# coverage..."
@@ -84,30 +81,35 @@ elif [ -d src/csharp/coverage ] && [ "$(ls -A src/csharp/coverage)" ]; then
 fi
 
 echo "C# coverage: $CS_COVERAGE"
-echo "CS_COVERAGE=$CS_COVERAGE" >> $GITHUB_ENV
 
 # PHP coverage (placeholder for future implementation)
 echo "Checking PHP coverage..."
 PHP_COVERAGE="N/A"
 echo "PHP coverage: $PHP_COVERAGE"
-echo "PHP_COVERAGE=$PHP_COVERAGE" >> $GITHUB_ENV
 
 # Go coverage (placeholder for future implementation)
 echo "Checking Go coverage..."
 GO_COVERAGE="N/A"
 echo "Go coverage: $GO_COVERAGE"
-echo "GO_COVERAGE=$GO_COVERAGE" >> $GITHUB_ENV
 
 # Kotlin coverage (placeholder for future implementation)
 echo "Checking Kotlin coverage..."
 KOTLIN_COVERAGE="N/A"
 echo "Kotlin coverage: $KOTLIN_COVERAGE"
-echo "KOTLIN_COVERAGE=$KOTLIN_COVERAGE" >> $GITHUB_ENV
 
 # Ruby coverage (placeholder for future implementation)
 echo "Checking Ruby coverage..."
 RUBY_COVERAGE="N/A"
 echo "Ruby coverage: $RUBY_COVERAGE"
-echo "RUBY_COVERAGE=$RUBY_COVERAGE" >> $GITHUB_ENV
 
 echo "Coverage extraction completed!"
+
+# Output coverage values for capture
+echo "TS_COVERAGE=$TS_COVERAGE"
+echo "PY_COVERAGE=$PY_COVERAGE"
+echo "JAVA_COVERAGE=$JAVA_COVERAGE"
+echo "CS_COVERAGE=$CS_COVERAGE"
+echo "PHP_COVERAGE=$PHP_COVERAGE"
+echo "GO_COVERAGE=$GO_COVERAGE"
+echo "KOTLIN_COVERAGE=$KOTLIN_COVERAGE"
+echo "RUBY_COVERAGE=$RUBY_COVERAGE"
