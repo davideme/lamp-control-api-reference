@@ -28,7 +28,7 @@ jobs:
           output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
             --not-match '[Tt]ests?' \
             --not-match '[Ss]pecs?' \
-            --not-match 'test_|test\..[^/]+$'
+            --not-match 'test_|test\..[^/]+$' \
             --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
           echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
