@@ -43,22 +43,22 @@ clean:
 test: build
 	dotnet test $(PROJECT_FILE)
 
-# Run tests with coverage
+# Run tests with coverage (Microsoft Method)
 test-coverage coverage: build
-	@echo "Running tests with coverage collection..."
+	@echo "Running tests with Microsoft Code Coverage..."
 	# Clean previous coverage results
-	rm -rf TestResults coverage/latest
-	# Run tests with coverage collection
-	dotnet test $(PROJECT_FILE) --collect:"XPlat Code Coverage" --results-directory TestResults --settings coverlet.runsettings || \
-	dotnet test $(PROJECT_FILE) --collect:"XPlat Code Coverage" --results-directory TestResults
-	# Try to consolidate coverage files to a standard location
-	@if [ -d TestResults ]; then \
-		mkdir -p coverage/latest; \
-		find TestResults -name "coverage.cobertura.xml" -exec cp {} TestResults/ \; 2>/dev/null || true; \
-		find TestResults -name "*.xml" -path "*/coverage.cobertura.xml" -exec cp {} coverage/latest/ \; 2>/dev/null || true; \
-		echo "Coverage files generated in TestResults/ and coverage/latest/"; \
-		ls -la TestResults/ 2>/dev/null || echo "No TestResults directory found"; \
-	fi
+	rm -rf TestResults coverage-report
+	# Run tests with Microsoft's built-in Code Coverage
+	dotnet test $(PROJECT_FILE) --collect:"Code Coverage" --results-directory TestResults
+	# Convert binary coverage to Cobertura XML
+	@echo "Converting coverage to XML format..."
+	dotnet-coverage merge TestResults/*/*.coverage --output TestResults/coverage.cobertura.xml --output-format cobertura
+	# Generate HTML report
+	@echo "Generating HTML coverage report..."
+	reportgenerator -reports:TestResults/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
+	@echo "Coverage report generated! Open coverage-report/index.html to view results"
+	@echo "Coverage summary:"
+	@grep -o 'line-rate="[^"]*"' TestResults/coverage.cobertura.xml | head -1 | sed 's/line-rate="//; s/"//' | awk '{printf "Line Coverage: %.1f%%\n", $$1*100}'
 
 # Format code
 format format-fix:
