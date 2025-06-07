@@ -46,6 +46,8 @@ CodeCoverage/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
+# Exception: Keep the main coverage file for metrics
+!TestResults/coverage.cobertura.xml
 [Bb]uild[Ll]og.*
 
 # NUnit
