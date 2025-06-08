@@ -4,7 +4,7 @@
 # Variables
 OPENAPI_GENERATOR_VERSION := v7.13.0
 OPENAPI_SPEC := docs/api/openapi.yaml
-OUTPUT_DIR := src/php
+OUTPUT_DIR := src/php/lamp-control-api
 GENERATOR_NAME := php-slim4
 
 # Docker command with common options
