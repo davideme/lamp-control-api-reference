@@ -1,4 +1,5 @@
 {
+  "name": "openapiserver/lamp-control-api",
   "minimum-stability": "RC",
   "repositories": [
     {

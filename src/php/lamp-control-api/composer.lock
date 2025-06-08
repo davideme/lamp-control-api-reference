@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01def794c4d67e439198c02d9a9adbaa",
+    "content-hash": "3bb865af0e3d80ba26992935b9d5cf5c",
     "packages": [
         {
             "name": "dyorg/slim-token-authentication",
