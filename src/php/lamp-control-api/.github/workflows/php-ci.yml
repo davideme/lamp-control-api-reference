@@ -1,0 +1,121 @@
+name: PHP CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: ['8.3']
+    
+    name: PHP ${{ matrix.php-version }} Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        tools: composer:v2
+        coverage: xdebug
+    
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php-version }}-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Run PHPUnit tests
+      run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+    
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    name: Code Quality Checks
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        tools: composer:v2
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-8.3-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.3-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Check PHP syntax
+      run: find src tests -name "*.php" -exec php -l {} \;
+    
+    - name: Run PHP_CodeSniffer (PSR-12 Style Check)
+      run: vendor/bin/phpcs --standard=PSR12 --colors -p src tests
+    
+    - name: Run PHP-CS-Fixer (Dry Run)
+      run: vendor/bin/php-cs-fixer fix src --dry-run --diff --verbose
+    
+    - name: Run PHPStan (Static Analysis)
+      run: vendor/bin/phpstan analyse --memory-limit=2G
+    
+    - name: Security Check
+      run: composer audit
+
+  format-check:
+    runs-on: ubuntu-latest
+    
+    name: Code Formatting Check
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
+        tools: composer:v2
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-8.3-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.3-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Check if code is properly formatted (PHP-CS-Fixer)
+      run: vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
+    
+    - name: Check if code follows PSR-12 (PHP_CodeSniffer)
+      run: vendor/bin/phpcs --standard=PSR12 src tests

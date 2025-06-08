@@ -30,6 +30,7 @@
         "slim/slim": "^4.10"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.75",
         "jangregor/phpstan-prophecy": "^1.0.0",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpstan/extension-installer": "^1.2.0",
@@ -56,6 +57,24 @@
     },
     "scripts": {
         "start": "php -S localhost:8080 -t public",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage --coverage-text",
+        "lint": "phpcs --standard=PSR12 --colors -p src tests",
+        "lint-fix": "phpcbf --standard=PSR12 src tests",
+        "format": "php-cs-fixer fix",
+        "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
+        "analyze": "phpstan analyse --memory-limit=2G",
+        "security-check": "composer audit",
+        "quality": [
+            "@lint",
+            "@format-check",
+            "@analyze",
+            "@security-check"
+        ],
+        "quality-fix": [
+            "@lint-fix",
+            "@format",
+            "@analyze"
+        ]
     }
 }
