@@ -43,8 +43,11 @@ class LampRepository
             return null;
         }
         $lamp = $this->lamps[$lampId];
-        $lampData = $lamp->getData();
-        if (isset($lampUpdate->status)) {
+        $lampDataObj = $lamp->getData();
+        $lampData = is_object($lampDataObj) ? get_object_vars($lampDataObj) : (array)$lampDataObj;
+        if (null !== $lampUpdate->status) {
+            $lampData['status'] = $lampUpdate->status;
+        } elseif (array_key_exists('status', $lampData)) {
             $lampData['status'] = $lampUpdate->status;
         }
         $lamp->setData($lampData);

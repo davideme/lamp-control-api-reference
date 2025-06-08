@@ -21,10 +21,16 @@
  * https://github.com/openapitools/openapi-generator
  * Please update the test case below to test the endpoint.
  */
+
 namespace OpenAPIServer\Api;
 
-use PHPUnit\Framework\TestCase;
 use OpenAPIServer\Api\DefaultApi;
+use PHPUnit\Framework\TestCase;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Response;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request as SlimRequest;
+use Slim\Psr7\Uri;
 
 /**
  * DefaultApiTest Class Doc Comment
@@ -37,33 +43,39 @@ use OpenAPIServer\Api\DefaultApi;
  */
 class DefaultApiTest extends TestCase
 {
+    private function createJsonRequest(string $method, string $path, array $body = null): SlimRequest
+    {
+        $uri = new Uri('', '', 80, $path);
+        $headers = new Headers([
+            'Content-Type' => ['application/json'],
+            'Accept' => ['application/json'],
+        ]);
+        $cookies = [];
+        $serverParams = [];
+        $streamFactory = new StreamFactory();
+        $stream = $streamFactory->createStream($body ? json_encode($body) : '');
+        return new SlimRequest($method, $uri, $headers, $cookies, $serverParams, $stream);
+    }
+
     /**
      * Setup before running any test cases
      */
-    public static function setUpBeforeClass(): void
-    {
-    }
+    public static function setUpBeforeClass(): void {}
 
     /**
      * Setup before running each test case
      */
-    public function setUp(): void
-    {
-    }
+    public function setUp(): void {}
 
     /**
      * Clean up after running each test case
      */
-    public function tearDown(): void
-    {
-    }
+    public function tearDown(): void {}
 
     /**
      * Clean up after running all test cases
      */
-    public static function tearDownAfterClass(): void
-    {
-    }
+    public static function tearDownAfterClass(): void {}
 
     /**
      * Test case for createLamp
@@ -74,64 +86,60 @@ class DefaultApiTest extends TestCase
      */
     public function testCreateLamp()
     {
-        self::markTestIncomplete(
-            'Test of "createLamp" method has not been implemented yet.'
-        );
-    }
+        $api = new DefaultApi();
 
-    /**
-     * Test case for deleteLamp
-     *
-     * Delete a lamp.
-     *
-     * @covers ::deleteLamp
-     */
-    public function testDeleteLamp()
-    {
-        self::markTestIncomplete(
-            'Test of "deleteLamp" method has not been implemented yet.'
-        );
-    }
+        // Create a request to create a lamp (status only, boolean)
+        $request = $this->createJsonRequest('POST', '/lamps', [
+            'status' => true,
+        ]);
+        $response = new Response();
+        $response = $api->createLamp($request, $response);
+        $this->assertEquals(201, $response->getStatusCode());
+        $lamp = json_decode((string)$response->getBody(), true);
+        $this->assertArrayHasKey('id', $lamp);
+        $this->assertArrayHasKey('status', $lamp);
+        $this->assertTrue($lamp['status']);
+        $lampId = $lamp['id'];
 
-    /**
-     * Test case for getLamp
-     *
-     * Get a specific lamp.
-     *
-     * @covers ::getLamp
-     */
-    public function testGetLamp()
-    {
-        self::markTestIncomplete(
-            'Test of "getLamp" method has not been implemented yet.'
-        );
-    }
+        // 2. List lamps
+        $request = $this->createJsonRequest('GET', '/lamps');
+        $response = new Response();
+        $response = $api->listLamps($request, $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $lamps = json_decode((string)$response->getBody(), true);
+        $this->assertIsArray($lamps);
+        $this->assertNotEmpty($lamps);
+        $this->assertEquals($lampId, $lamps[0]['id']);
 
-    /**
-     * Test case for listLamps
-     *
-     * List all lamps.
-     *
-     * @covers ::listLamps
-     */
-    public function testListLamps()
-    {
-        self::markTestIncomplete(
-            'Test of "listLamps" method has not been implemented yet.'
-        );
-    }
+        // 3. Get lamp
+        $request = $this->createJsonRequest('GET', "/lamps/{$lampId}");
+        $response = new Response();
+        $response = $api->getLamp($request, $response, (string)$lampId);
+        $this->assertEquals(200, $response->getStatusCode());
+        $lampFetched = json_decode((string)$response->getBody(), true);
+        $this->assertEquals($lampId, $lampFetched['id']);
+        $this->assertTrue($lampFetched['status']);
 
-    /**
-     * Test case for updateLamp
-     *
-     * Update a lamp's status.
-     *
-     * @covers ::updateLamp
-     */
-    public function testUpdateLamp()
-    {
-        self::markTestIncomplete(
-            'Test of "updateLamp" method has not been implemented yet.'
-        );
+        // 4. Update lamp (turn off)
+        $request = $this->createJsonRequest('PUT', "/lamps/{$lampId}", [
+            'status' => false,
+        ]);
+        $response = new Response();
+        $response = $api->updateLamp($request, $response, (string)$lampId);
+        $this->assertEquals(200, $response->getStatusCode());
+        $lampUpdated = json_decode((string)$response->getBody(), true);
+        $this->assertFalse($lampUpdated['status']);
+
+        // 5. Delete lamp
+        $request = $this->createJsonRequest('DELETE', "/lamps/{$lampId}");
+        $response = new Response();
+        $response = $api->deleteLamp($request, $response, (string)$lampId);
+        $this->assertEquals(204, $response->getStatusCode());
+
+        // 6. Get deleted lamp (should 404)
+        $request = $this->createJsonRequest('GET', "/lamps/{$lampId}");
+        $response = new Response();
+        $response = $api->getLamp($request, $response, (string)$lampId);
+        $this->assertEquals(404, $response->getStatusCode());
     }
 }
