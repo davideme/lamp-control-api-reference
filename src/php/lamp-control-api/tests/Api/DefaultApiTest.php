@@ -25,6 +25,8 @@
 namespace OpenAPIServer\Api;
 
 use OpenAPIServer\Api\DefaultApi;
+use OpenAPIServer\Repository\LampRepository;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Response;
@@ -43,6 +45,12 @@ use Slim\Psr7\Uri;
  */
 class DefaultApiTest extends TestCase
 {
+    /** @var MockObject|LampRepository */
+    private $mockRepo;
+
+    /** @var DefaultApi */
+    private $api;
+
     private function createJsonRequest(string $method, string $path, array $body = null): SlimRequest
     {
         $uri = new Uri('', '', 80, $path);
@@ -65,7 +73,22 @@ class DefaultApiTest extends TestCase
     /**
      * Setup before running each test case
      */
-    public function setUp(): void {}
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->mockRepo = $this->getMockBuilder(LampRepository::class)
+            ->onlyMethods(['create', 'all', 'get', 'update', 'delete'])
+            ->getMock();
+        $this->api = $this->getMockBuilder(DefaultApi::class)
+            ->onlyMethods(['__construct'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        // Inject the mock repository into the DefaultApi instance
+        $reflection = new \ReflectionClass(DefaultApi::class);
+        $repoProp = $reflection->getProperty('repo');
+        $repoProp->setAccessible(true);
+        $repoProp->setValue($this->api, $this->mockRepo);
+    }
 
     /**
      * Clean up after running each test case
@@ -86,14 +109,37 @@ class DefaultApiTest extends TestCase
      */
     public function testCreateLamp()
     {
-        $api = new DefaultApi();
+        $lampData = ['id' => '1', 'status' => true];
+        $lampObj = $this->createMock(\OpenAPIServer\Model\Lamp::class);
+        $lampObj->method('getData')->willReturn($lampData);
+        $lampObj->method('jsonSerialize')->willReturn($lampData);
+        $this->mockRepo->expects($this->once())
+            ->method('create')
+            ->willReturn($lampObj);
+        $this->mockRepo->expects($this->once())
+            ->method('all')
+            ->willReturn([$lampObj]);
+        $this->mockRepo->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(['1'], ['1'])
+            ->willReturnOnConsecutiveCalls($lampObj, null);
+        $this->mockRepo->expects($this->once())
+            ->method('update')
+            ->willReturnCallback(function ($id, $update) {
+                $updatedData = ['id' => '1', 'status' => false];
+                $updatedLamp = $this->createMock(\OpenAPIServer\Model\Lamp::class);
+                $updatedLamp->method('getData')->willReturn($updatedData);
+                $updatedLamp->method('jsonSerialize')->willReturn($updatedData);
+                return $updatedLamp;
+            });
+        $this->mockRepo->expects($this->once())
+            ->method('delete')
+            ->willReturn(true);
 
         // Create a request to create a lamp (status only, boolean)
-        $request = $this->createJsonRequest('POST', '/lamps', [
-            'status' => true,
-        ]);
+        $request = $this->createJsonRequest('POST', '/lamps', ['status' => true]);
         $response = new Response();
-        $response = $api->createLamp($request, $response);
+        $response = $this->api->createLamp($request, $response);
         $this->assertEquals(201, $response->getStatusCode());
         $lamp = json_decode((string)$response->getBody(), true);
         $this->assertArrayHasKey('id', $lamp);
@@ -104,7 +150,7 @@ class DefaultApiTest extends TestCase
         // 2. List lamps
         $request = $this->createJsonRequest('GET', '/lamps');
         $response = new Response();
-        $response = $api->listLamps($request, $response);
+        $response = $this->api->listLamps($request, $response);
         $this->assertEquals(200, $response->getStatusCode());
         $lamps = json_decode((string)$response->getBody(), true);
         $this->assertIsArray($lamps);
@@ -114,18 +160,16 @@ class DefaultApiTest extends TestCase
         // 3. Get lamp
         $request = $this->createJsonRequest('GET', "/lamps/{$lampId}");
         $response = new Response();
-        $response = $api->getLamp($request, $response, (string)$lampId);
+        $response = $this->api->getLamp($request, $response, (string)$lampId);
         $this->assertEquals(200, $response->getStatusCode());
         $lampFetched = json_decode((string)$response->getBody(), true);
         $this->assertEquals($lampId, $lampFetched['id']);
         $this->assertTrue($lampFetched['status']);
 
         // 4. Update lamp (turn off)
-        $request = $this->createJsonRequest('PUT', "/lamps/{$lampId}", [
-            'status' => false,
-        ]);
+        $request = $this->createJsonRequest('PUT', "/lamps/{$lampId}", ['status' => false]);
         $response = new Response();
-        $response = $api->updateLamp($request, $response, (string)$lampId);
+        $response = $this->api->updateLamp($request, $response, (string)$lampId);
         $this->assertEquals(200, $response->getStatusCode());
         $lampUpdated = json_decode((string)$response->getBody(), true);
         $this->assertFalse($lampUpdated['status']);
@@ -133,13 +177,13 @@ class DefaultApiTest extends TestCase
         // 5. Delete lamp
         $request = $this->createJsonRequest('DELETE', "/lamps/{$lampId}");
         $response = new Response();
-        $response = $api->deleteLamp($request, $response, (string)$lampId);
+        $response = $this->api->deleteLamp($request, $response, (string)$lampId);
         $this->assertEquals(204, $response->getStatusCode());
 
         // 6. Get deleted lamp (should 404)
         $request = $this->createJsonRequest('GET', "/lamps/{$lampId}");
         $response = new Response();
-        $response = $api->getLamp($request, $response, (string)$lampId);
+        $response = $this->api->getLamp($request, $response, (string)$lampId);
         $this->assertEquals(404, $response->getStatusCode());
     }
 }
