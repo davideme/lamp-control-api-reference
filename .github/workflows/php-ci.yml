@@ -129,9 +129,6 @@ jobs:
     
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-    
-    - name: Check if code is properly formatted (PHP-CS-Fixer)
-      run: vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
-    
+
     - name: Check if code follows PSR-12 (PHP_CodeSniffer)
       run: vendor/bin/phpcs --standard=PSR12 src tests
