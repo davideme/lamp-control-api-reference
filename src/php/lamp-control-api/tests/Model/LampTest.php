@@ -37,7 +37,6 @@ use OpenAPIServer\Model\Lamp;
  */
 class LampTest extends TestCase
 {
-
     /**
      * Setup before running any test cases
      */
@@ -113,4 +112,3 @@ class LampTest extends TestCase
         $this->assertIsArray($schemaArr);
     }
 }
-

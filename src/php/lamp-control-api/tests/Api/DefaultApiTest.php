@@ -37,7 +37,6 @@ use OpenAPIServer\Api\DefaultApi;
  */
 class DefaultApiTest extends TestCase
 {
-
     /**
      * Setup before running any test cases
      */
