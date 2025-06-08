@@ -1,5 +1,7 @@
 <?php
 
+namespace OpenAPIServer\Tests;
+
 use OpenAPIServer\Repository\LampRepository;
 use OpenAPIServer\Model\LampCreate;
 use OpenAPIServer\Model\LampUpdate;
