@@ -62,10 +62,32 @@
     ],
     "test-apis": "phpunit --testsuite Apis",
     "test-models": "phpunit --testsuite Models",
+    "test-coverage": "phpunit --coverage-html coverage --coverage-text",
     "phpcs": "phpcs",
-    "phplint": "phplint ./ --exclude=vendor"
+    "phplint": "phplint ./ --exclude=vendor",
+    "lint": "phpcs --standard=PSR12 --colors -p src tests",
+    "lint-fix": "phpcbf --standard=PSR12 src tests",
+    "format": "php-cs-fixer fix",
+    "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
+    "analyze": "phpstan analyse --memory-limit=2G",
+    "security-check": "composer audit",
+    "quality": [
+      "@lint",
+      "@format-check",
+      "@analyze",
+      "@security-check"
+    ],
+    "quality-fix": [
+      "@lint-fix",
+      "@format",
+      "@analyze"
+    ]
   },
   "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    },
+    "process-timeout": 0,
     "sort-packages": true
   }
 }
