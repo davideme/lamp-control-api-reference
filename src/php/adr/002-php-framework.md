@@ -6,41 +6,53 @@ Accepted
 
 ## Date
 
-2025-05-26
+2025-06-08
 
 ## Context
 
-We are initiating a new PHP project with the primary objective of building a robust, maintainable, and scalable REST API. The framework choice should enable rapid development, ensure security, and provide strong community and ecosystem support over the coming years.
+We are initiating a new PHP project with the primary objective of building a robust, maintainable, and scalable REST API. The framework choice should enable rapid development, ensure security, and provide strong community and ecosystem support over the coming years. **Requirement:** The framework must be backend-only without frontend dependencies or Node.js requirements.
 
 ## Decision
 
-We will use **Laravel 12** as the framework for our REST API.
+We will use **Slim Framework 4** as the framework for our REST API.
 
-* **Version:** Laravel 12 (released on February 24, 2025)
-* **PHP Compatibility:** PHP 8.2, 8.3, and 8.4
+* **Version:** Slim Framework 4.x (latest stable)
+* **PHP Compatibility:** PHP 8.1, 8.2, 8.3, and 8.4
+* **Architecture:** Microframework designed specifically for APIs and web services
 
 ## Rationale
 
-* **Latest Stable Release:** Laravel 12 is the most recent stable version, ensuring access to the latest features and improvements.
-* **Support Timeline:** Laravel 12 will receive bug fixes until August 13, 2026, and security updates until February 24, 2027.
-* **Enhanced Features:** Laravel 12 introduces improved application structure, new starter kits for Vue, React, and Livewire, and advanced API features like GraphQL support and better versioning.
-* **Community and Ecosystem:** Laravel has a large and active community, with extensive documentation and a rich ecosystem of packages and tools.
-* **Performance and Scalability:** Laravel 12 includes performance optimizations and supports asynchronous processing via Laravel Octane for high-throughput API needs.
+* **Backend-Only Design:** Slim is designed exclusively for backend development with no frontend dependencies or Node.js requirements.
+* **Lightweight and Fast:** Minimal overhead with excellent performance for API endpoints and microservices.
+* **PSR Standards Compliance:** Built on PSR-7 (HTTP Message Interface) and PSR-15 (HTTP Server Request Handlers), ensuring interoperability and modern PHP practices.
+* **Mature and Stable:** Slim 4 is well-established with proven reliability in production environments.
+* **Flexible Architecture:** Allows for clean separation of concerns with dependency injection container support.
+* **API-First Approach:** Designed specifically for building REST APIs, web services, and microservices.
+* **Minimal Learning Curve:** Simple, straightforward framework that's easy to learn and implement for API development.
 
 ## Alternatives Considered
 
-* **Laravel 11:** While still supported, Laravel 11 will receive bug fixes only until August 5, 2025, and security updates until February 3, 2026, making Laravel 12 a more future-proof choice.
+* **Laravel 12:** Full-stack framework with frontend capabilities (Vue, React starters) and Node.js dependencies, which doesn't align with our backend-only requirement.
 * **Symfony:** Highly modular and robust, ideal for complex, enterprise APIs, but has a steeper learning curve and requires more boilerplate.
-* **Slim:** Lightweight and fast, suited for microservices, but lacks many features and requires additional packages for full API functionality.
-* **API Platform:** Built on Symfony, specialized for API-first projects (REST & GraphQL), but introduces additional complexity.
+* **API Platform:** Built on Symfony, specialized for API-first projects (REST & GraphQL), but introduces additional complexity and includes frontend tooling.
+* **Lumen:** Laravel's microframework, but officially deprecated as of Laravel 10+ and no longer recommended for new projects.
 
 ## Risks
 
-* **Ecosystem Maturity:** As Laravel 12 is a recent release, some third-party packages may not yet be fully compatible.
-* **Learning Curve:** New features and changes in Laravel 12 may require additional learning and adaptation time for the development team.
+* **Feature Limitations:** Being a microframework, some advanced features may require additional packages or manual implementation.
+* **Smaller Ecosystem:** Fewer pre-built packages compared to Laravel, requiring more custom development.
+* **Less Opinionated:** Requires more architectural decisions from the development team.
+
+## Implementation Notes
+
+* Use Composer for dependency management
+* Implement PSR-4 autoloading
+* Utilize middleware for cross-cutting concerns (authentication, CORS, logging)
+* Integrate with existing PHP ecosystem packages as needed
 
 ## References
 
-* [Laravel 12 Release Notes](https://laravel.com/docs/12.x/releases)
-* [Laravel Versions and Support Policy](https://laravelversions.com/en)
-* [Laravel 12 Features and Updates](https://www.bacancytechnology.com/blog/laravel-12-features-updates)
+* [Slim Framework Documentation](https://www.slimframework.com/docs/v4/)
+* [Slim Framework GitHub Repository](https://github.com/slimphp/Slim)
+* [PSR-7 HTTP Message Interface](https://www.php-fig.org/psr/psr-7/)
+* [PSR-15 HTTP Server Request Handlers](https://www.php-fig.org/psr/psr-15/)
