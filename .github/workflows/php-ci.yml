@@ -3,13 +3,23 @@ name: PHP CI
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'src/php/**'
+      - '.github/workflows/php-ci.yml'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'src/php/**'
+      - '.github/workflows/php-ci.yml'
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: src/php
+
     strategy:
       matrix:
         php-version: ['8.3']
@@ -47,7 +57,10 @@ jobs:
     
   code-quality:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: src/php
+
     name: Code Quality Checks
     
     steps:
@@ -89,7 +102,10 @@ jobs:
 
   format-check:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: src/php
+
     name: Code Formatting Check
     
     steps:
