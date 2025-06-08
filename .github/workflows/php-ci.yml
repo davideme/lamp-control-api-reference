@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/php
+        working-directory: src/php/lamp-control-api
 
     strategy:
       matrix:
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/php
+        working-directory: src/php/lamp-control-api
 
     name: Code Quality Checks
     
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/php
+        working-directory: src/php/lamp-control-api
 
     name: Code Formatting Check
     
