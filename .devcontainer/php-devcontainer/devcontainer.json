@@ -19,6 +19,14 @@
 			"version": "lts",
 			"pnpmVersion": "none",
 			"nvmVersion": "latest"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"installDockerComposeSwitch": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
 		}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.

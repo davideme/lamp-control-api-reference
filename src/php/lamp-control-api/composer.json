@@ -1,80 +1,93 @@
 {
-    "name": "slim/slim-skeleton",
-    "description": "A Slim Framework skeleton application for rapid development",
-    "keywords": [
-        "microframework",
-        "rest",
-        "router",
-        "psr7"
-    ],
-    "homepage": "http://github.com/slimphp/Slim-Skeleton",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Josh Lockhart",
-            "email": "info@joshlockhart.com",
-            "homepage": "http://www.joshlockhart.com/"
-        },
-        {
-            "name": "Pierre Berube",
-            "email": "pierre@lgse.com",
-            "homepage": "http://www.lgse.com/"
-        }
-    ],
-    "require": {
-        "php": "^7.4 || ^8.0",
-        "ext-json": "*",
-        "monolog/monolog": "^2.8",
-        "php-di/php-di": "^6.4",
-        "slim/psr7": "^1.5",
-        "slim/slim": "^4.10"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.75",
-        "jangregor/phpstan-prophecy": "^1.0.0",
-        "phpspec/prophecy-phpunit": "^2.0",
-        "phpstan/extension-installer": "^1.2.0",
-        "phpstan/phpstan": "^1.8",
-        "phpunit/phpunit": "^9.5.26",
-        "squizlabs/php_codesniffer": "^3.7"
-    },
-    "config": {
-        "allow-plugins": {
-            "phpstan/extension-installer": true
-        },
-        "process-timeout": 0,
-        "sort-packages": true
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "start": "php -S localhost:8080 -t public",
-        "test": "phpunit",
-        "test-coverage": "phpunit --coverage-html coverage --coverage-text",
-        "lint": "phpcs --standard=PSR12 --colors -p src tests",
-        "lint-fix": "phpcbf --standard=PSR12 src tests",
-        "format": "php-cs-fixer fix",
-        "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
-        "analyze": "phpstan analyse --memory-limit=2G",
-        "security-check": "composer audit",
-        "quality": [
-            "@lint",
-            "@format-check",
-            "@analyze",
-            "@security-check"
-        ],
-        "quality-fix": [
-            "@lint-fix",
-            "@format",
-            "@analyze"
-        ]
+  "name": "openapiserver/lamp-control-api",
+  "minimum-stability": "RC",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ybelenko/slim-token-authentication",
+      "no-api": true
     }
+  ],
+  "description": "",
+  "keywords": [
+    "openapi",
+    "php",
+    "api"
+  ],
+  "homepage": "https://openapi-generator.tech",
+  "license": "unlicense",
+  "authors": [
+    {
+      "name": "OpenAPI",
+      "homepage": "https://openapi-generator.tech"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "dyorg/slim-token-authentication": "dev-slim4",
+    "monolog/monolog": "^2.4",
+    "neomerx/cors-psr7": "^2.0",
+    "php-di/slim-bridge": "^3.2",
+    "slim/psr7": "^1.1.0",
+    "ybelenko/openapi-data-mocker": "^1.0",
+    "ybelenko/openapi-data-mocker-server-middleware": "^1.2"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.75",
+    "overtrue/phplint": "^2.0.2",
+    "phpspec/prophecy-phpunit": "^2.4",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^8.0 || ^9.0",
+    "squizlabs/php_codesniffer": "^3.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "OpenAPIServer\\": [
+        "lib/",
+        "src/"
+      ],
+      "App\\": "src/",
+      "Tests\\": "tests/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OpenAPIServer\\": "tests/"
+    }
+  },
+  "scripts": {
+    "start": "php -S 0.0.0.0:8080 -t public",
+    "test": [
+      "phpunit"
+    ],
+    "test-apis": "phpunit --testsuite Apis",
+    "test-models": "phpunit --testsuite Models",
+    "test-coverage": "phpunit --coverage-html coverage --coverage-text",
+    "phpcs": "phpcs",
+    "phplint": "phplint ./ --exclude=vendor",
+    "lint": "phpcs --standard=PSR12 --colors -p src tests",
+    "lint-fix": "phpcbf --standard=PSR12 src tests",
+    "format": "php-cs-fixer fix",
+    "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
+    "analyze": "phpstan analyse --memory-limit=2G",
+    "security-check": "composer audit",
+    "quality": [
+      "@lint",
+      "@format-check",
+      "@analyze",
+      "@security-check"
+    ],
+    "quality-fix": [
+      "@lint-fix",
+      "@format",
+      "@analyze"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    },
+    "process-timeout": 0,
+    "sort-packages": true
+  }
 }
