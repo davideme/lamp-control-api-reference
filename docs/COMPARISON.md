@@ -10,7 +10,7 @@ This document provides a comparison of the different language implementations in
 | Python | 346 | 215 | 0.62 | 86 |
 | Java | 691 | 619 | 0.90 | 100 |
 | C# | 334 | 424 | 1.27 | 99 |
-| PHP | 603 | 283 | 0.47 | N/A |
+| PHP | 1426 | 1158 | 0.81 | N/A |
 | Go | null | 0 | N/A | N/A |
 | Kotlin | null | 0 | N/A | N/A |
 | Ruby | null | 0 | N/A | N/A |
