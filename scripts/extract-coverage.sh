@@ -82,9 +82,29 @@ fi
 
 echo "C# coverage: $CS_COVERAGE"
 
-# PHP coverage (placeholder for future implementation)
+# PHP coverage
 echo "Checking PHP coverage..."
 PHP_COVERAGE="N/A"
+
+# Try to find PHP coverage XML files
+if [ -f src/php/lamp-control-api/coverage.xml ]; then
+  # Extract line coverage from Clover XML - get total statements and covered statements
+  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' src/php/lamp-control-api/coverage.xml | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
+  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
+  
+  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
+    PHP_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+  fi
+elif [ -f src/php/lamp-control-api/coverage/clover.xml ]; then
+  # Try alternative location
+  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' src/php/lamp-control-api/coverage/clover.xml | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
+  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage/clover.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
+  
+  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
+    PHP_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+  fi
+fi
+
 echo "PHP coverage: $PHP_COVERAGE"
 
 # Go coverage (placeholder for future implementation)
