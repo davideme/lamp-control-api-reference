@@ -41,8 +41,9 @@ func main() {
 	api.HandlerFromMux(lamp, r)
 
 	s := &http.Server{
-		Handler: r,
-		Addr:    net.JoinHostPort("0.0.0.0", *port),
+		Handler:           r,
+		Addr:              net.JoinHostPort("0.0.0.0", *port),
+		ReadHeaderTimeout: 10 * 1e9, // 10 seconds
 	}
 
 	// And we serve HTTP until the world ends.
