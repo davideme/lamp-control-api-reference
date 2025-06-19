@@ -33,9 +33,9 @@ jobs:
           go mod tidy
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1.6
+          version: latest
           working-directory: src/go
           args: --timeout=5m
 
@@ -131,17 +131,13 @@ jobs:
           go mod download
           go mod tidy
 
-      - name: Install Gosec
-        run: |
-          curl -sfL https://raw.githubusercontent.com/securecodewarrior/gosec/master/install.sh | sh -s -- -b $HOME/go/bin latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
-
       - name: Run Gosec Security Scanner
-        working-directory: src/go
-        run: gosec -fmt sarif -out gosec-results.sarif ./...
+        uses: securego/gosec@v2
+        with:
+          args: '-fmt sarif -out gosec-results.sarif ./...'
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: src/go/gosec-results.sarif
+          sarif_file: gosec-results.sarif
           category: gosec
