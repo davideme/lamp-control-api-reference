@@ -1,7 +1,7 @@
 # golangci-lint configuration file - Version 2 format
 # https://golangci-lint.run/usage/configuration/
 
-version: 2
+version: "2"
 
 run:
   # Timeout for analysis
