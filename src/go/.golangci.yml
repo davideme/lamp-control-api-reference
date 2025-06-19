@@ -1,236 +1,130 @@
-# golangci-lint configuration file - Version 2 format
-# https://golangci-lint.run/usage/configuration/
-
 version: "2"
-
 run:
-  # Timeout for analysis
-  timeout: 5m
-  
-  # Include test files in analysis
   tests: true
-  
-  # Skip vendor directories
-  skip-dirs:
-    - vendor
-    - bin
-    - .git
-  
-  # Skip files matching these patterns
-  skip-files:
-    - ".*\\.gen\\.go$"
-    - ".*_gen\\.go$"
-
-# Output configuration
-output:  
-  # Print lines of code with issue
-  print-issued-lines: true
-  
-  # Print linter name in the end of issue text
-  print-linter-name: true
-  
-  # Make issues output unique by line
-  uniq-by-line: true
-  
-  # Sort results by: filepath, line and column
-  sort-results: true
-
-# All available settings of specific linters
-linters-settings:
-  # Cyclop (replaces gocyclo)
-  cyclop:
-    # Minimal code complexity to report
-    max-complexity: 15
-    
-  # Errcheck settings
-  errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`;
-    check-type-assertions: true
-    
-    # Report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
-    check-blank: true
-    
-    # List of functions to exclude from checking
-    exclude-functions:
-      - io/ioutil.ReadFile
-      - io.Copy(*bytes.Buffer)
-      - io.Copy(os.Stdout)
-
-  # Goimports settings
-  goimports:
-    # Put imports beginning with prefix after 3rd-party packages
-    local-prefixes: github.com/davideme/lamp-control-api-reference
-
-  # Govet settings
-  govet:
-    # Enable all analyzers
-    enable-all: true
-    # Disable specific analyzers
-    disable:
-      - fieldalignment # too strict
-    settings:
-      printf:
-        # Comma-separated list of print function names to check
-        funcs:
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-
-  # Lll settings (line length limit)
-  lll:
-    # Max line length, lines longer will be reported
-    line-length: 120
-
-  # Misspell settings
-  misspell:
-    # Correct spellings using locale preferences for US or UK
-    locale: US
-
-  # Nakedret settings
-  nakedret:
-    # Make an issue if func has more lines of code than this setting
-    max-func-lines: 30
-
-  # Prealloc settings
-  prealloc:
-    # Report preallocation suggestions only on simple loops
-    simple: true
-    range-loops: true
-    for-loops: false
-
-  # Revive (replaces golint)
-  revive:
-    # Maximum number of open files at the same time
-    max-open-files: 2048
-    # When set to false, ignores files with "GENERATED" header
-    ignore-generated-header: true
-    # Sets the default severity
-    severity: warning
-    # Sets the confidence threshold
-    confidence: 0.8
-    rules:
-      - name: atomic
-      - name: line-length-limit
-        severity: error
-        arguments: [120]
-      - name: argument-limit
-        arguments: [4]
-      - name: cyclomatic
-        arguments: [10]
-      - name: max-public-structs
-        arguments: [3]
-
-  # Unparam settings
-  unparam:
-    # Inspect exported functions
-    check-exported: false
-
-  # Unused settings
-  unused:
-    # Mark all struct fields that have been written to as used
-    field-writes-are-uses: true
-    # Mark all exported identifiers as used
-    exported-is-used: true
-    # Mark all exported fields as used
-    exported-fields-are-used: true
-    # Mark all function parameters as used
-    parameters-are-used: true
-    # Mark all local variables as used
-    local-variables-are-used: true
-    # Mark all generated files as used
-    generated-is-used: true
-
-  # Whitespace settings
-  whitespace:
-    multi-if: false   # Enforces newlines (or comments) after every multi-line if statement
-    multi-func: false # Enforces newlines (or comments) after every multi-line function signature
-
-# Linters to enable/disable
 linters:
-  # Disable all linters as it's a beta feature; all linters are enabled by default
-  disable-all: false
-  
   enable:
-    # Default linters (always enabled)
-    - errcheck      # Errcheck is a program for checking for unchecked errors in Go programs
-    - govet         # Vet examines Go source code and reports suspicious constructs
-    - ineffassign   # Detects when assignments to existing variables are not used
-    - staticcheck   # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
-    - unused        # Checks Go code for unused constants, variables, functions and types
-    
-    # Additional recommended linters
-    - cyclop        # Checks function and package cyclomatic complexity
-    - gosec         # Inspects source code for security problems
-    - misspell      # Finds commonly misspelled English words in comments
-    - nakedret      # Finds naked returns in functions greater than a specified function length
-    - prealloc      # Finds slice declarations that could potentially be preallocated
-    - unparam       # Reports unused function parameters
-    - whitespace    # Tool for detection of leading and trailing whitespace
-    - goconst       # Finds repeated strings that could be replaced by a constant
-    - gocritic      # Provides diagnostics that check for bugs, performance and style issues
-    - bodyclose     # Checks whether HTTP response body is closed successfully
-    - noctx         # Noctx finds sending http request without context.Context
-    - rowserrcheck  # Checks whether Err of rows is checked successfully
-    - sqlclosecheck # Checks that sql.Rows and sql.Stmt are closed
-    - goheader      # Checks is file header matches to pattern
-    - gomodguard    # Allow and block list linter for direct Go module dependencies
-    - gosmopolitan  # Report certain i18n/l10n anti-patterns in your Go codebase
-    - importas      # Enforces consistent import aliases
-    - makezero      # Finds slice declarations with non-zero initial length
-    - nilnil        # Checks that there is no simultaneous return of nil error and an invalid value
-    - nilerr        # Finds the code that returns nil even if it checks that the error is not nil
-    - nlreturn      # Nlreturn checks for a new line before return and branch statements
-    - nolintlint    # Reports ill-formed or insufficient nolint directives
-    - predeclared   # Find code that shadows one of Go's predeclared identifiers
-    - promlinter    # Check Prometheus metrics naming via promlint
-    - reassign      # Checks that package variables are not reassigned
-    - testableexamples # Linter checks if examples are testable (have an expected output)
-    - thelper       # Thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
-    - unconvert     # Remove unnecessary type conversions
-    - usestdlibvars # A linter that detect the possibility to use variables/constants from the Go standard library
-    - wastedassign  # Wastedassign finds wasted assignment statements
-    - wrapcheck     # Checks that errors returned from external packages are wrapped
-
-# Issues configuration
+    - bodyclose
+    - cyclop
+    - goconst
+    - gocritic
+    - goheader
+    - gomodguard
+    - gosec
+    - gosmopolitan
+    - importas
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - rowserrcheck
+    - sqlclosecheck
+    - testableexamples
+    - thelper
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - wrapcheck
+  settings:
+    cyclop:
+      max-complexity: 15
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - io/ioutil.ReadFile
+        - io.Copy(*bytes.Buffer)
+        - io.Copy(os.Stdout)
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+      settings:
+        printf:
+          funcs:
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    lll:
+      line-length: 120
+    misspell:
+      locale: US
+    nakedret:
+      max-func-lines: 30
+    prealloc:
+      simple: true
+      range-loops: true
+      for-loops: false
+    revive:
+      max-open-files: 2048
+      confidence: 0.8
+      severity: warning
+      rules:
+        - name: atomic
+        - name: line-length-limit
+          arguments:
+            - 120
+          severity: error
+        - name: argument-limit
+          arguments:
+            - 4
+        - name: cyclomatic
+          arguments:
+            - 10
+        - name: max-public-structs
+          arguments:
+            - 3
+    unparam:
+      check-exported: false
+    whitespace:
+      multi-if: false
+      multi-func: false
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - cyclop
+          - errcheck
+          - goconst
+          - gosec
+          - lll
+        path: _test\.go
+      - linters:
+          - govet
+        text: undeclared name
+      - linters:
+          - lll
+        source: '^//go:generate '
+      - linters:
+          - godot
+        source: ^\s*//\s*TODO
+      - path: (.+)\.go$
+        text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  # List of regexps of issue texts to exclude
-  exclude:
-    # Exclude some linters from running on tests files
-    - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
-    
-  # Excluding configuration per-path, per-linter, per-text and per-source
-  exclude-rules:
-    # Exclude some linters from running on tests files
-    - path: _test\.go
-      linters:
-        - cyclop
-        - errcheck
-        - gosec
-        - goconst
-        - lll
-        
-    # Exclude known linters from partially hard-to-fix issues
-    - linters:
-        - govet
-      text: "undeclared name"
-      
-    # Exclude lll issues for long lines with go:generate
-    - linters:
-        - lll
-      source: "^//go:generate "
-      
-    # Exclude godot for TODO comments
-    - linters:
-        - godot
-      source: "^\\s*//\\s*TODO"
-
-  # Independently from option `exclude` we use default exclude patterns
-  exclude-use-default: false
-  
-  # Maximum issues count per one linter
   max-issues-per-linter: 0
-  
-  # Maximum count of issues with the same text
   max-same-issues: 0
-
+formatters:
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/davideme/lamp-control-api-reference
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
