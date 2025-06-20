@@ -25,7 +25,7 @@ deps:
 # Build the application
 .PHONY: build
 build:
-	$(GOBUILD) -o $(BINARY_PATH) -v ./...
+	$(GOBUILD) -o $(BINARY_PATH) -v ./cmd/lamp-control-api
 
 # Clean build artifacts
 .PHONY: clean
@@ -88,7 +88,7 @@ run: build
 # Development mode (watch for changes)
 .PHONY: dev
 dev:
-	$(GOCMD) run main.go
+	$(GOCMD) run ./cmd/lamp-control-api
 
 # Security audit
 .PHONY: audit

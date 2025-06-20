@@ -113,7 +113,7 @@ jobs:
 
       - name: Build application
         working-directory: src/go
-        run: go build -v -o bin/lamp-control-api ./...
+        run: go build -v -o bin/lamp-control-api ./cmd/lamp-control-api
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
