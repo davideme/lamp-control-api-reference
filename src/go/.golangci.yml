@@ -1,0 +1,130 @@
+version: "2"
+run:
+  tests: true
+linters:
+  enable:
+    - bodyclose
+    - cyclop
+    - goconst
+    - gocritic
+    - goheader
+    - gomodguard
+    - gosec
+    - gosmopolitan
+    - importas
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - rowserrcheck
+    - sqlclosecheck
+    - testableexamples
+    - thelper
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - wrapcheck
+  settings:
+    cyclop:
+      max-complexity: 15
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - io/ioutil.ReadFile
+        - io.Copy(*bytes.Buffer)
+        - io.Copy(os.Stdout)
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+      settings:
+        printf:
+          funcs:
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    lll:
+      line-length: 120
+    misspell:
+      locale: US
+    nakedret:
+      max-func-lines: 30
+    prealloc:
+      simple: true
+      range-loops: true
+      for-loops: false
+    revive:
+      max-open-files: 2048
+      confidence: 0.8
+      severity: warning
+      rules:
+        - name: atomic
+        - name: line-length-limit
+          arguments:
+            - 120
+          severity: error
+        - name: argument-limit
+          arguments:
+            - 4
+        - name: cyclomatic
+          arguments:
+            - 10
+        - name: max-public-structs
+          arguments:
+            - 3
+    unparam:
+      check-exported: false
+    whitespace:
+      multi-if: false
+      multi-func: false
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - cyclop
+          - errcheck
+          - goconst
+          - gosec
+          - lll
+        path: _test\.go
+      - linters:
+          - govet
+        text: undeclared name
+      - linters:
+          - lll
+        source: '^//go:generate '
+      - linters:
+          - godot
+        source: ^\s*//\s*TODO
+      - path: (.+)\.go$
+        text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+formatters:
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/davideme/lamp-control-api-reference
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

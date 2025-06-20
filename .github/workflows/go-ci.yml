@@ -1,0 +1,156 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/go/**'
+      - '.github/workflows/go-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/go/**'
+      - '.github/workflows/go-ci.yml'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/go
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.3'
+          cache-dependency-path: src/go/go.sum
+
+      - name: Install dependencies
+        working-directory: src/go
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          working-directory: src/go
+          args: --timeout=5m
+
+      - name: Run go vet
+        working-directory: src/go
+        run: go vet ./...
+
+      - name: Check formatting
+        working-directory: src/go
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/go
+    strategy:
+      matrix:
+        go-version: ['1.24.4']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: src/go/go.sum
+
+      - name: Install dependencies
+        working-directory: src/go
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Run tests
+        working-directory: src/go
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/go
+    needs: [lint, test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.3'
+          cache-dependency-path: src/go/go.sum
+
+      - name: Install dependencies
+        working-directory: src/go
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Build application
+        working-directory: src/go
+        run: go build -v -o bin/lamp-control-api ./cmd/lamp-control-api
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-binary
+          path: src/go/bin/lamp-control-api
+
+  # security:
+  #   name: Security Scan
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: src/go
+  #   
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: '1.24.3'
+  #         cache-dependency-path: src/go/go.sum
+  #
+  #     - name: Install dependencies
+  #       working-directory: src/go
+  #       run: |
+  #         go mod download
+  #         go mod tidy
+  #
+  #     - name: Run Gosec Security Scanner
+  #       uses: securego/gosec@master
+  #       with:
+  #         args: '-fmt sarif -out gosec-results.sarif ./...'
+  #
+  #     - name: Upload SARIF file
+  #       uses: github/codeql-action/upload-sarif@v3
+  #       with:
+  #         sarif_file: gosec-results.sarif
+  #         category: gosec
