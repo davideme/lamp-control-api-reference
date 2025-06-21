@@ -1,13 +1,40 @@
 # Go Implementation
 
-This directory contains the Go implementation of the Lamp Control API.
+This directory contains the Go implementation of the Lamp Control API using an in-memory map as storage.
 
 ## Features
 
-- REST API (Gin/Echo with OpenAPI 3.0)
-- GraphQL (gqlgen)
-- gRPC
-- Database support for MySQL, PostgreSQL, and MongoDB
+- REST API with OpenAPI 3.0 specification
+- In-memory storage using Go maps with thread-safe access
+- Full CRUD operations for lamp management
+- Generated API client/server code using oapi-codegen
+- Comprehensive unit tests
+
+## Architecture
+
+The implementation uses:
+- **Chi Router**: Lightweight HTTP router for handling REST endpoints
+- **Map Storage**: In-memory map with `sync.RWMutex` for thread-safe operations
+- **OpenAPI Integration**: Generated types and handlers from OpenAPI specification
+- **Strict Handler Interface**: Type-safe request/response handling
+
+## Storage Implementation
+
+The lamp data is stored in a thread-safe map:
+```go
+type LampAPI struct {
+    lamps map[string]Lamp  // In-memory storage
+    mutex sync.RWMutex     // Thread-safe access
+}
+```
+
+## API Endpoints
+
+- `GET /lamps` - List all lamps
+- `POST /lamps` - Create a new lamp  
+- `GET /lamps/{lampId}` - Get a specific lamp
+- `PUT /lamps/{lampId}` - Update a lamp's status
+- `DELETE /lamps/{lampId}` - Delete a lamp
 
 ## Getting Started
 
@@ -20,7 +47,7 @@ This directory contains the Go implementation of the Lamp Control API.
 
 1. Install dependencies:
    ```bash
-   make deps
+   go mod tidy
    ```
 
 2. Install linting tools:
@@ -28,7 +55,57 @@ This directory contains the Go implementation of the Lamp Control API.
    make install-lint-tools
    ```
 
-### Development Workflow
+### Building and Running
+
+1. **Build the application**:
+   ```bash
+   go build -o bin/lamp-control-api ./cmd/lamp-control-api
+   ```
+
+2. **Run the server**:
+   ```bash
+   ./bin/lamp-control-api --port=8080
+   ```
+
+3. **Run tests**:
+   ```bash
+   go test ./api/
+   ```
+
+### Testing the API
+
+Once the server is running, you can test the endpoints:
+
+1. **Create a lamp**:
+   ```bash
+   curl -X POST http://localhost:8080/lamps \
+     -H "Content-Type: application/json" \
+     -d '{"status": true}'
+   ```
+
+2. **List all lamps**:
+   ```bash
+   curl -X GET http://localhost:8080/lamps
+   ```
+
+3. **Get a specific lamp**:
+   ```bash
+   curl -X GET http://localhost:8080/lamps/{lampId}
+   ```
+
+4. **Update a lamp**:
+   ```bash
+   curl -X PUT http://localhost:8080/lamps/{lampId} \
+     -H "Content-Type: application/json" \
+     -d '{"status": false}'
+   ```
+
+5. **Delete a lamp**:
+   ```bash
+   curl -X DELETE http://localhost:8080/lamps/{lampId}
+   ```
+
+## Development Workflow
 
 1. **Format code**: `make fmt`
 2. **Run linting**: `make lint`
@@ -43,8 +120,14 @@ go/
 ├── .vscode/        # VS Code settings
 ├── bin/            # Built binaries
 ├── api/            # API layer code
+│   ├── lamp.go     # Main API implementation with map storage
+│   ├── lamp_test.go # Unit tests
+│   ├── lamp.gen.go # Generated OpenAPI code
+│   └── cfg.yaml    # Code generation config
+├── cmd/            # Application entry points
+│   └── lamp-control-api/
+│       └── main.go # Server main function
 ├── .golangci.yml   # golangci-lint configuration
-├── .pre-commit-hook # Git pre-commit hook
 ├── Makefile        # Build and development tasks
 ├── go.mod          # Go module file
 ├── go.sum          # Go dependencies checksum
