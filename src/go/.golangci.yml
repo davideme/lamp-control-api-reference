@@ -98,6 +98,8 @@ linters:
           - goconst
           - gosec
           - lll
+          - gocritic
+          - nlreturn
         path: _test\.go
       - linters:
           - govet

@@ -3,37 +3,37 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
-	"sync"
 
 	"github.com/google/uuid"
 )
 
 type LampAPI struct {
-	// In-memory storage using a map with RWMutex for thread safety
-	lamps map[string]Lamp
-	mutex sync.RWMutex
+	repository LampRepository
 }
 
 var _ StrictServerInterface = (*LampAPI)(nil)
 
 func NewLampAPI() *LampAPI {
 	return &LampAPI{
-		lamps: make(map[string]Lamp),
-		mutex: sync.RWMutex{},
+		repository: NewInMemoryLampRepository(),
+	}
+}
+
+// NewLampAPIWithRepository creates a new LampAPI with a custom repository
+func NewLampAPIWithRepository(repo LampRepository) *LampAPI {
+	return &LampAPI{
+		repository: repo,
 	}
 }
 
 // List all lamps
 // (GET /lamps)
 func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject) (ListLampsResponseObject, error) {
-	l.mutex.RLock()
-	defer l.mutex.RUnlock()
-
-	// Convert map values to slice
-	lamps := make([]Lamp, 0, len(l.lamps))
-	for _, lamp := range l.lamps {
-		lamps = append(lamps, lamp)
+	lamps, err := l.repository.List(ctx)
+	if err != nil {
+		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError}
 	}
 
 	return ListLamps200JSONResponse(lamps), nil
@@ -54,9 +54,10 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 		Status: request.Body.Status,
 	}
 
-	l.mutex.Lock()
-	l.lamps[lampID.String()] = lamp
-	l.mutex.Unlock()
+	err := l.repository.Create(ctx, lamp)
+	if err != nil {
+		return nil, &APIError{Message: "Failed to create lamp", StatusCode: http.StatusInternalServerError}
+	}
 
 	return CreateLamp201JSONResponse(lamp), nil
 }
@@ -64,16 +65,14 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 // Delete a lamp
 // (DELETE /lamps/{lampId})
 func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObject) (DeleteLampResponseObject, error) {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
+	err := l.repository.Delete(ctx, request.LampId)
+	if err != nil {
+		if errors.Is(err, ErrLampNotFound) {
+			return DeleteLamp404Response{}, nil
+		}
 
-	// Check if lamp exists
-	if _, exists := l.lamps[request.LampId]; !exists {
-		return DeleteLamp404Response{}, nil
+		return nil, &APIError{Message: "Failed to delete lamp", StatusCode: http.StatusInternalServerError}
 	}
-
-	// Delete the lamp
-	delete(l.lamps, request.LampId)
 
 	return DeleteLamp204Response{}, nil
 }
@@ -81,13 +80,13 @@ func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObjec
 // Get a specific lamp
 // (GET /lamps/{lampId})
 func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (GetLampResponseObject, error) {
-	l.mutex.RLock()
-	defer l.mutex.RUnlock()
+	lamp, err := l.repository.GetByID(ctx, request.LampId)
+	if err != nil {
+		if errors.Is(err, ErrLampNotFound) {
+			return GetLamp404Response{}, nil
+		}
 
-	// Check if lamp exists
-	lamp, exists := l.lamps[request.LampId]
-	if !exists {
-		return GetLamp404Response{}, nil
+		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 
 	return GetLamp200JSONResponse(lamp), nil
@@ -100,20 +99,28 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
+	// Get the existing lamp to ensure it exists and get its ID
+	existingLamp, err := l.repository.GetByID(ctx, request.LampId)
+	if err != nil {
+		if errors.Is(err, ErrLampNotFound) {
+			return UpdateLamp404Response{}, nil
+		}
 
-	// Check if lamp exists
-	lamp, exists := l.lamps[request.LampId]
-	if !exists {
-		return UpdateLamp404Response{}, nil
+		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 
 	// Update the lamp status
-	lamp.Status = request.Body.Status
-	l.lamps[request.LampId] = lamp
+	updatedLamp := Lamp{
+		Id:     existingLamp.Id,
+		Status: request.Body.Status,
+	}
 
-	return UpdateLamp200JSONResponse(lamp), nil
+	err = l.repository.Update(ctx, updatedLamp)
+	if err != nil {
+		return nil, &APIError{Message: "Failed to update lamp", StatusCode: http.StatusInternalServerError}
+	}
+
+	return UpdateLamp200JSONResponse(updatedLamp), nil
 }
 
 // APIError represents an API error with status code
