@@ -70,6 +70,7 @@ func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObjec
 		if errors.Is(err, ErrLampNotFound) {
 			return DeleteLamp404Response{}, nil
 		}
+
 		return nil, &APIError{Message: "Failed to delete lamp", StatusCode: http.StatusInternalServerError}
 	}
 
@@ -84,6 +85,7 @@ func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (Ge
 		if errors.Is(err, ErrLampNotFound) {
 			return GetLamp404Response{}, nil
 		}
+
 		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 
@@ -103,6 +105,7 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		if errors.Is(err, ErrLampNotFound) {
 			return UpdateLamp404Response{}, nil
 		}
+
 		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 

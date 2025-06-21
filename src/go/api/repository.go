@@ -51,6 +51,7 @@ func (r *InMemoryLampRepository) Create(ctx context.Context, lamp Lamp) error {
 	defer r.mutex.Unlock()
 
 	r.lamps[lamp.Id.String()] = lamp
+
 	return nil
 }
 
@@ -78,6 +79,7 @@ func (r *InMemoryLampRepository) Update(ctx context.Context, lamp Lamp) error {
 	}
 
 	r.lamps[id] = lamp
+
 	return nil
 }
 
@@ -91,6 +93,7 @@ func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	delete(r.lamps, id)
+
 	return nil
 }
 
@@ -113,5 +116,6 @@ func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) bool {
 	defer r.mutex.RUnlock()
 
 	_, exists := r.lamps[id]
+
 	return exists
 }

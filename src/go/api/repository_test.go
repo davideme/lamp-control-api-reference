@@ -478,20 +478,20 @@ func TestInMemoryLampRepository_ContextHandling(t *testing.T) {
 		t.Fatalf("Create with background context failed: %v", err)
 	}
 
-	// Test with cancelled context (repository should still work as it doesn't use context for cancellation)
+	// Test with canceled context (repository should still work as it doesn't use context for cancellation)
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
 	_, err = repo.GetByID(cancelCtx, lamp.Id.String())
 	if err != nil {
-		t.Fatalf("GetByID with cancelled context failed: %v", err)
+		t.Fatalf("GetByID with canceled context failed: %v", err)
 	}
 
-	// Repository operations should still work with cancelled context
+	// Repository operations should still work with canceled context
 	// since the implementation doesn't check for cancellation
 	lamps, err := repo.List(cancelCtx)
 	if err != nil {
-		t.Fatalf("List with cancelled context failed: %v", err)
+		t.Fatalf("List with canceled context failed: %v", err)
 	}
 
 	if len(lamps) != 1 {

@@ -12,11 +12,13 @@ import (
 
 // Test helper to create API with mock repository
 func newTestLampAPI(t *testing.T) (*LampAPI, *MockLampRepository) {
+	t.Helper()
 	ctrl := gomock.NewController(t)
 	t.Cleanup(ctrl.Finish)
 
 	mockRepo := NewMockLampRepository(ctrl)
 	api := NewLampAPIWithRepository(mockRepo)
+
 	return api, mockRepo
 }
 
@@ -44,6 +46,7 @@ func TestLampAPI_CreateLamp_WithMock(t *testing.T) {
 					return false
 				}
 				lamp := Lamp(createResp)
+
 				return lamp.Status == true && lamp.Id != uuid.Nil
 			},
 		},
