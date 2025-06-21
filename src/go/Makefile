@@ -44,6 +44,23 @@ test-coverage:
 	$(GOTEST) -v -coverprofile=coverage.out ./...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 
+# Check code coverage meets minimum threshold
+.PHONY: coverage-check
+coverage-check:
+	@./scripts/check-coverage.sh
+
+# Generate coverage report and open in browser
+.PHONY: coverage-report
+coverage-report: test-coverage
+	@echo "Opening coverage report in browser..."
+	@$(GOCMD) tool cover -html=coverage.out
+
+# Show coverage summary
+.PHONY: coverage-summary
+coverage-summary:
+	@$(GOTEST) -coverprofile=coverage.out ./... > /dev/null 2>&1
+	@$(GOCMD) tool cover -func=coverage.out
+
 # Linting targets
 .PHONY: lint
 lint: lint-golangci lint-fmt lint-vet
@@ -110,6 +127,9 @@ help:
 	@echo "  clean              - Clean build artifacts"
 	@echo "  test               - Run tests"
 	@echo "  test-coverage      - Run tests with coverage report"
+	@echo "  coverage-check     - Check coverage meets minimum threshold (80%)"
+	@echo "  coverage-report    - Generate and open coverage report in browser"
+	@echo "  coverage-summary   - Show coverage summary"
 	@echo "  lint               - Run all linting checks"
 	@echo "  lint-golangci      - Run golangci-lint"
 	@echo "  lint-fmt           - Check code formatting"
