@@ -87,6 +87,52 @@ jobs:
         working-directory: src/go
         run: go test -v -race -coverprofile=coverage.out ./...
 
+      - name: Check code coverage
+        working-directory: src/go
+        run: |
+          echo "Checking code coverage..."
+          
+          # Filter out generated files from coverage (files ending with .gen.go)
+          echo "Filtering out generated files from coverage calculation..."
+          grep -v "\.gen\.go:" coverage.out > coverage.filtered.out || true
+          
+          # Also filter out main functions/packages which are hard to unit test
+          echo "Filtering out main packages from coverage calculation..."
+          grep -v "/main.go:" coverage.filtered.out > coverage.filtered2.out || true
+          
+          if [ -s coverage.filtered2.out ]; then
+            mv coverage.filtered2.out coverage.out
+            rm -f coverage.filtered.out
+          elif [ -s coverage.filtered.out ]; then
+            mv coverage.filtered.out coverage.out
+          else
+            echo "⚠️  Warning: No non-generated/non-main files found in coverage report"
+          fi
+          
+          coverage=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
+          echo "Current coverage (excluding generated files and main packages): ${coverage}%"
+          
+          # Check if coverage is at least 80% (using awk for floating point comparison)
+          meets_threshold=$(awk -v cov="$coverage" -v thresh="80" 'BEGIN {print (cov >= thresh)}')
+          
+          if [ "$meets_threshold" -eq 0 ]; then
+            echo "❌ Code coverage is ${coverage}%, which is below the required 80%"
+            echo "Please add more tests to increase coverage."
+            exit 1
+          else
+            echo "✅ Code coverage is ${coverage}%, which meets the required 80%"
+          fi
+
+      - name: Generate coverage report
+        working-directory: src/go
+        run: go tool cover -html=coverage.out -o coverage.html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage-report
+          path: src/go/coverage.html
+
   build:
     name: Build
     runs-on: ubuntu-latest

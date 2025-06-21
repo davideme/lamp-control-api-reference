@@ -67,10 +67,28 @@ type LampAPI struct {
    ./bin/lamp-control-api --port=8080
    ```
 
-3. **Run tests**:
+3. **Run tests with coverage**:
    ```bash
-   go test ./api/
+   make test-coverage
    ```
+
+4. **Check coverage meets minimum threshold (80%)**:
+   ```bash
+   make coverage-check
+   ```
+
+5. **View coverage report**:
+   ```bash
+   make coverage-report
+   ```
+
+### Coverage Requirements
+
+The project enforces a minimum code coverage of **80%** in CI/CD pipeline:
+- Generated files (`.gen.go`) are excluded from coverage calculation
+- Main packages are excluded since they're difficult to unit test
+- Coverage is checked on every PR and push to main/develop branches
+- Local coverage checking available via `make coverage-check`
 
 ### Testing the API
 

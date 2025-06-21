@@ -207,3 +207,67 @@ func TestLampAPI_DeleteLamp(t *testing.T) {
 		t.Fatalf("Expected DeleteLamp404Response for non-existent lamp, got %T", resp)
 	}
 }
+
+func TestAPIError(t *testing.T) {
+	err := &APIError{
+		Message:    "Test error",
+		StatusCode: 400,
+	}
+
+	if err.Error() != "Test error" {
+		t.Errorf("Expected error message 'Test error', got '%s'", err.Error())
+	}
+}
+
+func TestLampAPI_CreateLamp_NilBody(t *testing.T) {
+	api := NewLampAPI()
+
+	// Test creating a lamp with nil body
+	req := CreateLampRequestObject{
+		Body: nil,
+	}
+
+	_, err := api.CreateLamp(context.Background(), req)
+	if err == nil {
+		t.Fatal("Expected error for nil body, got nil")
+	}
+
+	apiErr, ok := err.(*APIError)
+	if !ok {
+		t.Fatalf("Expected APIError, got %T", err)
+	}
+
+	if apiErr.StatusCode != 400 {
+		t.Errorf("Expected status code 400, got %d", apiErr.StatusCode)
+	}
+}
+
+func TestLampAPI_UpdateLamp_NilBody(t *testing.T) {
+	api := NewLampAPI()
+	lampID := uuid.New()
+	lamp := Lamp{
+		Id:     openapi_types.UUID(lampID),
+		Status: true,
+	}
+	api.lamps[lampID.String()] = lamp
+
+	// Test updating a lamp with nil body
+	req := UpdateLampRequestObject{
+		LampId: lampID.String(),
+		Body:   nil,
+	}
+
+	_, err := api.UpdateLamp(context.Background(), req)
+	if err == nil {
+		t.Fatal("Expected error for nil body, got nil")
+	}
+
+	apiErr, ok := err.(*APIError)
+	if !ok {
+		t.Fatalf("Expected APIError, got %T", err)
+	}
+
+	if apiErr.StatusCode != 400 {
+		t.Errorf("Expected status code 400, got %d", apiErr.StatusCode)
+	}
+}
