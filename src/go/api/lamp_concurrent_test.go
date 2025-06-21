@@ -80,11 +80,21 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 	// Wait for all goroutines to complete
 	wg.Wait()
 
-	// Verify that we have the expected number of lamps
-	expectedLamps := numGoroutines * numOperationsPerGoroutine
-	if len(api.lamps) != expectedLamps {
-		t.Errorf("Expected %d lamps, got %d", expectedLamps, len(api.lamps))
+	// Verify that we have the expected number of lamps by listing them
+	listResp, err := api.ListLamps(context.Background(), ListLampsRequestObject{})
+	if err != nil {
+		t.Fatalf("ListLamps failed: %v", err)
 	}
 
-	t.Logf("Successfully created and accessed %d lamps concurrently", len(api.lamps))
+	listResult, ok := listResp.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
+	}
+
+	expectedLamps := numGoroutines * numOperationsPerGoroutine
+	if len(listResult) != expectedLamps {
+		t.Errorf("Expected %d lamps, got %d", expectedLamps, len(listResult))
+	}
+
+	t.Logf("Successfully created and accessed %d lamps concurrently", len(listResult))
 }

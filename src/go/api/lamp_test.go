@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"testing"
-
-	"github.com/google/uuid"
 )
 
 func TestLampAPI_CreateLamp(t *testing.T) {
@@ -31,9 +29,19 @@ func TestLampAPI_CreateLamp(t *testing.T) {
 		t.Errorf("Expected status true, got %v", lamp.Status)
 	}
 
-	// Verify the lamp was stored
-	if len(api.lamps) != 1 {
-		t.Errorf("Expected 1 lamp in storage, got %d", len(api.lamps))
+	// Verify the lamp was stored by listing lamps
+	listResp, err := api.ListLamps(context.Background(), ListLampsRequestObject{})
+	if err != nil {
+		t.Fatalf("ListLamps failed: %v", err)
+	}
+
+	listResult, ok := listResp.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
+	}
+
+	if len(listResult) != 1 {
+		t.Errorf("Expected 1 lamp in storage, got %d", len(listResult))
 	}
 }
 
@@ -56,10 +64,12 @@ func TestLampAPI_ListLamps(t *testing.T) {
 	}
 
 	// Add a lamp and verify it appears in the list
-	lampID := uuid.New()
-	api.lamps[lampID.String()] = Lamp{
-		Id:     lampID,
-		Status: true,
+	createReq := CreateLampRequestObject{
+		Body: &LampCreate{Status: true},
+	}
+	_, err = api.CreateLamp(context.Background(), createReq)
+	if err != nil {
+		t.Fatalf("CreateLamp failed: %v", err)
 	}
 
 	resp, err = api.ListLamps(context.Background(), ListLampsRequestObject{})
@@ -79,15 +89,24 @@ func TestLampAPI_ListLamps(t *testing.T) {
 
 func TestLampAPI_GetLamp(t *testing.T) {
 	api := NewLampAPI()
-	lampID := uuid.New()
-	lamp := Lamp{
-		Id:     lampID,
-		Status: true,
+
+	// Create a lamp using the API
+	createReq := CreateLampRequestObject{
+		Body: &LampCreate{Status: true},
 	}
-	api.lamps[lampID.String()] = lamp
+	createResp, err := api.CreateLamp(context.Background(), createReq)
+	if err != nil {
+		t.Fatalf("CreateLamp failed: %v", err)
+	}
+
+	createResult, ok := createResp.(CreateLamp201JSONResponse)
+	if !ok {
+		t.Fatalf("Expected CreateLamp201JSONResponse, got %T", createResp)
+	}
+	createdLamp := Lamp(createResult)
 
 	// Test getting existing lamp
-	req := GetLampRequestObject{LampId: lampID.String()}
+	req := GetLampRequestObject{LampId: createdLamp.Id.String()}
 	resp, err := api.GetLamp(context.Background(), req)
 	if err != nil {
 		t.Fatalf("GetLamp failed: %v", err)
@@ -99,8 +118,8 @@ func TestLampAPI_GetLamp(t *testing.T) {
 	}
 
 	retrievedLamp := Lamp(getResp)
-	if retrievedLamp.Id != lamp.Id || retrievedLamp.Status != lamp.Status {
-		t.Errorf("Retrieved lamp doesn't match: expected %+v, got %+v", lamp, retrievedLamp)
+	if retrievedLamp.Id != createdLamp.Id || retrievedLamp.Status != createdLamp.Status {
+		t.Errorf("Retrieved lamp doesn't match: expected %+v, got %+v", createdLamp, retrievedLamp)
 	}
 
 	// Test getting non-existent lamp
@@ -118,16 +137,25 @@ func TestLampAPI_GetLamp(t *testing.T) {
 
 func TestLampAPI_UpdateLamp(t *testing.T) {
 	api := NewLampAPI()
-	lampID := uuid.New()
-	lamp := Lamp{
-		Id:     lampID,
-		Status: true,
+
+	// Create a lamp using the API
+	createReq := CreateLampRequestObject{
+		Body: &LampCreate{Status: true},
 	}
-	api.lamps[lampID.String()] = lamp
+	createResp, err := api.CreateLamp(context.Background(), createReq)
+	if err != nil {
+		t.Fatalf("CreateLamp failed: %v", err)
+	}
+
+	createResult, ok := createResp.(CreateLamp201JSONResponse)
+	if !ok {
+		t.Fatalf("Expected CreateLamp201JSONResponse, got %T", createResp)
+	}
+	createdLamp := Lamp(createResult)
 
 	// Test updating existing lamp
 	req := UpdateLampRequestObject{
-		LampId: lampID.String(),
+		LampId: createdLamp.Id.String(),
 		Body:   &LampUpdate{Status: false},
 	}
 
@@ -146,8 +174,19 @@ func TestLampAPI_UpdateLamp(t *testing.T) {
 		t.Errorf("Expected status false, got %v", updatedLamp.Status)
 	}
 
-	// Verify the lamp was updated in storage
-	storedLamp := api.lamps[lampID.String()]
+	// Verify the lamp was updated in storage by getting it
+	getReq := GetLampRequestObject{LampId: createdLamp.Id.String()}
+	getResp, err := api.GetLamp(context.Background(), getReq)
+	if err != nil {
+		t.Fatalf("GetLamp failed: %v", err)
+	}
+
+	getLampResp, ok := getResp.(GetLamp200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected GetLamp200JSONResponse, got %T", getResp)
+	}
+
+	storedLamp := Lamp(getLampResp)
 	if storedLamp.Status != false {
 		t.Errorf("Lamp not updated in storage: expected status false, got %v", storedLamp.Status)
 	}
@@ -171,28 +210,47 @@ func TestLampAPI_UpdateLamp(t *testing.T) {
 
 func TestLampAPI_DeleteLamp(t *testing.T) {
 	api := NewLampAPI()
-	lampID := uuid.New()
-	lamp := Lamp{
-		Id:     lampID,
-		Status: true,
+
+	// Create a lamp using the API
+	createReq := CreateLampRequestObject{
+		Body: &LampCreate{Status: true},
 	}
-	api.lamps[lampID.String()] = lamp
+	createResp, err := api.CreateLamp(context.Background(), createReq)
+	if err != nil {
+		t.Fatalf("CreateLamp failed: %v", err)
+	}
+
+	createResult, ok := createResp.(CreateLamp201JSONResponse)
+	if !ok {
+		t.Fatalf("Expected CreateLamp201JSONResponse, got %T", createResp)
+	}
+	createdLamp := Lamp(createResult)
 
 	// Test deleting existing lamp
-	req := DeleteLampRequestObject{LampId: lampID.String()}
+	req := DeleteLampRequestObject{LampId: createdLamp.Id.String()}
 	resp, err := api.DeleteLamp(context.Background(), req)
 	if err != nil {
 		t.Fatalf("DeleteLamp failed: %v", err)
 	}
 
-	_, ok := resp.(DeleteLamp204Response)
+	_, ok = resp.(DeleteLamp204Response)
 	if !ok {
 		t.Fatalf("Expected DeleteLamp204Response, got %T", resp)
 	}
 
-	// Verify the lamp was deleted from storage
-	if len(api.lamps) != 0 {
-		t.Errorf("Expected empty storage after deletion, got %d lamps", len(api.lamps))
+	// Verify the lamp was deleted from storage by listing lamps
+	listResp, err := api.ListLamps(context.Background(), ListLampsRequestObject{})
+	if err != nil {
+		t.Fatalf("ListLamps failed: %v", err)
+	}
+
+	listResult, ok := listResp.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
+	}
+
+	if len(listResult) != 0 {
+		t.Errorf("Expected empty storage after deletion, got %d lamps", len(listResult))
 	}
 
 	// Test deleting non-existent lamp
@@ -244,20 +302,29 @@ func TestLampAPI_CreateLamp_NilBody(t *testing.T) {
 
 func TestLampAPI_UpdateLamp_NilBody(t *testing.T) {
 	api := NewLampAPI()
-	lampID := uuid.New()
-	lamp := Lamp{
-		Id:     lampID,
-		Status: true,
+
+	// Create a lamp using the API
+	createReq := CreateLampRequestObject{
+		Body: &LampCreate{Status: true},
 	}
-	api.lamps[lampID.String()] = lamp
+	createResp, err := api.CreateLamp(context.Background(), createReq)
+	if err != nil {
+		t.Fatalf("CreateLamp failed: %v", err)
+	}
+
+	createResult, ok := createResp.(CreateLamp201JSONResponse)
+	if !ok {
+		t.Fatalf("Expected CreateLamp201JSONResponse, got %T", createResp)
+	}
+	createdLamp := Lamp(createResult)
 
 	// Test updating a lamp with nil body
 	req := UpdateLampRequestObject{
-		LampId: lampID.String(),
+		LampId: createdLamp.Id.String(),
 		Body:   nil,
 	}
 
-	_, err := api.UpdateLamp(context.Background(), req)
+	_, err = api.UpdateLamp(context.Background(), req)
 	if err == nil {
 		t.Fatal("Expected error for nil body, got nil")
 	}
