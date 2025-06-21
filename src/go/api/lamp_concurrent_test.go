@@ -30,12 +30,14 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 				resp, err := api.CreateLamp(context.Background(), createReq)
 				if err != nil {
 					t.Errorf("Goroutine %d: CreateLamp failed: %v", goroutineID, err)
+
 					return
 				}
 
 				createResp, ok := resp.(CreateLamp201JSONResponse)
 				if !ok {
 					t.Errorf("Goroutine %d: Expected CreateLamp201JSONResponse, got %T", goroutineID, resp)
+
 					return
 				}
 
@@ -47,6 +49,7 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 				_, err = api.GetLamp(context.Background(), getReq)
 				if err != nil {
 					t.Errorf("Goroutine %d: GetLamp failed: %v", goroutineID, err)
+
 					return
 				}
 
@@ -59,6 +62,7 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 				_, err = api.UpdateLamp(context.Background(), updateReq)
 				if err != nil {
 					t.Errorf("Goroutine %d: UpdateLamp failed: %v", goroutineID, err)
+
 					return
 				}
 
@@ -66,6 +70,7 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 				_, err = api.ListLamps(context.Background(), ListLampsRequestObject{})
 				if err != nil {
 					t.Errorf("Goroutine %d: ListLamps failed: %v", goroutineID, err)
+
 					return
 				}
 			}

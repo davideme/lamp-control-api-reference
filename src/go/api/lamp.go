@@ -3,10 +3,10 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"sync"
 
 	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 type LampAPI struct {
@@ -43,14 +43,14 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 // (POST /lamps)
 func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObject) (CreateLampResponseObject, error) {
 	if request.Body == nil {
-		return nil, &APIError{Message: "Request body is required", StatusCode: 400}
+		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
 	// Generate a new UUID for the lamp
 	lampID := uuid.New()
 
 	lamp := Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: request.Body.Status,
 	}
 
@@ -97,7 +97,7 @@ func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (Ge
 // (PUT /lamps/{lampId})
 func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObject) (UpdateLampResponseObject, error) {
 	if request.Body == nil {
-		return nil, &APIError{Message: "Request body is required", StatusCode: 400}
+		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
 	l.mutex.Lock()

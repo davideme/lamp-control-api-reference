@@ -2,10 +2,10 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 func TestLampAPI_CreateLamp(t *testing.T) {
@@ -58,7 +58,7 @@ func TestLampAPI_ListLamps(t *testing.T) {
 	// Add a lamp and verify it appears in the list
 	lampID := uuid.New()
 	api.lamps[lampID.String()] = Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: true,
 	}
 
@@ -81,7 +81,7 @@ func TestLampAPI_GetLamp(t *testing.T) {
 	api := NewLampAPI()
 	lampID := uuid.New()
 	lamp := Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: true,
 	}
 	api.lamps[lampID.String()] = lamp
@@ -120,7 +120,7 @@ func TestLampAPI_UpdateLamp(t *testing.T) {
 	api := NewLampAPI()
 	lampID := uuid.New()
 	lamp := Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: true,
 	}
 	api.lamps[lampID.String()] = lamp
@@ -173,7 +173,7 @@ func TestLampAPI_DeleteLamp(t *testing.T) {
 	api := NewLampAPI()
 	lampID := uuid.New()
 	lamp := Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: true,
 	}
 	api.lamps[lampID.String()] = lamp
@@ -237,8 +237,8 @@ func TestLampAPI_CreateLamp_NilBody(t *testing.T) {
 		t.Fatalf("Expected APIError, got %T", err)
 	}
 
-	if apiErr.StatusCode != 400 {
-		t.Errorf("Expected status code 400, got %d", apiErr.StatusCode)
+	if apiErr.StatusCode != http.StatusBadRequest {
+		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, apiErr.StatusCode)
 	}
 }
 
@@ -246,7 +246,7 @@ func TestLampAPI_UpdateLamp_NilBody(t *testing.T) {
 	api := NewLampAPI()
 	lampID := uuid.New()
 	lamp := Lamp{
-		Id:     openapi_types.UUID(lampID),
+		Id:     lampID,
 		Status: true,
 	}
 	api.lamps[lampID.String()] = lamp
@@ -267,7 +267,7 @@ func TestLampAPI_UpdateLamp_NilBody(t *testing.T) {
 		t.Fatalf("Expected APIError, got %T", err)
 	}
 
-	if apiErr.StatusCode != 400 {
-		t.Errorf("Expected status code 400, got %d", apiErr.StatusCode)
+	if apiErr.StatusCode != http.StatusBadRequest {
+		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, apiErr.StatusCode)
 	}
 }
