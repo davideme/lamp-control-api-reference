@@ -107,9 +107,39 @@ fi
 
 echo "PHP coverage: $PHP_COVERAGE"
 
-# Go coverage (placeholder for future implementation)
+# Go coverage
 echo "Checking Go coverage..."
-GO_COVERAGE="N/A"
+if [ -f src/go/coverage.out ]; then
+  # Use go tool cover to extract total coverage percentage
+  # Check if go is available
+  if command -v go >/dev/null 2>&1; then
+    # Extract total coverage percentage from go tool cover output
+    GO_COVERAGE_RAW=$(cd src/go && go tool cover -func=coverage.out | grep "total:" | awk '{print $3}' | sed 's/%//')
+    if [[ "$GO_COVERAGE_RAW" =~ ^[0-9.]+$ ]]; then
+      GO_COVERAGE=$(printf "%.0f" "$GO_COVERAGE_RAW")
+    else
+      GO_COVERAGE="N/A"
+    fi
+  else
+    # Fallback: parse coverage.out file manually if go is not available
+    # Go coverage format: file:line.column,line.column numstmt covered
+    if [ -s src/go/coverage.out ]; then
+      # Calculate coverage from coverage.out file
+      TOTAL_STATEMENTS=$(grep -v "mode:" src/go/coverage.out | awk '{total += $2} END {print total}')
+      COVERED_STATEMENTS=$(grep -v "mode:" src/go/coverage.out | awk '$3 > 0 {covered += $2} END {print covered}')
+      
+      if [[ "$TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$COVERED_STATEMENTS" =~ ^[0-9]+$ && "$TOTAL_STATEMENTS" -gt 0 ]]; then
+        GO_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
+      else
+        GO_COVERAGE="N/A"
+      fi
+    else
+      GO_COVERAGE="N/A"
+    fi
+  fi
+else
+  GO_COVERAGE="N/A"
+fi
 echo "Go coverage: $GO_COVERAGE"
 
 # Kotlin coverage (placeholder for future implementation)
