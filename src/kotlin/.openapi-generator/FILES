@@ -1,0 +1,17 @@
+.openapi-generator-ignore
+Dockerfile
+README.md
+build.gradle.kts
+gradle.properties
+gradle/wrapper/gradle-wrapper.properties
+settings.gradle
+src/main/kotlin/com/lampcontrol/api/AppMain.kt
+src/main/kotlin/com/lampcontrol/api/Configuration.kt
+src/main/kotlin/com/lampcontrol/api/Paths.kt
+src/main/kotlin/com/lampcontrol/api/apis/DefaultApi.kt
+src/main/kotlin/com/lampcontrol/api/infrastructure/ApiKeyAuth.kt
+src/main/kotlin/com/lampcontrol/api/models/Lamp.kt
+src/main/kotlin/com/lampcontrol/api/models/LampCreate.kt
+src/main/kotlin/com/lampcontrol/api/models/LampUpdate.kt
+src/main/resources/application.conf
+src/main/resources/logback.xml

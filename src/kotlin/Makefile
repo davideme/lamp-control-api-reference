@@ -4,7 +4,7 @@
 # Variables
 OPENAPI_GENERATOR_VERSION := v7.13.0
 OPENAPI_SPEC := ../../docs/api/openapi.yaml
-OUTPUT_DIR := generated
+OUTPUT_DIR := .
 GENERATOR_NAME := kotlin-server
 
 # Docker command with common options
