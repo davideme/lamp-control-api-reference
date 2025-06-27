@@ -36,6 +36,8 @@ dependencies {
     implementation("io.dropwizard.metrics:metrics-core:4.1.18")
     implementation("io.ktor:ktor-server-metrics")
     implementation("io.ktor:ktor-server-netty")
+    implementation("io.ktor:ktor-server-cors")
+    implementation("io.ktor:ktor-server-call-id")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

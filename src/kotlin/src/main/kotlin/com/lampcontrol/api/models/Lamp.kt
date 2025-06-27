@@ -12,6 +12,7 @@
 package com.lampcontrol.api.models
 
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 /**
  * 
@@ -21,7 +22,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Lamp(
     /* Unique identifier for the lamp */
-    val id: java.util.UUID,
+    @Contextual val id: java.util.UUID,
     /* Whether the lamp is turned on (true) or off (false) */
     val status: kotlin.Boolean
 )

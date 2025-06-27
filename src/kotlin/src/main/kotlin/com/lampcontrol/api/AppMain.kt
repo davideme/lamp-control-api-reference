@@ -1,7 +1,6 @@
 package com.lampcontrol.api
 
 import io.ktor.server.application.*
-import io.ktor.http.*
 import io.ktor.server.resources.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.compression.*
@@ -13,6 +12,7 @@ import io.ktor.server.metrics.dropwizard.*
 import java.util.concurrent.TimeUnit
 import io.ktor.server.routing.*
 import com.lampcontrol.api.apis.DefaultApi
+import io.ktor.serialization.kotlinx.json.json
 
 
 fun Application.main() {
