@@ -81,14 +81,14 @@ jobs:
       if: always()
 
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: kotlin-test-results
         path: src/kotlin/build/reports/tests/
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: kotlin-coverage-reports
@@ -147,7 +147,7 @@ jobs:
       if: always()
 
     - name: Upload code quality reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: kotlin-code-quality-reports
