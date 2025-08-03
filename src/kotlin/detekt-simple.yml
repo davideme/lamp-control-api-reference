@@ -17,8 +17,6 @@ comments:
     active: false
   UndocumentedPublicFunction:
     active: false
-  ForbiddenComment:
-    active: false
 
 complexity:
   active: true
