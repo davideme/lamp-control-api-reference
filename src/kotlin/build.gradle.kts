@@ -1,6 +1,6 @@
 
-val kotlin_version: String by project
-val logback_version: String by project
+val kotlinVersion: String by project
+val logbackVersion: String by project
 
 group = "org.openapitools"
 version = "1.0.0"
@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     implementation(platform("io.ktor:ktor-bom:3.0.2"))
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("io.ktor:ktor-server-auth")
     implementation("io.ktor:ktor-server-auto-head-response")
     implementation("io.ktor:ktor-server-default-headers")
@@ -43,7 +43,7 @@ dependencies {
     implementation("io.ktor:ktor-server-call-id")
     implementation("io.ktor:ktor-server-status-pages")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("io.ktor:ktor-client-content-negotiation")
