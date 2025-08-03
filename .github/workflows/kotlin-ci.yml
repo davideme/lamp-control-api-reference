@@ -65,6 +65,10 @@ jobs:
       run: ./gradlew test jacocoTestReport
       continue-on-error: false
 
+    - name: Verify code coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification
+      continue-on-error: false
+
     - name: Check code formatting (ktlint)
       run: ./gradlew ktlintCheck
       continue-on-error: true
