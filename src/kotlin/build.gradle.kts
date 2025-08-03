@@ -9,6 +9,8 @@ plugins {
     kotlin("jvm") version "2.0.20"
     application
     kotlin("plugin.serialization") version "2.0.20"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
 }
 
 application {
@@ -48,4 +50,17 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+ktlint {
+    version.set("1.0.1")
+    outputToConsole.set(true)
+    outputColorName.set("RED")
+    ignoreFailures.set(false)
+}
+
+detekt {
+    toolVersion = "1.23.4"
+    config.setFrom(file("$projectDir/detekt-simple.yml"))
+    buildUponDefaultConfig = true
 }

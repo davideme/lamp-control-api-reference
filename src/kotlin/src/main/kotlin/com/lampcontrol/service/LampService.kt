@@ -7,9 +7,10 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Service class for managing lamp operations
+ * Service for managing lamp operations
  */
 class LampService {
+    // In-memory storage for lamps - using string keys for simplicity
     private val lamps = ConcurrentHashMap<String, Lamp>()
     
     /**
@@ -30,12 +31,13 @@ class LampService {
      * Create a new lamp
      */
     fun createLamp(lampCreate: LampCreate): Lamp {
-        val id = UUID.randomUUID()
+        val uuid = UUID.randomUUID()
         val lamp = Lamp(
-            id = id,
+            id = uuid,
             status = lampCreate.status
         )
-        lamps[id.toString()] = lamp
+        // Store using string representation of UUID for consistent lookup
+        lamps[uuid.toString()] = lamp
         return lamp
     }
     
@@ -50,7 +52,7 @@ class LampService {
     }
     
     /**
-     * Delete a lamp
+     * Delete a lamp by ID
      */
     fun deleteLamp(id: String): Boolean {
         return lamps.remove(id) != null
