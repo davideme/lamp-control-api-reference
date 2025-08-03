@@ -11,6 +11,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    jacoco
 }
 
 application {
@@ -50,6 +51,20 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.8"
 }
 
 ktlint {
