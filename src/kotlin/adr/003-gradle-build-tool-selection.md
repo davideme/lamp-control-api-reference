@@ -75,11 +75,8 @@ We will use **Gradle** with Kotlin DSL as our build tool and dependency manager 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
-    id("org.jetbrains.kotlin.plugin.jpa") version "1.9.20"
+    kotlin("jvm") version "2.1.21"
+    kotlin("plugin.serialization") version "2.1.21"
     application
 }
 
@@ -95,31 +92,59 @@ repositories {
 }
 
 dependencies {
-    // Spring Boot dependencies
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    val ktor_version = "2.3.12"
+    val kotlin_version = "2.1.21"
+    val logback_version = "1.4.14"
+    val exposed_version = "0.41.1"
     
-    // Kotlin dependencies
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    // Ktor server dependencies
+    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
     
-    // Database
-    runtimeOnly("com.h2database:h2")
+    // Content negotiation and serialization
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
+    
+    // Request validation
+    implementation("io.ktor:ktor-server-request-validation:$ktor_version")
+    
+    // Status pages and call logging
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
+    implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
+    
+    // Kotlin coroutines and datetime
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    
+    // Database (Exposed ORM - more Kotlin idiomatic than JPA)
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposed_version")
+    
+    // Database drivers
+    implementation("com.h2database:h2:2.2.224")
+    implementation("org.postgresql:postgresql:42.7.2")
+    
+    // Logging
+    implementation("ch.qos.logback:logback-classic:$logback_version")
     
     // Testing
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.1")
+    testImplementation("org.testcontainers:postgresql:1.19.1")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
         jvmTarget = "21"
+        freeCompilerArgs += listOf(
+            "-Xjsr305=strict",
+            "-opt-in=kotlin.RequiresOptIn"
+        )
     }
 }
 
@@ -128,7 +153,7 @@ tasks.withType<Test> {
 }
 
 application {
-    mainClass.set("com.lampcontrolapi.LampControlApiApplicationKt")
+    mainClass.set("com.lampcontrolapi.ApplicationKt")
 }
 ```
 
@@ -222,34 +247,71 @@ tasks.register("printVersion") {
 ### Version Catalogs (gradle/libs.versions.toml)
 ```toml
 [versions]
-kotlin = "1.9.20"
-spring-boot = "3.2.0"
+kotlin = "2.1.21"
+ktor = "2.3.12"
+coroutines = "1.7.3"
+exposed = "0.41.1"
+logback = "1.4.14"
 junit = "5.10.0"
 mockk = "1.13.8"
 testcontainers = "1.19.1"
 
 [libraries]
-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
-kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
-spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+# Ktor server
+ktor-server-core = { group = "io.ktor", name = "ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-config-yaml = { group = "io.ktor", name = "ktor-server-config-yaml", version.ref = "ktor" }
+ktor-server-content-negotiation = { group = "io.ktor", name = "ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+ktor-server-status-pages = { group = "io.ktor", name = "ktor-server-status-pages", version.ref = "ktor" }
+ktor-server-call-logging = { group = "io.ktor", name = "ktor-server-call-logging-jvm", version.ref = "ktor" }
+
+# Kotlin libraries
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.4.1" }
+
+# Database
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-kotlin-datetime = { group = "org.jetbrains.exposed", name = "exposed-kotlin-datetime", version.ref = "exposed" }
+
+# Logging
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+
+# Testing
+ktor-server-tests = { group = "io.ktor", name = "ktor-server-tests-jvm", version.ref = "ktor" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
 
 [bundles]
-kotlin = ["kotlin-stdlib", "kotlin-reflect"]
-testing = ["junit-jupiter", "mockk"]
+ktor-server = [
+    "ktor-server-core", 
+    "ktor-server-netty", 
+    "ktor-server-config-yaml",
+    "ktor-server-content-negotiation", 
+    "ktor-serialization-json",
+    "ktor-server-status-pages",
+    "ktor-server-call-logging"
+]
+kotlin-coroutines = ["kotlinx-coroutines-core", "kotlinx-datetime"]
+exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-kotlin-datetime"]
+testing = ["ktor-server-tests", "kotlin-test-junit", "mockk", "junit-jupiter"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ```
 
 ### Using Version Catalogs
 ```kotlin
 // In build.gradle.kts
 dependencies {
-    implementation(libs.bundles.kotlin)
-    implementation(libs.spring.boot.starter.web)
+    implementation(libs.bundles.ktor.server)
+    implementation(libs.bundles.kotlin.coroutines)
+    implementation(libs.bundles.exposed)
+    implementation(libs.logback.classic)
     testImplementation(libs.bundles.testing)
 }
 ```
