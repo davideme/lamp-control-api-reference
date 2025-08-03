@@ -11,8 +11,10 @@ fun main() {
 }
 
 fun Application.module() {
+    configureResources()
     configureSerialization()
     configureHTTP()
     configureMonitoring()
+    configureStatusPages()
     configureRouting()
 }

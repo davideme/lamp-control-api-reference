@@ -38,6 +38,14 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-cors")
     implementation("io.ktor:ktor-server-call-id")
+    implementation("io.ktor:ktor-server-status-pages")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testImplementation("io.ktor:ktor-client-content-negotiation")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

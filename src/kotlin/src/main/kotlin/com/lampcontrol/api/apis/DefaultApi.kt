@@ -15,6 +15,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
+import io.ktor.server.request.*
 import com.lampcontrol.api.Paths
 import io.ktor.server.resources.options
 import io.ktor.server.resources.get
@@ -28,76 +29,57 @@ import com.lampcontrol.api.infrastructure.ApiPrincipal
 import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.service.LampService
 
-fun Route.DefaultApi() {
-    val empty = mutableMapOf<String, Any?>()
+fun Route.DefaultApi(lampService: LampService) {
 
     post<Paths.createLamp> {
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "status" : true
-        }"""
-        
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
+        try {
+            val lampCreate = call.receive<LampCreate>()
+            val createdLamp = lampService.createLamp(lampCreate)
+            call.respond(HttpStatusCode.Created, createdLamp)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid request body"))
         }
-        
     }
 
     delete<Paths.deleteLamp> {
-        call.respond(HttpStatusCode.NotImplemented)
-        
+        val lampId = it.lampId
+        val deleted = lampService.deleteLamp(lampId)
+        if (deleted) {
+            call.respond(HttpStatusCode.NoContent)
+        } else {
+            call.respond(HttpStatusCode.NotFound, mapOf("error" to "Lamp not found"))
+        }
     }
 
     get<Paths.getLamp> {
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "status" : true
-        }"""
-        
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
+        val lampId = it.lampId
+        val lamp = lampService.getLampById(lampId)
+        if (lamp != null) {
+            call.respond(HttpStatusCode.OK, lamp)
+        } else {
+            call.respond(HttpStatusCode.NotFound, mapOf("error" to "Lamp not found"))
         }
-        
     }
 
     get<Paths.listLamps> {
-        val exampleContentType = "application/json"
-        val exampleContentString = """[ {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "status" : true
-        }, {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "status" : true
-        } ]"""
-        
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
-        
+        val lamps = lampService.getAllLamps()
+        call.respond(HttpStatusCode.OK, lamps)
     }
 
     put<Paths.updateLamp> {
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "status" : true
-        }"""
-        
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
+        try {
+            val lampId = it.lampId
+            val lampUpdate = call.receive<LampUpdate>()
+            val updatedLamp = lampService.updateLamp(lampId, lampUpdate)
+            if (updatedLamp != null) {
+                call.respond(HttpStatusCode.OK, updatedLamp)
+            } else {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Lamp not found"))
+            }
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid request body"))
         }
-        
     }
-
 }
