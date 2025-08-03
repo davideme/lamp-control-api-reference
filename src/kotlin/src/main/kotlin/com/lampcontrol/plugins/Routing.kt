@@ -3,11 +3,15 @@ package com.lampcontrol.plugins
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import com.lampcontrol.api.apis.DefaultApi
+import com.lampcontrol.service.LampService
 
 fun Application.configureRouting() {
+    val lampService = LampService()
+    
     routing {
         get("/") {
-            call.respondText("Hello World!")
+            call.respondText("Lamp Control API - Kotlin Implementation")
         }
         
         // Health check endpoint
@@ -15,7 +19,9 @@ fun Application.configureRouting() {
             call.respondText("OK")
         }
         
-        // OpenAPI documentation will be available at /swagger-ui
-        // Generated routes will be added here after code generation
+        // API v1 routes
+        route("/v1") {
+            DefaultApi(lampService)
+        }
     }
 }

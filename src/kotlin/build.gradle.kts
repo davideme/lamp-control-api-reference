@@ -9,6 +9,9 @@ plugins {
     kotlin("jvm") version "2.0.20"
     application
     kotlin("plugin.serialization") version "2.0.20"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    jacoco
 }
 
 application {
@@ -38,6 +41,42 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-cors")
     implementation("io.ktor:ktor-server-call-id")
+    implementation("io.ktor:ktor-server-status-pages")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testImplementation("io.ktor:ktor-client-content-negotiation")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    ignoreFailures = true
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+ktlint {
+    version.set("1.0.1")
+    outputToConsole.set(true)
+    outputColorName.set("RED")
+    ignoreFailures.set(true)
+}
+
+detekt {
+    toolVersion = "1.23.4"
+    buildUponDefaultConfig = true
+    ignoreFailures = true
 }

@@ -12,10 +12,13 @@ import io.ktor.server.metrics.dropwizard.*
 import java.util.concurrent.TimeUnit
 import io.ktor.server.routing.*
 import com.lampcontrol.api.apis.DefaultApi
+import com.lampcontrol.service.LampService
 import io.ktor.serialization.kotlinx.json.json
 
 
 fun Application.main() {
+    val lampService = LampService()
+    
     install(DefaultHeaders)
     install(DropwizardMetrics) {
         val reporter = Slf4jReporter.forRegistry(registry)
@@ -33,6 +36,6 @@ fun Application.main() {
     install(HSTS, ApplicationHstsConfiguration()) // see https://ktor.io/docs/hsts.html
     install(Resources)
     routing {
-        DefaultApi()
+        DefaultApi(lampService)
     }
 }
