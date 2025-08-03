@@ -12,7 +12,7 @@ This document provides a comparison of the different language implementations in
 | C# | 334 | 424 | 1.27 | 99 |
 | PHP | 1426 | 1158 | 0.81 | 89 |
 | Go | 715 | 1307 | 1.83 | 99 |
-| Kotlin | null | 0 | N/A | N/A |
+| Kotlin | 503 | 272 | 0.54 | N/A |
 | Ruby | null | 0 | N/A | N/A |
 ## API Interface Comparison
 
