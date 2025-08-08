@@ -1,10 +1,11 @@
 package com.lampcontrol.di
 
-import com.lampcontrol.service.LampService
+import com.lampcontrol.repository.LampRepository
+import com.lampcontrol.service.InMemoryLampRepository
 
 /**
  * Simple dependency injection container
  */
 object ServiceContainer {
-    val lampService: LampService by lazy { LampService() }
+    val lampService: LampRepository by lazy { InMemoryLampRepository() }
 }
