@@ -45,8 +45,7 @@ class UUIDSerializerTest {
             json.decodeFromString(UUIDSerializer, invalidUuidString)
             throw AssertionError("Expected exception was not thrown")
         } catch (e: Exception) {
-        assertThrows<Exception> {
-            json.decodeFromString(UUIDSerializer, invalidUuidString)
+            // Expected behavior
         }
     }
 }
