@@ -29,9 +29,9 @@ import com.lampcontrol.api.infrastructure.ApiPrincipal
 import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
-import com.lampcontrol.service.LampService
+import com.lampcontrol.repository.LampRepository
 
-fun Route.DefaultApi(lampService: LampService) {
+fun Route.DefaultApi(lampService: LampRepository) {
 
     post<Paths.createLamp> {
         try {

@@ -51,7 +51,6 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
     ignoreFailures = true
 }
 
@@ -62,6 +61,20 @@ tasks.jacocoTestReport {
         html.required.set(true)
         csv.required.set(false)
     }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
 }
 
 jacoco {

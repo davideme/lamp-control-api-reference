@@ -2,17 +2,18 @@ package com.lampcontrol.service
 
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.repository.LampRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
 class LampServiceTest {
-    private lateinit var lampService: LampService
+    private lateinit var lampService: LampRepository
 
     @BeforeEach
     fun setUp() {
-        lampService = LampService()
+    lampService = InMemoryLampRepository()
     }
 
     @Test
