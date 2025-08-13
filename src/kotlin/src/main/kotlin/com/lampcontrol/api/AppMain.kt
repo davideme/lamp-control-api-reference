@@ -17,7 +17,7 @@ import io.ktor.serialization.kotlinx.json.json
 
 
 fun Application.main() {
-    val lampService = ServiceContainer.lampService
+    val lampService = InMemoryLampRepository()
     
     install(DefaultHeaders)
     install(DropwizardMetrics) {
