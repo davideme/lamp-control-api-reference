@@ -20,15 +20,28 @@ extract_jacoco_line_coverage() {
   # Prefer XPath via xmllint to target the root-level counter precisely
   local missed covered total pct counter_line
   if command -v xmllint >/dev/null 2>&1; then
+    # Try direct child of report
     missed=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$xml_path" 2>/dev/null || true)
     covered=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@covered)' "$xml_path" 2>/dev/null || true)
+    # If not found, try under bundle (some JaCoCo versions place counters there)
+    if ! [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
+      missed=$(xmllint --xpath 'string(/report/bundle/counter[@type="LINE"]/@missed)' "$xml_path" 2>/dev/null || true)
+      covered=$(xmllint --xpath 'string(/report/bundle/counter[@type="LINE"]/@covered)' "$xml_path" 2>/dev/null || true)
+    fi
   fi
 
-  # Fallback: take the LINE counter closest to </report> (commonly the aggregate)
+  # Fallback: robust grep that works even when the XML is a single (very long) line.
+  # Grab the last <counter type="LINE" .../> in the file, which is typically the aggregate at the root.
   if ! [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
-    counter_line=$(awk '/<counter type="LINE"/{last=$0} /<\/report>/{print last; exit} END{if(NR>0 && last) print last}' "$xml_path" 2>/dev/null || true)
-    missed=$(printf '%s' "$counter_line" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p')
-    covered=$(printf '%s' "$counter_line" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p')
+    counter_line=$(grep -o '<counter type="LINE"[^>]*/>' "$xml_path" | tail -n 1 || true)
+    if [ -z "$counter_line" ]; then
+      # As a fallback, split tags onto newlines then try again
+      counter_line=$(sed 's/></>\n</g' "$xml_path" | grep -o '<counter type="LINE"[^>]*/>' | tail -n 1 || true)
+    fi
+    if [ -n "$counter_line" ]; then
+      missed=$(printf '%s' "$counter_line" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p')
+      covered=$(printf '%s' "$counter_line" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p')
+    fi
   fi
 
   if [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
