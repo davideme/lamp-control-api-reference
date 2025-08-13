@@ -7,6 +7,45 @@ set -e
 
 echo "Extracting code coverage percentages..."
 
+# Helper: extract integer line coverage percentage from a JaCoCo XML report
+# Usage: extract_jacoco_line_coverage /path/to/jacoco.xml
+# Echos an integer percentage (0-100) or N/A
+extract_jacoco_line_coverage() {
+  local xml_path="$1"
+  if [ ! -f "$xml_path" ]; then
+    echo "N/A"
+    return 0
+  fi
+
+  # Prefer XPath via xmllint to target the root-level counter precisely
+  local missed covered total pct counter_line
+  if command -v xmllint >/dev/null 2>&1; then
+    missed=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$xml_path" 2>/dev/null || true)
+    covered=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@covered)' "$xml_path" 2>/dev/null || true)
+  fi
+
+  # Fallback: take the LINE counter closest to </report> (commonly the aggregate)
+  if ! [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
+    counter_line=$(awk '/<counter type="LINE"/{last=$0} /<\/report>/{print last; exit} END{if(NR>0 && last) print last}' "$xml_path" 2>/dev/null || true)
+    missed=$(printf '%s' "$counter_line" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p')
+    covered=$(printf '%s' "$counter_line" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p')
+  fi
+
+  if [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
+    total=$((missed + covered))
+    if [ "$total" -gt 0 ]; then
+      pct=$(awk "BEGIN {printf \"%.0f\", ($covered/$total)*100}")
+      echo "$pct"
+      return 0
+    else
+      echo "0"
+      return 0
+    fi
+  fi
+
+  echo "N/A"
+}
+
 # TypeScript coverage
 echo "Checking TypeScript coverage..."
 if [ -f src/typescript/coverage/coverage-summary.json ]; then
@@ -27,23 +66,7 @@ echo "Python coverage: $PY_COVERAGE"
 
 # Java coverage
 echo "Checking Java coverage..."
-if [ -f src/java/target/site/jacoco/jacoco.xml ]; then
-  # Extract line coverage from JaCoCo XML using grep and sed
-  JAVA_MISSED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
-  JAVA_COVERED=$(grep '<counter type="LINE"' src/java/target/site/jacoco/jacoco.xml | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
-  if [[ "$JAVA_MISSED" =~ ^[0-9]+$ && "$JAVA_COVERED" =~ ^[0-9]+$ ]]; then
-    JAVA_TOTAL=$((JAVA_MISSED + JAVA_COVERED))
-    if [ "$JAVA_TOTAL" -gt 0 ]; then
-      JAVA_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($JAVA_COVERED/$JAVA_TOTAL)*100}")
-    else
-      JAVA_COVERAGE="0"
-    fi
-  else
-    JAVA_COVERAGE="N/A"
-  fi
-else
-  JAVA_COVERAGE="N/A"
-fi
+JAVA_COVERAGE=$(extract_jacoco_line_coverage "src/java/target/site/jacoco/jacoco.xml")
 echo "Java coverage: $JAVA_COVERAGE"
 
 # C# coverage
@@ -142,7 +165,7 @@ else
 fi
 echo "Go coverage: $GO_COVERAGE"
 
-# Kotlin coverage (placeholder for future implementation)
+# Kotlin coverage
 echo "Checking Kotlin coverage..."
 KOTLIN_COVERAGE="N/A"
 
@@ -150,30 +173,12 @@ KOTLIN_COVERAGE="N/A"
 KOTLIN_JACOCO_XML="src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml"
 
 if [ -f "$KOTLIN_JACOCO_XML" ]; then
-  KOTLIN_MISSED=$(grep '<counter type="LINE"' "$KOTLIN_JACOCO_XML" | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
-  KOTLIN_COVERED=$(grep '<counter type="LINE"' "$KOTLIN_JACOCO_XML" | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
-  if [[ "$KOTLIN_MISSED" =~ ^[0-9]+$ && "$KOTLIN_COVERED" =~ ^[0-9]+$ ]]; then
-    KOTLIN_TOTAL=$((KOTLIN_MISSED + KOTLIN_COVERED))
-    if [ "$KOTLIN_TOTAL" -gt 0 ]; then
-      KOTLIN_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($KOTLIN_COVERED/$KOTLIN_TOTAL)*100}")
-    else
-      KOTLIN_COVERAGE="0"
-    fi
-  fi
+  KOTLIN_COVERAGE=$(extract_jacoco_line_coverage "$KOTLIN_JACOCO_XML")
 else
   # Fallback: search for any jacocoTestReport.xml under src/kotlin
-  KOTLIN_XML_FOUND=$(find src/kotlin -path '*/build/reports/jacoco/test/jacocoTestReport.xml' | head -1 || true)
+  KOTLIN_XML_FOUND=$(find src/kotlin -maxdepth 8 -type f -path '*/build/reports/jacoco/test/jacocoTestReport.xml' | head -1 || true)
   if [ -n "$KOTLIN_XML_FOUND" ] && [ -f "$KOTLIN_XML_FOUND" ]; then
-    KOTLIN_MISSED=$(grep '<counter type="LINE"' "$KOTLIN_XML_FOUND" | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
-    KOTLIN_COVERED=$(grep '<counter type="LINE"' "$KOTLIN_XML_FOUND" | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
-    if [[ "$KOTLIN_MISSED" =~ ^[0-9]+$ && "$KOTLIN_COVERED" =~ ^[0-9]+$ ]]; then
-      KOTLIN_TOTAL=$((KOTLIN_MISSED + KOTLIN_COVERED))
-      if [ "$KOTLIN_TOTAL" -gt 0 ]; then
-        KOTLIN_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($KOTLIN_COVERED/$KOTLIN_TOTAL)*100}")
-      else
-        KOTLIN_COVERAGE="0"
-      fi
-    fi
+    KOTLIN_COVERAGE=$(extract_jacoco_line_coverage "$KOTLIN_XML_FOUND")
   fi
 fi
 echo "Kotlin coverage: $KOTLIN_COVERAGE"
