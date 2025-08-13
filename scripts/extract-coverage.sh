@@ -145,6 +145,37 @@ echo "Go coverage: $GO_COVERAGE"
 # Kotlin coverage (placeholder for future implementation)
 echo "Checking Kotlin coverage..."
 KOTLIN_COVERAGE="N/A"
+
+# Default JaCoCo XML report path for the Kotlin (Gradle) project
+KOTLIN_JACOCO_XML="src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml"
+
+if [ -f "$KOTLIN_JACOCO_XML" ]; then
+  KOTLIN_MISSED=$(grep '<counter type="LINE"' "$KOTLIN_JACOCO_XML" | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
+  KOTLIN_COVERED=$(grep '<counter type="LINE"' "$KOTLIN_JACOCO_XML" | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
+  if [[ "$KOTLIN_MISSED" =~ ^[0-9]+$ && "$KOTLIN_COVERED" =~ ^[0-9]+$ ]]; then
+    KOTLIN_TOTAL=$((KOTLIN_MISSED + KOTLIN_COVERED))
+    if [ "$KOTLIN_TOTAL" -gt 0 ]; then
+      KOTLIN_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($KOTLIN_COVERED/$KOTLIN_TOTAL)*100}")
+    else
+      KOTLIN_COVERAGE="0"
+    fi
+  fi
+else
+  # Fallback: search for any jacocoTestReport.xml under src/kotlin
+  KOTLIN_XML_FOUND=$(find src/kotlin -path '*/build/reports/jacoco/test/jacocoTestReport.xml' | head -1 || true)
+  if [ -n "$KOTLIN_XML_FOUND" ] && [ -f "$KOTLIN_XML_FOUND" ]; then
+    KOTLIN_MISSED=$(grep '<counter type="LINE"' "$KOTLIN_XML_FOUND" | tail -1 | sed 's/.*missed="\([0-9]*\)".*/\1/')
+    KOTLIN_COVERED=$(grep '<counter type="LINE"' "$KOTLIN_XML_FOUND" | tail -1 | sed 's/.*covered="\([0-9]*\)".*/\1/')
+    if [[ "$KOTLIN_MISSED" =~ ^[0-9]+$ && "$KOTLIN_COVERED" =~ ^[0-9]+$ ]]; then
+      KOTLIN_TOTAL=$((KOTLIN_MISSED + KOTLIN_COVERED))
+      if [ "$KOTLIN_TOTAL" -gt 0 ]; then
+        KOTLIN_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($KOTLIN_COVERED/$KOTLIN_TOTAL)*100}")
+      else
+        KOTLIN_COVERAGE="0"
+      fi
+    fi
+  fi
+fi
 echo "Kotlin coverage: $KOTLIN_COVERAGE"
 
 # Ruby coverage (placeholder for future implementation)
