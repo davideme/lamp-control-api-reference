@@ -7,6 +7,31 @@ set -e
 
 echo "Extracting code coverage percentages..."
 
+# Coverage file constants (one dir per language + one constant per coverage report)
+TS_DIR="src/typescript"
+TS_COVERAGE_SUMMARY="$TS_DIR/coverage/coverage-summary.json"
+
+PY_DIR="src/python"
+PY_COVERAGE_JSON="$PY_DIR/coverage/coverage.json"
+
+JAVA_DIR="src/java"
+JAVA_JACOCO_XML="$JAVA_DIR/target/site/jacoco/jacoco.xml"
+
+CSHARP_DIR="src/csharp"
+CSHARP_TESTRESULTS_DIR="$CSHARP_DIR/TestResults"
+CSHARP_COVERAGE_DIR="$CSHARP_DIR/coverage"
+CSHARP_COBERTURA_FILE="$CSHARP_TESTRESULTS_DIR/coverage.cobertura.xml"
+
+PHP_DIR="src/php/lamp-control-api"
+PHP_CLOVER_XML="$PHP_DIR/coverage.xml"
+PHP_ALT_CLOVER_XML="$PHP_DIR/coverage/clover.xml"
+
+GO_DIR="src/go"
+GO_COVERAGE_OUT="$GO_DIR/coverage.out"
+
+KOTLIN_DIR="src/kotlin"
+KOTLIN_JACOCO_XML="$KOTLIN_DIR/build/reports/jacoco/test/jacocoTestReport.xml"
+
 # Helper: extract integer line coverage percentage from a JaCoCo XML report
 # Usage: extract_jacoco_line_coverage /path/to/jacoco.xml
 # Echos an integer percentage (0-100) or N/A
@@ -62,7 +87,7 @@ extract_jacoco_line_coverage() {
 # TypeScript coverage
 echo "Checking TypeScript coverage..."
 if [ -f src/typescript/coverage/coverage-summary.json ]; then
-  TS_RAW=$(jq '.total.lines.pct' src/typescript/coverage/coverage-summary.json)
+  TS_RAW=$(jq '.total.lines.pct' "$TS_COVERAGE_SUMMARY")
   if [[ "$TS_RAW" =~ ^[0-9.]+$ ]]; then
     TS_COVERAGE=$(awk -v v="$TS_RAW" 'BEGIN { printf "%.2f", v }')
   else
@@ -75,8 +100,8 @@ echo "TypeScript coverage: $TS_COVERAGE"
 
 # Python coverage
 echo "Checking Python coverage..."
-if [ -f src/python/coverage/coverage.json ]; then
-  PY_RAW=$(jq '.totals.percent_covered' src/python/coverage/coverage.json)
+if [ -f "$PY_COVERAGE_JSON" ]; then
+  PY_RAW=$(jq '.totals.percent_covered' "$PY_COVERAGE_JSON")
   if [[ "$PY_RAW" =~ ^[0-9.]+$ ]]; then
     PY_COVERAGE=$(awk -v v="$PY_RAW" 'BEGIN { printf "%.2f", v }')
   else
@@ -89,7 +114,7 @@ echo "Python coverage: $PY_COVERAGE"
 
 # Java coverage
 echo "Checking Java coverage..."
-JAVA_COVERAGE=$(extract_jacoco_line_coverage "src/java/target/site/jacoco/jacoco.xml")
+JAVA_COVERAGE=$(extract_jacoco_line_coverage "$JAVA_JACOCO_XML")
 echo "Java coverage: $JAVA_COVERAGE"
 
 # C# coverage
@@ -97,32 +122,32 @@ echo "Checking C# coverage..."
 CS_COVERAGE="N/A"
 
 # Try different common locations for .NET coverage files
-if [ -f src/csharp/TestResults/coverage.cobertura.xml ]; then
+if [ -f "$CSHARP_COBERTURA_FILE" ]; then
   # Extract line coverage from Cobertura XML using grep and sed
-  CS_LINE_RATE=$(grep '<coverage' src/csharp/TestResults/coverage.cobertura.xml | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
+  CS_LINE_RATE=$(grep '<coverage' "$CSHARP_COBERTURA_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
   if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
     CS_COVERAGE=$(awk "BEGIN {printf \"%.2f\", $CS_LINE_RATE*100}")
   fi
-elif [ -f src/csharp/TestResults/*/coverage.cobertura.xml ]; then
+elif [ -d "$CSHARP_TESTRESULTS_DIR" ]; then
   # Try to find coverage file in subdirectories
-  COVERAGE_FILE=$(find src/csharp/TestResults -name "coverage.cobertura.xml" | head -1)
+  COVERAGE_FILE=$(find "$CSHARP_TESTRESULTS_DIR" -name "coverage.cobertura.xml" | head -1)
   if [ -n "$COVERAGE_FILE" ]; then
     CS_LINE_RATE=$(grep '<coverage' "$COVERAGE_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
     if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
       CS_COVERAGE=$(awk "BEGIN {printf \"%.2f\", $CS_LINE_RATE*100}")
     fi
   fi
-elif [ -f src/csharp/coverage/coverage.json ]; then
+elif [ -f "$CSHARP_COVERAGE_DIR/coverage.json" ]; then
   # Try JSON format (if using coverlet JSON output)
-  CS_RAW=$(jq '.summary.linecoverage' src/csharp/coverage/coverage.json 2>/dev/null | sed 's/%//')
+  CS_RAW=$(jq '.summary.linecoverage' "$CSHARP_COVERAGE_DIR/coverage.json" 2>/dev/null | sed 's/%//')
   if [[ "$CS_RAW" =~ ^[0-9.]+$ ]]; then
     CS_COVERAGE=$(awk -v v="$CS_RAW" 'BEGIN { printf "%.2f", v }')
   else
     CS_COVERAGE="N/A"
   fi
-elif [ -d src/csharp/coverage ] && [ "$(ls -A src/csharp/coverage)" ]; then
+elif [ -d "$CSHARP_COVERAGE_DIR" ] && [ "$(ls -A "$CSHARP_COVERAGE_DIR")" ]; then
   # Try to find any coverage files in the coverage directory
-  COVERAGE_FILE=$(find src/csharp/coverage -name "*.xml" -o -name "*.json" | head -1)
+  COVERAGE_FILE=$(find "$CSHARP_COVERAGE_DIR" -name "*.xml" -o -name "*.json" | head -1)
   if [ -n "$COVERAGE_FILE" ] && [[ "$COVERAGE_FILE" == *.xml ]]; then
     CS_LINE_RATE=$(grep -o 'line-rate="[0-9.]*"' "$COVERAGE_FILE" | head -1 | sed 's/line-rate="\([0-9.]*\)"/\1/')
     if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
@@ -138,18 +163,18 @@ echo "Checking PHP coverage..."
 PHP_COVERAGE="N/A"
 
 # Try to find PHP coverage XML files
-if [ -f src/php/lamp-control-api/coverage.xml ]; then
+if [ -f "$PHP_CLOVER_XML" ]; then
   # Extract line coverage from Clover XML - get total statements and covered statements
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' src/php/lamp-control-api/coverage.xml | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
+  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
+  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
   
   if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
     PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
   fi
-elif [ -f src/php/lamp-control-api/coverage/clover.xml ]; then
+elif [ -f "$PHP_ALT_CLOVER_XML" ]; then
   # Try alternative location
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' src/php/lamp-control-api/coverage/clover.xml | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage/clover.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
+  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
+  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
   
   if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
     PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
@@ -160,12 +185,12 @@ echo "PHP coverage: $PHP_COVERAGE"
 
 # Go coverage
 echo "Checking Go coverage..."
-if [ -f src/go/coverage.out ]; then
+if [ -f "$GO_COVERAGE_OUT" ]; then
   # Use go tool cover to extract total coverage percentage
   # Check if go is available
   if command -v go >/dev/null 2>&1; then
     # Extract total coverage percentage from go tool cover output
-    GO_COVERAGE_RAW=$(cd src/go && go tool cover -func=coverage.out | grep "total:" | awk '{print $3}' | sed 's/%//')
+  GO_COVERAGE_RAW=$(cd "$GO_DIR" && go tool cover -func=coverage.out | grep "total:" | awk '{print $3}' | sed 's/%//')
     if [[ "$GO_COVERAGE_RAW" =~ ^[0-9.]+$ ]]; then
       GO_COVERAGE=$(awk -v v="$GO_COVERAGE_RAW" 'BEGIN { printf "%.2f", v }')
     else
@@ -174,10 +199,10 @@ if [ -f src/go/coverage.out ]; then
   else
     # Fallback: parse coverage.out file manually if go is not available
     # Go coverage format: file:line.column,line.column numstmt covered
-    if [ -s src/go/coverage.out ]; then
+    if [ -s "$GO_COVERAGE_OUT" ]; then
       # Calculate coverage from coverage.out file
-      TOTAL_STATEMENTS=$(grep -v "mode:" src/go/coverage.out | awk '{total += $2} END {print total}')
-      COVERED_STATEMENTS=$(grep -v "mode:" src/go/coverage.out | awk '$3 > 0 {covered += $2} END {print covered}')
+      TOTAL_STATEMENTS=$(grep -v "mode:" "$GO_COVERAGE_OUT" | awk '{total += $2} END {print total}')
+      COVERED_STATEMENTS=$(grep -v "mode:" "$GO_COVERAGE_OUT" | awk '$3 > 0 {covered += $2} END {print covered}')
       
       if [[ "$TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$COVERED_STATEMENTS" =~ ^[0-9]+$ && "$TOTAL_STATEMENTS" -gt 0 ]]; then
         GO_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
@@ -197,14 +222,11 @@ echo "Go coverage: $GO_COVERAGE"
 echo "Checking Kotlin coverage..."
 KOTLIN_COVERAGE="N/A"
 
-# Default JaCoCo XML report path for the Kotlin (Gradle) project
-KOTLIN_JACOCO_XML="src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml"
-
 if [ -f "$KOTLIN_JACOCO_XML" ]; then
   KOTLIN_COVERAGE=$(extract_jacoco_line_coverage "$KOTLIN_JACOCO_XML")
 else
   # Fallback: search for any jacocoTestReport.xml under src/kotlin
-  KOTLIN_XML_FOUND=$(find src/kotlin -maxdepth 8 -type f -path '*/build/reports/jacoco/test/jacocoTestReport.xml' | head -1 || true)
+  KOTLIN_XML_FOUND=$(find "$KOTLIN_DIR" -maxdepth 8 -type f -path '*/build/reports/jacoco/test/jacocoTestReport.xml' | head -1 || true)
   if [ -n "$KOTLIN_XML_FOUND" ] && [ -f "$KOTLIN_XML_FOUND" ]; then
     KOTLIN_COVERAGE=$(extract_jacoco_line_coverage "$KOTLIN_XML_FOUND")
   fi
