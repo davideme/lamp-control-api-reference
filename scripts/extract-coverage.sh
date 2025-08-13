@@ -47,11 +47,11 @@ extract_jacoco_line_coverage() {
   if [[ "$missed" =~ ^[0-9]+$ && "$covered" =~ ^[0-9]+$ ]]; then
     total=$((missed + covered))
     if [ "$total" -gt 0 ]; then
-      pct=$(awk "BEGIN {printf \"%.0f\", ($covered/$total)*100}")
+      pct=$(awk "BEGIN {printf \"%.2f\", ($covered/$total)*100}")
       echo "$pct"
       return 0
     else
-      echo "0"
+      echo "0.00"
       return 0
     fi
   fi
@@ -62,7 +62,12 @@ extract_jacoco_line_coverage() {
 # TypeScript coverage
 echo "Checking TypeScript coverage..."
 if [ -f src/typescript/coverage/coverage-summary.json ]; then
-  TS_COVERAGE=$(jq '.total.lines.pct' src/typescript/coverage/coverage-summary.json)
+  TS_RAW=$(jq '.total.lines.pct' src/typescript/coverage/coverage-summary.json)
+  if [[ "$TS_RAW" =~ ^[0-9.]+$ ]]; then
+    TS_COVERAGE=$(awk -v v="$TS_RAW" 'BEGIN { printf "%.2f", v }')
+  else
+    TS_COVERAGE="N/A"
+  fi
 else
   TS_COVERAGE="N/A"
 fi
@@ -71,7 +76,12 @@ echo "TypeScript coverage: $TS_COVERAGE"
 # Python coverage
 echo "Checking Python coverage..."
 if [ -f src/python/coverage/coverage.json ]; then
-  PY_COVERAGE=$(jq '.totals.percent_covered | floor' src/python/coverage/coverage.json)
+  PY_RAW=$(jq '.totals.percent_covered' src/python/coverage/coverage.json)
+  if [[ "$PY_RAW" =~ ^[0-9.]+$ ]]; then
+    PY_COVERAGE=$(awk -v v="$PY_RAW" 'BEGIN { printf "%.2f", v }')
+  else
+    PY_COVERAGE="N/A"
+  fi
 else
   PY_COVERAGE="N/A"
 fi
@@ -91,7 +101,7 @@ if [ -f src/csharp/TestResults/coverage.cobertura.xml ]; then
   # Extract line coverage from Cobertura XML using grep and sed
   CS_LINE_RATE=$(grep '<coverage' src/csharp/TestResults/coverage.cobertura.xml | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
   if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
-    CS_COVERAGE=$(awk "BEGIN {printf \"%.0f\", $CS_LINE_RATE*100}")
+    CS_COVERAGE=$(awk "BEGIN {printf \"%.2f\", $CS_LINE_RATE*100}")
   fi
 elif [ -f src/csharp/TestResults/*/coverage.cobertura.xml ]; then
   # Try to find coverage file in subdirectories
@@ -99,19 +109,24 @@ elif [ -f src/csharp/TestResults/*/coverage.cobertura.xml ]; then
   if [ -n "$COVERAGE_FILE" ]; then
     CS_LINE_RATE=$(grep '<coverage' "$COVERAGE_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
     if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
-      CS_COVERAGE=$(awk "BEGIN {printf \"%.0f\", $CS_LINE_RATE*100}")
+      CS_COVERAGE=$(awk "BEGIN {printf \"%.2f\", $CS_LINE_RATE*100}")
     fi
   fi
 elif [ -f src/csharp/coverage/coverage.json ]; then
   # Try JSON format (if using coverlet JSON output)
-  CS_COVERAGE=$(jq '.summary.linecoverage' src/csharp/coverage/coverage.json 2>/dev/null | sed 's/%//' || echo "N/A")
+  CS_RAW=$(jq '.summary.linecoverage' src/csharp/coverage/coverage.json 2>/dev/null | sed 's/%//')
+  if [[ "$CS_RAW" =~ ^[0-9.]+$ ]]; then
+    CS_COVERAGE=$(awk -v v="$CS_RAW" 'BEGIN { printf "%.2f", v }')
+  else
+    CS_COVERAGE="N/A"
+  fi
 elif [ -d src/csharp/coverage ] && [ "$(ls -A src/csharp/coverage)" ]; then
   # Try to find any coverage files in the coverage directory
   COVERAGE_FILE=$(find src/csharp/coverage -name "*.xml" -o -name "*.json" | head -1)
   if [ -n "$COVERAGE_FILE" ] && [[ "$COVERAGE_FILE" == *.xml ]]; then
     CS_LINE_RATE=$(grep -o 'line-rate="[0-9.]*"' "$COVERAGE_FILE" | head -1 | sed 's/line-rate="\([0-9.]*\)"/\1/')
     if [[ "$CS_LINE_RATE" =~ ^[0-9.]+$ && "$CS_LINE_RATE" != "0" ]]; then
-      CS_COVERAGE=$(awk "BEGIN {printf \"%.0f\", $CS_LINE_RATE*100}")
+      CS_COVERAGE=$(awk "BEGIN {printf \"%.2f\", $CS_LINE_RATE*100}")
     fi
   fi
 fi
@@ -129,7 +144,7 @@ if [ -f src/php/lamp-control-api/coverage.xml ]; then
   PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
   
   if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
   fi
 elif [ -f src/php/lamp-control-api/coverage/clover.xml ]; then
   # Try alternative location
@@ -137,7 +152,7 @@ elif [ -f src/php/lamp-control-api/coverage/clover.xml ]; then
   PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' src/php/lamp-control-api/coverage/clover.xml | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
   
   if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
   fi
 fi
 
@@ -152,7 +167,7 @@ if [ -f src/go/coverage.out ]; then
     # Extract total coverage percentage from go tool cover output
     GO_COVERAGE_RAW=$(cd src/go && go tool cover -func=coverage.out | grep "total:" | awk '{print $3}' | sed 's/%//')
     if [[ "$GO_COVERAGE_RAW" =~ ^[0-9.]+$ ]]; then
-      GO_COVERAGE=$(printf "%.0f" "$GO_COVERAGE_RAW")
+      GO_COVERAGE=$(awk -v v="$GO_COVERAGE_RAW" 'BEGIN { printf "%.2f", v }')
     else
       GO_COVERAGE="N/A"
     fi
@@ -165,7 +180,7 @@ if [ -f src/go/coverage.out ]; then
       COVERED_STATEMENTS=$(grep -v "mode:" src/go/coverage.out | awk '$3 > 0 {covered += $2} END {print covered}')
       
       if [[ "$TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$COVERED_STATEMENTS" =~ ^[0-9]+$ && "$TOTAL_STATEMENTS" -gt 0 ]]; then
-        GO_COVERAGE=$(awk "BEGIN {printf \"%.0f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
+        GO_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
       else
         GO_COVERAGE="N/A"
       fi
