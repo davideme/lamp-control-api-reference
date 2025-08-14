@@ -41,12 +41,22 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# Coverlet and coverage outputs
+coverage/
+# Keep JSON summary if produced under the standard coverage directory
+!coverage/coverage.json
+coverage.cobertura.xml
+
+
 # MSBuild Binary and Structured Log
 *.binlog
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
 # Exception: Keep the main coverage file for metrics
+!TestResults/coverage.cobertura.xml
+# Don't commit any other coverage in TestResults
+TestResults/**/*
 !TestResults/coverage.cobertura.xml
 [Bb]uild[Ll]og.*
 

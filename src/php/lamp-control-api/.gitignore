@@ -10,6 +10,9 @@ composer.phar
 /coverage/*.js
 /coverage/_*
 !/coverage/coverage.xml
+# Also keep alternate clover locations used by scripts
+!/coverage/clover.xml
+!/coverage.xml
 
 # Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
 # You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
