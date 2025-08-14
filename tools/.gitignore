@@ -3,6 +3,7 @@ node_modules/
 
 # Metrics output
 metrics_reports/
+coverage/
 
 # Logs
 *.log

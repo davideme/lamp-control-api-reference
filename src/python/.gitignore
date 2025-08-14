@@ -122,6 +122,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Coverage output
+coverage/*
+!coverage/coverage.json
+
 # Coverage reports
 .coverage
 .coverage.*

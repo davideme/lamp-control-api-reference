@@ -64,3 +64,6 @@ TestResults/**/*
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Ignore stray coverage artifacts not in standard folders
+LampControlApi/coverage.json

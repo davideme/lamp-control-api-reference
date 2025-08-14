@@ -131,7 +131,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Coverage outputs
-# Ignore all coverage artifacts except the summary used by metrics scripts
-coverage/
+# Coverage output
+coverage/*
 !coverage/coverage-summary.json
