@@ -41,6 +41,11 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# Coverlet and coverage outputs
+coverage/
+coverage.cobertura.xml
+
+
 # MSBuild Binary and Structured Log
 *.binlog
 
@@ -48,9 +53,15 @@ CodeCoverage/
 [Tt]est[Rr]esult*/
 # Exception: Keep the main coverage file for metrics
 !TestResults/coverage.cobertura.xml
+# Don't commit any other coverage in TestResults
+TestResults/**/*
+!TestResults/coverage.cobertura.xml
 [Bb]uild[Ll]og.*
 
 # NUnit
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Ignore stray coverage artifacts not in standard folders
+LampControlApi/coverage.json

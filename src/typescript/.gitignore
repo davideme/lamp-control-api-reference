@@ -130,3 +130,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Coverage output
+coverage/*
+!coverage/coverage-summary.json

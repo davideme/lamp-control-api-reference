@@ -30,6 +30,20 @@ replay_pid*
 **/build/
 !**/src/**/build/
 
+# Keep the aggregated JaCoCo report used by scripts
+!build/
+build/*
+!build/reports/
+build/reports/*
+!build/reports/jacoco/
+build/reports/jacoco/*
+!build/reports/jacoco/test/
+build/reports/jacoco/test/*
+!build/reports/jacoco/test/jacocoTestReport.xml
+
+# Keep JaCoCo test report used by scripts
+!/build/reports/jacoco/test/jacocoTestReport.xml
+
 # Ignore Gradle GUI config
 gradle-app.setting
 
