@@ -45,6 +45,9 @@ CodeCoverage/
 coverage/
 coverage.cobertura.xml
 
+# HTML coverage reports (do not commit generated report assets)
+coverage-report/
+
 
 # MSBuild Binary and Structured Log
 *.binlog
