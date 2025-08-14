@@ -43,8 +43,6 @@ CodeCoverage/
 
 # Coverlet and coverage outputs
 coverage/
-# Keep JSON summary if produced under the standard coverage directory
-!coverage/coverage.json
 coverage.cobertura.xml
 
 
