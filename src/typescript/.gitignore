@@ -134,5 +134,3 @@ dist
 # Coverage output
 coverage/*
 !coverage/coverage-summary.json
-# Ignore generated TypeScript types
-src/types.ts
