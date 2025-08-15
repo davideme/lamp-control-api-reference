@@ -68,3 +68,7 @@ nunit-*.xml
 
 # Ignore stray coverage artifacts not in standard folders
 LampControlApi/coverage.json
+
+# Schemathesis artifacts
+schemathesis-report*
+.hypothesis/
