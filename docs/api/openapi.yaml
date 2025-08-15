@@ -38,6 +38,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "INVALID_ARGUMENT"
+                message: "The request contains invalid parameters or malformed data"
+                details: "Invalid format for parameter 'status': expected boolean"
 
   /lamps/{lampId}:
     get:
@@ -56,6 +66,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+        '400':
+          description: Invalid lamp ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "INVALID_ARGUMENT"
+                message: "The request contains invalid parameters or malformed data"
+                details: "Invalid format for parameter 'lampId'"
         '404':
           description: Lamp not found
     put:
@@ -80,6 +100,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+        '400':
+          description: Invalid request data or lamp ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "INVALID_ARGUMENT"
+                message: "The request contains invalid parameters or malformed data"
+                details: "Invalid format for parameter 'status': expected boolean"
         '404':
           description: Lamp not found
     delete:
@@ -94,6 +124,16 @@ paths:
       responses:
         '204':
           description: Lamp deleted successfully
+        '400':
+          description: Invalid lamp ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "INVALID_ARGUMENT"
+                message: "The request contains invalid parameters or malformed data"
+                details: "Invalid format for parameter 'lampId'"
         '404':
           description: Lamp not found
 
@@ -130,3 +170,22 @@ components:
           description: New status of the lamp (on/off)
       required:
         - status
+    
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+          example: "INVALID_ARGUMENT"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The request contains invalid parameters or malformed data"
+        details:
+          type: string
+          description: Additional error details or context
+          example: "Invalid format for parameter 'status': expected boolean"
+      required:
+        - error
+        - message
