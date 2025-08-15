@@ -46,7 +46,7 @@ namespace LampControlApi.E2E
         {
             var create = new LampCreate { Status = true };
             var createResp = await _client.PostAsJsonAsync("/v1/lamps", create);
-            Assert.AreEqual(HttpStatusCode.OK, createResp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, createResp.StatusCode);
             var created = await createResp.Content.ReadFromJsonAsync<Lamp>();
             Assert.IsNotNull(created);
             Assert.IsTrue(created.Status);
@@ -78,9 +78,31 @@ namespace LampControlApi.E2E
             var createResp = await _client.PostAsJsonAsync("/v1/lamps", create);
             var created = await createResp.Content.ReadFromJsonAsync<Lamp>();
             var delResp = await _client.DeleteAsync($"/v1/lamps/{created.Id}");
-            Assert.AreEqual(HttpStatusCode.OK, delResp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NoContent, delResp.StatusCode);
             var getResp = await _client.GetAsync($"/v1/lamps/{created.Id}");
             Assert.AreEqual(HttpStatusCode.NotFound, getResp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task GetLamp_WithInvalidId_ReturnsNotFound()
+        {
+            var response = await _client.GetAsync("/v1/lamps/0");
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateLamp_WithInvalidId_ReturnsNotFound()
+        {
+            var update = new LampUpdate { Status = true };
+            var response = await _client.PutAsJsonAsync("/v1/lamps/0", update);
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteLamp_WithInvalidId_ReturnsNotFound()
+        {
+            var response = await _client.DeleteAsync("/v1/lamps/0");
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
