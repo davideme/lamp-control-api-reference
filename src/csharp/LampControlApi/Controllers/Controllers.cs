@@ -76,6 +76,7 @@ namespace LampControlApi.Controllers
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     [Microsoft.AspNetCore.Mvc.Route("v1")]
+    [Microsoft.AspNetCore.Mvc.NonController]
 
     public partial class Controller : Microsoft.AspNetCore.Mvc.ControllerBase
     {
