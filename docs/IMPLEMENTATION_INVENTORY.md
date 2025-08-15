@@ -148,7 +148,14 @@ According to PRD.md, each implementation should support:
 - SQL databases (MySQL and PostgreSQL)
 - Document database (MongoDB)
 
-**Gap**: None of the implementations actually connect to external databases.
+- PHP: In-memory storage (PDO configuration present but not connected)
+
+### Planned Database Support
+According to PRD.md, each implementation should support:
+- SQL databases (MySQL and PostgreSQL)
+- Document database (MongoDB)
+
+**Gap**: None of the implementations actually connect to external databases (PHP has partial PDO configuration, but does not establish a connection).
 
 ## Testing Analysis
 
