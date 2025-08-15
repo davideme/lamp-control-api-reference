@@ -64,7 +64,7 @@ The repository contains implementations in 8 programming languages with varying 
 - **REST API**: ✅ Implemented using Ktor with OpenAPI
 - **GraphQL**: ❌ Not implemented
 - **gRPC**: ❌ Not implemented
-- **Database Support**: ❌ Likely in-memory (auto-generated code)
+- **Database Support**: ❌ Not analyzed: auto-generated code, storage implementation unclear
 - **Testing**: ✅ Testing infrastructure available
 - **Framework**: Ktor + OpenAPI Generator
 - **Storage**: Not analyzed in detail (generated code)
