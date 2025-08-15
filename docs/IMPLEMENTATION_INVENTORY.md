@@ -67,7 +67,7 @@ The repository contains implementations in 8 programming languages with varying 
 - **Database Support**: ❌ Not analyzed: auto-generated code, storage implementation unclear
 - **Testing**: ✅ Testing infrastructure available
 - **Framework**: Ktor + OpenAPI Generator
-- **Storage**: Not analyzed in detail (generated code)
+- **Storage**: Not analyzed in detail because the storage implementation is auto-generated and not easily human-readable, making detailed analysis infeasible.
 - **Test Coverage**: 78.76% (from COMPARISON.md)
 
 ### ⚠️ Partially Implemented Languages
