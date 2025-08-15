@@ -4,7 +4,7 @@ This document provides a comprehensive analysis of the actual implementations ac
 
 ## Executive Summary
 
-The repository contains implementations in 8 programming languages with varying degrees of completeness. Most implementations focus on REST APIs with in-memory storage, while GraphQL and gRPC implementations are largely absent. Database connectors are also limited.
+The repository contains implementations in 8 programming languages with varying degrees of completeness. Most implementations focus on REST APIs with in-memory storage, while GraphQL and gRPC implementations are absent and database connectors are not implemented.
 
 ## Language Implementation Status
 
