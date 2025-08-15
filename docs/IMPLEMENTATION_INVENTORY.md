@@ -81,7 +81,7 @@ The repository contains implementations in 8 programming languages with varying 
 - **Framework**: Slim Framework + OpenAPI Data Mocker
 - **Storage**: Configuration for MySQL present
 - **Test Coverage**: 88.89% (from COMPARISON.md)
-- **Notes**: Has database configuration files but unclear if fully functional
+- **Notes**: Database configuration files are present, but database connectivity is not fully implemented.
 
 ### ❌ Incomplete Implementations
 
