@@ -49,6 +49,7 @@ namespace LampControlApi.Tests
             var result = await _controller.ListLampsAsync();
 
             // Assert
+
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
             _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
