@@ -50,7 +50,7 @@ namespace LampControlApi.Services
 
             var page = all.Skip(start).Take(pageSize).ToList();
             var hasMore = start + pageSize < all.Count;
-            var nextCursor = hasMore ? (start + pageSize).ToString() : null;
+            var nextCursor = hasMore ? (start + pageSize).ToString() : string.Empty;
 
             return new Response
             {
@@ -67,7 +67,7 @@ namespace LampControlApi.Services
         public async Task<ICollection<Lamp>> ListLampsAsync()
         {
             // Call the paginated implementation with defaults and return the data list.
-            var response = await ListLampsAsync(null, int.MaxValue);
+            var response = await ListLampsAsync(string.Empty, int.MaxValue);
             return response.Data;
         }
 
