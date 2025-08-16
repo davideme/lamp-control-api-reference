@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using LampControlApi.Controllers;
 
 namespace LampControlApi.Services
@@ -19,12 +23,52 @@ namespace LampControlApi.Services
         }
 
         /// <summary>
-        /// List all lamps.
+        /// List all lamps with pagination.
         /// </summary>
-        /// <returns>A list of lamps.</returns>
+        /// <param name="cursor">Opaque cursor representing the starting index (stringified int).</param>
+        /// <param name="pageSize">Number of items to return.</param>
+        /// <returns>A paginated response containing lamps.</returns>
+        public async Task<Response> ListLampsAsync(string cursor, int pageSize)
+        {
+            // Normalize pageSize
+            if (pageSize <= 0)
+            {
+                pageSize = 25;
+            }
+
+            // Interpret cursor as a starting index. If parsing fails, start at 0.
+            var start = 0;
+            if (!string.IsNullOrWhiteSpace(cursor) && int.TryParse(cursor, out var parsed))
+            {
+                start = Math.Max(0, parsed);
+            }
+
+            var all = (await _lampRepository.GetAllAsync())
+                .OrderByDescending(l => l.UpdatedAt)
+                .ThenByDescending(l => l.Id)
+                .ToList();
+
+            var page = all.Skip(start).Take(pageSize).ToList();
+            var hasMore = start + pageSize < all.Count;
+            var nextCursor = hasMore ? (start + pageSize).ToString() : null;
+
+            return new Response
+            {
+                Data = page,
+                HasMore = hasMore,
+                NextCursor = nextCursor
+            };
+        }
+
+        /// <summary>
+        /// Backwards-compatible parameterless ListLampsAsync returning all lamps.
+        /// </summary>
+        /// <returns>All lamps from the repository.</returns>
         public async Task<ICollection<Lamp>> ListLampsAsync()
         {
-            return await _lampRepository.GetAllAsync();
+            // Call the paginated implementation with defaults and return the data list.
+            var response = await ListLampsAsync(null, int.MaxValue);
+            return response.Data;
         }
 
         /// <summary>
