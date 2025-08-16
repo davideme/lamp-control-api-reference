@@ -18,13 +18,20 @@ namespace LampControlApi.Services
             _lampRepository = lampRepository ?? throw new ArgumentNullException(nameof(lampRepository));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// List all lamps.
+        /// </summary>
+        /// <returns>A list of lamps.</returns>
         public async Task<ICollection<Lamp>> ListLampsAsync()
         {
             return await _lampRepository.GetAllAsync();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Create a new lamp.
+        /// </summary>
+        /// <param name="body">The lamp to create.</param>
+        /// <returns>Lamp created successfully.</returns>
         public async Task<Lamp> CreateLampAsync(LampCreate body)
         {
             if (body == null)
@@ -41,7 +48,11 @@ namespace LampControlApi.Services
             return await _lampRepository.CreateAsync(lamp);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Get a specific lamp.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to fetch.</param>
+        /// <returns>Lamp details.</returns>
         public async Task<Lamp> GetLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))
@@ -63,7 +74,12 @@ namespace LampControlApi.Services
             return lamp;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Update a lamp's status.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to update.</param>
+        /// <param name="body">Updated lamp fields.</param>
+        /// <returns>Lamp updated successfully.</returns>
         public async Task<Lamp> UpdateLampAsync(string lampId, LampUpdate body)
         {
             if (string.IsNullOrWhiteSpace(lampId))
@@ -93,7 +109,11 @@ namespace LampControlApi.Services
             return updatedLamp!; // We know it exists since we just checked.
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Delete a lamp.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to delete.</param>
+        /// <returns>Task representing the delete operation.</returns>
         public async Task DeleteLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))
