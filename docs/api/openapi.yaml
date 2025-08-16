@@ -178,14 +178,5 @@ components:
           type: string
           description: Error type identifier
           example: "INVALID_ARGUMENT"
-        message:
-          type: string
-          description: Human-readable error message
-          example: "The request contains invalid parameters or malformed data"
-        details:
-          type: string
-          description: Additional error details or context
-          example: "Invalid format for parameter 'status': expected boolean"
       required:
         - error
-        - message
