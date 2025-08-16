@@ -48,13 +48,6 @@ paths:
     post:
       summary: Create a new lamp
       operationId: createLamp
-      parameters:
-        - name: Idempotency-Key
-          in: header
-          required: false
-          schema:
-            type: string
-            description: A unique key to ensure idempotency of the request
       requestBody:
         required: true
         content:
@@ -125,12 +118,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: Idempotency-Key
-          in: header
-          required: false
-          schema:
-            type: string
-            description: A unique key to ensure idempotency of the request
       requestBody:
         required: true
         content:
@@ -165,12 +152,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: Idempotency-Key
-          in: header
-          required: false
-          schema:
-            type: string
-            description: A unique key to ensure idempotency of the request
       responses:
         '204':
           description: Lamp deleted successfully
