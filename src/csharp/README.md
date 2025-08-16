@@ -168,6 +168,23 @@ Once running, visit:
 - **Swagger UI**: `https://localhost:7173/swagger`
 - **OpenAPI JSON**: `https://localhost:7173/swagger/v1/swagger.json`
 
+## Generating the Server Code
+
+To generate the server code using NSwag, follow these steps:
+
+1. **Install NSwag CLI**:
+   ```bash
+   dotnet tool install -g NSwag.ConsoleCore
+   ```
+
+2. **Generate the Server Code**:
+   Run the following command, replacing `<path-to-openapi.yaml>` with the path to your OpenAPI definition file (e.g., `docs/api/openapi.yaml`):
+   ```bash
+   nswag openapi2cscontroller /input:docs/api/openapi.yaml /output:src/csharp/LampControlApi/Controllers/Controllers.cs /namespace:LampControlApi.Controllers
+   ```
+
+   This will generate a `Controllers.cs` file with the server-side code.
+
 ## Contributing
 
 1. **Follow the code style** - The build will fail if formatting or linting issues are found
