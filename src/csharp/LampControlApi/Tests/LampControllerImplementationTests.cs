@@ -49,7 +49,6 @@ namespace LampControlApi.Tests
             var result = await _controller.ListLampsAsync();
 
             // Assert
-
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
             _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
@@ -77,6 +76,7 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedLamps.Count, result.Count);
+
             // Ensure ordering matches UpdatedAt desc, then Id desc
             var expectedOrdered = expectedLamps.OrderByDescending(l => l.UpdatedAt).ThenByDescending(l => l.Id).ToList();
             CollectionAssert.AreEqual(expectedOrdered, result.ToList());
