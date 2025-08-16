@@ -64,9 +64,9 @@ namespace LampControlApi.Tests
             // Arrange
             var expectedLamps = new List<Lamp>
             {
-                new Lamp { Id = Guid.NewGuid(), Status = true },
-                new Lamp { Id = Guid.NewGuid(), Status = false },
-                new Lamp { Id = Guid.NewGuid(), Status = true }
+                new Lamp { Id = Guid.NewGuid(), Status = true, UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(-1) },
+                new Lamp { Id = Guid.NewGuid(), Status = false, UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(-2) },
+                new Lamp { Id = Guid.NewGuid(), Status = true, UpdatedAt = DateTimeOffset.UtcNow }
             };
             _mockRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(expectedLamps);
 
@@ -76,7 +76,9 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedLamps.Count, result.Count);
-            CollectionAssert.AreEqual(expectedLamps, result.ToList());
+            // Ensure ordering matches UpdatedAt desc, then Id desc
+            var expectedOrdered = expectedLamps.OrderByDescending(l => l.UpdatedAt).ThenByDescending(l => l.Id).ToList();
+            CollectionAssert.AreEqual(expectedOrdered, result.ToList());
             _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
         }
 
