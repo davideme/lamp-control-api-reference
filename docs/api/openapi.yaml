@@ -209,13 +209,8 @@ components:
         status:
           type: boolean
           description: New status of the lamp (on/off)
-        updatedAt:
-          type: string
-          format: date-time
-          description: Timestamp when the lamp was last updated
       required:
         - status
-        - updatedAt
 
     Error:
       type: object
