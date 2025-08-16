@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using LampControlApi.Controllers;
 
 namespace LampControlApi.Services
@@ -18,13 +22,60 @@ namespace LampControlApi.Services
             _lampRepository = lampRepository ?? throw new ArgumentNullException(nameof(lampRepository));
         }
 
-        /// <inheritdoc/>
-        public async Task<ICollection<Lamp>> ListLampsAsync()
+        /// <summary>
+        /// List all lamps with pagination.
+        /// </summary>
+        /// <param name="cursor">Opaque cursor representing the starting index (stringified int).</param>
+        /// <param name="pageSize">Number of items to return.</param>
+        /// <returns>A paginated response containing lamps.</returns>
+        public async Task<Response> ListLampsAsync(string cursor, int pageSize)
         {
-            return await _lampRepository.GetAllAsync();
+            // Normalize pageSize
+            if (pageSize <= 0)
+            {
+                pageSize = 25;
+            }
+
+            // Interpret cursor as a starting index. If parsing fails, start at 0.
+            var start = 0;
+            if (!string.IsNullOrWhiteSpace(cursor) && int.TryParse(cursor, out var parsed))
+            {
+                start = Math.Max(0, parsed);
+            }
+
+            var all = (await _lampRepository.GetAllAsync())
+                .OrderByDescending(l => l.UpdatedAt)
+                .ThenByDescending(l => l.Id)
+                .ToList();
+
+            var page = all.Skip(start).Take(pageSize).ToList();
+            var hasMore = start + pageSize < all.Count;
+            var nextCursor = hasMore ? (start + pageSize).ToString() : string.Empty;
+
+            return new Response
+            {
+                Data = page,
+                HasMore = hasMore,
+                NextCursor = nextCursor
+            };
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Backwards-compatible parameterless ListLampsAsync returning all lamps.
+        /// </summary>
+        /// <returns>All lamps from the repository.</returns>
+        public async Task<ICollection<Lamp>> ListLampsAsync()
+        {
+            // Call the paginated implementation with defaults and return the data list.
+            var response = await ListLampsAsync(string.Empty, int.MaxValue);
+            return response.Data;
+        }
+
+        /// <summary>
+        /// Create a new lamp.
+        /// </summary>
+        /// <param name="body">The lamp to create.</param>
+        /// <returns>Lamp created successfully.</returns>
         public async Task<Lamp> CreateLampAsync(LampCreate body)
         {
             if (body == null)
@@ -41,7 +92,11 @@ namespace LampControlApi.Services
             return await _lampRepository.CreateAsync(lamp);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Get a specific lamp.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to fetch.</param>
+        /// <returns>Lamp details.</returns>
         public async Task<Lamp> GetLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))
@@ -63,7 +118,12 @@ namespace LampControlApi.Services
             return lamp;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Update a lamp's status.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to update.</param>
+        /// <param name="body">Updated lamp fields.</param>
+        /// <returns>Lamp updated successfully.</returns>
         public async Task<Lamp> UpdateLampAsync(string lampId, LampUpdate body)
         {
             if (string.IsNullOrWhiteSpace(lampId))
@@ -93,7 +153,11 @@ namespace LampControlApi.Services
             return updatedLamp!; // We know it exists since we just checked.
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Delete a lamp.
+        /// </summary>
+        /// <param name="lampId">Identifier of the lamp to delete.</param>
+        /// <returns>Task representing the delete operation.</returns>
         public async Task DeleteLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))

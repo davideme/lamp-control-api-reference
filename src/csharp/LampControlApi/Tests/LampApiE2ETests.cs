@@ -37,8 +37,9 @@ namespace LampControlApi.E2E
         {
             var response = await _client.GetAsync("/v1/lamps");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            var lamps = await response.Content.ReadFromJsonAsync<List<Lamp>>();
-            Assert.IsNotNull(lamps);
+            var resp = await response.Content.ReadFromJsonAsync<Response>();
+            Assert.IsNotNull(resp);
+            Assert.IsNotNull(resp.Data);
         }
 
         [TestMethod]
