@@ -40,8 +40,10 @@ object Paths {
     /**
      * List all lamps
      * 
+     * @param cursor  (optional)
+     * @param pageSize  (optional, default to 25)
      */
-    @Resource("/lamps") class listLamps
+    @Resource("/lamps") class listLamps(val cursor: kotlin.String? = null, val pageSize: kotlin.Int? = null)
 
     /**
      * Update a lamp&#39;s status
