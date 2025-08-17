@@ -114,7 +114,13 @@ namespace LampControlApi.Tests
 
             // Act
             var actionResult = await _controller.CreateLampAsync(lampCreate);
-            var result = actionResult.Value!;
+            // The implementation may return an ActionResult with Value set or an
+            // IActionResult (e.g., CreatedAtActionResult). Handle both cases.
+            Lamp? result = actionResult.Value;
+            if (result == null && actionResult.Result is Microsoft.AspNetCore.Mvc.CreatedAtActionResult createdResult)
+            {
+                result = createdResult.Value as Lamp;
+            }
 
             // Assert
             Assert.IsNotNull(result);
