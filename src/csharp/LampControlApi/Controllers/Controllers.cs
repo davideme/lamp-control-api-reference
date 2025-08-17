@@ -35,7 +35,7 @@ namespace LampControlApi.Controllers
 
         /// <returns>A list of lamps with pagination</returns>
 
-        System.Threading.Tasks.Task<Response> ListLampsAsync(string cursor, int pageSize);
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Response>> ListLampsAsync(string cursor, int pageSize);
 
         /// <summary>
         /// Create a new lamp
@@ -44,7 +44,7 @@ namespace LampControlApi.Controllers
 
         /// <returns>Lamp created successfully</returns>
 
-        System.Threading.Tasks.Task<Lamp> CreateLampAsync(LampCreate body);
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> CreateLampAsync(LampCreate body);
 
         /// <summary>
         /// Get a specific lamp
@@ -53,7 +53,7 @@ namespace LampControlApi.Controllers
 
         /// <returns>Lamp details</returns>
 
-        System.Threading.Tasks.Task<Lamp> GetLampAsync(string lampId);
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> GetLampAsync(string lampId);
 
         /// <summary>
         /// Update a lamp's status
@@ -62,7 +62,7 @@ namespace LampControlApi.Controllers
 
         /// <returns>Lamp updated successfully</returns>
 
-        System.Threading.Tasks.Task<Lamp> UpdateLampAsync(string lampId, LampUpdate body);
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> UpdateLampAsync(string lampId, LampUpdate body);
 
         /// <summary>
         /// Delete a lamp
@@ -71,7 +71,7 @@ namespace LampControlApi.Controllers
 
         /// <returns>Lamp deleted successfully</returns>
 
-        System.Threading.Tasks.Task DeleteLampAsync(string lampId);
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> DeleteLampAsync(string lampId);
 
     }
 
@@ -92,7 +92,7 @@ namespace LampControlApi.Controllers
         /// </summary>
         /// <returns>A list of lamps with pagination</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("lamps")]
-        public System.Threading.Tasks.Task<Response> ListLamps([Microsoft.AspNetCore.Mvc.FromQuery] string cursor, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Response>> ListLamps([Microsoft.AspNetCore.Mvc.FromQuery] string cursor, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize)
         {
 
             return _implementation.ListLampsAsync(cursor, pageSize ?? 25);
@@ -103,7 +103,7 @@ namespace LampControlApi.Controllers
         /// </summary>
         /// <returns>Lamp created successfully</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("lamps")]
-        public System.Threading.Tasks.Task<Lamp> CreateLamp([Microsoft.AspNetCore.Mvc.FromBody] LampCreate body)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> CreateLamp([Microsoft.AspNetCore.Mvc.FromBody] LampCreate body)
         {
 
             return _implementation.CreateLampAsync(body);
@@ -114,7 +114,7 @@ namespace LampControlApi.Controllers
         /// </summary>
         /// <returns>Lamp details</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("lamps/{lampId}")]
-        public System.Threading.Tasks.Task<Lamp> GetLamp(string lampId)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> GetLamp(string lampId)
         {
 
             return _implementation.GetLampAsync(lampId);
@@ -125,7 +125,7 @@ namespace LampControlApi.Controllers
         /// </summary>
         /// <returns>Lamp updated successfully</returns>
         [Microsoft.AspNetCore.Mvc.HttpPut, Microsoft.AspNetCore.Mvc.Route("lamps/{lampId}")]
-        public System.Threading.Tasks.Task<Lamp> UpdateLamp(string lampId, [Microsoft.AspNetCore.Mvc.FromBody] LampUpdate body)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<Lamp>> UpdateLamp(string lampId, [Microsoft.AspNetCore.Mvc.FromBody] LampUpdate body)
         {
 
             return _implementation.UpdateLampAsync(lampId, body);
@@ -136,7 +136,7 @@ namespace LampControlApi.Controllers
         /// </summary>
         /// <returns>Lamp deleted successfully</returns>
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("lamps/{lampId}")]
-        public System.Threading.Tasks.Task DeleteLamp(string lampId)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> DeleteLamp(string lampId)
         {
 
             return _implementation.DeleteLampAsync(lampId);

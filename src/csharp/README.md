@@ -188,7 +188,7 @@ To generate the server code using NSwag, follow these steps:
 2. **Generate the Server Code**:
    Run the following command, replacing `<path-to-openapi.yaml>` with the path to your OpenAPI definition file (e.g., `docs/api/openapi.yaml`):
    ```bash
-   nswag openapi2cscontroller /input:docs/api/openapi.yaml /output:src/csharp/LampControlApi/Controllers/Controllers.cs /namespace:LampControlApi.Controllers
+   nswag openapi2cscontroller /input:docs/api/openapi.yaml /output:src/csharp/LampControlApi/Controllers/Controllers.cs /namespace:LampControlApi.Controllers /UseActionResultType:true
    ```
 
    This will generate a `Controllers.cs` file with the server-side code.
