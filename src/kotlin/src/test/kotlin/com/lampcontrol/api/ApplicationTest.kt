@@ -62,7 +62,10 @@ class ApplicationTest {
         
         client.get("/v1/lamps").apply {
             assertEquals(HttpStatusCode.OK, status)
-            assertEquals("[]", bodyAsText())
+            // Response should be an object with `data` array per OpenAPI
+            val respJson = bodyAsText()
+            val parsed = json.decodeFromString<com.lampcontrol.api.models.ListLamps200Response>(respJson)
+            assertTrue(parsed.data.isEmpty())
         }
     }
 

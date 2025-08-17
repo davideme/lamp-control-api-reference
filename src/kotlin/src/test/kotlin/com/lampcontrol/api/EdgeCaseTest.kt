@@ -142,11 +142,14 @@ class EdgeCaseTest {
         }
         
         // Get all lamps
-        val allLampsResponse = client.get("/v1/lamps")
-        assertEquals(HttpStatusCode.OK, allLampsResponse.status)
-        
-        val allLamps = json.parseToJsonElement(allLampsResponse.bodyAsText()).jsonArray
-        assertTrue(allLamps.size >= 5)
+    val allLampsResponse = client.get("/v1/lamps")
+    assertEquals(HttpStatusCode.OK, allLampsResponse.status)
+
+    // Response is an object with `data` array
+    val respObj = json.parseToJsonElement(allLampsResponse.bodyAsText()).jsonObject
+    val allLamps = respObj["data"]?.jsonArray
+    assertNotNull(allLamps)
+    assertTrue(allLamps.size >= 5)
         
         // Verify each lamp exists
         lampIds.forEach { lampId ->

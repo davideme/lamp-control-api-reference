@@ -51,4 +51,38 @@ class StatusPagesTest {
         val res = client.get("/ierr")
         assertEquals(HttpStatusCode.BadRequest, res.status)
     }
+
+    @Test
+    fun `number format exception returns 400`() = testApplication {
+        application {
+            module()
+            routing {
+                get("/nfe") {
+                    // simulate parsing a malformed numeric query param
+                    val v = call.request.queryParameters["pageSize"] ?: "null"
+                    val parsed = v.toInt() // will throw NumberFormatException for non-numeric
+                    call.respondText("ok $parsed")
+                }
+            }
+        }
+
+        val res = client.get("/nfe?pageSize=null")
+        assertEquals(HttpStatusCode.BadRequest, res.status)
+    }
+
+    @Test
+    fun `bad request wrapping number format returns 400`() = testApplication {
+        application {
+            module()
+            routing {
+                get("/breq") {
+                    // Simulate Ktor wrapping a NumberFormatException inside BadRequestException
+                    throw io.ktor.server.plugins.BadRequestException("Can't transform call to resource", NumberFormatException("For input string: \"null\""))
+                }
+            }
+        }
+
+        val res = client.get("/breq")
+        assertEquals(HttpStatusCode.BadRequest, res.status)
+    }
 }
