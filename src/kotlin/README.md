@@ -60,9 +60,11 @@ Class | Method | HTTP request | Description
 <a id="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [com.lampcontrol.api.models.Error](docs/Error.md)
  - [com.lampcontrol.api.models.Lamp](docs/Lamp.md)
  - [com.lampcontrol.api.models.LampCreate](docs/LampCreate.md)
  - [com.lampcontrol.api.models.LampUpdate](docs/LampUpdate.md)
+ - [com.lampcontrol.api.models.ListLamps200Response](docs/ListLamps200Response.md)
 
 
 <a id="documentation-for-authorization"></a>

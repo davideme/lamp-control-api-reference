@@ -18,12 +18,18 @@ import kotlinx.serialization.Serializable
  * 
  * @param id Unique identifier for the lamp
  * @param status Whether the lamp is turned on (true) or off (false)
+ * @param createdAt Timestamp when the lamp was created
+ * @param updatedAt Timestamp when the lamp was last updated
  */
 @Serializable
 data class Lamp(
     /* Unique identifier for the lamp */
     @Contextual val id: java.util.UUID,
     /* Whether the lamp is turned on (true) or off (false) */
-    val status: kotlin.Boolean
+    val status: kotlin.Boolean,
+    /* Timestamp when the lamp was created */
+    val createdAt: kotlin.String,
+    /* Timestamp when the lamp was last updated */
+    val updatedAt: kotlin.String
 )
 
