@@ -51,4 +51,22 @@ class StatusPagesTest {
         val res = client.get("/ierr")
         assertEquals(HttpStatusCode.BadRequest, res.status)
     }
+
+    @Test
+    fun `number format exception returns 400`() = testApplication {
+        application {
+            module()
+            routing {
+                get("/nfe") {
+                    // simulate parsing a malformed numeric query param
+                    val v = call.request.queryParameters["pageSize"] ?: "null"
+                    val parsed = v.toInt() // will throw NumberFormatException for non-numeric
+                    call.respondText("ok $parsed")
+                }
+            }
+        }
+
+        val res = client.get("/nfe?pageSize=null")
+        assertEquals(HttpStatusCode.BadRequest, res.status)
+    }
 }
