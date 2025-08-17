@@ -113,7 +113,15 @@ namespace LampControlApi.Tests
                 });
 
             // Act
-            var result = await _controller.CreateLampAsync(lampCreate);
+            var actionResult = await _controller.CreateLampAsync(lampCreate);
+
+            // The implementation may return an ActionResult with Value set or an
+            // IActionResult (e.g., CreatedAtActionResult). Handle both cases.
+            Lamp? result = actionResult.Value;
+            if (result == null && actionResult.Result is Microsoft.AspNetCore.Mvc.CreatedAtActionResult createdResult)
+            {
+                result = createdResult.Value as Lamp;
+            }
 
             // Assert
             Assert.IsNotNull(result);
@@ -226,7 +234,8 @@ namespace LampControlApi.Tests
             _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync(expectedLamp);
 
             // Act
-            var result = await _controller.GetLampAsync(lampId.ToString());
+            var actionResult = await _controller.GetLampAsync(lampId.ToString());
+            var result = actionResult.Value!;
 
             // Assert
             Assert.IsNotNull(result);
@@ -330,7 +339,8 @@ namespace LampControlApi.Tests
             _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<Lamp>())).ReturnsAsync(updatedLamp);
 
             // Act
-            var result = await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
+            var actionResult = await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
+            var result = actionResult.Value!;
 
             // Assert
             Assert.IsNotNull(result);
@@ -447,9 +457,10 @@ namespace LampControlApi.Tests
             _mockRepository.Setup(r => r.DeleteAsync(lampId)).ReturnsAsync(true);
 
             // Act
-            await _controller.DeleteLampAsync(lampId.ToString());
+            var actionResult = await _controller.DeleteLampAsync(lampId.ToString());
 
-            // Assert - No exception should be thrown
+            // Assert - No exception should be thrown and check for NoContentResult
+            Assert.IsInstanceOfType(actionResult, typeof(Microsoft.AspNetCore.Mvc.NoContentResult));
             _mockRepository.Verify(r => r.DeleteAsync(lampId), Times.Once);
         }
     }

@@ -1,0 +1,5 @@
+[generation]
+allow-x00 = false
+
+[checks]
+unsupported_method.enabled = false

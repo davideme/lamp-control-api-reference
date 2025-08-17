@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LampControlApi.Controllers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LampControlApi.Services
 {
@@ -28,7 +29,7 @@ namespace LampControlApi.Services
         /// <param name="cursor">Opaque cursor representing the starting index (stringified int).</param>
         /// <param name="pageSize">Number of items to return.</param>
         /// <returns>A paginated response containing lamps.</returns>
-        public async Task<Response> ListLampsAsync(string cursor, int pageSize)
+        public async Task<ActionResult<Response>> ListLampsAsync(string cursor, int pageSize)
         {
             // Normalize pageSize
             if (pageSize <= 0)
@@ -52,12 +53,14 @@ namespace LampControlApi.Services
             var hasMore = start + pageSize < all.Count;
             var nextCursor = hasMore ? (start + pageSize).ToString() : string.Empty;
 
-            return new Response
+            var response = new Response
             {
                 Data = page,
                 HasMore = hasMore,
                 NextCursor = nextCursor
             };
+
+            return new ActionResult<Response>(response);
         }
 
         /// <summary>
@@ -68,7 +71,15 @@ namespace LampControlApi.Services
         {
             // Call the paginated implementation with defaults and return the data list.
             var response = await ListLampsAsync(string.Empty, int.MaxValue);
-            return response.Data;
+
+            // If the paginated overload returns an ActionResult, unwrap the value.
+            if (response is ActionResult<Response> ar && ar.Value != null)
+            {
+                return ar.Value.Data;
+            }
+
+            // Fallback: return empty list if something unexpected happens.
+            return new List<Lamp>();
         }
 
         /// <summary>
@@ -76,7 +87,7 @@ namespace LampControlApi.Services
         /// </summary>
         /// <param name="body">The lamp to create.</param>
         /// <returns>Lamp created successfully.</returns>
-        public async Task<Lamp> CreateLampAsync(LampCreate body)
+        public async Task<ActionResult<Lamp>> CreateLampAsync(LampCreate body)
         {
             if (body == null)
             {
@@ -89,7 +100,12 @@ namespace LampControlApi.Services
                 Status = body.Status
             };
 
-            return await _lampRepository.CreateAsync(lamp);
+            var created = await _lampRepository.CreateAsync(lamp);
+
+            // Return 201 Created with a Location header pointing to the GetLamp route.
+            // Use CreatedAtAction semantics so the generated controller's URL helper can
+            // resolve the action name and produce the correct Location value.
+            return new CreatedAtActionResult("GetLamp", null, new { lampId = created.Id }, created);
         }
 
         /// <summary>
@@ -97,7 +113,7 @@ namespace LampControlApi.Services
         /// </summary>
         /// <param name="lampId">Identifier of the lamp to fetch.</param>
         /// <returns>Lamp details.</returns>
-        public async Task<Lamp> GetLampAsync(string lampId)
+        public async Task<ActionResult<Lamp>> GetLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
@@ -115,7 +131,7 @@ namespace LampControlApi.Services
                 throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");
             }
 
-            return lamp;
+            return new ActionResult<Lamp>(lamp);
         }
 
         /// <summary>
@@ -124,7 +140,7 @@ namespace LampControlApi.Services
         /// <param name="lampId">Identifier of the lamp to update.</param>
         /// <param name="body">Updated lamp fields.</param>
         /// <returns>Lamp updated successfully.</returns>
-        public async Task<Lamp> UpdateLampAsync(string lampId, LampUpdate body)
+        public async Task<ActionResult<Lamp>> UpdateLampAsync(string lampId, LampUpdate body)
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
@@ -150,7 +166,7 @@ namespace LampControlApi.Services
             existingLamp.Status = body.Status;
             var updatedLamp = await _lampRepository.UpdateAsync(existingLamp);
 
-            return updatedLamp!; // We know it exists since we just checked.
+            return new ActionResult<Lamp>(updatedLamp!); // We know it exists since we just checked.
         }
 
         /// <summary>
@@ -158,7 +174,7 @@ namespace LampControlApi.Services
         /// </summary>
         /// <param name="lampId">Identifier of the lamp to delete.</param>
         /// <returns>Task representing the delete operation.</returns>
-        public async Task DeleteLampAsync(string lampId)
+        public async Task<Microsoft.AspNetCore.Mvc.IActionResult> DeleteLampAsync(string lampId)
         {
             if (string.IsNullOrWhiteSpace(lampId))
             {
@@ -175,6 +191,9 @@ namespace LampControlApi.Services
             {
                 throw new KeyNotFoundException($"Lamp with ID {lampId} not found");
             }
+
+            // Return HTTP 204 No Content on successful delete.
+            return new NoContentResult();
         }
     }
 }

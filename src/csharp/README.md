@@ -123,6 +123,13 @@ The project includes a comprehensive CI/CD pipeline (`.github/workflows/csharp-c
 - Checks for outdated packages
 - Generates dependency reports
 
+#### 6. **Schemathesis API Testing**
+- Runs property-based tests against the running API
+- Validates OpenAPI specification compliance
+- Checks status code conformance, server errors, and response schemas
+- Generates test reports for CI integration
+- Automatically detects API violations and regressions
+
 ### Artifacts
 
 The workflow generates several artifacts:
@@ -131,6 +138,7 @@ The workflow generates several artifacts:
 - **Publish artifacts** (30 days retention)
 - **Coverage reports** (30 days retention)
 - **Dependency reports** (30 days retention)
+- **Schemathesis test reports** (30 days retention)
 
 ## Project Structure
 
@@ -180,7 +188,7 @@ To generate the server code using NSwag, follow these steps:
 2. **Generate the Server Code**:
    Run the following command, replacing `<path-to-openapi.yaml>` with the path to your OpenAPI definition file (e.g., `docs/api/openapi.yaml`):
    ```bash
-   nswag openapi2cscontroller /input:docs/api/openapi.yaml /output:src/csharp/LampControlApi/Controllers/Controllers.cs /namespace:LampControlApi.Controllers
+   nswag openapi2cscontroller /input:docs/api/openapi.yaml /output:src/csharp/LampControlApi/Controllers/Controllers.cs /namespace:LampControlApi.Controllers /UseActionResultType:true
    ```
 
    This will generate a `Controllers.cs` file with the server-side code.

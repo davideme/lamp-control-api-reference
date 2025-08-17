@@ -47,10 +47,13 @@ namespace LampControlApi.E2E
         {
             var create = new LampCreate { Status = true };
             var createResp = await _client.PostAsJsonAsync("/v1/lamps", create);
-            Assert.AreEqual(HttpStatusCode.OK, createResp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, createResp.StatusCode);
             var created = await createResp.Content.ReadFromJsonAsync<Lamp>();
             Assert.IsNotNull(created);
             Assert.IsTrue(created.Status);
+
+            // Ensure Location header is present and points to the created resource
+            Assert.IsTrue(createResp.Headers.Location != null);
 
             var getResp = await _client.GetAsync($"/v1/lamps/{created.Id}");
             Assert.AreEqual(HttpStatusCode.OK, getResp.StatusCode);
@@ -79,7 +82,7 @@ namespace LampControlApi.E2E
             var createResp = await _client.PostAsJsonAsync("/v1/lamps", create);
             var created = await createResp.Content.ReadFromJsonAsync<Lamp>();
             var delResp = await _client.DeleteAsync($"/v1/lamps/{created.Id}");
-            Assert.AreEqual(HttpStatusCode.OK, delResp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NoContent, delResp.StatusCode);
             var getResp = await _client.GetAsync($"/v1/lamps/{created.Id}");
             Assert.AreEqual(HttpStatusCode.NotFound, getResp.StatusCode);
         }
