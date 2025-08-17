@@ -29,6 +29,7 @@ import com.lampcontrol.api.infrastructure.ApiPrincipal
 import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.ListLamps200Response
 import com.lampcontrol.repository.LampRepository
 
 fun Route.DefaultApi(lampService: LampRepository) {
@@ -65,7 +66,13 @@ fun Route.DefaultApi(lampService: LampRepository) {
 
     get<Paths.listLamps> {
         val lamps = lampService.getAllLamps()
-        call.respond(HttpStatusCode.OK, lamps)
+        // Construct response object matching OpenAPI schema: { data: [...], hasMore: boolean, nextCursor: string? }
+        val response = ListLamps200Response(
+            data = lamps,
+            hasMore = false,
+            nextCursor = null
+        )
+        call.respond(HttpStatusCode.OK, response)
     }
 
     put<Paths.updateLamp> {
