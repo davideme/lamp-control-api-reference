@@ -71,6 +71,7 @@ namespace LampControlApi.Services
         {
             // Call the paginated implementation with defaults and return the data list.
             var response = await ListLampsAsync(string.Empty, int.MaxValue);
+
             // If the paginated overload returns an ActionResult, unwrap the value.
             if (response is ActionResult<Response> ar && ar.Value != null)
             {
