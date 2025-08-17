@@ -37,6 +37,48 @@ paths:
                     nullable: true
                   hasMore:
                     type: boolean
+              examples:
+                lamps_list:
+                  summary: List of lamps
+                  description: Example response showing multiple lamps with pagination
+                  value:
+                    data:
+                      - id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
+                        status: true
+                        createdAt: "2024-01-15T09:30:00Z"
+                        updatedAt: "2024-01-15T14:22:30Z"
+                      - id: "7c9e2a5b-8f1d-4e3c-9b2a-1d5f8c7e4b6a"
+                        status: false
+                        createdAt: "2024-01-15T10:15:45Z"
+                        updatedAt: "2024-01-15T10:15:45Z"
+                    nextCursor: "eyJpZCI6IjdjOWUyYTViLThmMWQtNGUzYy05YjJhLTFkNWY4YzdlNGI2YSJ9"
+                    hasMore: true
+                empty_list:
+                  summary: Empty list of lamps
+                  description: Example response when no lamps exist
+                  value:
+                    data: []
+                    nextCursor: null
+                    hasMore: false
+          links:
+            GetLampById:
+              operationId: getLamp
+              parameters:
+                lampId: '$response.body#/data/0/id'
+              description: >
+                The `id` value of any lamp in the list can be used as the `lampId` parameter in `GET /lamps/{lampId}`.
+            UpdateLamp:
+              operationId: updateLamp
+              parameters:
+                lampId: '$response.body#/data/0/id'
+              description: >
+                The `id` value of any lamp in the list can be used as the `lampId` parameter in `PUT /lamps/{lampId}`.
+            DeleteLamp:
+              operationId: deleteLamp
+              parameters:
+                lampId: '$response.body#/data/0/id'
+              description: >
+                The `id` value of any lamp in the list can be used as the `lampId` parameter in `DELETE /lamps/{lampId}`.
         '304':
           description: Not Modified
     post:
@@ -48,6 +90,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LampCreate'
+            examples:
+              create_lamp_on:
+                summary: Create lamp that is turned on
+                description: Create a new lamp with status set to on/true
+                value:
+                  status: true
+              create_lamp_off:
+                summary: Create lamp that is turned off
+                description: Create a new lamp with status set to off/false
+                value:
+                  status: false
       responses:
         '201':
           description: Lamp created successfully
@@ -55,6 +108,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+              examples:
+                created_lamp_on:
+                  summary: Created lamp turned on
+                  description: Successfully created lamp with status on
+                  value:
+                    id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
+                    status: true
+                    createdAt: "2024-01-15T09:30:00Z"
+                    updatedAt: "2024-01-15T09:30:00Z"
+                created_lamp_off:
+                  summary: Created lamp turned off
+                  description: Successfully created lamp with status off
+                  value:
+                    id: "7c9e2a5b-8f1d-4e3c-9b2a-1d5f8c7e4b6a"
+                    status: false
+                    createdAt: "2024-01-15T10:15:45Z"
+                    updatedAt: "2024-01-15T10:15:45Z"
+          links:
+            GetLampById:
+              operationId: getLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used as the `lampId` parameter in `GET /lamps/{lampId}`.
+            UpdateLamp:
+              operationId: updateLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used as the `lampId` parameter in `PUT /lamps/{lampId}`.
+            DeleteLamp:
+              operationId: deleteLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used as the `lampId` parameter in `DELETE /lamps/{lampId}`.
         '400':
           description: Invalid request data
           content:
@@ -83,6 +172,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+              examples:
+                lamp_on:
+                  summary: Lamp that is turned on
+                  description: Example of a lamp with status on/true
+                  value:
+                    id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
+                    status: true
+                    createdAt: "2024-01-15T09:30:00Z"
+                    updatedAt: "2024-01-15T14:22:30Z"
+                lamp_off:
+                  summary: Lamp that is turned off
+                  description: Example of a lamp with status off/false
+                  value:
+                    id: "7c9e2a5b-8f1d-4e3c-9b2a-1d5f8c7e4b6a"
+                    status: false
+                    createdAt: "2024-01-15T10:15:45Z"
+                    updatedAt: "2024-01-15T10:15:45Z"
+          links:
+            UpdateLamp:
+              operationId: updateLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used to update the lamp using `PUT /lamps/{lampId}`.
+            DeleteLamp:
+              operationId: deleteLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used to delete the lamp using `DELETE /lamps/{lampId}`.
         '304':
           description: Not Modified
         '400':
@@ -112,6 +231,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LampUpdate'
+            examples:
+              turn_on:
+                summary: Turn lamp on
+                description: Update lamp status to on/true
+                value:
+                  status: true
+              turn_off:
+                summary: Turn lamp off
+                description: Update lamp status to off/false
+                value:
+                  status: false
       responses:
         '200':
           description: Lamp updated successfully
@@ -119,6 +249,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lamp'
+              examples:
+                updated_to_on:
+                  summary: Lamp turned on
+                  description: Lamp successfully updated to on status
+                  value:
+                    id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
+                    status: true
+                    createdAt: "2024-01-15T09:30:00Z"
+                    updatedAt: "2024-01-15T16:45:20Z"
+                updated_to_off:
+                  summary: Lamp turned off
+                  description: Lamp successfully updated to off status
+                  value:
+                    id: "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
+                    status: false
+                    createdAt: "2024-01-15T09:30:00Z"
+                    updatedAt: "2024-01-15T16:45:20Z"
+          links:
+            GetLampById:
+              operationId: getLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used to get the updated lamp details using `GET /lamps/{lampId}`.
+            DeleteLamp:
+              operationId: deleteLamp
+              parameters:
+                lampId: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used to delete the lamp using `DELETE /lamps/{lampId}`.
         '400':
           description: Invalid request data or lamp ID format
           content:
