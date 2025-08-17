@@ -114,6 +114,7 @@ namespace LampControlApi.Tests
 
             // Act
             var actionResult = await _controller.CreateLampAsync(lampCreate);
+
             // The implementation may return an ActionResult with Value set or an
             // IActionResult (e.g., CreatedAtActionResult). Handle both cases.
             Lamp? result = actionResult.Value;
