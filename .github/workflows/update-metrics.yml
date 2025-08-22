@@ -25,6 +25,7 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+          # Analysis excluding tests
           output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
             --not-match '[Tt]ests?' \
             --not-match '[Ss]pecs?' \
@@ -33,6 +34,18 @@ jobs:
           echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Analysis excluding tests and generated files (using --no-min-gen)
+          output_no_generated=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
+            --no-min-gen \
+            --not-match '[Tt]ests?' \
+            --not-match '[Ss]pecs?' \
+            --not-match 'test_|test\..[^/]+$' \
+            --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-generated.json" /pwd/src/${{ matrix.folder }})
+          echo "## SCC Output for ${{ matrix.folder }} (excluding tests and generated files)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$output_no_generated" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Fix permissions for SCC output
@@ -47,6 +60,7 @@ jobs:
           path: |
             docs/loc/scc-${{ matrix.folder }}.json
             docs/loc/scc-${{ matrix.folder }}-no-tests.json
+            docs/loc/scc-${{ matrix.folder }}-no-generated.json
 
   scc-results:
     runs-on: ubuntu-latest
@@ -100,8 +114,8 @@ jobs:
 
       - name: Generate SCC table
         run: |
-          echo "| Language   | App Lines | Test Lines | Test/App Ratio | Coverage (%) |" > tools/metrics.md
-          echo "|------------|-----------|------------|---------------|--------------|" >> tools/metrics.md
+          echo "| Language   | App Lines | App Lines (No Generated) | Test Lines | Test/App Ratio | Coverage (%) |" > tools/metrics.md
+          echo "|------------|-----------|--------------------------|------------|---------------|--------------|" >> tools/metrics.md
 
           # Define language display names and corresponding folder names
           langs=("TypeScript:typescript" "Python:python" "Java:java" "C#:csharp" "PHP:php" "Go:go" "Kotlin:kotlin" "Ruby:ruby")
@@ -111,6 +125,17 @@ jobs:
             folder="${entry##*:}"
             app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-tests.json)
             total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}.json)
+            
+            # Get app lines without generated files
+            if [ -f "docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json" ] && [ -s "docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json" ]; then
+              app_lines_no_generated=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json)
+              if [ "$app_lines_no_generated" = "null" ] || [ -z "$app_lines_no_generated" ]; then
+                app_lines_no_generated="$app_lines"
+              fi
+            else
+              app_lines_no_generated="$app_lines"
+            fi
+            
             test_lines=$((total_lines - app_lines))
             if [[ "$app_lines" =~ ^[0-9]+$ && "$app_lines" -ne 0 ]]; then
               ratio=$(awk "BEGIN {printf \"%.2f\", $test_lines/$app_lines}")
@@ -139,7 +164,7 @@ jobs:
               coverage="N/A"
             fi
 
-            echo "| $lang_name | $app_lines | $test_lines | $ratio | $coverage |" >> tools/metrics.md
+            echo "| $lang_name | $app_lines | $app_lines_no_generated | $test_lines | $ratio | $coverage |" >> tools/metrics.md
           done
 
       - name: Update COMPARISON.md
