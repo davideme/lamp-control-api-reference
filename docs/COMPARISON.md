@@ -11,7 +11,7 @@ This document provides a comparison of the different language implementations in
 | Java | 691 | 619 | 0.90 | 92.00 |
 | C# | 412 | 435 | 1.06 | 98.59 |
 | PHP | 1419 | 1158 | 0.82 | 88.89 |
-| Go | 715 | 1307 | 1.83 | 98.60 |
+| Go | 197 | 1307 | 6.63 | 98.60 |
 | Kotlin | 583 | 795 | 1.36 | 79.19 |
 | Ruby | null | 0 | N/A | N/A |
 ## API Interface Comparison

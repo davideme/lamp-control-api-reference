@@ -25,11 +25,21 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
-            --not-match '[Tt]ests?' \
-            --not-match '[Ss]pecs?' \
-            --not-match 'test_|test\..[^/]+$' \
-            --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          # Add generated file exclusions for Go
+          if [[ "${{ matrix.folder }}" == "go" ]]; then
+            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
+              --not-match '[Tt]ests?' \
+              --not-match '[Ss]pecs?' \
+              --not-match 'test_|test\..[^/]+$' \
+              --not-match '\.gen\.' \
+              --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          else
+            output_no_tests=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
+              --not-match '[Tt]ests?' \
+              --not-match '[Ss]pecs?' \
+              --not-match 'test_|test\..[^/]+$' \
+              --format-multi "tabular:stdout,json:/pwd/docs/loc/scc-${{ matrix.folder }}-no-tests.json" /pwd/src/${{ matrix.folder }})
+          fi
           echo "## SCC Output for ${{ matrix.folder }} (excluding tests)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
