@@ -15,15 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Generate .sccignore.do-not-edit file
-        run: |
-          # Find all files containing "do not edit" (case insensitive) and create .sccignore.do-not-edit
-          find . -type f -exec grep -il "do not edit" {} \; 2>/dev/null > .sccignore.do-not-edit || true
-          echo "Generated .sccignore.do-not-edit with $(cat .sccignore.do-not-edit | wc -l) files"
-          echo "Contents of .sccignore.do-not-edit:" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat .sccignore.do-not-edit >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
       - name: Count lines in src/${{ matrix.folder }}
         id: scc
         run: |
@@ -45,9 +36,9 @@ jobs:
           echo "$output_no_tests" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          # Analysis excluding tests and generated files (using --no-gen)
+          # Analysis excluding tests and generated files (using --no-min-gen)
           output_no_generated=$(docker run --rm -v "$PWD:/pwd" ghcr.io/boyter/scc:v3.5.0 scc --dryness \
-            --no-gen \
+            --no-min-gen \
             --not-match '[Tt]ests?' \
             --not-match '[Ss]pecs?' \
             --not-match 'test_|test\..[^/]+$' \
