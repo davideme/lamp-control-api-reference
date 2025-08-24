@@ -92,9 +92,9 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 	}
 
 	expectedLamps := numGoroutines * numOperationsPerGoroutine
-	if len(listResult) != expectedLamps {
-		t.Errorf("Expected %d lamps, got %d", expectedLamps, len(listResult))
+	if len(listResult.Data) != expectedLamps {
+		t.Errorf("Expected %d lamps, got %d", expectedLamps, len(listResult.Data))
 	}
 
-	t.Logf("Successfully created and accessed %d lamps concurrently", len(listResult))
+	t.Logf("Successfully created and accessed %d lamps concurrently", len(listResult.Data))
 }
