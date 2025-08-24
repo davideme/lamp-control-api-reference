@@ -40,8 +40,8 @@ func TestLampAPI_CreateLamp(t *testing.T) {
 		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
 	}
 
-	if len(listResult) != 1 {
-		t.Errorf("Expected 1 lamp in storage, got %d", len(listResult))
+	if len(listResult.Data) != 1 {
+		t.Errorf("Expected 1 lamp in storage, got %d", len(listResult.Data))
 	}
 }
 
@@ -59,8 +59,8 @@ func TestLampAPI_ListLamps(t *testing.T) {
 		t.Fatalf("Expected ListLamps200JSONResponse, got %T", resp)
 	}
 
-	if len(listResp) != 0 {
-		t.Errorf("Expected empty list, got %d lamps", len(listResp))
+	if len(listResp.Data) != 0 {
+		t.Errorf("Expected empty list, got %d lamps", len(listResp.Data))
 	}
 
 	// Add a lamp and verify it appears in the list
@@ -82,8 +82,8 @@ func TestLampAPI_ListLamps(t *testing.T) {
 		t.Fatalf("Expected ListLamps200JSONResponse, got %T", resp)
 	}
 
-	if len(listResp) != 1 {
-		t.Errorf("Expected 1 lamp, got %d lamps", len(listResp))
+	if len(listResp.Data) != 1 {
+		t.Errorf("Expected 1 lamp, got %d lamps", len(listResp.Data))
 	}
 }
 
@@ -249,8 +249,8 @@ func TestLampAPI_DeleteLamp(t *testing.T) {
 		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
 	}
 
-	if len(listResult) != 0 {
-		t.Errorf("Expected empty storage after deletion, got %d lamps", len(listResult))
+	if len(listResult.Data) != 0 {
+		t.Errorf("Expected empty storage after deletion, got %d lamps", len(listResult.Data))
 	}
 
 	// Test deleting non-existent lamp

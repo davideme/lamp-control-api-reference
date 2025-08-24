@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -36,7 +37,13 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError}
 	}
 
-	return ListLamps200JSONResponse(lamps), nil
+	// For simplicity, we're returning all lamps without actual pagination
+	// In a real implementation, you would implement cursor-based pagination
+	return ListLamps200JSONResponse{
+		Data:       lamps,
+		HasMore:    false, // No more pages for now
+		NextCursor: nil,   // No next cursor since we're showing all
+	}, nil
 }
 
 // Create a new lamp
@@ -48,10 +55,13 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 
 	// Generate a new UUID for the lamp
 	lampID := uuid.New()
+	now := time.Now()
 
 	lamp := Lamp{
-		Id:     lampID,
-		Status: request.Body.Status,
+		Id:        lampID,
+		Status:    request.Body.Status,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	err := l.repository.Create(ctx, lamp)
@@ -99,7 +109,7 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Get the existing lamp to ensure it exists and get its ID
+	// Get the existing lamp to ensure it exists and get its ID and CreatedAt
 	existingLamp, err := l.repository.GetByID(ctx, request.LampId)
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
@@ -109,10 +119,12 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 
-	// Update the lamp status
+	// Update the lamp status while preserving CreatedAt and updating UpdatedAt
 	updatedLamp := Lamp{
-		Id:     existingLamp.Id,
-		Status: request.Body.Status,
+		Id:        existingLamp.Id,
+		Status:    request.Body.Status,
+		CreatedAt: existingLamp.CreatedAt, // Preserve original creation time
+		UpdatedAt: time.Now(),             // Update modification time
 	}
 
 	err = l.repository.Update(ctx, updatedLamp)
