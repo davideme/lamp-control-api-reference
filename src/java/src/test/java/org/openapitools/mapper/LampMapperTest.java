@@ -31,6 +31,8 @@ class LampMapperTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(testId);
     assertThat(result.getStatus()).isTrue();
+    assertThat(result.getCreatedAt()).isNotNull();
+    assertThat(result.getUpdatedAt()).isNotNull();
   }
 
   @Test
@@ -54,6 +56,8 @@ class LampMapperTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(testId);
     assertThat(result.getStatus()).isFalse();
+    assertThat(result.getCreatedAt()).isNotNull();
+    assertThat(result.getUpdatedAt()).isNotNull();
   }
 
   @Test
@@ -74,5 +78,7 @@ class LampMapperTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNull(); // Should be null as it's not set in this method
     assertThat(result.getStatus()).isTrue();
+    assertThat(result.getCreatedAt()).isNotNull();
+    assertThat(result.getUpdatedAt()).isNotNull();
   }
 }
