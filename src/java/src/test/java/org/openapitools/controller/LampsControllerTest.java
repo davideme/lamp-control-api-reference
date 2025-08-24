@@ -65,9 +65,9 @@ class LampsControllerTest {
         .perform(asyncDispatch(result))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value(testLampId.toString()))
-        .andExpect(jsonPath("$[0].status").value(true));
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data[0].id").value(testLampId.toString()))
+        .andExpect(jsonPath("$.data[0].status").value(true));
   }
 
   @Test
