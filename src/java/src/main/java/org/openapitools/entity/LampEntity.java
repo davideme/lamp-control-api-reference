@@ -1,5 +1,6 @@
 package org.openapitools.entity;
 
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,16 +12,22 @@ public class LampEntity {
 
   private UUID id;
   private Boolean status;
+  private OffsetDateTime createdAt;
+  private OffsetDateTime updatedAt;
 
   public LampEntity() {}
 
   public LampEntity(final Boolean status) {
     this.status = status;
+    this.createdAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now();
   }
 
   public LampEntity(final UUID lampId, final Boolean status) {
     this.id = lampId;
     this.status = status;
+    this.createdAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now();
   }
 
   public UUID getId() {
@@ -37,6 +44,23 @@ public class LampEntity {
 
   public void setStatus(final Boolean status) {
     this.status = status;
+    this.updatedAt = OffsetDateTime.now();
+  }
+
+  public OffsetDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(final OffsetDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public OffsetDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(final OffsetDateTime updatedAt) {
+    this.updatedAt = updatedAt;
   }
 
   @Override
@@ -58,6 +82,15 @@ public class LampEntity {
 
   @Override
   public String toString() {
-    return "LampEntity{" + "id=" + id + ", status=" + status + '}';
+    return "LampEntity{"
+        + "id="
+        + id
+        + ", status="
+        + status
+        + ", createdAt="
+        + createdAt
+        + ", updatedAt="
+        + updatedAt
+        + '}';
   }
 }
