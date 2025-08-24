@@ -10,7 +10,13 @@ public class LampMapper {
   public Lamp toModel(final LampEntity entity) {
     Lamp result = null;
     if (entity != null) {
-      result = new Lamp(entity.getId(), entity.getStatus());
+      result = new Lamp();
+      // Set fields using setters because generated model Lamp does not have a (UUID,
+      // Boolean) constructor
+      result.setId(entity.getId());
+      result.setStatus(entity.getStatus());
+      // createdAt/updatedAt are left null; persistence layer should populate them if
+      // needed
     }
     return result;
   }
