@@ -15,7 +15,6 @@ import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-
 import java.util.*;
 import jakarta.annotation.Generated;
 
@@ -50,6 +49,17 @@ public class Lamp {
     this.updatedAt = updatedAt;
   }
 
+  /**
+   * Convenience constructor matching older callers/tests that only provide id and
+   * status.
+   */
+  public Lamp(UUID id, Boolean status) {
+    this.id = id;
+    this.status = status;
+    this.createdAt = null;
+    this.updatedAt = null;
+  }
+
   public Lamp id(UUID id) {
     this.id = id;
     return this;
@@ -57,9 +67,11 @@ public class Lamp {
 
   /**
    * Unique identifier for the lamp
+   * 
    * @return id
    */
-  @NotNull @Valid 
+  @NotNull
+  @Valid
   @Schema(name = "id", description = "Unique identifier for the lamp", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("id")
   public UUID getId() {
@@ -77,9 +89,10 @@ public class Lamp {
 
   /**
    * Whether the lamp is turned on (true) or off (false)
+   * 
    * @return status
    */
-  @NotNull 
+  @NotNull
   @Schema(name = "status", description = "Whether the lamp is turned on (true) or off (false)", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("status")
   public Boolean getStatus() {
@@ -97,9 +110,11 @@ public class Lamp {
 
   /**
    * Timestamp when the lamp was created
+   * 
    * @return createdAt
    */
-  @NotNull @Valid 
+  @NotNull
+  @Valid
   @Schema(name = "createdAt", description = "Timestamp when the lamp was created", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("createdAt")
   public OffsetDateTime getCreatedAt() {
@@ -117,9 +132,11 @@ public class Lamp {
 
   /**
    * Timestamp when the lamp was last updated
+   * 
    * @return updatedAt
    */
-  @NotNull @Valid 
+  @NotNull
+  @Valid
   @Schema(name = "updatedAt", description = "Timestamp when the lamp was last updated", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("updatedAt")
   public OffsetDateTime getUpdatedAt() {
@@ -173,4 +190,3 @@ public class Lamp {
     return o.toString().replace("\n", "\n    ");
   }
 }
-
