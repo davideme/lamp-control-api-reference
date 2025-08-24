@@ -40,6 +40,8 @@ public class InMemoryLampRepository implements LampRepository {
     final LampEntity copy = new LampEntity();
     copy.setId(entity.getId());
     copy.setStatus(entity.getStatus());
+    copy.setCreatedAt(entity.getCreatedAt());
+    copy.setUpdatedAt(entity.getUpdatedAt());
 
     lamps.put(copy.getId(), copy);
     return copy;

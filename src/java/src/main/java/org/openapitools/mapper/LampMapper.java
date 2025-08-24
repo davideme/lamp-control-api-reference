@@ -15,8 +15,8 @@ public class LampMapper {
       // Boolean) constructor
       result.setId(entity.getId());
       result.setStatus(entity.getStatus());
-      // createdAt/updatedAt are left null; persistence layer should populate them if
-      // needed
+      result.setCreatedAt(entity.getCreatedAt());
+      result.setUpdatedAt(entity.getUpdatedAt());
     }
     return result;
   }
@@ -25,6 +25,13 @@ public class LampMapper {
     LampEntity result = null;
     if (lamp != null) {
       result = new LampEntity(lamp.getId(), lamp.getStatus());
+      // If the lamp has timestamps, use them; otherwise constructor sets current time
+      if (lamp.getCreatedAt() != null) {
+        result.setCreatedAt(lamp.getCreatedAt());
+      }
+      if (lamp.getUpdatedAt() != null) {
+        result.setUpdatedAt(lamp.getUpdatedAt());
+      }
     }
     return result;
   }
