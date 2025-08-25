@@ -36,6 +36,21 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
 # Translations
 *.mo
 *.pot
@@ -121,14 +136,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-# Coverage output
-coverage/*
-!coverage/coverage.json
-
-# Coverage reports
-.coverage
-.coverage.*
-htmlcov/
-coverage/
-!coverage/coverage.json

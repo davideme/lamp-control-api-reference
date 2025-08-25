@@ -1,8 +1,12 @@
+# coding: utf-8
+
+from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
-from typing import Any, Dict, List  # noqa: F401
 
-import src.openapi_server.impl
+from openapi_server.apis.default_api_base import BaseDefaultApi
+import openapi_server.impl
+
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
@@ -17,16 +21,21 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
-from src.openapi_server.apis.default_api_base import BaseDefaultApi
-from src.openapi_server.models.extra_models import TokenModel  # noqa: F401
-from src.openapi_server.models.lamp import Lamp
-from src.openapi_server.models.lamp_create import LampCreate
-from src.openapi_server.models.lamp_update import LampUpdate
-from pydantic import StrictStr
+
+from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from pydantic import Field, StrictStr
+from typing import Any, Optional
+from typing_extensions import Annotated
+from openapi_server.models.error import Error
+from openapi_server.models.lamp import Lamp
+from openapi_server.models.lamp_create import LampCreate
+from openapi_server.models.lamp_update import LampUpdate
+from openapi_server.models.list_lamps200_response import ListLamps200Response
+
 
 router = APIRouter()
 
-ns_pkg = src.openapi_server.impl
+ns_pkg = openapi_server.impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
@@ -35,6 +44,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     "/lamps",
     responses={
         201: {"model": Lamp, "description": "Lamp created successfully"},
+        400: {"model": Error, "description": "Invalid request data"},
     },
     tags=["default"],
     summary="Create a new lamp",
@@ -52,6 +62,7 @@ async def create_lamp(
     "/lamps/{lampId}",
     responses={
         204: {"description": "Lamp deleted successfully"},
+        400: {"model": Error, "description": "Invalid lamp ID format"},
         404: {"description": "Lamp not found"},
     },
     tags=["default"],
@@ -70,6 +81,8 @@ async def delete_lamp(
     "/lamps/{lampId}",
     responses={
         200: {"model": Lamp, "description": "Lamp details"},
+        304: {"description": "Not Modified"},
+        400: {"model": Error, "description": "Invalid lamp ID format"},
         404: {"description": "Lamp not found"},
     },
     tags=["default"],
@@ -87,22 +100,28 @@ async def get_lamp(
 @router.get(
     "/lamps",
     responses={
-        200: {"model": list[Lamp], "description": "A list of lamps"},
+        200: {"model": ListLamps200Response, "description": "A list of lamps with pagination"},
+        304: {"description": "Not Modified"},
+        400: {"model": Error, "description": "Invalid request parameters"},
     },
     tags=["default"],
     summary="List all lamps",
     response_model_by_alias=True,
 )
-async def list_lamps() -> list[Lamp]:
+async def list_lamps(
+    cursor: Optional[StrictStr] = Query(None, description="", alias="cursor"),
+    page_size: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = Query(25, description="", alias="pageSize", ge=1, le=100),
+) -> ListLamps200Response:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().list_lamps()
+    return await BaseDefaultApi.subclasses[0]().list_lamps(cursor, page_size)
 
 
 @router.put(
     "/lamps/{lampId}",
     responses={
         200: {"model": Lamp, "description": "Lamp updated successfully"},
+        400: {"model": Error, "description": "Invalid request data or lamp ID format"},
         404: {"description": "Lamp not found"},
     },
     tags=["default"],
