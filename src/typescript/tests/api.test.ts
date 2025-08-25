@@ -20,7 +20,9 @@ describe('Lamp API Endpoints', () => {
     it('should return a list of lamps', async () => {
       const response = await request.get('/v1/lamps').expect('Content-Type', /json/).expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('hasMore');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
