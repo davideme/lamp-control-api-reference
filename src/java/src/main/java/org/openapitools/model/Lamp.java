@@ -56,8 +56,8 @@ public class Lamp {
   public Lamp(UUID id, Boolean status) {
     this.id = id;
     this.status = status;
-    this.createdAt = null;
-    this.updatedAt = null;
+    this.createdAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now();
   }
 
   public Lamp id(UUID id) {
