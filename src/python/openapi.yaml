@@ -10,15 +10,43 @@ paths:
   /lamps:
     get:
       operationId: listLamps
+      parameters:
+      - explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: pageSize
+        required: false
+        schema:
+          default: 25
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Lamp'
-                type: array
-          description: A list of lamps
+                $ref: '#/components/schemas/listLamps_200_response'
+          description: A list of lamps with pagination
+        "304":
+          description: Not Modified
+        "400":
+          content:
+            application/json:
+              example:
+                error: INVALID_ARGUMENT
+                message: Invalid query parameter 'pageSize'
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid request parameters
       summary: List all lamps
     post:
       operationId: createLamp
@@ -35,6 +63,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Lamp'
           description: Lamp created successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: INVALID_ARGUMENT
+                message: The request contains invalid parameters or malformed data
+                details: "Invalid format for parameter 'status': expected boolean"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid request data
       summary: Create a new lamp
   /lamps/{lampId}:
     delete:
@@ -50,6 +88,16 @@ paths:
       responses:
         "204":
           description: Lamp deleted successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: INVALID_ARGUMENT
+                message: The request contains invalid parameters or malformed data
+                details: Invalid format for parameter 'lampId'
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid lamp ID format
         "404":
           description: Lamp not found
       summary: Delete a lamp
@@ -70,6 +118,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Lamp'
           description: Lamp details
+        "304":
+          description: Not Modified
+        "400":
+          content:
+            application/json:
+              example:
+                error: INVALID_ARGUMENT
+                message: The request contains invalid parameters or malformed data
+                details: Invalid format for parameter 'lampId'
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid lamp ID format
         "404":
           description: Lamp not found
       summary: Get a specific lamp
@@ -96,6 +156,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Lamp'
           description: Lamp updated successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: INVALID_ARGUMENT
+                message: The request contains invalid parameters or malformed data
+                details: "Invalid format for parameter 'status': expected boolean"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid request data or lamp ID format
         "404":
           description: Lamp not found
       summary: Update a lamp's status
@@ -103,8 +173,10 @@ components:
   schemas:
     Lamp:
       example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         status: true
+        updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Unique identifier for the lamp
@@ -115,9 +187,21 @@ components:
           description: Whether the lamp is turned on (true) or off (false)
           title: status
           type: boolean
+        createdAt:
+          description: Timestamp when the lamp was created
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: Timestamp when the lamp was last updated
+          format: date-time
+          title: updatedAt
+          type: string
       required:
+      - createdAt
       - id
       - status
+      - updatedAt
       title: Lamp
       type: object
     LampCreate:
@@ -143,4 +227,48 @@ components:
       required:
       - status
       title: LampUpdate
+      type: object
+    Error:
+      example:
+        error: INVALID_ARGUMENT
+      properties:
+        error:
+          description: Error type identifier
+          example: INVALID_ARGUMENT
+          title: error
+          type: string
+      required:
+      - error
+      title: Error
+      type: object
+    listLamps_200_response:
+      example:
+        nextCursor: nextCursor
+        data:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: true
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: true
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        hasMore: true
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Lamp'
+          title: data
+          type: array
+        nextCursor:
+          nullable: true
+          title: nextCursor
+          type: string
+        hasMore:
+          title: hasMore
+          type: boolean
+      required:
+      - data
+      - hasMore
+      title: listLamps_200_response
       type: object

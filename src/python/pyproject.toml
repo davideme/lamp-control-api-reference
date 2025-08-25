@@ -16,7 +16,7 @@ build-backend = "poetry.core.masonry.api"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12.9"
+python = "^3.12.3"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
 
 [tool.poetry.group.dev.dependencies]

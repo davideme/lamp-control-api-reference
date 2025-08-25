@@ -20,19 +20,22 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from openapi_server.models.lamp import Lamp
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class LampCreate(BaseModel):
+class ListLamps200Response(BaseModel):
     """
-    LampCreate
+    ListLamps200Response
     """ # noqa: E501
-    status: StrictBool = Field(description="Initial status of the lamp (on/off)")
-    __properties: ClassVar[List[str]] = ["status"]
+    data: List[Lamp]
+    next_cursor: Optional[StrictStr] = Field(default=None, alias="nextCursor")
+    has_more: StrictBool = Field(alias="hasMore")
+    __properties: ClassVar[List[str]] = ["data", "nextCursor", "hasMore"]
 
     model_config = {
         "populate_by_name": True,
@@ -52,7 +55,7 @@ class LampCreate(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of LampCreate from a JSON string"""
+        """Create an instance of ListLamps200Response from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +74,23 @@ class LampCreate(BaseModel):
             },
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in data (list)
+        _items = []
+        if self.data:
+            for _item in self.data:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict['data'] = _items
+        # set to None if next_cursor (nullable) is None
+        # and model_fields_set contains the field
+        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
+            _dict['nextCursor'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of LampCreate from a dict"""
+        """Create an instance of ListLamps200Response from a dict"""
         if obj is None:
             return None
 
@@ -83,7 +98,9 @@ class LampCreate(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "status": obj.get("status")
+            "data": [Lamp.from_dict(_item) for _item in obj.get("data")] if obj.get("data") is not None else None,
+            "nextCursor": obj.get("nextCursor"),
+            "hasMore": obj.get("hasMore")
         })
         return _obj
 

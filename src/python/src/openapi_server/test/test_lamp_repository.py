@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.openapi_server.models.lamp import Lamp
-from src.openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
+from openapi_server.models.lamp import Lamp
+from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
 
 
 @pytest.fixture
@@ -15,7 +15,13 @@ def repository():
 @pytest.fixture
 def sample_lamp():
     """Fixture that provides a sample lamp for testing."""
-    return Lamp(id="test-lamp-1", status=True)
+    from datetime import datetime
+    return Lamp(
+        id="test-lamp-1", 
+        status=True, 
+        created_at=datetime.now(), 
+        updated_at=datetime.now()
+    )
 
 
 class TestLampRepository:
@@ -53,7 +59,8 @@ class TestLampRepository:
         """Test listing all lamps."""
         # Arrange
         repository.create(sample_lamp)
-        another_lamp = Lamp(id="test-lamp-2", status=True)
+        from datetime import datetime
+        another_lamp = Lamp(id="test-lamp-2", status=True, created_at=datetime.now(), updated_at=datetime.now())
         repository.create(another_lamp)
 
         # Act
@@ -68,7 +75,8 @@ class TestLampRepository:
         """Test updating an existing lamp."""
         # Arrange
         repository.create(sample_lamp)
-        updated_lamp = Lamp(id=sample_lamp.id, status=True)
+        from datetime import datetime
+        updated_lamp = Lamp(id=sample_lamp.id, status=True, created_at=datetime.now(), updated_at=datetime.now())
 
         # Act
         result = repository.update(updated_lamp)

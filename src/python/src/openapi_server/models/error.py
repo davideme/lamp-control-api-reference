@@ -20,19 +20,19 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class LampCreate(BaseModel):
+class Error(BaseModel):
     """
-    LampCreate
+    Error
     """ # noqa: E501
-    status: StrictBool = Field(description="Initial status of the lamp (on/off)")
-    __properties: ClassVar[List[str]] = ["status"]
+    error: StrictStr = Field(description="Error type identifier")
+    __properties: ClassVar[List[str]] = ["error"]
 
     model_config = {
         "populate_by_name": True,
@@ -52,7 +52,7 @@ class LampCreate(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of LampCreate from a JSON string"""
+        """Create an instance of Error from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,7 +75,7 @@ class LampCreate(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of LampCreate from a dict"""
+        """Create an instance of Error from a dict"""
         if obj is None:
             return None
 
@@ -83,7 +83,7 @@ class LampCreate(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "status": obj.get("status")
+            "error": obj.get("error")
         })
         return _obj
 

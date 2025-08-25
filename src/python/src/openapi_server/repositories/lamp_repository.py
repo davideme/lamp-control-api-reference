@@ -1,6 +1,6 @@
 """Repository for managing lamp data."""
 
-from src.openapi_server.models.lamp import Lamp
+from openapi_server.models.lamp import Lamp
 
 
 class LampNotFoundError(Exception):

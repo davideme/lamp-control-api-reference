@@ -16,7 +16,7 @@ def test_create_lamp(client: TestClient):
         json=lamp_create,
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_delete_lamp(client: TestClient):
@@ -42,7 +42,7 @@ def test_delete_lamp(client: TestClient):
         headers=headers,
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 204
 
 
 def test_get_lamp(client: TestClient):
