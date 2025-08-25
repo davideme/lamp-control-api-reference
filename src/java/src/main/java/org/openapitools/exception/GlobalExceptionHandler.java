@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Error> handleConstraintViolationException(
       final ConstraintViolationException ex) {
     final Error error = new Error("INVALID_ARGUMENT");
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
   /**
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Error> handleMethodArgumentNotValidException(
       final MethodArgumentNotValidException ex) {
     final Error error = new Error("INVALID_ARGUMENT");
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
   /**
@@ -53,6 +53,6 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Error> handleMethodArgumentTypeMismatchException(
       final MethodArgumentTypeMismatchException ex) {
     final Error error = new Error("INVALID_ARGUMENT");
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 }
