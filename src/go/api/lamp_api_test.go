@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
@@ -136,7 +137,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 				if !ok {
 					return false
 				}
-				return len(listResp) == 2
+				return len(listResp.Data) == 2
 			},
 		},
 		{
@@ -150,7 +151,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 				if !ok {
 					return false
 				}
-				return len(listResp) == 0
+				return len(listResp.Data) == 0
 			},
 		},
 		{
@@ -297,10 +298,24 @@ func TestLampAPI_UpdateLamp_WithMock(t *testing.T) {
 				Body:   &LampUpdate{Status: false},
 			},
 			setupMock: func(m *MockLampRepository) {
-				existingLamp := Lamp{Id: uuid.MustParse(testID), Status: true}
-				updatedLamp := Lamp{Id: uuid.MustParse(testID), Status: false}
+				now := time.Now()
+				existingLamp := Lamp{Id: uuid.MustParse(testID), Status: true, CreatedAt: now, UpdatedAt: now}
 				m.EXPECT().GetByID(gomock.Any(), testID).Return(existingLamp, nil)
-				m.EXPECT().Update(gomock.Any(), updatedLamp).Return(nil)
+				// Use a custom matcher since UpdatedAt timestamp will be different
+				m.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, lamp Lamp) error {
+					// Verify the lamp has the correct ID and Status
+					if lamp.Id != uuid.MustParse(testID) || lamp.Status != false {
+						return errors.New("unexpected lamp values")
+					}
+					// Verify CreatedAt is preserved and UpdatedAt is updated
+					if lamp.CreatedAt != existingLamp.CreatedAt {
+						return errors.New("CreatedAt should be preserved")
+					}
+					if lamp.UpdatedAt.Before(existingLamp.UpdatedAt) {
+						return errors.New("UpdatedAt should be updated")
+					}
+					return nil
+				})
 			},
 			expectError: false,
 			expectResponse: func(resp UpdateLampResponseObject) bool {
