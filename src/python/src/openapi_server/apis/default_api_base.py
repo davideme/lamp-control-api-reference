@@ -5,11 +5,11 @@ from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from src.openapi_server.models.error import Error
-from src.openapi_server.models.lamp import Lamp
-from src.openapi_server.models.lamp_create import LampCreate
-from src.openapi_server.models.lamp_update import LampUpdate
-from src.openapi_server.models.list_lamps200_response import ListLamps200Response
+from openapi_server.models.error import Error
+from openapi_server.models.lamp import Lamp
+from openapi_server.models.lamp_create import LampCreate
+from openapi_server.models.lamp_update import LampUpdate
+from openapi_server.models.list_lamps200_response import ListLamps200Response
 
 
 class BaseDefaultApi:

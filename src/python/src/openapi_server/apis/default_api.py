@@ -5,7 +5,7 @@ import importlib
 import pkgutil
 
 from openapi_server.apis.default_api_base import BaseDefaultApi
-import openapi_server.impl
+import src.openapi_server.impl
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -35,7 +35,7 @@ from openapi_server.models.list_lamps200_response import ListLamps200Response
 
 router = APIRouter()
 
-ns_pkg = openapi_server.impl
+ns_pkg = src.openapi_server.impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
@@ -49,6 +49,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     tags=["default"],
     summary="Create a new lamp",
     response_model_by_alias=True,
+    status_code=201,
 )
 async def create_lamp(
     lamp_create: LampCreate = Body(None, description=""),
@@ -68,6 +69,7 @@ async def create_lamp(
     tags=["default"],
     summary="Delete a lamp",
     response_model_by_alias=True,
+    status_code=204,
 )
 async def delete_lamp(
     lampId: StrictStr = Path(..., description=""),

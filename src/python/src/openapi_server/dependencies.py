@@ -1,6 +1,6 @@
 """Dependency injection functions for FastAPI."""
 
-from src.openapi_server.repositories.lamp_repository import LampRepository
+from openapi_server.repositories.lamp_repository import LampRepository
 
 repository = LampRepository()
 
