@@ -30,7 +30,7 @@ except ImportError:
 class LampCreate(BaseModel):
     """
     LampCreate
-    """  # noqa: E501
+    """
 
     status: StrictBool = Field(description="Initial status of the lamp (on/off)")
     __properties: ClassVar[List[str]] = ["status"]
