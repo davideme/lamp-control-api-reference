@@ -68,9 +68,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             raise HTTPException(status_code=404, detail="Lamp not found")
         return lamp
 
-    async def list_lamps(
-        self, cursor: str | None, page_size: int | None
-    ) -> ListLamps200Response:
+    async def list_lamps(self, cursor: str | None, page_size: int | None) -> ListLamps200Response:
         """List lamps with pagination.
 
         Args:
