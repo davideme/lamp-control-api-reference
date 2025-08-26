@@ -18,38 +18,30 @@ class BaseDefaultApi:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         BaseDefaultApi.subclasses = BaseDefaultApi.subclasses + (cls,)
+
     async def create_lamp(
         self,
         lamp_create: LampCreate,
-    ) -> Lamp:
-        ...
-
+    ) -> Lamp: ...
 
     async def delete_lamp(
         self,
         lampId: StrictStr,
-    ) -> None:
-        ...
-
+    ) -> None: ...
 
     async def get_lamp(
         self,
         lampId: StrictStr,
-    ) -> Lamp:
-        ...
-
+    ) -> Lamp: ...
 
     async def list_lamps(
         self,
         cursor: Optional[StrictStr],
         page_size: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]],
-    ) -> ListLamps200Response:
-        ...
-
+    ) -> ListLamps200Response: ...
 
     async def update_lamp(
         self,
         lampId: StrictStr,
         lamp_update: LampUpdate,
-    ) -> Lamp:
-        ...
+    ) -> Lamp: ...

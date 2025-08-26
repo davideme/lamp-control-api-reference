@@ -32,12 +32,8 @@ def api_impl(mock_lamp_repository):
 def sample_lamp():
     """Fixture that provides a sample lamp for testing."""
     from datetime import datetime
-    return Lamp(
-        id="test-lamp-1", 
-        status=True, 
-        created_at=datetime.now(), 
-        updated_at=datetime.now()
-    )
+
+    return Lamp(id="test-lamp-1", status=True, created_at=datetime.now(), updated_at=datetime.now())
 
 
 class TestDefaultApiImpl:
@@ -49,7 +45,10 @@ class TestDefaultApiImpl:
         # Arrange
         lamp_create = LampCreate(status=True)
         from datetime import datetime
-        expected_lamp = Lamp(id="generated-uuid", status=True, created_at=datetime.now(), updated_at=datetime.now())
+
+        expected_lamp = Lamp(
+            id="generated-uuid", status=True, created_at=datetime.now(), updated_at=datetime.now()
+        )
         mock_lamp_repository.create.return_value = expected_lamp
 
         # Act
@@ -106,7 +105,12 @@ class TestDefaultApiImpl:
         """Test updating an existing lamp."""
         # Arrange
         lamp_update = LampUpdate(status=True)
-        updated_lamp = Lamp(id=sample_lamp.id, status=True, created_at=sample_lamp.created_at, updated_at=sample_lamp.updated_at)
+        updated_lamp = Lamp(
+            id=sample_lamp.id,
+            status=True,
+            created_at=sample_lamp.created_at,
+            updated_at=sample_lamp.updated_at,
+        )
         mock_lamp_repository.get.return_value = sample_lamp
         mock_lamp_repository.update.return_value = updated_lamp
 

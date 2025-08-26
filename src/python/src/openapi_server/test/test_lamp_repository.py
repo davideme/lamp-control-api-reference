@@ -16,12 +16,8 @@ def repository():
 def sample_lamp():
     """Fixture that provides a sample lamp for testing."""
     from datetime import datetime
-    return Lamp(
-        id="test-lamp-1", 
-        status=True, 
-        created_at=datetime.now(), 
-        updated_at=datetime.now()
-    )
+
+    return Lamp(id="test-lamp-1", status=True, created_at=datetime.now(), updated_at=datetime.now())
 
 
 class TestLampRepository:
@@ -60,7 +56,10 @@ class TestLampRepository:
         # Arrange
         repository.create(sample_lamp)
         from datetime import datetime
-        another_lamp = Lamp(id="test-lamp-2", status=True, created_at=datetime.now(), updated_at=datetime.now())
+
+        another_lamp = Lamp(
+            id="test-lamp-2", status=True, created_at=datetime.now(), updated_at=datetime.now()
+        )
         repository.create(another_lamp)
 
         # Act
@@ -76,7 +75,10 @@ class TestLampRepository:
         # Arrange
         repository.create(sample_lamp)
         from datetime import datetime
-        updated_lamp = Lamp(id=sample_lamp.id, status=True, created_at=datetime.now(), updated_at=datetime.now())
+
+        updated_lamp = Lamp(
+            id=sample_lamp.id, status=True, created_at=datetime.now(), updated_at=datetime.now()
+        )
 
         # Act
         result = repository.update(updated_lamp)

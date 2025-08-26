@@ -31,12 +31,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         """
         lamp_id = str(uuid4())
         now = datetime.now()
-        lamp = Lamp(
-            id=lamp_id, 
-            status=lamp_create.status, 
-            created_at=now, 
-            updated_at=now
-        )
+        lamp = Lamp(id=lamp_id, status=lamp_create.status, created_at=now, updated_at=now)
         return self._lamp_repository.create(lamp)
 
     async def delete_lamp(self, lamp_id: str) -> None:
@@ -91,7 +86,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         return ListLamps200Response(
             data=all_lamps,
             next_cursor=None,  # No next page in this simple implementation
-            has_more=False,    # No more items available
+            has_more=False,  # No more items available
         )
 
     async def update_lamp(self, lamp_id: str, lamp_update: LampUpdate) -> Lamp:
@@ -112,13 +107,13 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             existing_lamp = self._lamp_repository.get(lamp_id)
             if existing_lamp is None:
                 raise LampNotFoundError(lamp_id)
-            
+
             # Create updated lamp with new updated_at timestamp
             updated_lamp = Lamp(
-                id=lamp_id, 
+                id=lamp_id,
                 status=lamp_update.status,
                 created_at=existing_lamp.created_at,
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
             return self._lamp_repository.update(updated_lamp)
         except LampNotFoundError as err:
