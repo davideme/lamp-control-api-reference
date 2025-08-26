@@ -1,7 +1,6 @@
 """Default API implementation for the Lamp Control API."""
 
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 
 from openapi_server.apis.default_api_base import BaseDefaultApi
@@ -70,7 +69,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         return lamp
 
     async def list_lamps(
-        self, cursor: Optional[str], page_size: Optional[int]
+        self, cursor: str | None, page_size: int | None
     ) -> ListLamps200Response:
         """List lamps with pagination.
 
