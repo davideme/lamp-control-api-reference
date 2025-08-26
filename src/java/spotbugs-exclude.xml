@@ -42,4 +42,10 @@
         <Method name="&lt;init&gt;" />
     </Match>
 
+    <!-- Suppress clone-without-super for our custom DateFormat which intentionally reinitializes internal state -->
+    <Match>
+        <Bug pattern="CN_IDIOM_NO_SUPER_CALL" />
+        <Class name="org.openapitools.RFC3339DateFormat" />
+    </Match>
+
 </FindBugsFilter>

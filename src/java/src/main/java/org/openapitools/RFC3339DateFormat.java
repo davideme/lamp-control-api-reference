@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.util.StdDateFormat;
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-public class RFC3339DateFormat extends DateFormat {
+public final class RFC3339DateFormat extends DateFormat {
   private static final long serialVersionUID = 1L;
   private static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
@@ -32,7 +33,15 @@ public class RFC3339DateFormat extends DateFormat {
   }
 
   @Override
+  @SuppressWarnings("PMD.ProperCloneImplementation")
   public RFC3339DateFormat clone() {
-    return (RFC3339DateFormat) super.clone();
+    // Return a fresh, fully-initialized instance instead of delegating
+    // to super.clone(). The class is final, so returning a new
+    // instance does not violate the clone contract for subclasses.
+    final RFC3339DateFormat copy = new RFC3339DateFormat();
+    if (this.calendar != null) {
+      copy.calendar = (Calendar) this.calendar.clone();
+    }
+    return copy;
   }
 }
