@@ -2,8 +2,8 @@
 
 import pytest
 
-from openapi_server.models.lamp import Lamp
-from openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.repositories.lamp_repository import LampNotFoundError, LampRepository
 
 
 @pytest.fixture

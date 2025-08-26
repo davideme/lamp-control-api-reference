@@ -3,13 +3,13 @@
 from datetime import datetime
 from uuid import uuid4
 
-from openapi_server.apis.default_api_base import BaseDefaultApi
-from openapi_server.dependencies import get_lamp_repository
-from openapi_server.models.lamp import Lamp
-from openapi_server.models.lamp_create import LampCreate
-from openapi_server.models.lamp_update import LampUpdate
-from openapi_server.models.list_lamps200_response import ListLamps200Response
-from openapi_server.repositories.lamp_repository import LampNotFoundError
+from src.openapi_server.apis.default_api_base import BaseDefaultApi
+from src.openapi_server.dependencies import get_lamp_repository
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.models.lamp_create import LampCreate
+from src.openapi_server.models.lamp_update import LampUpdate
+from src.openapi_server.models.list_lamps200_response import ListLamps200Response
+from src.openapi_server.repositories.lamp_repository import LampNotFoundError
 
 
 class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]

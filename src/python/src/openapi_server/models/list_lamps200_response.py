@@ -18,7 +18,7 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field, StrictBool, StrictStr
 
-from openapi_server.models.lamp import Lamp
+from src.openapi_server.models.lamp import Lamp
 
 try:
     from typing import Self

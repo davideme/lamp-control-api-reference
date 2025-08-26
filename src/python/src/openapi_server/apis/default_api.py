@@ -4,7 +4,7 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.default_api_base import BaseDefaultApi
+from src.openapi_server.apis.default_api_base import BaseDefaultApi
 import src.openapi_server.impl
 
 from fastapi import (  # noqa: F401
@@ -22,15 +22,15 @@ from fastapi import (  # noqa: F401
     status,
 )
 
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from src.openapi_server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from openapi_server.models.error import Error
-from openapi_server.models.lamp import Lamp
-from openapi_server.models.lamp_create import LampCreate
-from openapi_server.models.lamp_update import LampUpdate
-from openapi_server.models.list_lamps200_response import ListLamps200Response
+from src.openapi_server.models.error import Error
+from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.models.lamp_create import LampCreate
+from src.openapi_server.models.lamp_update import LampUpdate
+from src.openapi_server.models.list_lamps200_response import ListLamps200Response
 
 
 router = APIRouter()
