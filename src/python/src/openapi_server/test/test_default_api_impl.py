@@ -22,7 +22,7 @@ def mock_lamp_repository():
 def api_impl(mock_lamp_repository):
     """Fixture that provides a DefaultApiImpl instance with mocked repository."""
     with patch(
-        "openapi_server.impl.default_api_impl.get_lamp_repository",
+        "src.openapi_server.impl.default_api_impl.get_lamp_repository",
         return_value=mock_lamp_repository,
     ):
         return DefaultApiImpl()
