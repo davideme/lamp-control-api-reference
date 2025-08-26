@@ -9,11 +9,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-public class RFC3339DateFormat extends DateFormat {
+public final class RFC3339DateFormat extends DateFormat {
   private static final long serialVersionUID = 1L;
   private static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
-  private StdDateFormat fmt =
+  private final StdDateFormat fmt =
       new StdDateFormat().withTimeZone(TIMEZONE_Z).withColonInTimeZone(true);
 
   public RFC3339DateFormat() {
@@ -35,11 +35,10 @@ public class RFC3339DateFormat extends DateFormat {
   @Override
   @SuppressWarnings("PMD.ProperCloneImplementation")
   public RFC3339DateFormat clone() {
-    final RFC3339DateFormat copy = (RFC3339DateFormat) super.clone();
-    // Reinitialize fmt on the cloned instance so we do not inherit
-    // potentially inconsistent internal state from StdDateFormat.
-    copy.fmt = new StdDateFormat().withTimeZone(TIMEZONE_Z).withColonInTimeZone(true);
-    // copy the calendar state to preserve timezone/locale information
+    // Return a fresh, fully-initialized instance instead of delegating
+    // to super.clone(). The class is final, so returning a new
+    // instance does not violate the clone contract for subclasses.
+    final RFC3339DateFormat copy = new RFC3339DateFormat();
     if (this.calendar != null) {
       copy.calendar = (Calendar) this.calendar.clone();
     }
