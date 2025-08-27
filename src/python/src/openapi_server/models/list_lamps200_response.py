@@ -14,10 +14,11 @@ from __future__ import annotations
 import json
 import pprint
 import re  # noqa: F401
-from datetime import datetime
 from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field, StrictBool, StrictStr
+
+from src.openapi_server.models.lamp import Lamp
 
 try:
     from typing import Self
@@ -25,20 +26,15 @@ except ImportError:
     from typing import Self
 
 
-class Lamp(BaseModel):
+class ListLamps200Response(BaseModel):
     """
-    Lamp
+    ListLamps200Response
     """
 
-    id: StrictStr = Field(description="Unique identifier for the lamp")
-    status: StrictBool = Field(description="Whether the lamp is turned on (true) or off (false)")
-    created_at: datetime = Field(
-        description="Timestamp when the lamp was created", alias="createdAt"
-    )
-    updated_at: datetime = Field(
-        description="Timestamp when the lamp was last updated", alias="updatedAt"
-    )
-    __properties: ClassVar[list[str]] = ["id", "status", "createdAt", "updatedAt"]
+    data: list[Lamp]
+    next_cursor: StrictStr | None = Field(default=None, alias="nextCursor")
+    has_more: StrictBool = Field(alias="hasMore")
+    __properties: ClassVar[list[str]] = ["data", "nextCursor", "hasMore"]
 
     model_config = {
         "populate_by_name": True,
@@ -57,7 +53,7 @@ class Lamp(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Lamp from a JSON string"""
+        """Create an instance of ListLamps200Response from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> dict[str, Any]:
@@ -75,11 +71,23 @@ class Lamp(BaseModel):
             exclude={},
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in data
+        _items = []
+        if self.data:
+            for _item in self.data:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict["data"] = _items
+        # set to None if next_cursor (nullable) is None
+        # and model_fields_set contains the field
+        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
+            _dict["nextCursor"] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: dict) -> Self:
-        """Create an instance of Lamp from a dict"""
+        """Create an instance of ListLamps200Response from a dict"""
         if obj is None:
             return None
 
@@ -88,10 +96,13 @@ class Lamp(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "id": obj.get("id"),
-                "status": obj.get("status"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
+                "data": (
+                    [Lamp.from_dict(_item) for _item in obj.get("data")]
+                    if obj.get("data") is not None
+                    else None
+                ),
+                "nextCursor": obj.get("nextCursor"),
+                "hasMore": obj.get("hasMore"),
             }
         )
         return _obj

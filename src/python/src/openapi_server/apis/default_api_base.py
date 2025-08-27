@@ -1,13 +1,19 @@
-from typing import Any, ClassVar, Dict, List, Tuple  # noqa: F401
+# coding: utf-8
 
+from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+
+from pydantic import Field, StrictStr
+from typing import Any, Optional
+from typing_extensions import Annotated
+from src.openapi_server.models.error import Error
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
-from pydantic import StrictStr
+from src.openapi_server.models.list_lamps200_response import ListLamps200Response
 
 
 class BaseDefaultApi:
-    subclasses: ClassVar[tuple] = ()
+    subclasses: ClassVar[Tuple] = ()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -30,7 +36,9 @@ class BaseDefaultApi:
 
     async def list_lamps(
         self,
-    ) -> list[Lamp]: ...
+        cursor: Optional[StrictStr],
+        page_size: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]],
+    ) -> ListLamps200Response: ...
 
     async def update_lamp(
         self,
