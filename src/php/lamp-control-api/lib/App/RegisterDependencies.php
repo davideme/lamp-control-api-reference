@@ -66,6 +66,15 @@ final class RegisterDependencies
 
             \Neomerx\Cors\Contracts\AnalyzerInterface::class => \DI\factory([\Neomerx\Cors\Analyzer::class, 'instance']),
 
+            // PDO class for database managing
+            \PDO::class => \DI\create()
+                ->constructor(
+                    \DI\get('pdo.dsn'),
+                    \DI\get('pdo.username'),
+                    \DI\get('pdo.password'),
+                    \DI\get('pdo.options')
+                ),
+
             // DataMocker
             // @see https://github.com/ybelenko/openapi-data-mocker-server-middleware
             \OpenAPIServer\Mock\OpenApiDataMockerInterface::class => \DI\create(\OpenAPIServer\Mock\OpenApiDataMocker::class)
