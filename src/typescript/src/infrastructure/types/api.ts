@@ -53,6 +53,16 @@ export interface components {
       id: string;
       /** @description Whether the lamp is turned on (true) or off (false) */
       status: boolean;
+      /**
+       * Format: date-time
+       * @description Timestamp when the lamp was created
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the lamp was last updated
+       */
+      updatedAt: string;
     };
     LampCreate: {
       /** @description Initial status of the lamp (on/off) */
@@ -61,6 +71,13 @@ export interface components {
     LampUpdate: {
       /** @description New status of the lamp (on/off) */
       status: boolean;
+    };
+    Error: {
+      /**
+       * @description Error type identifier
+       * @example INVALID_ARGUMENT
+       */
+      error: string;
     };
   };
   responses: never;
@@ -73,20 +90,43 @@ export type $defs = Record<string, never>;
 export interface operations {
   listLamps: {
     parameters: {
-      query?: never;
+      query?: {
+        cursor?: string | null;
+        pageSize?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description A list of lamps */
+      /** @description A list of lamps with pagination */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['Lamp'][];
+          'application/json': {
+            data: components['schemas']['Lamp'][];
+            nextCursor?: string | null;
+            hasMore: boolean;
+          };
+        };
+      };
+      /** @description Not Modified */
+      304: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid request parameters */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
         };
       };
     };
@@ -113,6 +153,15 @@ export interface operations {
           'application/json': components['schemas']['Lamp'];
         };
       };
+      /** @description Invalid request data */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
     };
   };
   getLamp: {
@@ -133,6 +182,22 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Lamp'];
+        };
+      };
+      /** @description Not Modified */
+      304: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid lamp ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
         };
       };
       /** @description Lamp not found */
@@ -168,6 +233,15 @@ export interface operations {
           'application/json': components['schemas']['Lamp'];
         };
       };
+      /** @description Invalid request data or lamp ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
       /** @description Lamp not found */
       404: {
         headers: {
@@ -194,6 +268,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Invalid lamp ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
       };
       /** @description Lamp not found */
       404: {

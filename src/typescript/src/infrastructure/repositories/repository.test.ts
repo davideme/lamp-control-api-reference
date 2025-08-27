@@ -75,6 +75,8 @@ describe('InMemoryLampRepository', () => {
       // Assert
       expect(result.id).toBeDefined();
       expect(result.status).toBe(true);
+      expect(result.createdAt).toBeDefined();
+      expect(result.updatedAt).toBeDefined();
       expect(await repository.findById(result.id)).toEqual(result);
     });
 
@@ -98,15 +100,20 @@ describe('InMemoryLampRepository', () => {
       const lamp = await repository.create({ status: true });
       const updateData = { status: false };
 
+      // Add a small delay to ensure different timestamps
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       // Act
       const result = await repository.update(lamp.id, updateData);
 
       // Assert
-      expect(result).toEqual({ id: lamp.id, status: false });
-      expect(await repository.findById(lamp.id)).toEqual({
-        id: lamp.id,
-        status: false,
-      });
+      expect(result.id).toBe(lamp.id);
+      expect(result.status).toBe(false);
+      expect(result.createdAt).toBe(lamp.createdAt); // Should preserve creation time
+      expect(result.updatedAt).not.toBe(lamp.updatedAt); // Should update modification time
+
+      const refetchedLamp = await repository.findById(lamp.id);
+      expect(refetchedLamp).toEqual(result);
     });
 
     it('should throw LampNotFoundError when lamp does not exist', async () => {
@@ -124,12 +131,17 @@ describe('InMemoryLampRepository', () => {
       const lamp = await repository.create({ status: true });
       const updateData = { status: false };
 
+      // Add a small delay to ensure different timestamps
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       // Act
       const result = await repository.update(lamp.id, updateData);
 
       // Assert
       expect(result.id).toBe(lamp.id); // ID should not change
       expect(result.status).toBe(false); // Only status should be updated
+      expect(result.createdAt).toBe(lamp.createdAt); // createdAt should not change
+      expect(result.updatedAt).not.toBe(lamp.updatedAt); // updatedAt should change
     });
   });
 
