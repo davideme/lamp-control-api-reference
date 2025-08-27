@@ -37,7 +37,7 @@ export class Service {
   constructor(private readonly repository: LampRepository) {}
 
   async listLamps(request: ListLampsRequest, reply: FastifyReply): Promise<void> {
-    const { cursor, pageSize = 25 } = request.query;
+    const { pageSize = 25 } = request.query;
     const lamps = await this.repository.findAll(pageSize);
 
     // Simple implementation without actual cursor-based pagination

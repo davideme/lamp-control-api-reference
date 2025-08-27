@@ -16,7 +16,7 @@ const options = {
   prefix: 'v1',
 };
 
-export async function buildApp() {
+export async function buildApp(): Promise<import('fastify').FastifyInstance> {
   const server = fastify({
     logger: true,
   });
