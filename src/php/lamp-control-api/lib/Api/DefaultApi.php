@@ -32,7 +32,13 @@ class DefaultApi extends AbstractDefaultApi
     public function listLamps(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $lamps = $this->repo->all();
-        $response->getBody()->write(json_encode($lamps));
+        // Create paginated response structure as per OpenAPI spec
+        $paginatedResponse = [
+            'data' => $lamps,
+            'hasMore' => false,  // Since we're not implementing actual pagination yet
+            'nextCursor' => null
+        ];
+        $response->getBody()->write(json_encode($paginatedResponse));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
