@@ -1,6 +1,6 @@
 """Default API implementation for the Lamp Control API."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
@@ -29,7 +29,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             The created lamp.
         """
         lamp_id = str(uuid4())
-        now = datetime.now()
+        now = datetime.now(UTC)
         lamp = Lamp(id=lamp_id, status=lamp_create.status, created_at=now, updated_at=now)
         return self._lamp_repository.create(lamp)
 
@@ -110,7 +110,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
                 id=lamp_id,
                 status=lamp_update.status,
                 created_at=existing_lamp.created_at,
-                updated_at=datetime.now(),
+                updated_at=datetime.now(UTC),
             )
             return self._lamp_repository.update(updated_lamp)
         except LampNotFoundError as err:
