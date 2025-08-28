@@ -115,7 +115,8 @@ class DefaultApiTest extends TestCase
      */
     public function testCreateLamp()
     {
-        $lampData = ['id' => '1', 'status' => true];
+        $now = (new \DateTime())->format(\DateTime::ATOM);
+        $lampData = ['id' => '1', 'status' => true, 'createdAt' => $now, 'updatedAt' => $now];
         $lampObj = $this->createMock(\OpenAPIServer\Model\Lamp::class);
         $lampObj->method('getData')->willReturn($lampData);
         $lampObj->method('jsonSerialize')->willReturn($lampData);
@@ -131,8 +132,11 @@ class DefaultApiTest extends TestCase
             ->willReturnOnConsecutiveCalls($lampObj, null);
         $this->mockRepo->expects($this->once())
             ->method('update')
-            ->willReturnCallback(function ($id, $update) {
-                $updatedData = ['id' => '1', 'status' => false];
+            ->willReturnCallback(function ($id, $update) use ($now) {
+                // Use a fixed timestamp that's clearly different from creation time
+                $updatedNow = (new \DateTime('2025-08-28 20:30:00'))->format(\DateTime::ATOM);
+                // createdAt should remain unchanged, only updatedAt should be modified
+                $updatedData = ['id' => '1', 'status' => false, 'createdAt' => $now, 'updatedAt' => $updatedNow];
                 $updatedLamp = $this->createMock(\OpenAPIServer\Model\Lamp::class);
                 $updatedLamp->method('getData')->willReturn($updatedData);
                 $updatedLamp->method('jsonSerialize')->willReturn($updatedData);
@@ -150,18 +154,23 @@ class DefaultApiTest extends TestCase
         $lamp = json_decode((string)$response->getBody(), true);
         $this->assertArrayHasKey('id', $lamp);
         $this->assertArrayHasKey('status', $lamp);
+        $this->assertArrayHasKey('createdAt', $lamp);
+        $this->assertArrayHasKey('updatedAt', $lamp);
         $this->assertTrue($lamp['status']);
         $lampId = $lamp['id'];
 
-        // 2. List lamps
+        // 2. List lamps - now expects paginated response
         $request = $this->createJsonRequest('GET', '/lamps');
         $response = new Response();
         $response = $this->api->listLamps($request, $response);
         $this->assertEquals(200, $response->getStatusCode());
-        $lamps = json_decode((string)$response->getBody(), true);
-        $this->assertIsArray($lamps);
-        $this->assertNotEmpty($lamps);
-        $this->assertEquals($lampId, $lamps[0]['id']);
+        $paginatedResponse = json_decode((string)$response->getBody(), true);
+        $this->assertArrayHasKey('data', $paginatedResponse);
+        $this->assertArrayHasKey('hasMore', $paginatedResponse);
+        $this->assertArrayHasKey('nextCursor', $paginatedResponse);
+        $this->assertIsArray($paginatedResponse['data']);
+        $this->assertNotEmpty($paginatedResponse['data']);
+        $this->assertEquals($lampId, $paginatedResponse['data'][0]['id']);
 
         // 3. Get lamp
         $request = $this->createJsonRequest('GET', "/lamps/{$lampId}");
@@ -171,6 +180,8 @@ class DefaultApiTest extends TestCase
         $lampFetched = json_decode((string)$response->getBody(), true);
         $this->assertEquals($lampId, $lampFetched['id']);
         $this->assertTrue($lampFetched['status']);
+        $this->assertArrayHasKey('createdAt', $lampFetched);
+        $this->assertArrayHasKey('updatedAt', $lampFetched);
 
         // 4. Update lamp (turn off)
         $request = $this->createJsonRequest('PUT', "/lamps/{$lampId}", ['status' => false]);
@@ -179,6 +190,12 @@ class DefaultApiTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $lampUpdated = json_decode((string)$response->getBody(), true);
         $this->assertFalse($lampUpdated['status']);
+        $this->assertArrayHasKey('createdAt', $lampUpdated);
+        $this->assertArrayHasKey('updatedAt', $lampUpdated);
+        // Verify that createdAt remains unchanged during updates
+        $this->assertEquals($lamp['createdAt'], $lampUpdated['createdAt']);
+        // Verify that updatedAt is different (newer) than createdAt
+        $this->assertNotEquals($lampUpdated['createdAt'], $lampUpdated['updatedAt']);
 
         // 5. Delete lamp
         $request = $this->createJsonRequest('DELETE', "/lamps/{$lampId}");

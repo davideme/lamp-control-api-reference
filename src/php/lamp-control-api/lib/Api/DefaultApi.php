@@ -32,12 +32,21 @@ class DefaultApi extends AbstractDefaultApi
     public function listLamps(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $lamps = $this->repo->all();
-        $response->getBody()->write(json_encode($lamps));
+        // Create paginated response structure as per OpenAPI spec
+        $paginatedResponse = [
+            'data' => $lamps,
+            'hasMore' => false,  // Since we're not implementing actual pagination yet
+            'nextCursor' => null
+        ];
+        $response->getBody()->write(json_encode($paginatedResponse));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function getLamp(ServerRequestInterface $request, ResponseInterface $response, string $lampId): ResponseInterface
-    {
+    public function getLamp(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        string $lampId
+    ): ResponseInterface {
         $lamp = $this->repo->get($lampId);
         if (!$lamp) {
             return $response->withStatus(404);
@@ -46,8 +55,11 @@ class DefaultApi extends AbstractDefaultApi
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function updateLamp(ServerRequestInterface $request, ResponseInterface $response, string $lampId): ResponseInterface
-    {
+    public function updateLamp(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        string $lampId
+    ): ResponseInterface {
         $data = json_decode((string)$request->getBody(), true);
         $lampUpdate = new LampUpdate();
         $lampUpdate->setData($data);
@@ -59,8 +71,11 @@ class DefaultApi extends AbstractDefaultApi
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function deleteLamp(ServerRequestInterface $request, ResponseInterface $response, string $lampId): ResponseInterface
-    {
+    public function deleteLamp(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        string $lampId
+    ): ResponseInterface {
         $deleted = $this->repo->delete($lampId);
         if (!$deleted) {
             return $response->withStatus(404);

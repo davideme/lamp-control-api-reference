@@ -25,13 +25,13 @@ namespace OpenAPIServer\Model;
 use OpenAPIServer\BaseModel;
 
 /**
- * Lamp
+ * ListLamps200Response
  *
  * @package OpenAPIServer\Model
  * @author  OpenAPI Generator team
  * @link    https://github.com/openapitools/openapi-generator
  */
-class Lamp extends BaseModel
+class ListLamps200Response extends BaseModel
 {
     /**
      * @var string Models namespace.
@@ -45,27 +45,21 @@ class Lamp extends BaseModel
      */
     protected const MODEL_SCHEMA = <<<'SCHEMA'
 {
-  "required" : [ "createdAt", "id", "status", "updatedAt" ],
+  "required" : [ "data", "hasMore" ],
   "type" : "object",
   "properties" : {
-    "id" : {
-      "type" : "string",
-      "description" : "Unique identifier for the lamp",
-      "format" : "uuid"
+    "data" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Lamp"
+      }
     },
-    "status" : {
-      "type" : "boolean",
-      "description" : "Whether the lamp is turned on (true) or off (false)"
-    },
-    "createdAt" : {
+    "nextCursor" : {
       "type" : "string",
-      "description" : "Timestamp when the lamp was created",
-      "format" : "date-time"
+      "nullable" : true
     },
-    "updatedAt" : {
-      "type" : "string",
-      "description" : "Timestamp when the lamp was last updated",
-      "format" : "date-time"
+    "hasMore" : {
+      "type" : "boolean"
     }
   }
 }
