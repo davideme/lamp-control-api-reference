@@ -59,6 +59,16 @@ class TestDefaultApiImpl:
         assert result.id is not None
 
     @pytest.mark.asyncio
+    async def test_create_lamp_null_request(self, api_impl, mock_lamp_repository):
+        """Test creating a lamp with null request data."""
+        # Act & Assert
+        with pytest.raises(HTTPException) as exc_info:
+            await api_impl.create_lamp(None)
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.detail == "Invalid request data"
+        mock_lamp_repository.create.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_get_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp):
         """Test getting an existing lamp."""
         # Arrange
@@ -124,6 +134,17 @@ class TestDefaultApiImpl:
         updated_lamp_arg = mock_lamp_repository.update.call_args[0][0]
         assert updated_lamp_arg.id == sample_lamp.id
         assert updated_lamp_arg.status == lamp_update.status
+
+    @pytest.mark.asyncio
+    async def test_update_lamp_null_request(self, api_impl, mock_lamp_repository):
+        """Test updating a lamp with null request data."""
+        # Act & Assert
+        with pytest.raises(HTTPException) as exc_info:
+            await api_impl.update_lamp("test-lamp-1", None)
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.detail == "Invalid request data"
+        mock_lamp_repository.get.assert_not_called()
+        mock_lamp_repository.update.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_update_lamp_not_found(self, api_impl, mock_lamp_repository):

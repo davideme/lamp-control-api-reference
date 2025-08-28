@@ -27,7 +27,15 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         Returns:
             The created lamp.
+
+        Raises:
+            HTTPException: If the lamp creation data is invalid.
         """
+        if lamp_create is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid request data")
+
         lamp_id = str(uuid4())
         now = datetime.now(UTC)
         lamp = Lamp(id=lamp_id, status=lamp_create.status, created_at=now, updated_at=now)
@@ -97,8 +105,13 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             The updated lamp.
 
         Raises:
-            HTTPException: If the lamp is not found.
+            HTTPException: If the lamp is not found or update data is invalid.
         """
+        if lamp_update is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid request data")
+
         try:
             # Get existing lamp to preserve created_at timestamp
             existing_lamp = self._lamp_repository.get(lamp_id)
