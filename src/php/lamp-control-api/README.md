@@ -171,8 +171,10 @@ Class | Method | HTTP request | Description
 
 ## Models
 
+* OpenAPIServer\Model\Error
 * OpenAPIServer\Model\Lamp
 * OpenAPIServer\Model\LampCreate
 * OpenAPIServer\Model\LampUpdate
+* OpenAPIServer\Model\ListLamps200Response
 
 

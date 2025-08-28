@@ -25,13 +25,13 @@ namespace OpenAPIServer\Model;
 use OpenAPIServer\BaseModel;
 
 /**
- * Lamp
+ * Error
  *
  * @package OpenAPIServer\Model
  * @author  OpenAPI Generator team
  * @link    https://github.com/openapitools/openapi-generator
  */
-class Lamp extends BaseModel
+class Error extends BaseModel
 {
     /**
      * @var string Models namespace.
@@ -45,27 +45,13 @@ class Lamp extends BaseModel
      */
     protected const MODEL_SCHEMA = <<<'SCHEMA'
 {
-  "required" : [ "createdAt", "id", "status", "updatedAt" ],
+  "required" : [ "error" ],
   "type" : "object",
   "properties" : {
-    "id" : {
+    "error" : {
       "type" : "string",
-      "description" : "Unique identifier for the lamp",
-      "format" : "uuid"
-    },
-    "status" : {
-      "type" : "boolean",
-      "description" : "Whether the lamp is turned on (true) or off (false)"
-    },
-    "createdAt" : {
-      "type" : "string",
-      "description" : "Timestamp when the lamp was created",
-      "format" : "date-time"
-    },
-    "updatedAt" : {
-      "type" : "string",
-      "description" : "Timestamp when the lamp was last updated",
-      "format" : "date-time"
+      "description" : "Error type identifier",
+      "example" : "INVALID_ARGUMENT"
     }
   }
 }

@@ -61,6 +61,23 @@ class RegisterRoutes
   }
 }',
                 ],
+                '400' => [
+                    'jsonSchema' => '{
+  "description" : "Invalid request data",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter 'status': expected boolean"
+      }
+    }
+  }
+}',
+                ],
             ],
             'authMethods' => [
             ],
@@ -76,14 +93,32 @@ class RegisterRoutes
             'responses' => [
                 '200' => [
                     'jsonSchema' => '{
-  "description" : "A list of lamps",
+  "description" : "A list of lamps with pagination",
   "content" : {
     "application/json" : {
       "schema" : {
-        "type" : "array",
-        "items" : {
-          "$ref" : "#/components/schemas/Lamp"
-        }
+        "$ref" : "#/components/schemas/listLamps_200_response"
+      }
+    }
+  }
+}',
+                ],
+                '304' => [
+                    'jsonSchema' => '{
+  "description" : "Not Modified"
+}',
+                ],
+                '400' => [
+                    'jsonSchema' => '{
+  "description" : "Invalid request parameters",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "Invalid query parameter 'pageSize'"
       }
     }
   }
@@ -105,6 +140,23 @@ class RegisterRoutes
                 '204' => [
                     'jsonSchema' => '{
   "description" : "Lamp deleted successfully"
+}',
+                ],
+                '400' => [
+                    'jsonSchema' => '{
+  "description" : "Invalid lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter 'lampId'"
+      }
+    }
+  }
 }',
                 ],
                 '404' => [
@@ -137,6 +189,28 @@ class RegisterRoutes
   }
 }',
                 ],
+                '304' => [
+                    'jsonSchema' => '{
+  "description" : "Not Modified"
+}',
+                ],
+                '400' => [
+                    'jsonSchema' => '{
+  "description" : "Invalid lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter 'lampId'"
+      }
+    }
+  }
+}',
+                ],
                 '404' => [
                     'jsonSchema' => '{
   "description" : "Lamp not found"
@@ -162,6 +236,23 @@ class RegisterRoutes
     "application/json" : {
       "schema" : {
         "$ref" : "#/components/schemas/Lamp"
+      }
+    }
+  }
+}',
+                ],
+                '400' => [
+                    'jsonSchema' => '{
+  "description" : "Invalid request data or lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter 'status': expected boolean"
       }
     }
   }
