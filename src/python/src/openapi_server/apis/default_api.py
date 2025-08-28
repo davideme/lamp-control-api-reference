@@ -112,7 +112,7 @@ async def get_lamp(
 )
 async def list_lamps(
     cursor: Optional[StrictStr] = Query(None, description="", alias="cursor"),
-    page_size: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = Query(
+    page_size: Optional[Annotated[int, Field(le=100, ge=1)]] = Query(
         25, description="", alias="pageSize", ge=1, le=100
     ),
 ) -> ListLamps200Response:

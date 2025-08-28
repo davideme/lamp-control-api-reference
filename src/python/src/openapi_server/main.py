@@ -12,7 +12,9 @@ Do not edit the class manually.
 """  # noqa: E501
 
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from src.openapi_server.apis.default_api import router as DefaultApiRouter
 
@@ -21,5 +23,15 @@ app = FastAPI(
     description="A simple API for controlling lamps, demonstrating CRUD operations. ",
     version="1.0.0",
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Convert 422 validation errors to 400 Bad Request as documented in OpenAPI spec."""
+    return JSONResponse(
+        status_code=400,
+        content={"error": "INVALID_ARGUMENT", "message": "Invalid request data"},
+    )
+
 
 app.include_router(DefaultApiRouter, prefix="/v1")
