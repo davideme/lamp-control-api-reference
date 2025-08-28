@@ -132,9 +132,11 @@ class DefaultApiTest extends TestCase
             ->willReturnOnConsecutiveCalls($lampObj, null);
         $this->mockRepo->expects($this->once())
             ->method('update')
-            ->willReturnCallback(function ($id, $update) {
-                $updatedNow = (new \DateTime())->format(\DateTime::ATOM);
-                $updatedData = ['id' => '1', 'status' => false, 'createdAt' => $updatedNow, 'updatedAt' => $updatedNow];
+            ->willReturnCallback(function ($id, $update) use ($now) {
+                // Use a fixed timestamp that's clearly different from creation time
+                $updatedNow = (new \DateTime('2025-08-28 20:30:00'))->format(\DateTime::ATOM);
+                // createdAt should remain unchanged, only updatedAt should be modified
+                $updatedData = ['id' => '1', 'status' => false, 'createdAt' => $now, 'updatedAt' => $updatedNow];
                 $updatedLamp = $this->createMock(\OpenAPIServer\Model\Lamp::class);
                 $updatedLamp->method('getData')->willReturn($updatedData);
                 $updatedLamp->method('jsonSerialize')->willReturn($updatedData);
@@ -190,6 +192,10 @@ class DefaultApiTest extends TestCase
         $this->assertFalse($lampUpdated['status']);
         $this->assertArrayHasKey('createdAt', $lampUpdated);
         $this->assertArrayHasKey('updatedAt', $lampUpdated);
+        // Verify that createdAt remains unchanged during updates
+        $this->assertEquals($lamp['createdAt'], $lampUpdated['createdAt']);
+        // Verify that updatedAt is different (newer) than createdAt
+        $this->assertNotEquals($lampUpdated['createdAt'], $lampUpdated['updatedAt']);
 
         // 5. Delete lamp
         $request = $this->createJsonRequest('DELETE', "/lamps/{$lampId}");
