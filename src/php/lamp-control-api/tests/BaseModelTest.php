@@ -38,7 +38,6 @@ use StdClass;
  */
 class BaseModelTest extends TestCase
 {
-
     /**
      * @covers ::__construct
      * @covers ::validateModelType
@@ -555,7 +554,6 @@ SCHEMA;
 
 class ClassWithoutGetSchemaMethod
 {
-
 }
 
 class DogRefTestClass extends BaseModel

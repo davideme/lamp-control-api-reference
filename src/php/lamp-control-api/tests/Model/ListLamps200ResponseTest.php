@@ -37,7 +37,6 @@ use OpenAPIServer\Model\ListLamps200Response;
  */
 class ListLamps200ResponseTest extends TestCase
 {
-
     /**
      * Setup before running any test cases
      */
@@ -123,4 +122,3 @@ class ListLamps200ResponseTest extends TestCase
         $this->assertIsArray($schemaArr);
     }
 }
-

@@ -37,7 +37,6 @@ use OpenAPIServer\Model\Error;
  */
 class ErrorTest extends TestCase
 {
-
     /**
      * Setup before running any test cases
      */
@@ -103,4 +102,3 @@ class ErrorTest extends TestCase
         $this->assertIsArray($schemaArr);
     }
 }
-
