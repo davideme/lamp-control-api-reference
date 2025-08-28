@@ -1,4 +1,5 @@
 {
+  "name": "openapiserver/lamp-control-api",
   "minimum-stability": "RC",
   "repositories": [
     {
@@ -32,29 +33,61 @@
     "ybelenko/openapi-data-mocker-server-middleware": "^1.2"
   },
   "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.75",
     "overtrue/phplint": "^2.0.2",
+    "phpspec/prophecy-phpunit": "^2.4",
+    "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^8.0 || ^9.0",
     "squizlabs/php_codesniffer": "^3.5"
   },
   "autoload": {
-    "psr-4": { "OpenAPIServer\\": [
-      "lib/",
-      "src/"
-    ]}
+    "psr-4": {
+      "OpenAPIServer\\": [
+        "lib/",
+        "src/"
+      ],
+      "App\\": "src/",
+      "Tests\\": "tests/"
+    }
   },
   "autoload-dev": {
-    "psr-4": { "OpenAPIServer\\": "tests/" }
+    "psr-4": {
+      "OpenAPIServer\\": "tests/"
+    }
   },
   "scripts": {
+    "start": "php -S 0.0.0.0:8080 -t public",
     "test": [
       "phpunit"
     ],
     "test-apis": "phpunit --testsuite Apis",
     "test-models": "phpunit --testsuite Models",
+    "test-coverage": "phpunit --coverage-html coverage --coverage-text",
     "phpcs": "phpcs",
-    "phplint": "phplint ./ --exclude=vendor"
+    "phplint": "phplint ./ --exclude=vendor",
+    "lint": "phpcs --standard=PSR12 --colors -p src tests",
+    "lint-fix": "phpcbf --standard=PSR12 src tests",
+    "format": "php-cs-fixer fix",
+    "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
+    "analyze": "phpstan analyse --memory-limit=2G",
+    "security-check": "composer audit",
+    "quality": [
+      "@lint",
+      "@format-check",
+      "@analyze",
+      "@security-check"
+    ],
+    "quality-fix": [
+      "@lint-fix",
+      "@format",
+      "@analyze"
+    ]
   },
   "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    },
+    "process-timeout": 0,
     "sort-packages": true
   }
 }
