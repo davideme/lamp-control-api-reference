@@ -29,6 +29,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
 // Map controllers
 app.MapControllers();
 
