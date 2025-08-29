@@ -153,7 +153,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter \'lampId\'"
+        "details" : "Invalid format for parameter "lampId""
       }
     }
   }
@@ -205,7 +205,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter \'lampId\'"
+        "details" : "Invalid format for parameter "lampId""
       }
     }
   }

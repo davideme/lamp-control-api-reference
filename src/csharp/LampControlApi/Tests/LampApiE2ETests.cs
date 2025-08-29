@@ -86,5 +86,19 @@ namespace LampControlApi.E2E
             var getResp = await _client.GetAsync($"/v1/lamps/{created.Id}");
             Assert.AreEqual(HttpStatusCode.NotFound, getResp.StatusCode);
         }
+
+        [TestMethod]
+        public async Task HealthEndpoint_ReturnsOkWithStatus()
+        {
+            var response = await _client.GetAsync("/health");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var healthResponse = await response.Content.ReadFromJsonAsync<object>();
+            Assert.IsNotNull(healthResponse);
+
+            // Check that the response contains status: "ok"
+            var responseText = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(responseText.Contains("\"status\":\"ok\""));
+        }
     }
 }
