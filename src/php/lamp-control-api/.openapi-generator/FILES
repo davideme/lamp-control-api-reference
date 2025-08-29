@@ -22,5 +22,3 @@ phpunit.xml.dist
 public/.htaccess
 public/index.php
 tests/BaseModelTest.php
-tests/Model/ErrorTest.php
-tests/Model/ListLamps200ResponseTest.php
