@@ -43,9 +43,18 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
             status_code=400,
             content={"error": "INVALID_ARGUMENT"},
         )
+    error_map = {
+        401: "UNAUTHORIZED",
+        403: "FORBIDDEN",
+        404: "NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
+        409: "CONFLICT",
+        500: "INTERNAL_SERVER_ERROR",
+    }
+    error_code = error_map.get(exc.status_code, f"HTTP_ERROR_{exc.status_code}")
     return JSONResponse(
         status_code=exc.status_code,
-        content={"error": "HTTP_ERROR"},
+        content={"error": error_code},
     )
 
 
