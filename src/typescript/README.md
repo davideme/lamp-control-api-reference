@@ -82,13 +82,16 @@ npm run test:coverage
 
 ## API Documentation
 
-The API documentation is available at `http://localhost:3000/api-docs` when the server is running.
+The API documentation is available at `http://localhost:8080/api-docs` when the server is running.
 
 ### Endpoints
 
-- `GET /api/lamps` - List all lamps
-- `POST /api/lamps` - Create a new lamp
-- `GET /api/lamps/:id` - Get a lamp by ID
-- `PATCH /api/lamps/:id` - Update a lamp
-- `DELETE /api/lamps/:id` - Delete a lamp
-- `POST /api/lamps/:id/toggle` - Toggle a lamp on/off
+**Health Check:**
+- `GET /health` - Health check endpoint returning service status
+
+**Lamp Control API (v1):**
+- `GET /v1/lamps` - List all lamps
+- `POST /v1/lamps` - Create a new lamp
+- `GET /v1/lamps/:id` - Get a lamp by ID
+- `PUT /v1/lamps/:id` - Update a lamp
+- `DELETE /v1/lamps/:id` - Delete a lamp
