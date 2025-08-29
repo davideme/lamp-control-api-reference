@@ -5,10 +5,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class PluginsTest {
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     @Test
     fun `test application plugins configuration`() = testApplication {
@@ -19,7 +26,8 @@ class PluginsTest {
         // Test call logging and monitoring by making requests
         val response1 = client.get("/health")
         assertEquals(HttpStatusCode.OK, response1.status)
-        assertEquals("OK", response1.bodyAsText())
+        val healthResponse = json.decodeFromString<Map<String, String>>(response1.bodyAsText())
+        assertEquals("ok", healthResponse["status"])
         
         // Test CORS headers
         val response2 = client.get("/") {
@@ -32,6 +40,8 @@ class PluginsTest {
             header("X-Request-Id", "test-123")
         }
         assertEquals(HttpStatusCode.OK, response3.status)
+        val healthResponse3 = json.decodeFromString<Map<String, String>>(response3.bodyAsText())
+        assertEquals("ok", healthResponse3["status"])
     }
 
     @Test
