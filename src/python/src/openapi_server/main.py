@@ -15,6 +15,7 @@ Do not edit the class manually.
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.openapi_server.apis.default_api import router as DefaultApiRouter
 
@@ -30,7 +31,30 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """Convert 422 validation errors to 400 Bad Request as documented in OpenAPI spec."""
     return JSONResponse(
         status_code=400,
-        content={"error": "INVALID_ARGUMENT", "message": "Invalid request data"},
+        content={"error": "INVALID_ARGUMENT"},
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions including 400 Bad Request."""
+    if exc.status_code == 400:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "INVALID_ARGUMENT"},
+        )
+    error_map = {
+        401: "UNAUTHORIZED",
+        403: "FORBIDDEN",
+        404: "NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
+        409: "CONFLICT",
+        500: "INTERNAL_SERVER_ERROR",
+    }
+    error_code = error_map.get(exc.status_code, f"HTTP_ERROR_{exc.status_code}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": error_code},
     )
 
 
