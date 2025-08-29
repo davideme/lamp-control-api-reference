@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -117,5 +119,74 @@ func TestNetJoinHostPort(t *testing.T) {
 				t.Errorf("Expected %s, got %s", tc.expected, result)
 			}
 		})
+	}
+}
+
+func TestHealthHandler(t *testing.T) {
+	// Test the health handler function directly
+	req := httptest.NewRequest("GET", "/health", nil)
+	rr := httptest.NewRecorder()
+
+	healthHandler(rr, req)
+
+	// Check status code
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, status)
+	}
+
+	// Check content type
+	expectedContentType := "application/json"
+	if contentType := rr.Header().Get("Content-Type"); contentType != expectedContentType {
+		t.Errorf("Expected content type %s, got %s", expectedContentType, contentType)
+	}
+
+	// Check response body
+	var response HealthResponse
+	if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
+
+	expectedStatus := "ok"
+	if response.Status != expectedStatus {
+		t.Errorf("Expected status %s, got %s", expectedStatus, response.Status)
+	}
+}
+
+func TestHealthEndpointIntegration(t *testing.T) {
+	// Test the health endpoint with a complete router setup
+	r := chi.NewRouter()
+	r.Get("/health", healthHandler)
+
+	// Create test server
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	// Make request to health endpoint
+	resp, err := http.Get(ts.URL + "/health")
+	if err != nil {
+		t.Fatalf("Failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check status code
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	// Check content type
+	expectedContentType := "application/json"
+	if contentType := resp.Header.Get("Content-Type"); contentType != expectedContentType {
+		t.Errorf("Expected content type %s, got %s", expectedContentType, contentType)
+	}
+
+	// Check response body
+	var response HealthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
+
+	expectedStatus := "ok"
+	if response.Status != expectedStatus {
+		t.Errorf("Expected status %s, got %s", expectedStatus, response.Status)
 	}
 }
