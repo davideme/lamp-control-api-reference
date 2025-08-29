@@ -59,3 +59,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 app.include_router(DefaultApiRouter, prefix="/v1")
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint for monitoring service availability."""
+    return {"status": "ok"}
