@@ -1,7 +1,7 @@
 """Test error response formats to ensure they match OpenAPI specification."""
 
-import pytest
 from fastapi.testclient import TestClient
+
 from src.openapi_server.main import app
 
 client = TestClient(app)
@@ -40,7 +40,7 @@ def test_error_response_schema_compliance():
     response = client.post("/v1/lamps", json=None)
     assert response.status_code == 400
     response_data = response.json()
-    
+
     # Should only have 'error' field
     assert set(response_data.keys()) == {"error"}
     assert isinstance(response_data["error"], str)
