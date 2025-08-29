@@ -1,0 +1,22 @@
+name: openapi-ci
+
+on:
+  pull_request:
+    # Only run the workflow when OpenAPI definition files in docs/api change
+    paths:
+      - 'docs/api/openapi.yaml'
+      - 'docs/api/*.yaml'
+
+jobs:
+  build:
+    name: Run Spectral
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Run Spectral
+        uses: stoplightio/spectral-action@latest
+        with:
+          # Lint all YAML files under docs/api (this repo uses `docs/api/openapi.yaml`)
+          file_glob: 'docs/api/*.yaml'
