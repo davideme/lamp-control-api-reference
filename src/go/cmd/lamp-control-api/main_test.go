@@ -124,7 +124,7 @@ func TestNetJoinHostPort(t *testing.T) {
 
 func TestHealthHandler(t *testing.T) {
 	// Test the health handler function directly
-	req := httptest.NewRequest("GET", "/health", nil)
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rr := httptest.NewRecorder()
 
 	healthHandler(rr, req)
@@ -162,7 +162,13 @@ func TestHealthEndpointIntegration(t *testing.T) {
 	defer ts.Close()
 
 	// Make request to health endpoint
-	resp, err := http.Get(ts.URL + "/health")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, ts.URL+"/health", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)
 	}
