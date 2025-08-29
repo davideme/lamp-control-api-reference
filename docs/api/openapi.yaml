@@ -4,14 +4,23 @@ info:
   description: |
     A simple API for controlling lamps, demonstrating CRUD operations.
   version: 1.0.0
+  contact:
+    name: API Support
+    url: https://www.example.com/support
 
 servers:
   - url: /v1
+
+tags:
+  - name: lamps
+    description: Operations related to lamps
 
 paths:
   /lamps:
     get:
       summary: List all lamps
+      description: Retrieve a list of all lamps.
+      tags: [lamps]
       operationId: listLamps
       parameters:
         - in: query
@@ -83,6 +92,8 @@ paths:
           description: Not Modified
     post:
       summary: Create a new lamp
+      description: Create a new lamp.
+      tags: [lamps]
       operationId: createLamp
       requestBody:
         required: true
@@ -158,6 +169,8 @@ paths:
   /lamps/{lampId}:
     get:
       summary: Get a specific lamp
+      description: Retrieve a specific lamp.
+      tags: [lamps]
       operationId: getLamp
       parameters:
         - name: lampId
@@ -218,6 +231,8 @@ paths:
           description: Lamp not found
     put:
       summary: Update a lamp's status
+      description: Update a lamp's status.
+      tags: [lamps]
       operationId: updateLamp
       parameters:
         - name: lampId
@@ -293,6 +308,8 @@ paths:
           description: Lamp not found
     delete:
       summary: Delete a lamp
+      description: Delete a lamp.
+      tags: [lamps]
       operationId: deleteLamp
       parameters:
         - name: lampId
