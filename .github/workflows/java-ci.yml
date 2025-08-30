@@ -25,6 +25,8 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
+      env:
+        JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
     
     - name: Cache Maven dependencies
       uses: actions/cache@v3
@@ -97,6 +99,8 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
+      env:
+        JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
 
     - name: Cache Maven dependencies
       uses: actions/cache@v3
