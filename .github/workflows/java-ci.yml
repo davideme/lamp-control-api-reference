@@ -25,15 +25,8 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-      env:
-        JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
-    
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        cache: 'maven'
+        cache-dependency-path: 'src/java/pom.xml'
     
     - name: Check code formatting
       working-directory: ./src/java
@@ -99,15 +92,8 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-      env:
-        JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
-
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        cache: 'maven'
+        cache-dependency-path: 'src/java/pom.xml'
 
     - name: Build application
       run: mvn compile -q
