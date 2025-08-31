@@ -18,7 +18,7 @@ COPY src/ src/
 RUN mvn clean package -DskipTests -q
 
 # Runtime stage using distroless Java 21
-FROM gcr.io/distroless/java21-debian12
+FROM gcr.io/distroless/java21-debian12:nonroot
 
 # Copy the built JAR from build stage
 COPY --from=build-env /app/target/openapi-spring-1.0.0.jar /app/main.jar
