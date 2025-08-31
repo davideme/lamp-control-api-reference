@@ -170,16 +170,24 @@ jobs:
 
     - name: Test Docker image
       run: |
-        # Start the container in background
-        docker run -d --name test-container -p 8080:8080 java-lamp-api:test
+        # Start the container in background with health check
+        docker run -d --name test-container -p 8080:8080 \
+          --health-cmd="curl -f http://localhost:8080/v1/lamps || exit 1" \
+          --health-interval=5s \
+          --health-timeout=3s \
+          --health-retries=24 \
+          java-lamp-api:test
         
-        # Wait for the application to start
-        echo "Waiting for application to start..."
-        timeout 120 bash -c 'until docker exec test-container curl -f -s http://localhost:8080/v1/lamps > /dev/null 2>&1; do sleep 2; done'
+        # Wait for the application to be healthy
+        echo "Waiting for application to be healthy..."
+        until [ "$(docker inspect --format '{{.State.Health.Status}}' test-container)" = "healthy" ]; do
+          echo "Container health status: $(docker inspect --format '{{.State.Health.Status}}' test-container)"
+          sleep 2
+        done
         
-        # Test the API endpoint
+        # Test the API endpoint from host
         echo "Testing API endpoint..."
-        docker exec test-container curl -f -s http://localhost:8080/v1/lamps
+        curl -f -s http://localhost:8080/v1/lamps
         
         # Check application logs
         echo "Application logs:"
