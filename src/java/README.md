@@ -58,7 +58,7 @@ docker run -p 8080:8080 lamp-control-api
 ```
 
 The Docker image uses:
-- **Build stage**: `openjdk:21-jdk-slim` - Contains Maven and full JDK for building the application
+- **Build stage**: `maven:3.9-eclipse-temurin-21` - Contains Maven and Eclipse Temurin JDK 21 for building the application
 - **Runtime stage**: `gcr.io/distroless/java21-debian12` - Minimal, secure base image with only Java runtime
 
 #### Multi-Stage Benefits
