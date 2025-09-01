@@ -19,7 +19,15 @@ namespace LampControlApi.E2E
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            var factory = new CustomWebApplicationFactory();
+            // Ensure current directory is the project directory so the test host
+            // can locate content/solution-relative files during SetContentRoot.
+            var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
+            System.IO.Directory.SetCurrentDirectory(projectDir);
+
+            // Configure a factory instance and set the content root explicitly
+            var factory = new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder => builder.UseContentRoot(projectDir));
+
             _client = factory.CreateClient();
         }
 
