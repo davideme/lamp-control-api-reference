@@ -212,11 +212,11 @@ jobs:
         echo "## Direct Dependencies" > dependency-report.md
         dotnet list package >> dependency-report.md
         echo "" >> dependency-report.md
-  echo "## Transitive Dependencies" >> dependency-report.md
-  dotnet list package --include-transitive >> dependency-report.md
+        echo "## Transitive Dependencies" >> dependency-report.md
+        dotnet list package --include-transitive >> dependency-report.md
         echo "" >> dependency-report.md
-  echo "## Outdated Packages" >> dependency-report.md
-  dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
+        echo "## Outdated Packages" >> dependency-report.md
+        dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
     
     - name: Upload dependency report
       uses: actions/upload-artifact@v4
