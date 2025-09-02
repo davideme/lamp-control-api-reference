@@ -11,6 +11,7 @@ on:
     paths:
       - 'src/go/**'
       - '.github/workflows/go-ci.yml'
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -135,6 +136,16 @@ jobs:
         with:
           name: go-coverage-report
           path: src/go/coverage.html
+
+      - name: Commit coverage summary
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: src/go
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add coverage.out || true
+          git commit -m "chore: update Go coverage summary" || exit 0
+          git push
 
   build:
     name: Build
