@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -28,31 +28,25 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
-    
+      run: dotnet restore --locked-mode
+
     - name: Check code formatting
-      run: dotnet format LampControlApi/LampControlApi.csproj --verify-no-changes --verbosity diagnostic
+      run: dotnet format --verify-no-changes --verbosity diagnostic
     
     - name: Run static analysis
-      run: dotnet build LampControlApi/LampControlApi.csproj --verbosity normal --configuration Release
+      run: dotnet build --verbosity normal --configuration Release
     
     - name: Build application
-      run: dotnet build LampControlApi/LampControlApi.csproj --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
     
     - name: Run tests
       run: |
-        dotnet test LampControlApi/LampControlApi.csproj --configuration Release --logger trx --results-directory ./TestResults
+        dotnet test --configuration Release --logger trx --results-directory ./TestResults
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -60,8 +54,8 @@ jobs:
       with:
         name: csharp-build-artifacts
         path: |
-          src/csharp/LampControlApi/bin/
-          src/csharp/LampControlApi/obj/
+          bin/
+          obj/
         retention-days: 7
 
   security-scan:
@@ -69,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -78,14 +72,16 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
+      run: dotnet restore --locked-mode
     
     - name: Run security scan
       run: |
-        dotnet list LampControlApi/LampControlApi.csproj package --vulnerable --include-transitive 2>&1 | tee security-scan.log
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee security-scan.log
         if grep -q "has the following vulnerable packages" security-scan.log; then
           echo "❌ Vulnerable packages found!"
           cat security-scan.log
@@ -99,7 +95,7 @@ jobs:
       if: always()
       with:
         name: security-scan-results
-        path: src/csharp/security-scan.log
+        path: security-scan.log
         retention-days: 30
 
   publish-ready:
@@ -108,7 +104,7 @@ jobs:
     needs: [code-quality, security-scan]
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -117,22 +113,24 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
+      run: dotnet restore --locked-mode
     
     - name: Build for Release
-      run: dotnet build LampControlApi/LampControlApi.csproj --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
     
     - name: Publish application
-      run: dotnet publish LampControlApi/LampControlApi.csproj --configuration Release --no-build --output ./publish
+      run: dotnet publish --configuration Release --no-build --output ./publish
     
     - name: Upload publish artifacts
       uses: actions/upload-artifact@v4
       with:
         name: csharp-publish-artifacts
-        path: src/csharp/publish/
+        path: publish/
         retention-days: 30
 
   code-coverage:
@@ -140,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -149,17 +147,19 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
+      run: dotnet restore --locked-mode
     
     - name: Install coverage tools
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
     
     - name: Run tests with coverage
       run: |
-        dotnet test LampControlApi/LampControlApi.csproj \
+        dotnet test \
           --configuration Release \
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
@@ -183,7 +183,7 @@ jobs:
       if: success()
       with:
         name: coverage-report
-        path: src/csharp/coverage/
+        path: coverage/
         retention-days: 30
 
   dependency-check:
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -200,27 +200,29 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
+      run: dotnet restore --locked-mode
     
     - name: List all packages
       run: |
         echo "## Direct Dependencies" > dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package >> dependency-report.md
+        dotnet list package >> dependency-report.md
         echo "" >> dependency-report.md
         echo "## Transitive Dependencies" >> dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package --include-transitive >> dependency-report.md
+        dotnet list package --include-transitive >> dependency-report.md
         echo "" >> dependency-report.md
         echo "## Outdated Packages" >> dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
+        dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
     
     - name: Upload dependency report
       uses: actions/upload-artifact@v4
       with:
         name: dependency-report
-        path: src/csharp/dependency-report.md
+        path: dependency-report.md
         retention-days: 30
 
   schemathesis-testing:
@@ -229,7 +231,7 @@ jobs:
     needs: [code-quality]
     defaults:
       run:
-        working-directory: src/csharp
+        working-directory: src/csharp/LampControlApi
     
     steps:
     - name: Checkout code
@@ -238,17 +240,19 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    
+        dotnet-version: 8.x
+        cache: true
+        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        
     - name: Install dependencies
-      run: dotnet restore LampControlApi/LampControlApi.csproj
+      run: dotnet restore --locked-mode
     
     - name: Build application
-      run: dotnet build LampControlApi/LampControlApi.csproj --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
     
     - name: Start API in background
       run: |
-        dotnet run --project LampControlApi/LampControlApi.csproj --configuration Release --no-build --urls "http://localhost:5169" &
+        dotnet run --configuration Release --no-build --urls "http://localhost:5169" &
         echo $! > api.pid
         sleep 10
     

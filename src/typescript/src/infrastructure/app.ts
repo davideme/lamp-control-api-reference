@@ -21,6 +21,11 @@ export async function buildApp(): Promise<import('fastify').FastifyInstance> {
     logger: true,
   });
 
+  // Health endpoint - infrastructure concern, separate from business API
+  server.get('/health', async (_request, _reply) => {
+    return { status: 'ok' };
+  });
+
   server.register(fastifyOpenapiGlue, options);
 
   return server;
