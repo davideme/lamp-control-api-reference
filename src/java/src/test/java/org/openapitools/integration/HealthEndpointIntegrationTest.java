@@ -26,4 +26,18 @@ class HealthEndpointIntegrationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.status").value("ok"));
   }
+
+  @Test
+  void health_AtV1Level_ShouldAlsoReturnOkStatus() throws Exception {
+    mockMvc
+        .perform(get("/v1/health").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.status").value("ok"));
+  }
+
+  @Test
+  void lamps_ShouldBeAvailableAtV1Level() throws Exception {
+    mockMvc.perform(get("/v1/lamps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+  }
 }
