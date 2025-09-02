@@ -72,6 +72,13 @@ $app = Bridge::create($container);
 $middleware = new RegisterMiddlewares();
 $middleware($app);
 
+// Add health endpoint
+$app->get('/health', function (Psr\Http\Message\ServerRequestInterface $request, Psr\Http\Message\ResponseInterface $response) {
+    $healthData = ['status' => 'ok'];
+    $response->getBody()->write(json_encode($healthData));
+    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+});
+
 // Register routes
 // yes, it's anti-pattern you shouldn't get deps from container directly
 $routes = $container->get(RegisterRoutes::class);
