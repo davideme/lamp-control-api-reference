@@ -72,7 +72,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter 'status': expected boolean"
+        "details" : "Invalid format for parameter "status": expected boolean"
       }
     }
   }
@@ -118,7 +118,7 @@ class RegisterRoutes
       },
       "example" : {
         "error" : "INVALID_ARGUMENT",
-        "message" : "Invalid query parameter 'pageSize'"
+        "message" : "Invalid query parameter "pageSize""
       }
     }
   }
@@ -153,7 +153,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter 'lampId'"
+        "details" : "Invalid format for parameter "lampId""
       }
     }
   }
@@ -205,7 +205,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter 'lampId'"
+        "details" : "Invalid format for parameter "lampId""
       }
     }
   }
@@ -252,7 +252,7 @@ class RegisterRoutes
       "example" : {
         "error" : "INVALID_ARGUMENT",
         "message" : "The request contains invalid parameters or malformed data",
-        "details" : "Invalid format for parameter 'status': expected boolean"
+        "details" : "Invalid format for parameter "status": expected boolean"
       }
     }
   }

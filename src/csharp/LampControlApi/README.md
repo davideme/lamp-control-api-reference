@@ -86,3 +86,24 @@ curl -X PUT "http://localhost:5170/v1/lamps/{lampId}" \
 ```bash
 curl -X DELETE "http://localhost:5170/v1/lamps/{lampId}"
 ```
+
+## Dependency lockfile (packages.lock.json)
+
+This project uses a NuGet lockfile to pin resolved package versions for deterministic restores and CI.
+
+- To regenerate or create `packages.lock.json` locally:
+
+```bash
+# ensure the project opts in (already set in the project file)
+cd src/csharp/LampControlApi
+dotnet restore --use-lock-file
+```
+
+- CI enforces the lockfile with:
+
+```bash
+dotnet restore --locked-mode LampControlApi/LampControlApi.csproj
+```
+
+- If CI fails due to an out-of-date lockfile, open a dependency PR that runs `dotnet restore --use-lock-file`, commits the updated `packages.lock.json`, and includes tests and a short rationale for the change.
+
