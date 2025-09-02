@@ -6,12 +6,12 @@ This document provides a comparison of the different language implementations in
 
 | Language   | App Lines | App Lines (No Generated) | Test Lines | Test/App Ratio | Coverage (%) |
 |------------|-----------|--------------------------|------------|---------------|--------------|
-| TypeScript | 365 | 183 | 343 | 0.94 | 85.00 |
-| Python | 346 | 217 | 215 | 0.62 | 86.40 |
-| Java | 691 | 555 | 619 | 0.90 | 92.00 |
-| C# | 412 | 254 | 435 | 1.06 | 98.59 |
-| PHP | 1419 | 774 | 1158 | 0.82 | 88.89 |
-| Go | 715 | 197 | 1307 | 1.83 | 98.60 |
+| TypeScript | 436 | 190 | 409 | 0.94 | 85.48 |
+| Python | 550 | 271 | 289 | 0.53 | 86.40 |
+| Java | 1105 | 873 | 676 | 0.61 | 94.04 |
+| C# | 413 | 255 | 445 | 1.08 | 98.59 |
+| PHP | 1601 | 792 | 1285 | 0.80 | 88.89 |
+| Go | 801 | 207 | 1319 | 1.65 | 98.50 |
 | Kotlin | 583 | 462 | 795 | 1.36 | 79.19 |
 | Ruby | null | null | 0 | N/A | N/A |
 ## API Interface Comparison
