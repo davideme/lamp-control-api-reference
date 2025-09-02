@@ -1,4 +1,3 @@
-````markdown
 # ADR 006: C# / .NET package management and lockfile policy
 
 ## Status
@@ -67,5 +66,3 @@ For library projects in this mono-repo, prefer NOT committing lockfiles unless a
 
 - Add a short section to `src/csharp/README.md` or `CONTRIBUTING.md` with the exact commands to regenerate `packages.lock.json` for contributors (example commands above).
 - Consider enabling Dependabot/Renovate for NuGet and require reviewers to include test runs on dependency PRs.
-
-````
