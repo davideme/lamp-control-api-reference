@@ -16,7 +16,7 @@ fun Application.configureRouting() {
         
         // Health check endpoint
         get("/health") {
-            call.respondText("OK")
+            call.respond(mapOf("status" to "ok"))
         }
         
         // API v1 routes
