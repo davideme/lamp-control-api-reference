@@ -30,6 +30,7 @@ type LampAPI struct {
 
 ## API Endpoints
 
+- `GET /health` - Health check endpoint (returns service status)
 - `GET /lamps` - List all lamps
 - `POST /lamps` - Create a new lamp  
 - `GET /lamps/{lampId}` - Get a specific lamp
@@ -94,31 +95,41 @@ The project enforces a minimum code coverage of **80%** in CI/CD pipeline:
 
 Once the server is running, you can test the endpoints:
 
-1. **Create a lamp**:
+1. **Check service health**:
+   ```bash
+   curl -X GET http://localhost:8080/health
+   ```
+   
+   Expected response:
+   ```json
+   {"status":"ok"}
+   ```
+
+2. **Create a lamp**:
    ```bash
    curl -X POST http://localhost:8080/lamps \
      -H "Content-Type: application/json" \
      -d '{"status": true}'
    ```
 
-2. **List all lamps**:
+3. **List all lamps**:
    ```bash
    curl -X GET http://localhost:8080/lamps
    ```
 
-3. **Get a specific lamp**:
+4. **Get a specific lamp**:
    ```bash
    curl -X GET http://localhost:8080/lamps/{lampId}
    ```
 
-4. **Update a lamp**:
+5. **Update a lamp**:
    ```bash
    curl -X PUT http://localhost:8080/lamps/{lampId} \
      -H "Content-Type: application/json" \
      -d '{"status": false}'
    ```
 
-5. **Delete a lamp**:
+6. **Delete a lamp**:
    ```bash
    curl -X DELETE http://localhost:8080/lamps/{lampId}
    ```
