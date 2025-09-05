@@ -17,9 +17,13 @@ class LampRepository
         $lamp = new Lamp();
         $lampId = (string)$this->nextId++;
         $now = (new \DateTime())->format(\DateTime::ATOM);
+
+        $createData = $lampCreate->getData();
+        $createArray = is_object($createData) ? get_object_vars($createData) : (array)$createData;
+
         $lamp->setData([
             'id' => $lampId,
-            'status' => $lampCreate->status ?? false,
+            'status' => $createArray['status'] ?? false,
             'createdAt' => $now,
             'updatedAt' => $now
         ]);
@@ -48,10 +52,12 @@ class LampRepository
         $lamp = $this->lamps[$lampId];
         $lampDataObj = $lamp->getData();
         $lampData = is_object($lampDataObj) ? get_object_vars($lampDataObj) : (array)$lampDataObj;
-        if (null !== $lampUpdate->status) {
-            $lampData['status'] = $lampUpdate->status;
-        } elseif (array_key_exists('status', $lampData)) {
-            $lampData['status'] = $lampUpdate->status;
+
+        $updateData = $lampUpdate->getData();
+        $updateArray = is_object($updateData) ? get_object_vars($updateData) : (array)$updateData;
+
+        if (array_key_exists('status', $updateArray)) {
+            $lampData['status'] = $updateArray['status'];
         }
         // Update the updatedAt timestamp
         $lampData['updatedAt'] = (new \DateTime())->format(\DateTime::ATOM);

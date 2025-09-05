@@ -42,11 +42,7 @@
   },
   "autoload": {
     "psr-4": {
-      "OpenAPIServer\\": [
-        "lib/",
-        "src/"
-      ],
-      "App\\": "src/",
+      "OpenAPIServer\\": "lib/",
       "Tests\\": "tests/"
     }
   },
@@ -65,8 +61,8 @@
     "test-coverage": "phpunit --coverage-html coverage --coverage-text",
     "phpcs": "phpcs",
     "phplint": "phplint ./ --exclude=vendor",
-    "lint": "phpcs --standard=PSR12 --colors -p src tests",
-    "lint-fix": "phpcbf --standard=PSR12 src tests",
+    "lint": "phpcs --standard=PSR12 --colors -p lib tests",
+    "lint-fix": "phpcbf --standard=PSR12 lib tests",
     "format": "php-cs-fixer fix",
     "format-check": "php-cs-fixer fix --dry-run --diff --verbose",
     "analyze": "phpstan analyse --memory-limit=2G",
