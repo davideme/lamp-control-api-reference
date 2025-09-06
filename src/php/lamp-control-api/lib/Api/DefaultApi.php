@@ -46,7 +46,7 @@ class DefaultApi extends AbstractDefaultApi
         }
 
         // Check if it's an indexed array (not an associative array/object)
-        if (array_keys($data) === range(0, count($data) - 1)) {
+        if (!empty($data) && array_keys($data) === range(0, count($data) - 1)) {
             $errorData = [
                 'error' => 'INVALID_ARGUMENT',
                 'message' => 'The request contains invalid parameters or malformed data',
