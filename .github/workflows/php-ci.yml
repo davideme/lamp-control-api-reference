@@ -188,7 +188,10 @@ jobs:
       uses: schemathesis/action@v2
       with:
         schema: docs/api/openapi.yaml
-        args: '--url http://localhost:8080/v1 --max-examples 100 --checks status_code_conformance,not_a_server_error,response_schema_conformance --report junit --report-junit-path schemathesis-report.xml'
+        base-url: http://localhost:8080/v1
+        max-examples: 100
+        checks: status_code_conformance,not_a_server_error,response_schema_conformance
+        args: '--report junit --report-junit-path schemathesis-report.xml'
 
     - name: Stop API
       run: |
