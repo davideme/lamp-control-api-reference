@@ -95,7 +95,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
     
     - name: Check PHP syntax
-      run: find src tests -name "*.php" -exec php -l {} \;
+      run: find lib tests -name "*.php" -exec php -l {} \;
     
     - name: Run PHP_CodeSniffer (PSR-12 Style Check)
       run: vendor/bin/phpcs --standard=PSR12 --colors -p lib tests
