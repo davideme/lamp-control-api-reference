@@ -52,7 +52,7 @@ return [
         [], // allowedLcHeaders
         '', // allowedHeadersList
         '', // exposedHeadersList
-        true, // isCheckHost
+        false, // isCheckHost
     ],
 
     // PDO
