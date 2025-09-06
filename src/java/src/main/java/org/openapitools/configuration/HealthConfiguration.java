@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -21,7 +22,7 @@ public class HealthConfiguration {
   /** Register a servlet for the health endpoint at root level, bypassing the context path */
   @Bean
   public ServletRegistrationBean<HttpServlet> healthServletRegistration() {
-    ServletRegistrationBean<HttpServlet> registration = new ServletRegistrationBean<>();
+    final ServletRegistrationBean<HttpServlet> registration = new ServletRegistrationBean<>();
     registration.setServlet(new HealthServlet());
     registration.addUrlMappings("/health");
     registration.setName("healthServlet");
@@ -31,15 +32,24 @@ public class HealthConfiguration {
   /** Simple servlet providing health status at root level */
   public static class HealthServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
     private static final String HEALTH_RESPONSE = "{\"status\":\"ok\"}";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, final HttpServletResponse response)
         throws IOException {
       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
       response.setCharacterEncoding(StandardCharsets.UTF_8.name());
       response.setStatus(HttpServletResponse.SC_OK);
-      response.getWriter().write(HEALTH_RESPONSE);
+      writeHealthResponse(response);
+    }
+
+    @SuppressWarnings("PMD.LawOfDemeter")
+    private static void writeHealthResponse(final HttpServletResponse response) throws IOException {
+      try (PrintWriter writer = response.getWriter()) {
+        writer.write(HEALTH_RESPONSE);
+      }
     }
   }
 
