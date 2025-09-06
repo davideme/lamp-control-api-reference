@@ -1,7 +1,7 @@
 <?php
 
-// filepath: src/php/tests/E2E/LampApiE2ETest.php
-/*
+namespace OpenAPIServer\Tests\E2E;
+
 use PHPUnit\Framework\TestCase;
 
 class LampApiE2ETest extends TestCase
@@ -22,7 +22,7 @@ class LampApiE2ETest extends TestCase
         self::$baseUrl = "http://127.0.0.1:$port";
 
         // Start PHP built-in server in background
-        $docRoot = realpath(__DIR__ . '/../../../lamp-control-api/public');
+        $docRoot = realpath(__DIR__ . '/../../public');
         $cmd = sprintf(
             'php -S 127.0.0.1:%d -t %s > /dev/null 2>&1 & echo $!',
             $port,
@@ -35,7 +35,7 @@ class LampApiE2ETest extends TestCase
         $maxTries = 10;
         $ready = false;
         while ($maxTries-- > 0) {
-            if (@file_get_contents(self::$baseUrl . '/')) {
+            if (@file_get_contents(self::$baseUrl . '/health')) {
                 $ready = true;
                 break;
             }
@@ -57,7 +57,7 @@ class LampApiE2ETest extends TestCase
     public function testCreateListGetUpdateDeleteLamp()
     {
         // 1. Create lamp
-        $createResponse = $this->apiRequest('POST', '/lamps', ['status' => true]);
+        $createResponse = $this->apiRequest('POST', '/v1/lamps', ['status' => true]);
         $this->assertEquals(201, $createResponse['status']);
         $lamp = $createResponse['body'];
         $this->assertArrayHasKey('id', $lamp);
@@ -65,28 +65,29 @@ class LampApiE2ETest extends TestCase
         $this->assertTrue($lamp['status']);
 
         // 2. List lamps
-        $listResponse = $this->apiRequest('GET', '/lamps');
+        $listResponse = $this->apiRequest('GET', '/v1/lamps');
         $this->assertEquals(200, $listResponse['status']);
-        $lamps = $listResponse['body'];
-        $this->assertNotEmpty($lamps);
+        $this->assertArrayHasKey('data', $listResponse['body'], 'Response should have data key. Actual response: ' . json_encode($listResponse['body']));
+        $lamps = $listResponse['body']['data'];
+        $this->assertNotEmpty($lamps, 'Lamps data array should not be empty after creating a lamp. Response: ' . json_encode($listResponse['body']));
         $this->assertEquals($lampId, $lamps[0]['id']);
 
         // 3. Get lamp
-        $getResponse = $this->apiRequest('GET', "/lamps/{$lampId}");
+        $getResponse = $this->apiRequest('GET', "/v1/lamps/{$lampId}");
         $this->assertEquals(200, $getResponse['status']);
         $this->assertEquals($lampId, $getResponse['body']['id']);
 
         // 4. Update lamp
-        $updateResponse = $this->apiRequest('PUT', "/lamps/{$lampId}", ['status' => false]);
+        $updateResponse = $this->apiRequest('PUT', "/v1/lamps/{$lampId}", ['status' => false]);
         $this->assertEquals(200, $updateResponse['status']);
         $this->assertFalse($updateResponse['body']['status']);
 
         // 5. Delete lamp
-        $deleteResponse = $this->apiRequest('DELETE', "/lamps/{$lampId}");
+        $deleteResponse = $this->apiRequest('DELETE', "/v1/lamps/{$lampId}");
         $this->assertEquals(204, $deleteResponse['status']);
 
         // 6. Get deleted lamp (should 404)
-        $getDeletedResponse = $this->apiRequest('GET', "/lamps/{$lampId}");
+        $getDeletedResponse = $this->apiRequest('GET', "/v1/lamps/{$lampId}");
         $this->assertEquals(404, $getDeletedResponse['status']);
     }
 
@@ -115,4 +116,3 @@ class LampApiE2ETest extends TestCase
         ];
     }
 }
-*/
