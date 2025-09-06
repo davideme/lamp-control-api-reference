@@ -67,9 +67,17 @@ class LampApiE2ETest extends TestCase
         // 2. List lamps
         $listResponse = $this->apiRequest('GET', '/v1/lamps');
         $this->assertEquals(200, $listResponse['status']);
-        $this->assertArrayHasKey('data', $listResponse['body'], 'Response should have data key. Actual response: ' . json_encode($listResponse['body']));
+        $this->assertArrayHasKey(
+            'data',
+            $listResponse['body'],
+            'Response should have data key. Actual response: ' . json_encode($listResponse['body'])
+        );
         $lamps = $listResponse['body']['data'];
-        $this->assertNotEmpty($lamps, 'Lamps data array should not be empty after creating a lamp. Response: ' . json_encode($listResponse['body']));
+        $this->assertNotEmpty(
+            $lamps,
+            'Lamps data array should not be empty after creating a lamp. Response: ' .
+                json_encode($listResponse['body'])
+        );
         $this->assertEquals($lampId, $lamps[0]['id']);
 
         // 3. Get lamp
