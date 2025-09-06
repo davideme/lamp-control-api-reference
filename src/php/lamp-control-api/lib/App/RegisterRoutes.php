@@ -39,19 +39,19 @@ use Slim\Exception\HttpNotImplementedException;
  */
 class RegisterRoutes
 {
-    /** @var array[] list of all api operations */
-    private $operations = [
-      [
-        'httpMethod' => 'POST',
-        'basePathWithoutHost' => '/v1',
-        'path' => '/lamps',
-        'apiPackage' => 'OpenAPIServer\Api',
-        'classname' => 'AbstractDefaultApi',
-        'userClassname' => 'DefaultApi',
-        'operationId' => 'createLamp',
-        'responses' => [
-          '201' => [
-            'jsonSchema' => '{
+  /** @var array[] list of all api operations */
+  private $operations = [
+    [
+      'httpMethod' => 'POST',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'createLamp',
+      'responses' => [
+        '201' => [
+          'jsonSchema' => '{
   "description" : "Lamp created successfully",
   "content" : {
     "application/json" : {
@@ -61,9 +61,9 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '400' => [
-            'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
   "description" : "Invalid request data",
   "content" : {
     "application/json" : {
@@ -78,21 +78,21 @@ class RegisterRoutes
     }
   }
 }',
-          ],
         ],
-        'authMethods' => [],
       ],
-      [
-        'httpMethod' => 'GET',
-        'basePathWithoutHost' => '/v1',
-        'path' => '/lamps',
-        'apiPackage' => 'OpenAPIServer\Api',
-        'classname' => 'AbstractDefaultApi',
-        'userClassname' => 'DefaultApi',
-        'operationId' => 'listLamps',
-        'responses' => [
-          '200' => [
-            'jsonSchema' => '{
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'GET',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'listLamps',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
   "description" : "A list of lamps with pagination",
   "content" : {
     "application/json" : {
@@ -102,14 +102,14 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '304' => [
-            'jsonSchema' => '{
+        ],
+        '304' => [
+          'jsonSchema' => '{
   "description" : "Not Modified"
 }',
-          ],
-          '400' => [
-            'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
   "description" : "Invalid request parameters",
   "content" : {
     "application/json" : {
@@ -123,26 +123,26 @@ class RegisterRoutes
     }
   }
 }',
-          ],
         ],
-        'authMethods' => [],
       ],
-      [
-        'httpMethod' => 'DELETE',
-        'basePathWithoutHost' => '/v1',
-        'path' => '/lamps/{lampId}',
-        'apiPackage' => 'OpenAPIServer\Api',
-        'classname' => 'AbstractDefaultApi',
-        'userClassname' => 'DefaultApi',
-        'operationId' => 'deleteLamp',
-        'responses' => [
-          '204' => [
-            'jsonSchema' => '{
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'DELETE',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'deleteLamp',
+      'responses' => [
+        '204' => [
+          'jsonSchema' => '{
   "description" : "Lamp deleted successfully"
 }',
-          ],
-          '400' => [
-            'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
   "description" : "Invalid lamp ID format",
   "content" : {
     "application/json" : {
@@ -157,26 +157,26 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '404' => [
-            'jsonSchema' => '{
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-          ],
         ],
-        'authMethods' => [],
       ],
-      [
-        'httpMethod' => 'GET',
-        'basePathWithoutHost' => '/v1',
-        'path' => '/lamps/{lampId}',
-        'apiPackage' => 'OpenAPIServer\Api',
-        'classname' => 'AbstractDefaultApi',
-        'userClassname' => 'DefaultApi',
-        'operationId' => 'getLamp',
-        'responses' => [
-          '200' => [
-            'jsonSchema' => '{
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'GET',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'getLamp',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
   "description" : "Lamp details",
   "content" : {
     "application/json" : {
@@ -186,14 +186,14 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '304' => [
-            'jsonSchema' => '{
+        ],
+        '304' => [
+          'jsonSchema' => '{
   "description" : "Not Modified"
 }',
-          ],
-          '400' => [
-            'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
   "description" : "Invalid lamp ID format",
   "content" : {
     "application/json" : {
@@ -208,26 +208,26 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '404' => [
-            'jsonSchema' => '{
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-          ],
         ],
-        'authMethods' => [],
       ],
-      [
-        'httpMethod' => 'PUT',
-        'basePathWithoutHost' => '/v1',
-        'path' => '/lamps/{lampId}',
-        'apiPackage' => 'OpenAPIServer\Api',
-        'classname' => 'AbstractDefaultApi',
-        'userClassname' => 'DefaultApi',
-        'operationId' => 'updateLamp',
-        'responses' => [
-          '200' => [
-            'jsonSchema' => '{
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'PUT',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'updateLamp',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
   "description" : "Lamp updated successfully",
   "content" : {
     "application/json" : {
@@ -237,9 +237,9 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '400' => [
-            'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
   "description" : "Invalid request data or lamp ID format",
   "content" : {
     "application/json" : {
@@ -254,71 +254,76 @@ class RegisterRoutes
     }
   }
 }',
-          ],
-          '404' => [
-            'jsonSchema' => '{
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-          ],
         ],
-        'authMethods' => [],
       ],
-    ];
+      'authMethods' => [],
+    ],
+  ];
 
-    /**
-     * Add routes to Slim app.
-     *
-     * @param \Slim\App $app Pre-configured Slim application instance
-     *
-     * @throws HttpNotImplementedException When implementation class doesn't exists
-     */
-    public function __invoke(\Slim\App $app): void
-    {
-        $app->options('/{routes:.*}', function (ServerRequestInterface $request, ResponseInterface $response) {
-            // CORS Pre-Flight OPTIONS Request Handler
-            return $response;
-        });
+  /**
+   * Add routes to Slim app.
+   *
+   * @param \Slim\App $app Pre-configured Slim application instance
+   *
+   * @throws HttpNotImplementedException When implementation class doesn't exists
+   */
+  public function __invoke(\Slim\App $app): void
+  {
+    $app->options('/{routes:.*}', function (ServerRequestInterface $request, ResponseInterface $response) {
+      // CORS Pre-Flight OPTIONS Request Handler
+      return $response;
+    });
 
-        // create mock middleware factory
-        /** @var \Psr\Container\ContainerInterface */
-        $container = $app->getContainer();
-        /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
-        $mockMiddlewareFactory = null;
-        if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
-            // I know, anti-pattern. Don't retrieve dependency directly from container
-            $mockMiddlewareFactory = $container->get(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class);
-        }
-
-        foreach ($this->operations as $operation) {
-            $callback = function (ServerRequestInterface $request) use ($operation) {
-                $message = "How about extending {$operation['classname']} by {$operation['apiPackage']}\\{$operation['userClassname']} class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
-                throw new HttpNotImplementedException($request, $message);
-            };
-            $middlewares = [];
-
-            if (class_exists("\\{$operation['apiPackage']}\\{$operation['userClassname']}")) {
-                // Notice how we register the controller using the class name?
-                // PHP-DI will instantiate the class for us only when it's actually necessary
-                $callback = ["\\{$operation['apiPackage']}\\{$operation['userClassname']}", $operation['operationId']];
-            }
-
-            if ($mockMiddlewareFactory) {
-                $mockSchemaResponses = array_map(function ($item) {
-                    return json_decode($item['jsonSchema'], true);
-                }, $operation['responses']);
-                $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
-            }
-
-            $route = $app->map(
-                [$operation['httpMethod']],
-                "{$operation['basePathWithoutHost']}{$operation['path']}",
-                $callback
-            )->setName($operation['operationId']);
-
-
-            foreach ($middlewares as $middleware) {
-                $route->add($middleware);
-            }
-        }
+    // create mock middleware factory
+    /** @var \Psr\Container\ContainerInterface */
+    $container = $app->getContainer();
+    /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
+    $mockMiddlewareFactory = null;
+    if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
+      // I know, anti-pattern. Don't retrieve dependency directly from container
+      $mockMiddlewareFactory = $container->get(
+        \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class
+      );
     }
+
+    foreach ($this->operations as $operation) {
+      $callback = function (ServerRequestInterface $request) use ($operation) {
+        $message =
+          "How about extending {$operation['classname']} " .
+          "by {$operation['apiPackage']}\\{$operation['userClassname']} " .
+          "class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
+        throw new HttpNotImplementedException($request, $message);
+      };
+      $middlewares = [];
+
+      if (class_exists("\\{$operation['apiPackage']}\\{$operation['userClassname']}")) {
+        // Notice how we register the controller using the class name?
+        // PHP-DI will instantiate the class for us only when it's actually necessary
+        $callback = ["\\{$operation['apiPackage']}\\{$operation['userClassname']}", $operation['operationId']];
+      }
+
+      if ($mockMiddlewareFactory) {
+        $mockSchemaResponses = array_map(function ($item) {
+          return json_decode($item['jsonSchema'], true);
+        }, $operation['responses']);
+        $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
+      }
+
+      $route = $app->map(
+        [$operation['httpMethod']],
+        "{$operation['basePathWithoutHost']}{$operation['path']}",
+        $callback
+      )->setName($operation['operationId']);
+
+
+      foreach ($middlewares as $middleware) {
+        $route->add($middleware);
+      }
+    }
+  }
 }
