@@ -117,6 +117,7 @@ class DefaultApi extends AbstractDefaultApi
     ): ResponseInterface {
         $deleted = $this->repo->delete($lampId);
         if (!$deleted) {
+            // Return 404 with empty body as per OpenAPI spec for lamp not found
             return $response->withStatus(404);
         }
         return $response->withStatus(204);
