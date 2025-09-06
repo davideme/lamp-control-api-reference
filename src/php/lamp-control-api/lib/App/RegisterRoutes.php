@@ -39,7 +39,7 @@ use Slim\Exception\HttpNotImplementedException;
  */
 class RegisterRoutes
 {
-  /** @var array[] list of all api operations */
+    /** @var array[] list of all api operations */
     private $operations = [
     [
       'httpMethod' => 'POST',
@@ -265,27 +265,27 @@ class RegisterRoutes
     ],
     ];
 
-  /**
-   * Add routes to Slim app.
-   *
-   * @param \Slim\App $app Pre-configured Slim application instance
-   *
-   * @throws HttpNotImplementedException When implementation class doesn't exists
-   */
+    /**
+     * Add routes to Slim app.
+     *
+     * @param \Slim\App $app Pre-configured Slim application instance
+     *
+     * @throws HttpNotImplementedException When implementation class doesn't exists
+     */
     public function __invoke(\Slim\App $app): void
     {
         $app->options('/{routes:.*}', function (ServerRequestInterface $request, ResponseInterface $response) {
-          // CORS Pre-Flight OPTIONS Request Handler
+            // CORS Pre-Flight OPTIONS Request Handler
             return $response;
         });
 
-      // create mock middleware factory
-      /** @var \Psr\Container\ContainerInterface */
+        // create mock middleware factory
+        /** @var \Psr\Container\ContainerInterface */
         $container = $app->getContainer();
-      /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
+        /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
         $mockMiddlewareFactory = null;
         if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
-          // I know, anti-pattern. Don't retrieve dependency directly from container
+            // I know, anti-pattern. Don't retrieve dependency directly from container
             $mockMiddlewareFactory = $container->get(
                 \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class
             );
@@ -302,8 +302,8 @@ class RegisterRoutes
             $middlewares = [];
 
             if (class_exists("\\{$operation['apiPackage']}\\{$operation['userClassname']}")) {
-              // Notice how we register the controller using the class name?
-              // PHP-DI will instantiate the class for us only when it's actually necessary
+                // Notice how we register the controller using the class name?
+                // PHP-DI will instantiate the class for us only when it's actually necessary
                 $callback = ["\\{$operation['apiPackage']}\\{$operation['userClassname']}", $operation['operationId']];
             }
 
