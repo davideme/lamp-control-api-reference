@@ -16,11 +16,21 @@ describe('Lamp API Endpoints', () => {
     await app.close();
   });
 
+  describe('GET /health', () => {
+    it('should return health status', async () => {
+      const response = await request.get('/health').expect('Content-Type', /json/).expect(200);
+
+      expect(response.body).toEqual({ status: 'ok' });
+    });
+  });
+
   describe('GET /v1/lamps', () => {
     it('should return a list of lamps', async () => {
       const response = await request.get('/v1/lamps').expect('Content-Type', /json/).expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('hasMore');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 

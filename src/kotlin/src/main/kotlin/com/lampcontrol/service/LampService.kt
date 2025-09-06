@@ -6,6 +6,7 @@ import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.repository.LampRepository
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.time.Instant
 
 /**
  * In-memory repository implementation for managing lamp operations.
@@ -33,9 +34,12 @@ class InMemoryLampRepository : LampRepository {
      */
     override fun createLamp(lampCreate: LampCreate): Lamp {
         val uuid = UUID.randomUUID()
+        val now = Instant.now().toString()
         val lamp = Lamp(
             id = uuid,
-            status = lampCreate.status
+            status = lampCreate.status,
+            createdAt = now,
+            updatedAt = now
         )
         // Store using string representation of UUID for consistent lookup
         lamps[uuid.toString()] = lamp
@@ -47,7 +51,8 @@ class InMemoryLampRepository : LampRepository {
      */
     override fun updateLamp(id: String, lampUpdate: LampUpdate): Lamp? {
         val existingLamp = lamps[id] ?: return null
-        val updatedLamp = existingLamp.copy(status = lampUpdate.status)
+    val now = Instant.now().toString()
+    val updatedLamp = existingLamp.copy(status = lampUpdate.status, updatedAt = now)
         lamps[id] = updatedLamp
         return updatedLamp
     }

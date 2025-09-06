@@ -167,12 +167,35 @@ Class | Method | HTTP request | Description
 *AbstractDefaultApi* | **deleteLamp** | **DELETE** /lamps/{lampId} | Delete a lamp
 *AbstractDefaultApi* | **getLamp** | **GET** /lamps/{lampId} | Get a specific lamp
 *AbstractDefaultApi* | **updateLamp** | **PUT** /lamps/{lampId} | Update a lamp's status
+*Health Endpoint* | **health** | **GET** /health | Health check endpoint
+
+## Health Check
+
+The API includes a health check endpoint at `/health` that returns a simple JSON response indicating the service status:
+
+```bash
+curl http://localhost:8080/health
+```
+
+Response:
+```json
+{
+  "status": "ok"
+}
+```
+
+This endpoint is useful for:
+- Monitoring systems to verify service availability
+- Container orchestration health checks (Kubernetes liveness/readiness probes)
+- CI/CD pipeline health verification
 
 
 ## Models
 
+* OpenAPIServer\Model\Error
 * OpenAPIServer\Model\Lamp
 * OpenAPIServer\Model\LampCreate
 * OpenAPIServer\Model\LampUpdate
+* OpenAPIServer\Model\ListLamps200Response
 
 

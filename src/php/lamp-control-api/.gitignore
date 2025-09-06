@@ -3,12 +3,6 @@
 composer.phar
 /vendor/
 
-.idea/
-.vscode/
-/coverage/*
-!/coverage/clover.xml
-!/coverage.xml
-
 # Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
 # You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
 # composer.lock
@@ -32,8 +26,4 @@ composer.phar
 # Logs folder
 /logs/**/*.*
 !/logs/.htaccess
-
-/vendor/
-/logs/*
-!/logs/README.md
-.phpunit.result.cache
+server.log

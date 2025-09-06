@@ -182,12 +182,12 @@ According to PRD.md, each implementation should support:
 ### Lines of Code Analysis (from COMPARISON.md)
 | Language   | App Lines | Test Lines | Ratio | Quality |
 |------------|-----------|------------|-------|---------|
-| C#         | 334       | 424        | 1.27  | Excellent |
-| Go         | 715       | 1307       | 1.83  | Excellent |
-| Kotlin     | 528       | 704        | 1.33  | Good |
+| C#         | 412       | 435        | 1.06  | Excellent |
+| Go         | 197       | 1307       | 6.63  | Excellent |
+| Kotlin     | 583       | 795        | 1.36  | Good |
 | TypeScript | 365       | 343        | 0.94  | Good |
 | Java       | 691       | 619        | 0.90  | Good |
-| PHP        | 1426      | 1158       | 0.81  | Fair |
+| PHP        | 1419      | 1158       | 0.82  | Fair |
 | Python     | 346       | 215        | 0.62  | Fair |
 | Ruby       | null      | 0          | N/A   | None |
 

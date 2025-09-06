@@ -21,6 +21,12 @@ poetry run uvicorn openapi_server.main:app --host 0.0.0.0 --port 8080
 
 and open your browser at `http://localhost:8080/docs/` to see the docs.
 
+## Health Check
+
+The API includes a health check endpoint for monitoring:
+
+- `GET /health` - Returns `{"status": "ok"}` with HTTP 200 when the service is healthy
+
 ## Running with Docker
 
 To run the server on a Docker container, please execute the following from the root directory:

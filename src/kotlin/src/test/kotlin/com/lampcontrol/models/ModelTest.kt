@@ -24,7 +24,8 @@ class ModelTest {
     @Test
     fun `test Lamp model serialization`() {
         val uuid = UUID.randomUUID()
-        val lamp = Lamp(id = uuid, status = true)
+    val now = java.time.Instant.now().toString()
+    val lamp = Lamp(id = uuid, status = true, createdAt = now, updatedAt = now)
         
         val serialized = json.encodeToString(lamp)
         val deserialized = json.decodeFromString<Lamp>(serialized)
@@ -56,7 +57,8 @@ class ModelTest {
     @Test
     fun `test Lamp model toString`() {
         val uuid = UUID.randomUUID()
-        val lamp = Lamp(id = uuid, status = true)
+    val now = java.time.Instant.now().toString()
+    val lamp = Lamp(id = uuid, status = true, createdAt = now, updatedAt = now)
         
         val string = lamp.toString()
         assertNotNull(string)
@@ -65,9 +67,10 @@ class ModelTest {
     @Test
     fun `test Lamp model equals and hashCode`() {
         val uuid = UUID.randomUUID()
-        val lamp1 = Lamp(id = uuid, status = true)
-        val lamp2 = Lamp(id = uuid, status = true)
-        val lamp3 = Lamp(id = UUID.randomUUID(), status = false)
+    val now = java.time.Instant.now().toString()
+    val lamp1 = Lamp(id = uuid, status = true, createdAt = now, updatedAt = now)
+    val lamp2 = Lamp(id = uuid, status = true, createdAt = now, updatedAt = now)
+    val lamp3 = Lamp(id = UUID.randomUUID(), status = false, createdAt = now, updatedAt = now)
         
         assertEquals(lamp1, lamp2)
         assertEquals(lamp1.hashCode(), lamp2.hashCode())

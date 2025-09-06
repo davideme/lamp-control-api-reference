@@ -34,19 +34,19 @@ use OpenAPIServer\BaseModel;
  */
 class Lamp extends BaseModel
 {
-  /**
-   * @var string Models namespace.
-   * Can be required for data deserialization when model contains referenced schemas.
-   */
-  protected const MODELS_NAMESPACE = '\OpenAPIServer\Model';
+    /**
+     * @var string Models namespace.
+     * Can be required for data deserialization when model contains referenced schemas.
+     */
+    protected const MODELS_NAMESPACE = '\OpenAPIServer\Model';
 
-  /**
-   * @var string Constant with OAS schema of current class.
-   * Should be overwritten by inherited class.
-   */
-  protected const MODEL_SCHEMA = <<<'SCHEMA'
+    /**
+     * @var string Constant with OAS schema of current class.
+     * Should be overwritten by inherited class.
+     */
+    protected const MODEL_SCHEMA = <<<'SCHEMA'
 {
-  "required" : [ "id", "status" ],
+  "required" : [ "createdAt", "id", "status", "updatedAt" ],
   "type" : "object",
   "properties" : {
     "id" : {
@@ -57,6 +57,16 @@ class Lamp extends BaseModel
     "status" : {
       "type" : "boolean",
       "description" : "Whether the lamp is turned on (true) or off (false)"
+    },
+    "createdAt" : {
+      "type" : "string",
+      "description" : "Timestamp when the lamp was created",
+      "format" : "date-time"
+    },
+    "updatedAt" : {
+      "type" : "string",
+      "description" : "Timestamp when the lamp was last updated",
+      "format" : "date-time"
     }
   }
 }

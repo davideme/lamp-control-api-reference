@@ -15,8 +15,11 @@ export class InMemoryLampRepository implements LampRepository {
   }
 
   async create(lamp: LampCreate): Promise<Lamp> {
+    const now = new Date().toISOString();
     const newLamp: Lamp = {
       id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
       ...lamp,
     };
     this.lamps.set(newLamp.id, newLamp);
@@ -28,7 +31,11 @@ export class InMemoryLampRepository implements LampRepository {
     if (!existingLamp) {
       throw new LampNotFoundError(id);
     }
-    const updatedLamp = { ...existingLamp, ...lamp };
+    const updatedLamp = {
+      ...existingLamp,
+      ...lamp,
+      updatedAt: new Date().toISOString(),
+    };
     this.lamps.set(id, updatedLamp);
     return updatedLamp;
   }

@@ -5,9 +5,11 @@
  */
 package org.openapitools.api;
 
+import org.openapitools.model.Error;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
+import org.openapitools.model.ListLamps200Response;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,24 +50,42 @@ public interface LampsApi {
     /**
      * POST /lamps : Create a new lamp
      *
-     * @param lampCreate (required)
+     * @param lampCreate  (required)
      * @return Lamp created successfully (status code 201)
+     *         or Invalid request data (status code 400)
      */
-    @Operation(operationId = "createLamp", summary = "Create a new lamp", responses = {
+    @Operation(
+        operationId = "createLamp",
+        summary = "Create a new lamp",
+        responses = {
             @ApiResponse(responseCode = "201", description = "Lamp created successfully", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
             })
-    })
-    @RequestMapping(method = RequestMethod.POST, value = "/lamps", produces = { "application/json" }, consumes = {
-            "application/json" })
-
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/lamps",
+        produces = { "application/json" },
+        consumes = { "application/json" }
+    )
+    
     default CompletableFuture<ResponseEntity<Lamp>> createLamp(
-            @Parameter(name = "LampCreate", description = "", required = true) @Valid @RequestBody LampCreate lampCreate) {
-        return CompletableFuture.supplyAsync(() -> {
+        @Parameter(name = "LampCreate", description = "", required = true) @Valid @RequestBody LampCreate lampCreate
+    ) {
+        return CompletableFuture.supplyAsync(()-> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                        String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
+                        String exampleString = "{ \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\", \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true, \"updatedAt\" : \"2000-01-23T04:56:07.000+00:00\" }";
+                        ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                        break;
+                    }
+                    if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                        String exampleString = "{ \"error\" : \"INVALID_ARGUMENT\" }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
                         break;
                     }
@@ -75,48 +95,94 @@ public interface LampsApi {
         }, Runnable::run);
 
     }
+
 
     /**
      * DELETE /lamps/{lampId} : Delete a lamp
      *
-     * @param lampId (required)
+     * @param lampId  (required)
      * @return Lamp deleted successfully (status code 204)
+     *         or Invalid lamp ID format (status code 400)
      *         or Lamp not found (status code 404)
      */
-    @Operation(operationId = "deleteLamp", summary = "Delete a lamp", responses = {
+    @Operation(
+        operationId = "deleteLamp",
+        summary = "Delete a lamp",
+        responses = {
             @ApiResponse(responseCode = "204", description = "Lamp deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid lamp ID format", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
+            }),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-    })
-    @RequestMapping(method = RequestMethod.DELETE, value = "/lamps/{lampId}")
-
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.DELETE,
+        value = "/lamps/{lampId}",
+        produces = { "application/json" }
+    )
+    
     default CompletableFuture<ResponseEntity<Void>> deleteLamp(
-            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId) {
-        return CompletableFuture.completedFuture(new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED));
+        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId
+    ) {
+        return CompletableFuture.supplyAsync(()-> {
+            getRequest().ifPresent(request -> {
+                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                    if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                        String exampleString = "{ \"error\" : \"INVALID_ARGUMENT\" }";
+                        ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                        break;
+                    }
+                }
+            });
+            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        }, Runnable::run);
 
     }
+
 
     /**
      * GET /lamps/{lampId} : Get a specific lamp
      *
-     * @param lampId (required)
+     * @param lampId  (required)
      * @return Lamp details (status code 200)
+     *         or Not Modified (status code 304)
+     *         or Invalid lamp ID format (status code 400)
      *         or Lamp not found (status code 404)
      */
-    @Operation(operationId = "getLamp", summary = "Get a specific lamp", responses = {
+    @Operation(
+        operationId = "getLamp",
+        summary = "Get a specific lamp",
+        responses = {
             @ApiResponse(responseCode = "200", description = "Lamp details", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+            }),
+            @ApiResponse(responseCode = "304", description = "Not Modified"),
+            @ApiResponse(responseCode = "400", description = "Invalid lamp ID format", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
             }),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-    })
-    @RequestMapping(method = RequestMethod.GET, value = "/lamps/{lampId}", produces = { "application/json" })
-
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/lamps/{lampId}",
+        produces = { "application/json" }
+    )
+    
     default CompletableFuture<ResponseEntity<Lamp>> getLamp(
-            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId) {
-        return CompletableFuture.supplyAsync(() -> {
+        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId
+    ) {
+        return CompletableFuture.supplyAsync(()-> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                        String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
+                        String exampleString = "{ \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\", \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true, \"updatedAt\" : \"2000-01-23T04:56:07.000+00:00\" }";
+                        ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                        break;
+                    }
+                    if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                        String exampleString = "{ \"error\" : \"INVALID_ARGUMENT\" }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
                         break;
                     }
@@ -126,26 +192,50 @@ public interface LampsApi {
         }, Runnable::run);
 
     }
+
 
     /**
      * GET /lamps : List all lamps
      *
-     * @return A list of lamps (status code 200)
+     * @param cursor  (optional)
+     * @param pageSize  (optional, default to 25)
+     * @return A list of lamps with pagination (status code 200)
+     *         or Not Modified (status code 304)
+     *         or Invalid request parameters (status code 400)
      */
-    @Operation(operationId = "listLamps", summary = "List all lamps", responses = {
-            @ApiResponse(responseCode = "200", description = "A list of lamps", content = {
-                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Lamp.class)))
+    @Operation(
+        operationId = "listLamps",
+        summary = "List all lamps",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "A list of lamps with pagination", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ListLamps200Response.class))
+            }),
+            @ApiResponse(responseCode = "304", description = "Not Modified"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
             })
-    })
-    @RequestMapping(method = RequestMethod.GET, value = "/lamps", produces = { "application/json" })
-    default CompletableFuture<ResponseEntity<List<Lamp>>> listLamps(
-
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/lamps",
+        produces = { "application/json" }
+    )
+    
+    default CompletableFuture<ResponseEntity<ListLamps200Response>> listLamps(
+        @Parameter(name = "cursor", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "cursor", required = false) Optional<String> cursor,
+        @Parameter(name = "pageSize", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "25") Optional<@Min(1) @Max(100) Integer> pageSize
     ) {
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.supplyAsync(()-> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                        String exampleString = "[ { \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }, { \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true } ]";
+                        String exampleString = "{ \"nextCursor\" : \"nextCursor\", \"data\" : [ { \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\", \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true, \"updatedAt\" : \"2000-01-23T04:56:07.000+00:00\" }, { \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\", \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true, \"updatedAt\" : \"2000-01-23T04:56:07.000+00:00\" } ], \"hasMore\" : true }";
+                        ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                        break;
+                    }
+                    if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                        String exampleString = "{ \"error\" : \"INVALID_ARGUMENT\" }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
                         break;
                     }
@@ -156,31 +246,50 @@ public interface LampsApi {
 
     }
 
+
     /**
      * PUT /lamps/{lampId} : Update a lamp&#39;s status
      *
-     * @param lampId     (required)
-     * @param lampUpdate (required)
+     * @param lampId  (required)
+     * @param lampUpdate  (required)
      * @return Lamp updated successfully (status code 200)
+     *         or Invalid request data or lamp ID format (status code 400)
      *         or Lamp not found (status code 404)
      */
-    @Operation(operationId = "updateLamp", summary = "Update a lamp's status", responses = {
+    @Operation(
+        operationId = "updateLamp",
+        summary = "Update a lamp's status",
+        responses = {
             @ApiResponse(responseCode = "200", description = "Lamp updated successfully", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Lamp.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or lamp ID format", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
             }),
             @ApiResponse(responseCode = "404", description = "Lamp not found")
-    })
-    @RequestMapping(method = RequestMethod.PUT, value = "/lamps/{lampId}", produces = {
-            "application/json" }, consumes = { "application/json" })
-
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.PUT,
+        value = "/lamps/{lampId}",
+        produces = { "application/json" },
+        consumes = { "application/json" }
+    )
+    
     default CompletableFuture<ResponseEntity<Lamp>> updateLamp(
-            @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId,
-            @Parameter(name = "LampUpdate", description = "", required = true) @Valid @RequestBody LampUpdate lampUpdate) {
-        return CompletableFuture.supplyAsync(() -> {
+        @Parameter(name = "lampId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("lampId") String lampId,
+        @Parameter(name = "LampUpdate", description = "", required = true) @Valid @RequestBody LampUpdate lampUpdate
+    ) {
+        return CompletableFuture.supplyAsync(()-> {
             getRequest().ifPresent(request -> {
-                for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                     if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                        String exampleString = "{ \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true }";
+                        String exampleString = "{ \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\", \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"status\" : true, \"updatedAt\" : \"2000-01-23T04:56:07.000+00:00\" }";
+                        ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                        break;
+                    }
+                    if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                        String exampleString = "{ \"error\" : \"INVALID_ARGUMENT\" }";
                         ApiUtil.setExampleResponse(request, "application/json", exampleString);
                         break;
                     }

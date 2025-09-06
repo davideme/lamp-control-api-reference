@@ -8,7 +8,7 @@
     "npm": ">=10.x"
   },
   "scripts": {
-    "generate-types": "openapi-typescript ../../docs/api/openapi.yaml -o ./src/types.ts",
+    "generate-types": "openapi-typescript ../../docs/api/openapi.yaml -o ./src/infrastructure/types/api.ts",
     "build": "tsc",
     "clean": "rm -rf dist",
     "dev": "tsx src/index.ts",

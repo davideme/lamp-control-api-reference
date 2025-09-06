@@ -12,9 +12,11 @@ lib/App/RegisterMiddlewares.php
 lib/App/RegisterRoutes.php
 lib/App/ResponseEmitter.php
 lib/BaseModel.php
+lib/Model/Error.php
 lib/Model/Lamp.php
 lib/Model/LampCreate.php
 lib/Model/LampUpdate.php
+lib/Model/ListLamps200Response.php
 logs/.htaccess
 phpcs.xml.dist
 phpunit.xml.dist
@@ -22,6 +24,8 @@ public/.htaccess
 public/index.php
 tests/Api/DefaultApiTest.php
 tests/BaseModelTest.php
+tests/Model/ErrorTest.php
 tests/Model/LampCreateTest.php
 tests/Model/LampTest.php
 tests/Model/LampUpdateTest.php
+tests/Model/ListLamps200ResponseTest.php

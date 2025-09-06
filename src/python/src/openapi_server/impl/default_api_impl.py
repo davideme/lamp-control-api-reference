@@ -1,5 +1,6 @@
 """Default API implementation for the Lamp Control API."""
 
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
@@ -7,6 +8,7 @@ from src.openapi_server.dependencies import get_lamp_repository
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
+from src.openapi_server.models.list_lamps200_response import ListLamps200Response
 from src.openapi_server.repositories.lamp_repository import LampNotFoundError
 
 
@@ -25,9 +27,18 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         Returns:
             The created lamp.
+
+        Raises:
+            HTTPException: If the lamp creation data is invalid.
         """
+        if lamp_create is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid request data")
+
         lamp_id = str(uuid4())
-        lamp = Lamp(id=lamp_id, status=lamp_create.status)
+        now = datetime.now(UTC)
+        lamp = Lamp(id=lamp_id, status=lamp_create.status, created_at=now, updated_at=now)
         return self._lamp_repository.create(lamp)
 
     async def delete_lamp(self, lamp_id: str) -> None:
@@ -65,13 +76,23 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             raise HTTPException(status_code=404, detail="Lamp not found")
         return lamp
 
-    async def list_lamps(self) -> list[Lamp]:
-        """List all lamps.
+    async def list_lamps(self, cursor: str | None, page_size: int | None) -> ListLamps200Response:
+        """List lamps with pagination.
+
+        Args:
+            cursor: Cursor for pagination (currently ignored for simplicity).
+            page_size: Maximum number of items to return (currently ignored for simplicity).
 
         Returns:
-            A list of all lamps.
+            A paginated response containing lamps.
         """
-        return self._lamp_repository.list()
+        # For simplicity, we'll return all lamps and ignore pagination for now
+        all_lamps = self._lamp_repository.list()
+        return ListLamps200Response(
+            data=all_lamps,
+            next_cursor=None,  # No next page in this simple implementation
+            has_more=False,  # No more items available
+        )
 
     async def update_lamp(self, lamp_id: str, lamp_update: LampUpdate) -> Lamp:
         """Update a lamp's status.
@@ -84,10 +105,26 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             The updated lamp.
 
         Raises:
-            HTTPException: If the lamp is not found.
+            HTTPException: If the lamp is not found or update data is invalid.
         """
+        if lamp_update is None:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid request data")
+
         try:
-            updated_lamp = Lamp(id=lamp_id, status=lamp_update.status)
+            # Get existing lamp to preserve created_at timestamp
+            existing_lamp = self._lamp_repository.get(lamp_id)
+            if existing_lamp is None:
+                raise LampNotFoundError(lamp_id)
+
+            # Create updated lamp with new updated_at timestamp
+            updated_lamp = Lamp(
+                id=lamp_id,
+                status=lamp_update.status,
+                created_at=existing_lamp.created_at,
+                updated_at=datetime.now(UTC),
+            )
             return self._lamp_repository.update(updated_lamp)
         except LampNotFoundError as err:
             from fastapi import HTTPException

@@ -12,8 +12,14 @@ namespace LampControlApi.E2E
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // Set content root to the project directory
-            var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../LampControlApi"));
+            // Resolve the project directory from the runtime base path (bin/Debug/netX)
+            var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
+
+            // Ensure the process current directory is the project directory so
+            // any solution-relative lookup by the test host will resolve correctly.
+            Directory.SetCurrentDirectory(projectDir);
+
+            // Set the content root explicitly to the project directory.
             builder.UseContentRoot(projectDir);
         }
     }

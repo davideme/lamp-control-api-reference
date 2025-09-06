@@ -6,27 +6,21 @@ import { LampNotFoundError } from '../../domain/errors/DomainError';
 type Lamp = components['schemas']['Lamp'];
 
 type ListLampsRequest = FastifyRequest<{
-  Querystring: { limit?: string };
+  Querystring: { cursor?: string | null; pageSize?: number };
 }>;
 
-type ListLampsReply = FastifyReply<{
-  Reply: Lamp[];
-}>;
+type ListLampsResponse = {
+  data: Lamp[];
+  nextCursor?: string | null;
+  hasMore: boolean;
+};
 
 type GetLampRequest = FastifyRequest<{
   Params: operations['getLamp']['parameters']['path'];
 }>;
 
-type GetLampReply = FastifyReply<{
-  Reply: Lamp;
-}>;
-
 type CreateLampRequest = FastifyRequest<{
   Body: operations['createLamp']['requestBody']['content']['application/json'];
-}>;
-
-type CreateLampReply = FastifyReply<{
-  Reply: Lamp;
 }>;
 
 type UpdateLampRequest = FastifyRequest<{
@@ -34,29 +28,30 @@ type UpdateLampRequest = FastifyRequest<{
   Body: operations['updateLamp']['requestBody']['content']['application/json'];
 }>;
 
-type UpdateLampReply = FastifyReply<{
-  Reply: Lamp;
-}>;
-
 type DeleteLampRequest = FastifyRequest<{
   Params: operations['deleteLamp']['parameters']['path'];
-}>;
-
-type DeleteLampReply = FastifyReply<{
-  Reply: void;
 }>;
 
 // service.ts
 export class Service {
   constructor(private readonly repository: LampRepository) {}
 
-  async listLamps(request: ListLampsRequest, _reply: ListLampsReply): Promise<Lamp[]> {
-    const { limit } = request.query;
-    const limitNumber = limit ? parseInt(limit) : undefined;
-    return await this.repository.findAll(limitNumber);
+  async listLamps(request: ListLampsRequest, reply: FastifyReply): Promise<void> {
+    const { pageSize = 25 } = request.query;
+    const lamps = await this.repository.findAll(pageSize);
+
+    // Simple implementation without actual cursor-based pagination
+    // In a real implementation, you'd use the cursor to fetch from a specific position
+    const response: ListLampsResponse = {
+      data: lamps,
+      hasMore: false, // Simple implementation assumes no more pages
+      nextCursor: null,
+    };
+
+    return reply.code(200).send(response);
   }
 
-  async getLamp(request: GetLampRequest, reply: GetLampReply): Promise<Lamp> {
+  async getLamp(request: GetLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
     const lamp = await this.repository.findById(lampId);
 
@@ -64,21 +59,21 @@ export class Service {
       return reply.code(404).send();
     }
 
-    return lamp;
+    return reply.code(200).send(lamp);
   }
 
-  async createLamp(request: CreateLampRequest, reply: CreateLampReply): Promise<Lamp> {
+  async createLamp(request: CreateLampRequest, reply: FastifyReply): Promise<void> {
     const body = request.body;
     const newLamp = await this.repository.create({ status: body.status });
-    reply.code(201).send(newLamp);
-    return newLamp;
+    return reply.code(201).send(newLamp);
   }
 
-  async updateLamp(request: UpdateLampRequest, reply: UpdateLampReply): Promise<Lamp> {
+  async updateLamp(request: UpdateLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
     const body = request.body;
     try {
-      return await this.repository.update(lampId, { status: body.status });
+      const updatedLamp = await this.repository.update(lampId, { status: body.status });
+      return reply.code(200).send(updatedLamp);
     } catch (error) {
       if (error instanceof LampNotFoundError) {
         return reply.code(404).send();
@@ -87,7 +82,7 @@ export class Service {
     }
   }
 
-  async deleteLamp(request: DeleteLampRequest, reply: DeleteLampReply): Promise<void> {
+  async deleteLamp(request: DeleteLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
     try {
       await this.repository.delete(lampId);

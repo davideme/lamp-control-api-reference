@@ -10,7 +10,13 @@ public class LampMapper {
   public Lamp toModel(final LampEntity entity) {
     Lamp result = null;
     if (entity != null) {
-      result = new Lamp(entity.getId(), entity.getStatus());
+      result = new Lamp();
+      // Set fields using setters because generated model Lamp does not have a (UUID,
+      // Boolean) constructor
+      result.setId(entity.getId());
+      result.setStatus(entity.getStatus());
+      result.setCreatedAt(entity.getCreatedAt());
+      result.setUpdatedAt(entity.getUpdatedAt());
     }
     return result;
   }
@@ -19,6 +25,13 @@ public class LampMapper {
     LampEntity result = null;
     if (lamp != null) {
       result = new LampEntity(lamp.getId(), lamp.getStatus());
+      // If the lamp has timestamps, use them; otherwise constructor sets current time
+      if (lamp.getCreatedAt() != null) {
+        result.setCreatedAt(lamp.getCreatedAt());
+      }
+      if (lamp.getUpdatedAt() != null) {
+        result.setUpdatedAt(lamp.getUpdatedAt());
+      }
     }
     return result;
   }

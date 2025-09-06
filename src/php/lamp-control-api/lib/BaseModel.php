@@ -43,7 +43,7 @@ class BaseModel implements OpenApiModelInterface
      * Should be overwritten by inherited class.
      */
     protected const MODEL_SCHEMA =
-    <<<'SCHEMA'
+        <<<'SCHEMA'
     {
         "type" : "object",
         "properties": {}
@@ -114,10 +114,13 @@ SCHEMA;
      *
      * @param mixed $data Data with values for new instance.
      *
+     * @phpstan-return static
+     * @return static
      * @return OpenApiModelInterface
      */
     public static function createFromData($data): OpenApiModelInterface
     {
+        /** @phpstan-ignore new.static */
         $instance = new static();
         $instance->setData($data);
         return $instance;
@@ -156,7 +159,7 @@ SCHEMA;
                 throw new InvalidArgumentException(
                     sprintf('Invalid data for %s model because it accepts straight indexed arrays only', static::class)
                 );
-                break;
+
             case IMocker::DATA_TYPE_OBJECT:
                 foreach ($data as $key => $value) {
                     // this action handles __set method
@@ -230,7 +233,11 @@ SCHEMA;
                 $definedProps = (array_key_exists('properties', $schema)) ? (array) $schema['properties'] : null;
                 if (is_array($definedProps) && !in_array($param, array_keys($definedProps))) {
                     throw new InvalidArgumentException(
-                        sprintf('Cannot set %s property of %s model because it doesn\'t exist in related OAS schema', $param, static::class)
+                        sprintf(
+                            'Cannot set %s property of %s model because it doesn\'t exist in related OAS schema',
+                            $param,
+                            static::class
+                        )
                     );
                 }
                 $this->dataContainer[$param] = $value;
@@ -243,7 +250,12 @@ SCHEMA;
             default:
                 // scalar type and array cannot use property assignation
                 throw new InvalidArgumentException(
-                    sprintf('Cannot set %s property of %s model because it\'s %s type. Use setData method instead', $param, static::class, $modelType)
+                    sprintf(
+                        'Cannot set %s property of %s model because it\'s %s type. Use setData method instead',
+                        $param,
+                        static::class,
+                        $modelType
+                    )
                 );
         }
     }
@@ -266,7 +278,11 @@ SCHEMA;
         if (!in_array($modelType, [null, IMocker::DATA_TYPE_OBJECT])) {
             // scalar type
             throw new InvalidArgumentException(
-                sprintf('Cannot get %s property of %s model because getter is for object OAS type only', $param, static::class)
+                sprintf(
+                    'Cannot get %s property of %s model because getter is for object OAS type only',
+                    $param,
+                    static::class
+                )
             );
         }
 
@@ -281,7 +297,11 @@ SCHEMA;
         }
 
         throw new InvalidArgumentException(
-            sprintf('Cannot get %s property of %s model because it doesn\'t exist in related OAS schema', $param, static::class)
+            sprintf(
+                'Cannot get %s property of %s model because it doesn\'t exist in related OAS schema',
+                $param,
+                static::class
+            )
         );
     }
 
@@ -289,7 +309,8 @@ SCHEMA;
      * Serializes the object to a value that can be serialized natively by json_encode().
      * Ref @link https://www.php.net/manual/en/jsonserializable.jsonserialize.php
      *
-     * @return mixed Returns data which can be serialized by json_encode(), which is a value of any type other than a resource.
+     * @return mixed Returns data which can be serialized by json_encode().
+     *               It should be any type other than a resource.
      */
     #[\ReturnTypeWillChange]
     public function jsonSerialize()
@@ -301,7 +322,8 @@ SCHEMA;
      * Checks if type is valid OAS data type.
      *
      * @param string|null $type           Model type.
-     * @param bool        $throwException Throws InvalidArgumentException when set to true and processed type is invalid.
+     * @param bool        $throwException Throws InvalidArgumentException when set to true and
+     * processed type is invalid.
      *
      * @throws \InvalidArgumentException When $throwException set to TRUE.
      *

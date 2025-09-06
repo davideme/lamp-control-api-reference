@@ -4,16 +4,16 @@ This document provides a comparison of the different language implementations in
 
 ## Code Metrics
 
-| Language   | App Lines | Test Lines | Test/App Ratio | Coverage (%) |
-|------------|-----------|------------|---------------|--------------|
-| TypeScript | 365 | 343 | 0.94 | 85.00 |
-| Python | 346 | 215 | 0.62 | 86.40 |
-| Java | 691 | 619 | 0.90 | 92.00 |
-| C# | 334 | 424 | 1.27 | 98.59 |
-| PHP | 1426 | 1158 | 0.81 | 88.89 |
-| Go | 715 | 1307 | 1.83 | 98.60 |
-| Kotlin | 528 | 704 | 1.33 | 78.76 |
-| Ruby | null | 0 | N/A | N/A |
+| Language   | App Lines | App Lines (No Generated) | Test Lines | Test/App Ratio | Coverage (%) |
+|------------|-----------|--------------------------|------------|---------------|--------------|
+| TypeScript | 436 | 190 | 409 | 0.94 | 85.48 |
+| Python | 550 | 271 | 289 | 0.53 | 86.40 |
+| Java | 1105 | 873 | 676 | 0.61 | 94.04 |
+| C# | 413 | 255 | 449 | 1.09 | 98.59 |
+| PHP | 1090 | 235 | 1015 | 0.93 | N/A |
+| Go | 801 | 207 | 1319 | 1.65 | 98.50 |
+| Kotlin | 583 | 462 | 795 | 1.36 | 79.19 |
+| Ruby | null | null | 0 | N/A | N/A |
 ## API Interface Comparison
 
 ### REST API

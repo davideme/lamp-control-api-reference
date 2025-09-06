@@ -23,6 +23,7 @@ declare(strict_types=1);
  * https://github.com/openapitools/openapi-generator
  * Do not edit the class manually.
  */
+
 namespace OpenAPIServer\App;
 
 use Psr\Http\Message\ResponseInterface;
@@ -40,17 +41,17 @@ class RegisterRoutes
 {
     /** @var array[] list of all api operations */
     private $operations = [
-        [
-            'httpMethod' => 'POST',
-            'basePathWithoutHost' => '/v1',
-            'path' => '/lamps',
-            'apiPackage' => 'OpenAPIServer\Api',
-            'classname' => 'AbstractDefaultApi',
-            'userClassname' => 'DefaultApi',
-            'operationId' => 'createLamp',
-            'responses' => [
-                '201' => [
-                    'jsonSchema' => '{
+    [
+      'httpMethod' => 'POST',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'createLamp',
+      'responses' => [
+        '201' => [
+          'jsonSchema' => '{
   "description" : "Lamp created successfully",
   "content" : {
     "application/json" : {
@@ -60,73 +61,122 @@ class RegisterRoutes
     }
   }
 }',
-                ],
-            ],
-            'authMethods' => [
-            ],
         ],
-        [
-            'httpMethod' => 'GET',
-            'basePathWithoutHost' => '/v1',
-            'path' => '/lamps',
-            'apiPackage' => 'OpenAPIServer\Api',
-            'classname' => 'AbstractDefaultApi',
-            'userClassname' => 'DefaultApi',
-            'operationId' => 'listLamps',
-            'responses' => [
-                '200' => [
-                    'jsonSchema' => '{
-  "description" : "A list of lamps",
+        '400' => [
+          'jsonSchema' => '{
+  "description" : "Invalid request data",
   "content" : {
     "application/json" : {
       "schema" : {
-        "type" : "array",
-        "items" : {
-          "$ref" : "#/components/schemas/Lamp"
-        }
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter \"status\": expected boolean"
       }
     }
   }
 }',
-                ],
-            ],
-            'authMethods' => [
-            ],
         ],
-        [
-            'httpMethod' => 'DELETE',
-            'basePathWithoutHost' => '/v1',
-            'path' => '/lamps/{lampId}',
-            'apiPackage' => 'OpenAPIServer\Api',
-            'classname' => 'AbstractDefaultApi',
-            'userClassname' => 'DefaultApi',
-            'operationId' => 'deleteLamp',
-            'responses' => [
-                '204' => [
-                    'jsonSchema' => '{
+      ],
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'GET',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'listLamps',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
+  "description" : "A list of lamps with pagination",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/listLamps_200_response"
+      }
+    }
+  }
+}',
+        ],
+        '304' => [
+          'jsonSchema' => '{
+  "description" : "Not Modified"
+}',
+        ],
+        '400' => [
+          'jsonSchema' => '{
+  "description" : "Invalid request parameters",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "Invalid query parameter \"pageSize\""
+      }
+    }
+  }
+}',
+        ],
+      ],
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'DELETE',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'deleteLamp',
+      'responses' => [
+        '204' => [
+          'jsonSchema' => '{
   "description" : "Lamp deleted successfully"
 }',
-                ],
-                '404' => [
-                    'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
+  "description" : "Invalid lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter \"lampId\""
+      }
+    }
+  }
+}',
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-                ],
-            ],
-            'authMethods' => [
-            ],
         ],
-        [
-            'httpMethod' => 'GET',
-            'basePathWithoutHost' => '/v1',
-            'path' => '/lamps/{lampId}',
-            'apiPackage' => 'OpenAPIServer\Api',
-            'classname' => 'AbstractDefaultApi',
-            'userClassname' => 'DefaultApi',
-            'operationId' => 'getLamp',
-            'responses' => [
-                '200' => [
-                    'jsonSchema' => '{
+      ],
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'GET',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'getLamp',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
   "description" : "Lamp details",
   "content" : {
     "application/json" : {
@@ -136,27 +186,48 @@ class RegisterRoutes
     }
   }
 }',
-                ],
-                '404' => [
-                    'jsonSchema' => '{
+        ],
+        '304' => [
+          'jsonSchema' => '{
+  "description" : "Not Modified"
+}',
+        ],
+        '400' => [
+          'jsonSchema' => '{
+  "description" : "Invalid lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter \"lampId\""
+      }
+    }
+  }
+}',
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-                ],
-            ],
-            'authMethods' => [
-            ],
         ],
-        [
-            'httpMethod' => 'PUT',
-            'basePathWithoutHost' => '/v1',
-            'path' => '/lamps/{lampId}',
-            'apiPackage' => 'OpenAPIServer\Api',
-            'classname' => 'AbstractDefaultApi',
-            'userClassname' => 'DefaultApi',
-            'operationId' => 'updateLamp',
-            'responses' => [
-                '200' => [
-                    'jsonSchema' => '{
+      ],
+      'authMethods' => [],
+    ],
+    [
+      'httpMethod' => 'PUT',
+      'basePathWithoutHost' => '/v1',
+      'path' => '/lamps/{lampId}',
+      'apiPackage' => 'OpenAPIServer\Api',
+      'classname' => 'AbstractDefaultApi',
+      'userClassname' => 'DefaultApi',
+      'operationId' => 'updateLamp',
+      'responses' => [
+        '200' => [
+          'jsonSchema' => '{
   "description" : "Lamp updated successfully",
   "content" : {
     "application/json" : {
@@ -166,16 +237,32 @@ class RegisterRoutes
     }
   }
 }',
-                ],
-                '404' => [
-                    'jsonSchema' => '{
+        ],
+        '400' => [
+          'jsonSchema' => '{
+  "description" : "Invalid request data or lamp ID format",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/Error"
+      },
+      "example" : {
+        "error" : "INVALID_ARGUMENT",
+        "message" : "The request contains invalid parameters or malformed data",
+        "details" : "Invalid format for parameter \"status\": expected boolean"
+      }
+    }
+  }
+}',
+        ],
+        '404' => [
+          'jsonSchema' => '{
   "description" : "Lamp not found"
 }',
-                ],
-            ],
-            'authMethods' => [
-            ],
         ],
+      ],
+      'authMethods' => [],
+    ],
     ];
 
     /**
@@ -199,12 +286,17 @@ class RegisterRoutes
         $mockMiddlewareFactory = null;
         if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
             // I know, anti-pattern. Don't retrieve dependency directly from container
-            $mockMiddlewareFactory = $container->get(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class);
+            $mockMiddlewareFactory = $container->get(
+                \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class
+            );
         }
 
         foreach ($this->operations as $operation) {
             $callback = function (ServerRequestInterface $request) use ($operation) {
-                $message = "How about extending {$operation['classname']} by {$operation['apiPackage']}\\{$operation['userClassname']} class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
+                $message =
+                "How about extending {$operation['classname']} " .
+                "by {$operation['apiPackage']}\\{$operation['userClassname']} " .
+                "class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
                 throw new HttpNotImplementedException($request, $message);
             };
             $middlewares = [];
@@ -222,13 +314,34 @@ class RegisterRoutes
                 $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
             }
 
-            $route = $app->map(
-                [$operation['httpMethod']],
-                "{$operation['basePathWithoutHost']}{$operation['path']}",
-                $callback
-            )->setName($operation['operationId']);
-
-
+            // Use specific HTTP method functions instead of generic map()
+            switch (strtoupper($operation['httpMethod'])) {
+                case 'GET':
+                    $route = $app->get("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'POST':
+                    $route = $app->post("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PUT':
+                    $route = $app->put("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'DELETE':
+                    $route = $app->delete("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PATCH':
+                    $route = $app->patch("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'OPTIONS':
+                    $route = $app->options("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                default:
+                    $route = $app->map(
+                        [$operation['httpMethod']],
+                        "{$operation['basePathWithoutHost']}{$operation['path']}",
+                        $callback
+                    );
+            }
+            $route->setName($operation['operationId']);
             foreach ($middlewares as $middleware) {
                 $route->add($middleware);
             }

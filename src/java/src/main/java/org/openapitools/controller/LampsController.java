@@ -11,6 +11,7 @@ import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
+import org.openapitools.model.ListLamps200Response;
 import org.openapitools.repository.LampRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,13 +80,17 @@ public class LampsController implements LampsApi {
   }
 
   @Override
-  public CompletableFuture<ResponseEntity<List<Lamp>>> listLamps() {
+  public CompletableFuture<ResponseEntity<ListLamps200Response>> listLamps(
+      final Optional<String> cursor, final Optional<Integer> pageSize) {
     return CompletableFuture.supplyAsync(
         () -> {
           final List<LampEntity> entities = lampRepository.findAll();
           final List<Lamp> lamps =
               entities.stream().map(lampMapper::toModel).collect(Collectors.toList());
-          return ResponseEntity.ok().body(lamps);
+          final ListLamps200Response response = new ListLamps200Response();
+          response.setData(lamps);
+          response.setHasMore(false);
+          return ResponseEntity.ok().body(response);
         });
   }
 

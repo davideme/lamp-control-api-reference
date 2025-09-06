@@ -23,6 +23,7 @@
  * Extend this class with your controller. You can inject dependencies via class constructor,
  * @see https://github.com/PHP-DI/Slim-Bridge basic example.
  */
+
 namespace OpenAPIServer\Api;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -61,6 +62,7 @@ abstract class AbstractDefaultApi
     /**
      * DELETE deleteLamp
      * Summary: Delete a lamp
+     * Output-Formats: [application/json]
      *
      * @param ServerRequestInterface $request  Request
      * @param ResponseInterface      $response Response
@@ -114,6 +116,9 @@ abstract class AbstractDefaultApi
         ServerRequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
+        $queryParams = $request->getQueryParams();
+        $cursor = (key_exists('cursor', $queryParams)) ? $queryParams['cursor'] : null;
+        $pageSize = (key_exists('pageSize', $queryParams)) ? $queryParams['pageSize'] : null;
         $message = "How about implementing listLamps as a GET method in OpenAPIServer\Api\DefaultApi class?";
         throw new HttpNotImplementedException($request, $message);
     }

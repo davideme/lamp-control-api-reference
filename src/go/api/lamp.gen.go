@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
@@ -22,13 +23,25 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Error defines model for Error.
+type Error struct {
+	// Error Error type identifier
+	Error string `json:"error"`
+}
+
 // Lamp defines model for Lamp.
 type Lamp struct {
+	// CreatedAt Timestamp when the lamp was created
+	CreatedAt time.Time `json:"createdAt"`
+
 	// Id Unique identifier for the lamp
 	Id openapi_types.UUID `json:"id"`
 
 	// Status Whether the lamp is turned on (true) or off (false)
 	Status bool `json:"status"`
+
+	// UpdatedAt Timestamp when the lamp was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // LampCreate defines model for LampCreate.
@@ -43,6 +56,12 @@ type LampUpdate struct {
 	Status bool `json:"status"`
 }
 
+// ListLampsParams defines parameters for ListLamps.
+type ListLampsParams struct {
+	Cursor   *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+	PageSize *int    `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+}
+
 // CreateLampJSONRequestBody defines body for CreateLamp for application/json ContentType.
 type CreateLampJSONRequestBody = LampCreate
 
@@ -53,7 +72,7 @@ type UpdateLampJSONRequestBody = LampUpdate
 type ServerInterface interface {
 	// List all lamps
 	// (GET /lamps)
-	ListLamps(w http.ResponseWriter, r *http.Request)
+	ListLamps(w http.ResponseWriter, r *http.Request, params ListLampsParams)
 	// Create a new lamp
 	// (POST /lamps)
 	CreateLamp(w http.ResponseWriter, r *http.Request)
@@ -74,7 +93,7 @@ type Unimplemented struct{}
 
 // List all lamps
 // (GET /lamps)
-func (_ Unimplemented) ListLamps(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) ListLamps(w http.ResponseWriter, r *http.Request, params ListLampsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -114,8 +133,29 @@ type MiddlewareFunc func(http.Handler) http.Handler
 // ListLamps operation middleware
 func (siw *ServerInterfaceWrapper) ListLamps(w http.ResponseWriter, r *http.Request) {
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListLampsParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "cursor", r.URL.Query(), &params.Cursor)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "pageSize" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "pageSize", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "pageSize", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListLamps(w, r)
+		siw.Handler.ListLamps(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -347,17 +387,39 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 }
 
 type ListLampsRequestObject struct {
+	Params ListLampsParams
 }
 
 type ListLampsResponseObject interface {
 	VisitListLampsResponse(w http.ResponseWriter) error
 }
 
-type ListLamps200JSONResponse []Lamp
+type ListLamps200JSONResponse struct {
+	Data       []Lamp  `json:"data"`
+	HasMore    bool    `json:"hasMore"`
+	NextCursor *string `json:"nextCursor"`
+}
 
 func (response ListLamps200JSONResponse) VisitListLampsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListLamps304Response struct {
+}
+
+func (response ListLamps304Response) VisitListLampsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(304)
+	return nil
+}
+
+type ListLamps400JSONResponse Error
+
+func (response ListLamps400JSONResponse) VisitListLampsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -379,6 +441,15 @@ func (response CreateLamp201JSONResponse) VisitCreateLampResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CreateLamp400JSONResponse Error
+
+func (response CreateLamp400JSONResponse) VisitCreateLampResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type DeleteLampRequestObject struct {
 	LampId string `json:"lampId"`
 }
@@ -393,6 +464,15 @@ type DeleteLamp204Response struct {
 func (response DeleteLamp204Response) VisitDeleteLampResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type DeleteLamp400JSONResponse Error
+
+func (response DeleteLamp400JSONResponse) VisitDeleteLampResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type DeleteLamp404Response struct {
@@ -420,6 +500,23 @@ func (response GetLamp200JSONResponse) VisitGetLampResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetLamp304Response struct {
+}
+
+func (response GetLamp304Response) VisitGetLampResponse(w http.ResponseWriter) error {
+	w.WriteHeader(304)
+	return nil
+}
+
+type GetLamp400JSONResponse Error
+
+func (response GetLamp400JSONResponse) VisitGetLampResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetLamp404Response struct {
 }
 
@@ -442,6 +539,15 @@ type UpdateLamp200JSONResponse Lamp
 func (response UpdateLamp200JSONResponse) VisitUpdateLampResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateLamp400JSONResponse Error
+
+func (response UpdateLamp400JSONResponse) VisitUpdateLampResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -503,8 +609,10 @@ type strictHandler struct {
 }
 
 // ListLamps operation middleware
-func (sh *strictHandler) ListLamps(w http.ResponseWriter, r *http.Request) {
+func (sh *strictHandler) ListLamps(w http.ResponseWriter, r *http.Request, params ListLampsParams) {
 	var request ListLampsRequestObject
+
+	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		return sh.ssi.ListLamps(ctx, request.(ListLampsRequestObject))
@@ -645,18 +753,24 @@ func (sh *strictHandler) UpdateLamp(w http.ResponseWriter, r *http.Request, lamp
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xVT0skPxD9KqF+P1iFZnpcPfXNVZABWZYF2YPrIXZXO5F0ElPVyjD0d18qaWfWmRF1",
-	"US+dJn+q3ntVL1lC7bvgHTomqJZA9Rw7nX7PdRdkDNEHjGwwzZpGvg1SHU1g4x1UcOHMXY/KNOjYtAaj",
-	"an1UPEdlJUYBrY+dZqig700DBfAiIFRAHI27gaEAYs09bUf+NUee4zqWMqS4jw4b5Z3a49jjvvJR+bZV",
-	"e622hPvr8NfeW9QOhqGAiHe9idhAdQkJwpjxarXbX99izQJGiJ9E1Izb9J8DOnOGjbYqryvfriHveVf6",
-	"tn0FsBcwXYTmTZi+48MH4ZGNxrV+O+exItMFi+r4xyx1Qe0dR2+tcTcpPRWqwc474qhZJk9+XpwqoaMl",
-	"BE1+OwFm2EpCoa1OcggJCQXcY6Sc62AynUxFHB/Q6WCggsPJdHIIBQTN86RImXLK3w2yDKtMs0biG+Lz",
-	"tEOYU/COsqZfp1MZBD26dFCHYE2djpa3JAAe3ZJswdilg/9HbKGC/8q1r8rRVGVy1LBSU8eoF1nMTRGt",
-	"IZaiZfSyg/qu03ExYlba2sfFAoKnHdxyC59nB0pZkfibbxZv4vUSndEnw9PWEV8OW4oevGvmXcKldqkT",
-	"pEZRX9dI1PbWLjYkzKiVVg4f8h0l67lXyqUMs2bIzW0xW+6ptqdpftQ26Kg7ZIwE1eUSjCCRBoQCnO6k",
-	"0jkibEpU/EV340ocrrbkO9p2W+KbMW7yLeDo2RPOs2p975oNWTIrpUdJit2eOUP+XOLTz+mbBlkbS/8m",
-	"3Rmy0ooC1qY19UrA0O8QMN/jH67hxxh+fIReZfhPKlyfIL2HATK50QBfaHw9c2LCeP9YpT5aqKC8P4Dh",
-	"avgTAAD//3p0KilDCQAA",
+	"H4sIAAAAAAAC/+yX30/kNhDH/xVrWok7KWWX4/qSNwontBKg6grtwxVVJp7s+uTYxp4AW7T/ezV29ne4",
+	"bhEgVbqnTbzO/Pz4O8kjVK7xzqKlCOUjxGqCjUyXn0JwgS98cB4DaUzLOF9WGKugPWlnocy7BU09Cq3Q",
+	"kq41BigAH2TjDUIJo4vfj85GJ38dfT69Ov90cQkF8HYoIVLQdgyzWQEBb1sdUEH5pfN0vdjmbr5iRTAr",
+	"4Ew2fjuyKqAkVEe0Hd2lbjCSbLy4n6AVNEFh0p2MonsMCqhdaCRBCUoS/kS6we0YC9Bq2/6V1bftauai",
+	"5mp0blZNt61WfVYjSWrjtuU/JkgTXNoSOgpqg0UlnBXvKLT4XrggXF2Ld7U0Ed8vzd84Z1Batt969Zzi",
+	"GBlJdM/uWKGNLqZ0u+yKlR6thvRUj4/T7u1OP1WskdWkpRH5f+HqZTLvnB24uu4rzkbAnfGnYrpKUe8e",
+	"0wXev1I8vFHb2m37PBJR86kTR7+OEomVsxScMdqOk/tYCIWNs5GCJF48/nx1IjgdySbi/p+WA9OUTi6n",
+	"LY6zCTYJBdxhiNnXwf5wf8jFcR6t9BpKONwf7h9CAV7SJFVkkHzy1RgTgAtPI8X2daSztIOfCbJBwhCh",
+	"/PIIml3cthimUICVDYdTtSE61pYsVmzPtsbIGw6WD0QPkv2WvBzjb/pvXLOlsJatISg//FxAIx900zZQ",
+	"HgyHBTTadncLF9oSjjHAbHbNbYve2ZiB+DAcJlVyltCmrKX3Rlcp78HXyNV7XPG7jpOSlFY1YZMWfgxY",
+	"Qwk/DJaCPejUepD0cLaISYYgp3w/kfHchQTrtiJYfKDjXMpdKrjGZIpuab+fzU0mjY7EZyDBIO41TYSX",
+	"Y21TQTiiw+HHnvPjSJw7xaqqeNPHncq6GDuLgdU3fxqMUY7TcLJ30mglEiBiAaHYmyOyl0R60axvdSMP",
+	"zp4SzJ1wJTGSWGGdN8e2aWSYdgdCSGNyqdizd7Hn4GR9PMsjprP6i1PT/8Tdv4HVifBsnQGmZLZF/MGL",
+	"eu6rYdKiboqI2FYVxli3xkyfxYZCktrEld7kCZdEc4WCrMF7pcAHjxW7nh+kYje+Lie4aDuHJ7WNQnc+",
+	"lxzwJG+k4SBQiXTKXh67bHYNuNxjIYXF+/zKwv9n2R488s9IzXLBDObpt07iSVrvSOzTcJ4FS+HNFmET",
+	"qNVUNwVoW157xCLRkWN8QzpyNnv/JxbSO8jopEsoV+epelrHGbdWbUCTey5kB0zRP9xPkd4Wi+HbaNAc",
+	"jlebW9/p+yZ9p0hCiuix0rWuFgz6tofB/M7+6hi+zvztPjh2mr9vxH735fZ9/j57/rKjlzgFGY5Og/di",
+	"96WZo4gY7uaUt8FACYO7A5hdz/4JAAD//5Ey/5z1EQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

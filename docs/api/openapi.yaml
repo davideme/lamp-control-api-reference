@@ -91,6 +91,15 @@ paths:
                 The `id` value of any lamp in the list can be used as the `lampId` parameter in `DELETE /lamps/{lampId}`.
         '304':
           description: Not Modified
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "INVALID_ARGUMENT"
+                message: "Invalid query parameter 'pageSize'"
     post:
       summary: Create a new lamp
       description: Create a new lamp.
