@@ -1,0 +1,9 @@
+# Docker ignore file for Java project
+target/
+.mvn/
+.git/
+.gitignore
+*.log
+*.class
+.DS_Store
+Thumbs.db
