@@ -95,13 +95,13 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
     
     - name: Check PHP syntax
-      run: find src tests -name "*.php" -exec php -l {} \;
+      run: find lib tests -name "*.php" -exec php -l {} \;
     
     - name: Run PHP_CodeSniffer (PSR-12 Style Check)
-      run: vendor/bin/phpcs --standard=PSR12 --colors -p src tests
+      run: vendor/bin/phpcs --standard=PSR12 --colors -p lib tests
     
     - name: Run PHP-CS-Fixer (Dry Run)
-      run: vendor/bin/php-cs-fixer fix src --dry-run --diff --verbose
+      run: vendor/bin/php-cs-fixer fix lib --dry-run --diff --verbose
     
     - name: Run PHPStan (Static Analysis)
       run: vendor/bin/phpstan analyse --memory-limit=2G
@@ -140,4 +140,4 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
 
     - name: Check if code follows PSR-12 (PHP_CodeSniffer)
-      run: vendor/bin/phpcs --standard=PSR12 src tests
+      run: vendor/bin/phpcs --standard=PSR12 lib tests
