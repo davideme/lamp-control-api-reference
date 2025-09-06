@@ -314,13 +314,34 @@ class RegisterRoutes
                 $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
             }
 
-            $route = $app->map(
-                [$operation['httpMethod']],
-                "{$operation['basePathWithoutHost']}{$operation['path']}",
-                $callback
-            )->setName($operation['operationId']);
-
-
+            // Use specific HTTP method functions instead of generic map()
+            switch (strtoupper($operation['httpMethod'])) {
+                case 'GET':
+                    $route = $app->get("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'POST':
+                    $route = $app->post("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PUT':
+                    $route = $app->put("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'DELETE':
+                    $route = $app->delete("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PATCH':
+                    $route = $app->patch("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'OPTIONS':
+                    $route = $app->options("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                default:
+                    $route = $app->map(
+                        [$operation['httpMethod']],
+                        "{$operation['basePathWithoutHost']}{$operation['path']}",
+                        $callback
+                    );
+            }
+            $route->setName($operation['operationId']);
             foreach ($middlewares as $middleware) {
                 $route->add($middleware);
             }
