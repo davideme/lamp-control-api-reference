@@ -5,17 +5,17 @@ namespace OpenAPIServer\Repository;
 use OpenAPIServer\Model\Lamp;
 use OpenAPIServer\Model\LampCreate;
 use OpenAPIServer\Model\LampUpdate;
+use Ramsey\Uuid\Uuid;
 
 class LampRepository
 {
     /** @var Lamp[] */
     private array $lamps = [];
-    private int $nextId = 1;
 
     public function create(LampCreate $lampCreate): Lamp
     {
         $lamp = new Lamp();
-        $lampId = (string)$this->nextId++;
+        $lampId = Uuid::uuid4()->toString();
         $now = (new \DateTime())->format(\DateTime::ATOM);
         $lamp->setData([
             'id' => $lampId,
