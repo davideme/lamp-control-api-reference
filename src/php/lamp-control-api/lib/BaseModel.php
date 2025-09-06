@@ -43,7 +43,7 @@ class BaseModel implements OpenApiModelInterface
      * Should be overwritten by inherited class.
      */
     protected const MODEL_SCHEMA =
-        <<<'SCHEMA'
+    <<<'SCHEMA'
     {
         "type" : "object",
         "properties": {}
@@ -114,10 +114,13 @@ SCHEMA;
      *
      * @param mixed $data Data with values for new instance.
      *
+     * @phpstan-return static
+     * @return static
      * @return OpenApiModelInterface
      */
     public static function createFromData($data): OpenApiModelInterface
     {
+        /** @phpstan-ignore new.static */
         $instance = new static();
         $instance->setData($data);
         return $instance;
@@ -156,7 +159,7 @@ SCHEMA;
                 throw new InvalidArgumentException(
                     sprintf('Invalid data for %s model because it accepts straight indexed arrays only', static::class)
                 );
-                break;
+
             case IMocker::DATA_TYPE_OBJECT:
                 foreach ($data as $key => $value) {
                     // this action handles __set method
@@ -291,6 +294,7 @@ SCHEMA;
      *
      * @return mixed Returns data which can be serialized by json_encode(), which is a value of any type other than a resource.
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->getData();
