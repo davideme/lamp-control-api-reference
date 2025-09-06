@@ -5,17 +5,17 @@ namespace OpenAPIServer\Repository;
 use OpenAPIServer\Model\Lamp;
 use OpenAPIServer\Model\LampCreate;
 use OpenAPIServer\Model\LampUpdate;
+use Ramsey\Uuid\Uuid;
 
 class LampRepository
 {
     /** @var Lamp[] */
     private array $lamps = [];
-    private int $nextId = 1;
 
     public function create(LampCreate $lampCreate): Lamp
     {
         $lamp = new Lamp();
-        $lampId = (string)$this->nextId++;
+        $lampId = Uuid::uuid4()->toString();
         $now = (new \DateTime())->format(\DateTime::ATOM);
         $lamp->setData([
             'id' => $lampId,
@@ -48,10 +48,13 @@ class LampRepository
         $lamp = $this->lamps[$lampId];
         $lampDataObj = $lamp->getData();
         $lampData = is_object($lampDataObj) ? get_object_vars($lampDataObj) : (array)$lampDataObj;
-        if (null !== $lampUpdate->status) {
-            $lampData['status'] = $lampUpdate->status;
-        } elseif (array_key_exists('status', $lampData)) {
-            $lampData['status'] = $lampUpdate->status;
+
+        // LampUpdate may be an OpenApi model; prefer getData() to access provided fields.
+        $updateDataObj = $lampUpdate->getData();
+        $updateData = is_object($updateDataObj) ? get_object_vars($updateDataObj) : (array)$updateDataObj;
+
+        if (array_key_exists('status', $updateData)) {
+            $lampData['status'] = $updateData['status'];
         }
         // Update the updatedAt timestamp
         $lampData['updatedAt'] = (new \DateTime())->format(\DateTime::ATOM);
