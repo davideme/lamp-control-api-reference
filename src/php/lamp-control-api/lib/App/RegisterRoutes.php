@@ -39,8 +39,8 @@ use Slim\Exception\HttpNotImplementedException;
  */
 class RegisterRoutes
 {
-    /** @var array[] list of all api operations */
-    private $operations = [
+  /** @var array[] list of all api operations */
+  private $operations = [
     [
       'httpMethod' => 'POST',
       'basePathWithoutHost' => '/v1',
@@ -263,67 +263,88 @@ class RegisterRoutes
       ],
       'authMethods' => [],
     ],
-    ];
+  ];
 
-    /**
-     * Add routes to Slim app.
-     *
-     * @param \Slim\App $app Pre-configured Slim application instance
-     *
-     * @throws HttpNotImplementedException When implementation class doesn't exists
-     */
-    public function __invoke(\Slim\App $app): void
-    {
-        $app->options('/{routes:.*}', function (ServerRequestInterface $request, ResponseInterface $response) {
-            // CORS Pre-Flight OPTIONS Request Handler
-            return $response;
-        });
+  /**
+   * Add routes to Slim app.
+   *
+   * @param \Slim\App $app Pre-configured Slim application instance
+   *
+   * @throws HttpNotImplementedException When implementation class doesn't exists
+   */
+  public function __invoke(\Slim\App $app): void
+  {
+    $app->options('/{routes:.*}', function (ServerRequestInterface $request, ResponseInterface $response) {
+      // CORS Pre-Flight OPTIONS Request Handler
+      return $response;
+    });
 
-        // create mock middleware factory
-        /** @var \Psr\Container\ContainerInterface */
-        $container = $app->getContainer();
-        /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
-        $mockMiddlewareFactory = null;
-        if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
-            // I know, anti-pattern. Don't retrieve dependency directly from container
-            $mockMiddlewareFactory = $container->get(
-                \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class
-            );
-        }
-
-        foreach ($this->operations as $operation) {
-            $callback = function (ServerRequestInterface $request) use ($operation) {
-                $message =
-                "How about extending {$operation['classname']} " .
-                "by {$operation['apiPackage']}\\{$operation['userClassname']} " .
-                "class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
-                throw new HttpNotImplementedException($request, $message);
-            };
-            $middlewares = [];
-
-            if (class_exists("\\{$operation['apiPackage']}\\{$operation['userClassname']}")) {
-                // Notice how we register the controller using the class name?
-                // PHP-DI will instantiate the class for us only when it's actually necessary
-                $callback = ["\\{$operation['apiPackage']}\\{$operation['userClassname']}", $operation['operationId']];
-            }
-
-            if ($mockMiddlewareFactory) {
-                $mockSchemaResponses = array_map(function ($item) {
-                    return json_decode($item['jsonSchema'], true);
-                }, $operation['responses']);
-                $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
-            }
-
-            $route = $app->map(
-                [$operation['httpMethod']],
-                "{$operation['basePathWithoutHost']}{$operation['path']}",
-                $callback
-            )->setName($operation['operationId']);
-
-
-            foreach ($middlewares as $middleware) {
-                $route->add($middleware);
-            }
-        }
+    // create mock middleware factory
+    /** @var \Psr\Container\ContainerInterface */
+    $container = $app->getContainer();
+    /** @var \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory|null */
+    $mockMiddlewareFactory = null;
+    if ($container->has(\OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class)) {
+      // I know, anti-pattern. Don't retrieve dependency directly from container
+      $mockMiddlewareFactory = $container->get(
+        \OpenAPIServer\Mock\OpenApiDataMockerRouteMiddlewareFactory::class
+      );
     }
+
+    foreach ($this->operations as $operation) {
+      $callback = function (ServerRequestInterface $request) use ($operation) {
+        $message =
+          "How about extending {$operation['classname']} " .
+          "by {$operation['apiPackage']}\\{$operation['userClassname']} " .
+          "class implementing {$operation['operationId']} as a {$operation['httpMethod']} method?";
+        throw new HttpNotImplementedException($request, $message);
+      };
+      $middlewares = [];
+
+      if (class_exists("\\{$operation['apiPackage']}\\{$operation['userClassname']}")) {
+        // Notice how we register the controller using the class name?
+        // PHP-DI will instantiate the class for us only when it's actually necessary
+        $callback = ["\\{$operation['apiPackage']}\\{$operation['userClassname']}", $operation['operationId']];
+      }
+
+      if ($mockMiddlewareFactory) {
+        $mockSchemaResponses = array_map(function ($item) {
+          return json_decode($item['jsonSchema'], true);
+        }, $operation['responses']);
+        $middlewares[] = $mockMiddlewareFactory->create($mockSchemaResponses);
+      }
+
+            // Use specific HTTP method functions instead of generic map()
+            switch (strtoupper($operation['httpMethod'])) {
+                case 'GET':
+                    $route = $app->get("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'POST':
+                    $route = $app->post("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PUT':
+                    $route = $app->put("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'DELETE':
+                    $route = $app->delete("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'PATCH':
+                    $route = $app->patch("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                case 'OPTIONS':
+                    $route = $app->options("{$operation['basePathWithoutHost']}{$operation['path']}", $callback);
+                    break;
+                default:
+                    $route = $app->map(
+                        [$operation['httpMethod']],
+                        "{$operation['basePathWithoutHost']}{$operation['path']}",
+                        $callback
+                    );
+            }
+            $route->setName($operation['operationId']);
+      foreach ($middlewares as $middleware) {
+        $route->add($middleware);
+      }
+    }
+  }
 }
