@@ -43,7 +43,7 @@ class BaseModel implements OpenApiModelInterface
      * Should be overwritten by inherited class.
      */
     protected const MODEL_SCHEMA =
-    <<<'SCHEMA'
+        <<<'SCHEMA'
     {
         "type" : "object",
         "properties": {}
