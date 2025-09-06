@@ -141,3 +141,85 @@ jobs:
 
     - name: Check if code follows PSR-12 (PHP_CodeSniffer)
       run: vendor/bin/phpcs --standard=PSR12 lib tests
+
+  schemathesis-testing:
+    name: Schemathesis API Testing
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    defaults:
+      run:
+        working-directory: src/php/lamp-control-api
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        tools: composer:v2
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-8.3-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.3-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Start PHP API server
+      run: |
+        composer start &
+        echo $! > api.pid
+        sleep 3
+
+    - name: Wait for API to be ready
+      run: |
+        timeout 30 bash -c 'until curl -f -s http://localhost:8080/health > /dev/null; do sleep 1; done'
+        echo "API is ready!"
+
+    - name: Run Schemathesis tests
+      uses: schemathesis/action@v2
+      with:
+        schema: docs/api/openapi.yaml
+        base-url: http://localhost:8080/v1
+        max-examples: 100
+        checks: status_code_conformance,not_a_server_error,response_schema_conformance
+        args: '--report junit --report-junit-path schemathesis-report.xml'
+
+    - name: Stop API
+      run: |
+        if [ -f api.pid ]; then
+          kill $(cat api.pid) || true
+          rm api.pid
+        fi
+
+    - name: Upload Schemathesis report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: php-schemathesis-report
+        path: |
+          schemathesis-report.xml
+        retention-days: 30
+
+    - name: Check Schemathesis results
+      run: |
+        if [ -f schemathesis-report.xml ]; then
+          # Check if there were any failures in the XML report
+          if grep -q 'failures="[1-9]' schemathesis-report.xml || grep -q 'errors="[1-9]' schemathesis-report.xml; then
+            echo "❌ Schemathesis found API issues!"
+            echo "Check the uploaded report for details."
+            exit 1
+          else
+            echo "✅ Schemathesis tests passed!"
+          fi
+        else
+          echo "⚠️ No Schemathesis report found"
+        fi
