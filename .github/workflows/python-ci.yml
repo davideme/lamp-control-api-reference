@@ -65,6 +65,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install poetry
+      run: pipx install poetry
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -145,6 +148,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Install poetry
+      run: pipx install poetry
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
