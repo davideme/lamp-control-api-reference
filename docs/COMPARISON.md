@@ -9,8 +9,8 @@ This document provides a comparison of the different language implementations in
 | TypeScript | 436 | 190 | 409 | 0.94 | 85.48 |
 | Python | 550 | 271 | 289 | 0.53 | 86.40 |
 | Java | 1105 | 873 | 676 | 0.61 | 94.04 |
-| C# | 413 | 255 | 445 | 1.08 | 98.59 |
-| PHP | 1601 | 792 | 1285 | 0.80 | 88.89 |
+| C# | 413 | 255 | 449 | 1.09 | 98.59 |
+| PHP | 1090 | 235 | 1015 | 0.93 | N/A |
 | Go | 801 | 207 | 1319 | 1.65 | 98.50 |
 | Kotlin | 583 | 462 | 795 | 1.36 | 79.19 |
 | Ruby | null | null | 0 | N/A | N/A |
