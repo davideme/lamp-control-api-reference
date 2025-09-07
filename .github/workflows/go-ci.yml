@@ -17,6 +17,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.24']
     defaults:
       run:
         working-directory: src/go
@@ -28,7 +31,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24'
+          go-version: ${{ matrix.go-version }}
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -149,6 +152,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.24']
     defaults:
       run:
         working-directory: src/go
@@ -161,7 +167,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24'
+          go-version: ${{ matrix.go-version }}
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -184,6 +190,9 @@ jobs:
     name: Schemathesis API Testing
     runs-on: ubuntu-latest
     needs: [lint, test]
+    strategy:
+      matrix:
+        go-version: ['1.24']
     defaults:
       run:
         working-directory: src/go
@@ -195,7 +204,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24'
+          go-version: ${{ matrix.go-version }}
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -274,7 +283,7 @@ jobs:
   #     - name: Set up Go
   #       uses: actions/setup-go@v4
   #       with:
-  #         go-version: '1.24'
+  #         go-version: ${{ matrix.go-version }}
   #         cache-dependency-path: src/go/go.sum
   #
   #     - name: Install dependencies
