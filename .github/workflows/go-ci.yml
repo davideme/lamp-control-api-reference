@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.3'
+          go-version: '1.24'
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -65,7 +65,7 @@ jobs:
         working-directory: src/go
     strategy:
       matrix:
-        go-version: ['1.24.4']
+        go-version: ['1.24']
 
     steps:
       - name: Checkout code
@@ -151,7 +151,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.3'
+          go-version: '1.24'
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -185,7 +185,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.3'
+          go-version: '1.24'
           cache-dependency-path: src/go/go.sum
 
       - name: Install dependencies
@@ -264,7 +264,7 @@ jobs:
   #     - name: Set up Go
   #       uses: actions/setup-go@v4
   #       with:
-  #         go-version: '1.24.3'
+  #         go-version: '1.24'
   #         cache-dependency-path: src/go/go.sum
   #
   #     - name: Install dependencies
