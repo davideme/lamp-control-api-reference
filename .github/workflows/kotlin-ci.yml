@@ -42,15 +42,13 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+        cache-dependency-path: |
+          src/kotlin/**/*.gradle*
+          src/kotlin/**/gradle-wrapper.properties
 
     - name: Make gradlew executable
       run: chmod +x gradlew
@@ -125,15 +123,13 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+        cache-dependency-path: |
+          src/kotlin/**/*.gradle*
+          src/kotlin/**/gradle-wrapper.properties
 
     - name: Make gradlew executable
       run: chmod +x gradlew
@@ -184,15 +180,13 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+        cache-dependency-path: |
+          src/kotlin/**/*.gradle*
+          src/kotlin/**/gradle-wrapper.properties
     
     - name: Make gradlew executable
       run: chmod +x gradlew
