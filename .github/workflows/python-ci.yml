@@ -65,11 +65,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install poetry
+      run: pipx install poetry
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+        cache: 'poetry'
+        cache-dependency-path: 'src/python/poetry.lock'
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -145,11 +149,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install poetry
+      run: pipx install poetry
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+        cache: 'poetry'
+        cache-dependency-path: 'src/python/poetry.lock'
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
