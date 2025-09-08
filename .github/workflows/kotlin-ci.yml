@@ -43,15 +43,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
-      with:
-        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-        cache-dependency-path: |
-          src/kotlin/**/*.gradle*
-          src/kotlin/**/gradle-wrapper.properties
-
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Validate Gradle wrapper
       uses: gradle/actions/wrapper-validation@v3
@@ -124,15 +116,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
-      with:
-        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-        cache-dependency-path: |
-          src/kotlin/**/*.gradle*
-          src/kotlin/**/gradle-wrapper.properties
-
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Run ktlint formatting check
       run: ./gradlew ktlintCheck
@@ -181,15 +165,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
-      with:
-        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-        cache-dependency-path: |
-          src/kotlin/**/*.gradle*
-          src/kotlin/**/gradle-wrapper.properties
-    
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+      uses: gradle/actions/setup-gradle@v4
     
     - name: Build application
       run: ./gradlew build --no-daemon
