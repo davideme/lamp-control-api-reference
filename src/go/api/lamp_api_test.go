@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/davideme/lamp-control-api-reference/api/entities"
 	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
 )
@@ -125,9 +126,9 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 		{
 			name: "successful list with lamps",
 			setupMock: func(m *MockLampRepository) {
-				lamps := []Lamp{
-					{Id: uuid.New(), Status: true},
-					{Id: uuid.New(), Status: false},
+				lamps := []*entities.LampEntity{
+					{ID: uuid.New(), Status: true},
+					{ID: uuid.New(), Status: false},
 				}
 				m.EXPECT().List(gomock.Any()).Return(lamps, nil)
 			},
@@ -143,7 +144,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 		{
 			name: "successful list with empty result",
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().List(gomock.Any()).Return([]Lamp{}, nil)
+				m.EXPECT().List(gomock.Any()).Return([]*entities.LampEntity{}, nil)
 			},
 			expectError: false,
 			expectResponse: func(resp ListLampsResponseObject) bool {
@@ -210,7 +211,7 @@ func TestLampAPI_GetLamp_WithMock(t *testing.T) {
 			name:   "successful get",
 			lampID: testID,
 			setupMock: func(m *MockLampRepository) {
-				lamp := Lamp{Id: uuid.MustParse(testID), Status: true}
+				lamp := &entities.LampEntity{ID: uuid.MustParse(testID), Status: true}
 				m.EXPECT().GetByID(gomock.Any(), testID).Return(lamp, nil)
 			},
 			expectError: false,
@@ -227,7 +228,7 @@ func TestLampAPI_GetLamp_WithMock(t *testing.T) {
 			name:   "lamp not found",
 			lampID: testID,
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().GetByID(gomock.Any(), testID).Return(Lamp{}, ErrLampNotFound)
+				m.EXPECT().GetByID(gomock.Any(), testID).Return((*entities.LampEntity)(nil), ErrLampNotFound)
 			},
 			expectError: false,
 			expectResponse: func(resp GetLampResponseObject) bool {
@@ -239,7 +240,7 @@ func TestLampAPI_GetLamp_WithMock(t *testing.T) {
 			name:   "repository error",
 			lampID: testID,
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().GetByID(gomock.Any(), testID).Return(Lamp{}, errors.New("database error"))
+				m.EXPECT().GetByID(gomock.Any(), testID).Return((*entities.LampEntity)(nil), errors.New("database error"))
 			},
 			expectError: true,
 			expectResponse: func(resp GetLampResponseObject) bool {
@@ -297,14 +298,15 @@ func TestLampAPI_UpdateLamp_WithMock(t *testing.T) {
 				LampId: testID,
 				Body:   &LampUpdate{Status: false},
 			},
+
 			setupMock: func(m *MockLampRepository) {
 				now := time.Now()
-				existingLamp := Lamp{Id: uuid.MustParse(testID), Status: true, CreatedAt: now, UpdatedAt: now}
+				existingLamp := &entities.LampEntity{ID: uuid.MustParse(testID), Status: true, CreatedAt: now, UpdatedAt: now}
 				m.EXPECT().GetByID(gomock.Any(), testID).Return(existingLamp, nil)
 				// Use a custom matcher since UpdatedAt timestamp will be different
-				m.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, lamp Lamp) error {
+				m.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, lamp *entities.LampEntity) error {
 					// Verify the lamp has the correct ID and Status
-					if lamp.Id != uuid.MustParse(testID) || lamp.Status != false {
+					if lamp.ID != uuid.MustParse(testID) || lamp.Status != false {
 						return errors.New("unexpected lamp values")
 					}
 					// Verify CreatedAt is preserved and UpdatedAt is updated
