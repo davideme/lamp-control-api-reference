@@ -1,10 +1,10 @@
 """Default API implementation for the Lamp Control API."""
 
-from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
 from src.openapi_server.dependencies import get_lamp_repository
+from src.openapi_server.mappers.lamp_mapper import LampMapper
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
@@ -37,9 +37,13 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             raise HTTPException(status_code=400, detail="Invalid request data")
 
         lamp_id = str(uuid4())
-        now = datetime.now(UTC)
-        lamp = Lamp(id=lamp_id, status=lamp_create.status, created_at=now, updated_at=now)
-        return self._lamp_repository.create(lamp)
+
+        # Create domain entity from API model
+        lamp_entity = LampMapper.create_from_api_model(lamp_create, lamp_id)
+        created_entity = self._lamp_repository.create(lamp_entity)
+
+        # Convert domain entity back to API model
+        return LampMapper.to_api_model(created_entity)
 
     async def delete_lamp(self, lamp_id: str) -> None:
         """Delete a lamp.
@@ -69,12 +73,14 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         Raises:
             HTTPException: If the lamp is not found.
         """
-        lamp = self._lamp_repository.get(lamp_id)
-        if lamp is None:
+        lamp_entity = self._lamp_repository.get(lamp_id)
+        if lamp_entity is None:
             from fastapi import HTTPException
 
             raise HTTPException(status_code=404, detail="Lamp not found")
-        return lamp
+
+        # Convert domain entity to API model
+        return LampMapper.to_api_model(lamp_entity)
 
     async def list_lamps(self, cursor: str | None, page_size: int | None) -> ListLamps200Response:
         """List lamps with pagination.
@@ -87,7 +93,11 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             A paginated response containing lamps.
         """
         # For simplicity, we'll return all lamps and ignore pagination for now
-        all_lamps = self._lamp_repository.list()
+        all_lamp_entities = self._lamp_repository.list()
+
+        # Convert domain entities to API models
+        all_lamps = [LampMapper.to_api_model(entity) for entity in all_lamp_entities]
+
         return ListLamps200Response(
             data=all_lamps,
             next_cursor=None,  # No next page in this simple implementation
@@ -113,19 +123,17 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             raise HTTPException(status_code=400, detail="Invalid request data")
 
         try:
-            # Get existing lamp to preserve created_at timestamp
-            existing_lamp = self._lamp_repository.get(lamp_id)
-            if existing_lamp is None:
+            # Get existing lamp entity
+            existing_entity = self._lamp_repository.get(lamp_id)
+            if existing_entity is None:
                 raise LampNotFoundError(lamp_id)
 
-            # Create updated lamp with new updated_at timestamp
-            updated_lamp = Lamp(
-                id=lamp_id,
-                status=lamp_update.status,
-                created_at=existing_lamp.created_at,
-                updated_at=datetime.now(UTC),
-            )
-            return self._lamp_repository.update(updated_lamp)
+            # Update the domain entity using the mapper
+            updated_entity = LampMapper.update_from_api_model(existing_entity, lamp_update)
+            final_entity = self._lamp_repository.update(updated_entity)
+
+            # Convert domain entity back to API model
+            return LampMapper.to_api_model(final_entity)
         except LampNotFoundError as err:
             from fastapi import HTTPException
 

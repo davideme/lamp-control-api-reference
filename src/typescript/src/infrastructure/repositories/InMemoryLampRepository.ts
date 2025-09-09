@@ -1,22 +1,22 @@
 import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { Lamp, LampCreate, LampUpdate } from '../../domain/models/Lamp';
+import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../../domain/entities/LampEntity';
 import { LampRepository } from '../../domain/repositories/LampRepository';
 
 export class InMemoryLampRepository implements LampRepository {
-  private lamps: Map<string, Lamp> = new Map();
+  private lamps: Map<string, LampEntity> = new Map();
 
-  async findAll(limit?: number): Promise<Lamp[]> {
+  async findAll(limit?: number): Promise<LampEntity[]> {
     const lamps = Array.from(this.lamps.values());
     return limit ? lamps.slice(0, limit) : lamps;
   }
 
-  async findById(id: string): Promise<Lamp | undefined> {
+  async findById(id: string): Promise<LampEntity | undefined> {
     return this.lamps.get(id);
   }
 
-  async create(lamp: LampCreate): Promise<Lamp> {
+  async create(lamp: LampEntityCreate): Promise<LampEntity> {
     const now = new Date().toISOString();
-    const newLamp: Lamp = {
+    const newLamp: LampEntity = {
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -26,7 +26,7 @@ export class InMemoryLampRepository implements LampRepository {
     return newLamp;
   }
 
-  async update(id: string, lamp: LampUpdate): Promise<Lamp> {
+  async update(id: string, lamp: LampEntityUpdate): Promise<LampEntity> {
     const existingLamp = this.lamps.get(id);
     if (!existingLamp) {
       throw new LampNotFoundError(id);

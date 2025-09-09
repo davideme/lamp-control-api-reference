@@ -5,7 +5,9 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 
+	"github.com/davideme/lamp-control-api-reference/api/entities"
 	"github.com/google/uuid"
 )
 
@@ -29,9 +31,11 @@ func TestInMemoryLampRepository_Create(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp := Lamp{
-		Id:     uuid.New(),
-		Status: true,
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Test successful creation
@@ -41,13 +45,13 @@ func TestInMemoryLampRepository_Create(t *testing.T) {
 	}
 
 	// Verify lamp was stored
-	storedLamp, err := repo.GetByID(ctx, lamp.Id.String())
+	storedLamp, err := repo.GetByID(ctx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("GetByID failed after Create: %v", err)
 	}
 
-	if storedLamp.Id != lamp.Id {
-		t.Errorf("Expected ID %v, got %v", lamp.Id, storedLamp.Id)
+	if storedLamp.ID != lamp.ID {
+		t.Errorf("Expected ID %v, got %v", lamp.ID, storedLamp.ID)
 	}
 
 	if storedLamp.Status != lamp.Status {
@@ -59,8 +63,18 @@ func TestInMemoryLampRepository_Create_Multiple(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp1 := Lamp{Id: uuid.New(), Status: true}
-	lamp2 := Lamp{Id: uuid.New(), Status: false}
+	lamp1 := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	lamp2 := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
 	err := repo.Create(ctx, lamp1)
 	if err != nil {
@@ -87,13 +101,15 @@ func TestInMemoryLampRepository_GetByID(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp := Lamp{
-		Id:     uuid.New(),
-		Status: true,
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Test getting non-existent lamp
-	_, err := repo.GetByID(ctx, lamp.Id.String())
+	_, err := repo.GetByID(ctx, lamp.ID.String())
 	if err == nil {
 		t.Error("GetByID should return error for non-existent lamp")
 	}
@@ -108,13 +124,13 @@ func TestInMemoryLampRepository_GetByID(t *testing.T) {
 		t.Fatalf("Create failed: %v", err)
 	}
 
-	retrievedLamp, err := repo.GetByID(ctx, lamp.Id.String())
+	retrievedLamp, err := repo.GetByID(ctx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("GetByID failed: %v", err)
 	}
 
-	if retrievedLamp.Id != lamp.Id {
-		t.Errorf("Expected ID %v, got %v", lamp.Id, retrievedLamp.Id)
+	if retrievedLamp.ID != lamp.ID {
+		t.Errorf("Expected ID %v, got %v", lamp.ID, retrievedLamp.ID)
 	}
 
 	if retrievedLamp.Status != lamp.Status {
@@ -126,9 +142,11 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp := Lamp{
-		Id:     uuid.New(),
-		Status: true,
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Test updating non-existent lamp
@@ -148,9 +166,11 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 	}
 
 	// Update lamp status
-	updatedLamp := Lamp{
-		Id:     lamp.Id,
-		Status: false,
+	updatedLamp := &entities.LampEntity{
+		ID:        lamp.ID,
+		Status:    false,
+		CreatedAt: lamp.CreatedAt,
+		UpdatedAt: time.Now(),
 	}
 
 	err = repo.Update(ctx, updatedLamp)
@@ -159,7 +179,7 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 	}
 
 	// Verify update
-	retrievedLamp, err := repo.GetByID(ctx, lamp.Id.String())
+	retrievedLamp, err := repo.GetByID(ctx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("GetByID failed after update: %v", err)
 	}
@@ -173,13 +193,15 @@ func TestInMemoryLampRepository_Delete(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp := Lamp{
-		Id:     uuid.New(),
-		Status: true,
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Test deleting non-existent lamp
-	err := repo.Delete(ctx, lamp.Id.String())
+	err := repo.Delete(ctx, lamp.ID.String())
 	if err == nil {
 		t.Error("Delete should return error for non-existent lamp")
 	}
@@ -195,25 +217,25 @@ func TestInMemoryLampRepository_Delete(t *testing.T) {
 	}
 
 	// Verify lamp exists
-	exists := repo.Exists(ctx, lamp.Id.String())
+	exists := repo.Exists(ctx, lamp.ID.String())
 	if !exists {
 		t.Error("Lamp should exist before deletion")
 	}
 
 	// Delete lamp
-	err = repo.Delete(ctx, lamp.Id.String())
+	err = repo.Delete(ctx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("Delete failed: %v", err)
 	}
 
 	// Verify lamp no longer exists
-	exists = repo.Exists(ctx, lamp.Id.String())
+	exists = repo.Exists(ctx, lamp.ID.String())
 	if exists {
 		t.Error("Lamp should not exist after deletion")
 	}
 
 	// Verify GetByID returns error
-	_, err = repo.GetByID(ctx, lamp.Id.String())
+	_, err = repo.GetByID(ctx, lamp.ID.String())
 	if err == nil {
 		t.Error("GetByID should return error after deletion")
 	}
@@ -238,9 +260,24 @@ func TestInMemoryLampRepository_List(t *testing.T) {
 	}
 
 	// Add some lamps
-	lamp1 := Lamp{Id: uuid.New(), Status: true}
-	lamp2 := Lamp{Id: uuid.New(), Status: false}
-	lamp3 := Lamp{Id: uuid.New(), Status: true}
+	lamp1 := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	lamp2 := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	lamp3 := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
 	err = repo.Create(ctx, lamp1)
 	if err != nil {
@@ -270,16 +307,16 @@ func TestInMemoryLampRepository_List(t *testing.T) {
 	// Verify all lamps are present (order may vary)
 	lampIds := make(map[uuid.UUID]bool)
 	for _, lamp := range lamps {
-		lampIds[lamp.Id] = true
+		lampIds[lamp.ID] = true
 	}
 
-	if !lampIds[lamp1.Id] {
+	if !lampIds[lamp1.ID] {
 		t.Error("lamp1 not found in list")
 	}
-	if !lampIds[lamp2.Id] {
+	if !lampIds[lamp2.ID] {
 		t.Error("lamp2 not found in list")
 	}
-	if !lampIds[lamp3.Id] {
+	if !lampIds[lamp3.ID] {
 		t.Error("lamp3 not found in list")
 	}
 }
@@ -288,13 +325,15 @@ func TestInMemoryLampRepository_Exists(t *testing.T) {
 	repo := NewInMemoryLampRepository()
 	ctx := context.Background()
 
-	lamp := Lamp{
-		Id:     uuid.New(),
-		Status: true,
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	// Test non-existent lamp
-	exists := repo.Exists(ctx, lamp.Id.String())
+	exists := repo.Exists(ctx, lamp.ID.String())
 	if exists {
 		t.Error("Exists should return false for non-existent lamp")
 	}
@@ -306,19 +345,19 @@ func TestInMemoryLampRepository_Exists(t *testing.T) {
 	}
 
 	// Test existing lamp
-	exists = repo.Exists(ctx, lamp.Id.String())
+	exists = repo.Exists(ctx, lamp.ID.String())
 	if !exists {
 		t.Error("Exists should return true for existing lamp")
 	}
 
 	// Delete lamp
-	err = repo.Delete(ctx, lamp.Id.String())
+	err = repo.Delete(ctx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("Delete failed: %v", err)
 	}
 
 	// Test deleted lamp
-	exists = repo.Exists(ctx, lamp.Id.String())
+	exists = repo.Exists(ctx, lamp.ID.String())
 	if exists {
 		t.Error("Exists should return false for deleted lamp")
 	}
@@ -340,9 +379,11 @@ func TestInMemoryLampRepository_ConcurrentAccess(t *testing.T) {
 			defer wg.Done()
 
 			for j := 0; j < numOperationsPerGoroutine; j++ {
-				lamp := Lamp{
-					Id:     uuid.New(),
-					Status: routineID%2 == 0, // Alternate between true/false
+				lamp := &entities.LampEntity{
+					ID:        uuid.New(),
+					Status:    routineID%2 == 0, // Alternate between true/false
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
 				}
 
 				err := repo.Create(ctx, lamp)
@@ -352,13 +393,13 @@ func TestInMemoryLampRepository_ConcurrentAccess(t *testing.T) {
 				}
 
 				// Verify the lamp can be retrieved
-				retrievedLamp, err := repo.GetByID(ctx, lamp.Id.String())
+				retrievedLamp, err := repo.GetByID(ctx, lamp.ID.String())
 				if err != nil {
 					t.Errorf("Concurrent get failed: %v", err)
 					return
 				}
 
-				if retrievedLamp.Id != lamp.Id {
+				if retrievedLamp.ID != lamp.ID {
 					t.Errorf("Concurrent access returned wrong lamp")
 					return
 				}
@@ -385,11 +426,13 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 	ctx := context.Background()
 
 	// Create initial lamps
-	var initialLamps []Lamp
+	var initialLamps []*entities.LampEntity
 	for i := 0; i < 10; i++ {
-		lamp := Lamp{
-			Id:     uuid.New(),
-			Status: true,
+		lamp := &entities.LampEntity{
+			ID:        uuid.New(),
+			Status:    true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 		err := repo.Create(ctx, lamp)
 		if err != nil {
@@ -420,7 +463,7 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 				}
 
 				// Check if a specific lamp exists
-				lampId := initialLamps[j%len(initialLamps)].Id.String()
+				lampId := initialLamps[j%len(initialLamps)].ID.String()
 				exists := repo.Exists(ctx, lampId)
 				if !exists {
 					t.Errorf("Expected lamp %s to exist", lampId)
@@ -437,9 +480,11 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 			defer wg.Done()
 
 			lamp := initialLamps[index]
-			updatedLamp := Lamp{
-				Id:     lamp.Id,
-				Status: false, // Toggle status
+			updatedLamp := &entities.LampEntity{
+				ID:        lamp.ID,
+				Status:    false, // Toggle status
+				CreatedAt: lamp.CreatedAt,
+				UpdatedAt: time.Now(),
 			}
 
 			err := repo.Update(ctx, updatedLamp)
@@ -454,14 +499,14 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 
 	// Verify all updates were applied
 	for _, originalLamp := range initialLamps {
-		updatedLamp, err := repo.GetByID(ctx, originalLamp.Id.String())
+		updatedLamp, err := repo.GetByID(ctx, originalLamp.ID.String())
 		if err != nil {
 			t.Fatalf("Failed to get updated lamp: %v", err)
 		}
 
 		if updatedLamp.Status != false {
 			t.Errorf("Expected lamp %s to have status false after update, got %v",
-				originalLamp.Id.String(), updatedLamp.Status)
+				originalLamp.ID.String(), updatedLamp.Status)
 		}
 	}
 }
@@ -471,7 +516,12 @@ func TestInMemoryLampRepository_ContextHandling(t *testing.T) {
 
 	// Test with background context
 	ctx := context.Background()
-	lamp := Lamp{Id: uuid.New(), Status: true}
+	lamp := &entities.LampEntity{
+		ID:        uuid.New(),
+		Status:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
 	err := repo.Create(ctx, lamp)
 	if err != nil {
@@ -482,7 +532,7 @@ func TestInMemoryLampRepository_ContextHandling(t *testing.T) {
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	_, err = repo.GetByID(cancelCtx, lamp.Id.String())
+	_, err = repo.GetByID(cancelCtx, lamp.ID.String())
 	if err != nil {
 		t.Fatalf("GetByID with canceled context failed: %v", err)
 	}

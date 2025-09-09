@@ -1,6 +1,6 @@
 """Repository for managing lamp data."""
 
-from src.openapi_server.models.lamp import Lamp
+from src.openapi_server.entities.lamp_entity import LampEntity
 
 
 class LampNotFoundError(Exception):
@@ -21,55 +21,55 @@ class LampRepository:
 
     def __init__(self) -> None:
         """Initialize the repository with an empty lamp store."""
-        self._lamps: dict[str, Lamp] = {}
+        self._lamps: dict[str, LampEntity] = {}
 
-    def create(self, lamp: Lamp) -> Lamp:
+    def create(self, lamp_entity: LampEntity) -> LampEntity:
         """Create a new lamp.
 
         Args:
-            lamp: The lamp to create.
+            lamp_entity: The lamp entity to create.
 
         Returns:
-            The created lamp.
+            The created lamp entity.
         """
-        self._lamps[lamp.id] = lamp
-        return lamp
+        self._lamps[lamp_entity.id] = lamp_entity
+        return lamp_entity
 
-    def get(self, lamp_id: str) -> Lamp | None:
+    def get(self, lamp_id: str) -> LampEntity | None:
         """Get a specific lamp.
 
         Args:
             lamp_id: The ID of the lamp to get.
 
         Returns:
-            The requested lamp, or None if not found.
+            The requested lamp entity, or None if not found.
         """
         return self._lamps.get(lamp_id)
 
-    def list(self) -> list[Lamp]:
+    def list(self) -> list[LampEntity]:
         """List all lamps.
 
         Returns:
-            A list of all lamps.
+            A list of all lamp entities.
         """
         return list(self._lamps.values())
 
-    def update(self, lamp: Lamp) -> Lamp:
+    def update(self, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp.
 
         Args:
-            lamp: The lamp to update.
+            lamp_entity: The lamp entity to update.
 
         Returns:
-            The updated lamp.
+            The updated lamp entity.
 
         Raises:
             LampNotFoundError: If the lamp is not found.
         """
-        if lamp.id not in self._lamps:
-            raise LampNotFoundError(lamp.id)
-        self._lamps[lamp.id] = lamp
-        return lamp
+        if lamp_entity.id not in self._lamps:
+            raise LampNotFoundError(lamp_entity.id)
+        self._lamps[lamp_entity.id] = lamp_entity
+        return lamp_entity
 
     def delete(self, lamp_id: str) -> None:
         """Delete a lamp.

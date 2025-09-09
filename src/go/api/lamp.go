@@ -5,13 +5,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 type LampAPI struct {
 	repository LampRepository
+	mapper     *LampMapper
 }
 
 var _ StrictServerInterface = (*LampAPI)(nil)
@@ -19,6 +17,7 @@ var _ StrictServerInterface = (*LampAPI)(nil)
 func NewLampAPI() *LampAPI {
 	return &LampAPI{
 		repository: NewInMemoryLampRepository(),
+		mapper:     NewLampMapper(),
 	}
 }
 
@@ -26,15 +25,22 @@ func NewLampAPI() *LampAPI {
 func NewLampAPIWithRepository(repo LampRepository) *LampAPI {
 	return &LampAPI{
 		repository: repo,
+		mapper:     NewLampMapper(),
 	}
 }
 
 // List all lamps
 // (GET /lamps)
 func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject) (ListLampsResponseObject, error) {
-	lamps, err := l.repository.List(ctx)
+	lampEntities, err := l.repository.List(ctx)
 	if err != nil {
 		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError}
+	}
+
+	// Convert domain entities to API models
+	lamps := make([]Lamp, len(lampEntities))
+	for i, entity := range lampEntities {
+		lamps[i] = l.mapper.ToAPIModel(entity)
 	}
 
 	// For simplicity, we're returning all lamps without actual pagination
@@ -53,21 +59,16 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Generate a new UUID for the lamp
-	lampID := uuid.New()
-	now := time.Now()
+	// Create domain entity from API model
+	lampEntity := l.mapper.CreateEntityFromAPICreate(*request.Body)
 
-	lamp := Lamp{
-		Id:        lampID,
-		Status:    request.Body.Status,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-
-	err := l.repository.Create(ctx, lamp)
+	err := l.repository.Create(ctx, lampEntity)
 	if err != nil {
 		return nil, &APIError{Message: "Failed to create lamp", StatusCode: http.StatusInternalServerError}
 	}
+
+	// Convert domain entity back to API model
+	lamp := l.mapper.ToAPIModel(lampEntity)
 
 	return CreateLamp201JSONResponse(lamp), nil
 }
@@ -90,7 +91,7 @@ func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObjec
 // Get a specific lamp
 // (GET /lamps/{lampId})
 func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (GetLampResponseObject, error) {
-	lamp, err := l.repository.GetByID(ctx, request.LampId)
+	lampEntity, err := l.repository.GetByID(ctx, request.LampId)
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
 			return GetLamp404Response{}, nil
@@ -98,6 +99,9 @@ func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (Ge
 
 		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
+
+	// Convert domain entity to API model
+	lamp := l.mapper.ToAPIModel(lampEntity)
 
 	return GetLamp200JSONResponse(lamp), nil
 }
@@ -109,8 +113,8 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Get the existing lamp to ensure it exists and get its ID and CreatedAt
-	existingLamp, err := l.repository.GetByID(ctx, request.LampId)
+	// Get the existing lamp entity to ensure it exists
+	existingEntity, err := l.repository.GetByID(ctx, request.LampId)
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
 			return UpdateLamp404Response{}, nil
@@ -119,18 +123,16 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
 	}
 
-	// Update the lamp status while preserving CreatedAt and updating UpdatedAt
-	updatedLamp := Lamp{
-		Id:        existingLamp.Id,
-		Status:    request.Body.Status,
-		CreatedAt: existingLamp.CreatedAt, // Preserve original creation time
-		UpdatedAt: time.Now(),             // Update modification time
-	}
+	// Update the domain entity using the mapper
+	updatedEntity := l.mapper.UpdateEntityFromAPIUpdate(existingEntity, *request.Body)
 
-	err = l.repository.Update(ctx, updatedLamp)
+	err = l.repository.Update(ctx, updatedEntity)
 	if err != nil {
 		return nil, &APIError{Message: "Failed to update lamp", StatusCode: http.StatusInternalServerError}
 	}
+
+	// Convert domain entity back to API model
+	updatedLamp := l.mapper.ToAPIModel(updatedEntity)
 
 	return UpdateLamp200JSONResponse(updatedLamp), nil
 }
