@@ -352,7 +352,7 @@ func TestLampAPI_UpdateLamp_WithMock(t *testing.T) {
 				Body:   &LampUpdate{Status: true},
 			},
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().GetByID(gomock.Any(), testID).Return(Lamp{}, ErrLampNotFound)
+				m.EXPECT().GetByID(gomock.Any(), testID).Return((*entities.LampEntity)(nil), ErrLampNotFound)
 			},
 			expectError: false,
 			expectResponse: func(resp UpdateLampResponseObject) bool {
@@ -368,7 +368,7 @@ func TestLampAPI_UpdateLamp_WithMock(t *testing.T) {
 				Body:   &LampUpdate{Status: true},
 			},
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().GetByID(gomock.Any(), testID).Return(Lamp{}, errors.New("database error"))
+				m.EXPECT().GetByID(gomock.Any(), testID).Return((*entities.LampEntity)(nil), errors.New("database error"))
 			},
 			expectError: true,
 			expectResponse: func(resp UpdateLampResponseObject) bool {
