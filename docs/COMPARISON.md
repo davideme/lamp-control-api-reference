@@ -17,16 +17,16 @@ This document provides a comparison of the different language implementations in
 
 ## ULOC Metrics
 
-| Language   | App ULOC | App ULOC (No Generated) | Test ULOC | Test/App Ratio | Coverage (%) |
-|------------|----------|-------------------------|-----------|---------------|--------------|
-| TypeScript | 494 | 150 | 237 | 0.92 | 85.48 |
-| Python | 603 | 236 | 214 | 0.55 | 86.40 |
-| Java | 995 | 517 | 365 | 0.58 | 94.04 |
-| C# | 615 | 225 | 281 | 0.84 | 98.59 |
-| PHP | 1360 | 198 | 571 | 0.72 | N/A |
-| Go | 1168 | 179 | 630 | 1.17 | 98.50 |
-| Kotlin | 881 | 382 | 390 | 0.79 | 79.19 |
-| Ruby | null | null | null | N/A | N/A |
+| Language   | App Lines | App Lines (No Generated) | Test Lines | App ULOC | App ULOC (No Generated) | Test ULOC | App DRYness | App DRYness (No Generated) | Test DRYness |
+|------------|-----------|--------------------------|------------|----------|-------------------------|-----------|-------------|----------------------------|--------------|
+| TypeScript | 436 | 190 | 409 | 494 | 150 | 237 | 1.13 | 0.78 | 0.57 |
+| Python | 550 | 271 | 289 | 603 | 236 | 214 | 1.09 | 0.87 | 0.74 |
+| Java | 1105 | 873 | 676 | 995 | 517 | 365 | 0.90 | 0.59 | 0.54 |
+| C# | 413 | 255 | 449 | 615 | 225 | 281 | 1.48 | 0.88 | 0.63 |
+| PHP | 1090 | 235 | 1015 | 1360 | 198 | 571 | 1.25 | 0.84 | 0.56 |
+| Go | 801 | 207 | 1319 | 1168 | 179 | 630 | 1.45 | 0.86 | 0.48 |
+| Kotlin | 583 | 462 | 795 | 881 | 382 | 390 | 1.51 | 0.83 | 0.49 |
+| Ruby | null | null | 0 | null | null | null | N/A | N/A | N/A |
 
 ## API Interface Comparison
 
