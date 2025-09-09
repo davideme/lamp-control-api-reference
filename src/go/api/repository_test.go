@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/davideme/lamp-control-api-reference/api/entities"
 	"github.com/google/uuid"
 )
 

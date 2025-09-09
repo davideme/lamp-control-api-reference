@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	entities "github.com/davideme/lamp-control-api-reference/api/entities"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,17 +42,17 @@ func (m *MockLampRepository) EXPECT() *MockLampRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockLampRepository) Create(ctx context.Context, lamp Lamp) error {
+func (m *MockLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, lamp)
+	ret := m.ctrl.Call(m, "Create", ctx, lampEntity)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockLampRepositoryMockRecorder) Create(ctx, lamp any) *gomock.Call {
+func (mr *MockLampRepositoryMockRecorder) Create(ctx, lampEntity any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockLampRepository)(nil).Create), ctx, lamp)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockLampRepository)(nil).Create), ctx, lampEntity)
 }
 
 // Delete mocks base method.
@@ -83,10 +84,10 @@ func (mr *MockLampRepositoryMockRecorder) Exists(ctx, id any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockLampRepository) GetByID(ctx context.Context, id string) (Lamp, error) {
+func (m *MockLampRepository) GetByID(ctx context.Context, id string) (*entities.LampEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(Lamp)
+	ret0, _ := ret[0].(*entities.LampEntity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -98,10 +99,10 @@ func (mr *MockLampRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockLampRepository) List(ctx context.Context) ([]Lamp, error) {
+func (m *MockLampRepository) List(ctx context.Context) ([]*entities.LampEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx)
-	ret0, _ := ret[0].([]Lamp)
+	ret0, _ := ret[0].([]*entities.LampEntity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -113,15 +114,15 @@ func (mr *MockLampRepositoryMockRecorder) List(ctx any) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockLampRepository) Update(ctx context.Context, lamp Lamp) error {
+func (m *MockLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, lamp)
+	ret := m.ctrl.Call(m, "Update", ctx, lampEntity)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockLampRepositoryMockRecorder) Update(ctx, lamp any) *gomock.Call {
+func (mr *MockLampRepositoryMockRecorder) Update(ctx, lampEntity any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockLampRepository)(nil).Update), ctx, lamp)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockLampRepository)(nil).Update), ctx, lampEntity)
 }
