@@ -2,22 +2,26 @@
 
 namespace OpenAPIServer\Api;
 
+use OpenAPIServer\Mapper\LampMapper;
 use OpenAPIServer\Model\Error;
 use OpenAPIServer\Model\Lamp;
 use OpenAPIServer\Model\LampCreate;
 use OpenAPIServer\Model\LampUpdate;
 use OpenAPIServer\Repository\LampRepository;
+use OpenAPIServer\Service\LampService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Response;
 
 class DefaultApi extends AbstractDefaultApi
 {
-    private LampRepository $repo;
+    private LampService $service;
 
     public function __construct()
     {
-        $this->repo = new LampRepository();
+        $repository = new LampRepository();
+        $mapper = new LampMapper();
+        $this->service = new LampService($repository, $mapper);
     }
 
     public function createLamp(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -104,14 +108,14 @@ class DefaultApi extends AbstractDefaultApi
 
         $lampCreate = new LampCreate();
         $lampCreate->setData($data);
-        $lamp = $this->repo->create($lampCreate);
+        $lamp = $this->service->create($lampCreate);
         $response->getBody()->write(json_encode($lamp->getData()));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     }
 
     public function listLamps(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $lamps = $this->repo->all();
+        $lamps = $this->service->all();
         // Convert lamp objects to data
         $lampsData = array_map(function ($lamp) {
             return $lamp->getData();
@@ -132,7 +136,7 @@ class DefaultApi extends AbstractDefaultApi
         ResponseInterface $response,
         string $lampId
     ): ResponseInterface {
-        $lamp = $this->repo->get($lampId);
+        $lamp = $this->service->get($lampId);
         if (!$lamp) {
             return $response->withStatus(404);
         }
@@ -227,7 +231,7 @@ class DefaultApi extends AbstractDefaultApi
 
         $lampUpdate = new LampUpdate();
         $lampUpdate->setData($data);
-        $lamp = $this->repo->update($lampId, $lampUpdate);
+        $lamp = $this->service->update($lampId, $lampUpdate);
         if (!$lamp) {
             return $response->withStatus(404);
         }
@@ -240,7 +244,7 @@ class DefaultApi extends AbstractDefaultApi
         ResponseInterface $response,
         string $lampId
     ): ResponseInterface {
-        $deleted = $this->repo->delete($lampId);
+        $deleted = $this->service->delete($lampId);
         if (!$deleted) {
             // Return 404 with empty body as per OpenAPI spec for lamp not found
             return $response->withStatus(404);

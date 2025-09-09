@@ -2,67 +2,100 @@
 
 namespace OpenAPIServer\Repository;
 
-use OpenAPIServer\Model\Lamp;
-use OpenAPIServer\Model\LampCreate;
-use OpenAPIServer\Model\LampUpdate;
-use Ramsey\Uuid\Uuid;
+use OpenAPIServer\Entity\LampEntity;
+use Ramsey\Uuid\UuidInterface;
 
+/**
+ * Repository for managing Lamp domain entities.
+ * Uses domain entities to maintain separation from API models.
+ */
 class LampRepository
 {
-    /** @var Lamp[] */
+    /** @var LampEntity[] */
     private array $lamps = [];
 
-    public function create(LampCreate $lampCreate): Lamp
+    /**
+     * Create a new lamp entity
+     *
+     * @param LampEntity $entity
+     * @return LampEntity
+     */
+    public function create(LampEntity $entity): LampEntity
     {
-        $lamp = new Lamp();
-        $lampId = Uuid::uuid4()->toString();
-        $now = (new \DateTime())->format(\DateTime::ATOM);
-        $lamp->setData([
-            'id' => $lampId,
-            'status' => $lampCreate->status ?? false,
-            'createdAt' => $now,
-            'updatedAt' => $now
-        ]);
-        $this->lamps[$lampId] = $lamp;
-        return $lamp;
+        $this->lamps[$entity->getId()->toString()] = $entity;
+        return $entity;
     }
 
     /**
-     * @return Lamp[]
+     * Get all lamp entities
+     *
+     * @return LampEntity[]
      */
     public function all(): array
     {
         return array_values($this->lamps);
     }
 
-    public function get(string $lampId): ?Lamp
+    /**
+     * Get lamp entity by UUID
+     *
+     * @param UuidInterface $lampId
+     * @return LampEntity|null
+     */
+    public function getById(UuidInterface $lampId): ?LampEntity
+    {
+        return $this->lamps[$lampId->toString()] ?? null;
+    }
+
+    /**
+     * Get lamp entity by string ID
+     *
+     * @param string $lampId
+     * @return LampEntity|null
+     */
+    public function get(string $lampId): ?LampEntity
     {
         return $this->lamps[$lampId] ?? null;
     }
 
-    public function update(string $lampId, LampUpdate $lampUpdate): ?Lamp
+    /**
+     * Update an existing lamp entity
+     *
+     * @param LampEntity $entity
+     * @return LampEntity|null
+     */
+    public function update(LampEntity $entity): ?LampEntity
     {
+        $lampId = $entity->getId()->toString();
         if (!isset($this->lamps[$lampId])) {
             return null;
         }
-        $lamp = $this->lamps[$lampId];
-        $lampDataObj = $lamp->getData();
-        $lampData = is_object($lampDataObj) ? get_object_vars($lampDataObj) : (array)$lampDataObj;
-
-        // LampUpdate may be an OpenApi model; prefer getData() to access provided fields.
-        $updateDataObj = $lampUpdate->getData();
-        $updateData = is_object($updateDataObj) ? get_object_vars($updateDataObj) : (array)$updateDataObj;
-
-        if (array_key_exists('status', $updateData)) {
-            $lampData['status'] = $updateData['status'];
-        }
-        // Update the updatedAt timestamp
-        $lampData['updatedAt'] = (new \DateTime())->format(\DateTime::ATOM);
-        $lamp->setData($lampData);
-        $this->lamps[$lampId] = $lamp;
-        return $lamp;
+        $this->lamps[$lampId] = $entity;
+        return $entity;
     }
 
+    /**
+     * Delete a lamp by UUID
+     *
+     * @param UuidInterface $lampId
+     * @return bool
+     */
+    public function deleteById(UuidInterface $lampId): bool
+    {
+        $key = $lampId->toString();
+        if (!isset($this->lamps[$key])) {
+            return false;
+        }
+        unset($this->lamps[$key]);
+        return true;
+    }
+
+    /**
+     * Delete a lamp by string ID
+     *
+     * @param string $lampId
+     * @return bool
+     */
     public function delete(string $lampId): bool
     {
         if (!isset($this->lamps[$lampId])) {

@@ -2,9 +2,8 @@
 
 namespace OpenAPIServer\Tests;
 
+use OpenAPIServer\Entity\LampEntity;
 use OpenAPIServer\Repository\LampRepository;
-use OpenAPIServer\Model\LampCreate;
-use OpenAPIServer\Model\LampUpdate;
 use PHPUnit\Framework\TestCase;
 
 class LampRepositoryTest extends TestCase
@@ -12,24 +11,26 @@ class LampRepositoryTest extends TestCase
     public function testCreateAndGetLamp()
     {
         $repo = new LampRepository();
-        $lampCreate = new LampCreate();
-        $lampCreate->status = true;
-        $lamp = $repo->create($lampCreate);
-        $this->assertNotNull($lamp);
-        $this->assertEquals(true, $lamp->getData()->status);
-        $fetched = $repo->get($lamp->getData()->id);
-        $this->assertEquals($lamp, $fetched);
+        $entity = LampEntity::create(true);
+        $createdEntity = $repo->create($entity);
+        
+        $this->assertNotNull($createdEntity);
+        $this->assertTrue($createdEntity->getStatus());
+        $this->assertTrue($entity->getId()->equals($createdEntity->getId()));
+        
+        $fetched = $repo->get($entity->getId()->toString());
+        $this->assertTrue($entity->equals($fetched));
     }
 
     public function testAllReturnsAllLamps()
     {
         $repo = new LampRepository();
-        $lampCreate1 = new LampCreate();
-        $lampCreate1->status = true;
-        $lampCreate2 = new LampCreate();
-        $lampCreate2->status = false;
-        $repo->create($lampCreate1);
-        $repo->create($lampCreate2);
+        $entity1 = LampEntity::create(true);
+        $entity2 = LampEntity::create(false);
+        
+        $repo->create($entity1);
+        $repo->create($entity2);
+        
         $all = $repo->all();
         $this->assertCount(2, $all);
     }
@@ -37,23 +38,24 @@ class LampRepositoryTest extends TestCase
     public function testUpdateLamp()
     {
         $repo = new LampRepository();
-        $lampCreate = new LampCreate();
-        $lampCreate->status = false;
-        $lamp = $repo->create($lampCreate);
-        $lampId = $lamp->getData()->id;
-        $update = new LampUpdate();
-        $update->status = true;
-        $updated = $repo->update($lampId, $update);
-        $this->assertEquals(true, $updated->getData()->status);
+        $entity = LampEntity::create(false);
+        $createdEntity = $repo->create($entity);
+        
+        $updatedEntity = $createdEntity->withUpdatedStatus(true);
+        $result = $repo->update($updatedEntity);
+        
+        $this->assertNotNull($result);
+        $this->assertTrue($result->getStatus());
+        $this->assertTrue($entity->getId()->equals($result->getId()));
     }
 
     public function testDeleteLamp()
     {
         $repo = new LampRepository();
-        $lampCreate = new LampCreate();
-        $lampCreate->status = true;
-        $lamp = $repo->create($lampCreate);
-        $lampId = $lamp->getData()->id;
+        $entity = LampEntity::create(true);
+        $createdEntity = $repo->create($entity);
+        $lampId = $createdEntity->getId()->toString();
+        
         $deleted = $repo->delete($lampId);
         $this->assertTrue($deleted);
         $this->assertNull($repo->get($lampId));
@@ -62,9 +64,8 @@ class LampRepositoryTest extends TestCase
     public function testUpdateNonexistentLampReturnsNull()
     {
         $repo = new LampRepository();
-        $update = new LampUpdate();
-        $update->status = true;
-        $this->assertNull($repo->update('999', $update));
+        $entity = LampEntity::create(true);
+        $this->assertNull($repo->update($entity));
     }
 
     public function testDeleteNonexistentLampReturnsFalse()

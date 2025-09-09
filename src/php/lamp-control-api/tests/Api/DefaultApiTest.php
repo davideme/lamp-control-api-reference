@@ -85,11 +85,11 @@ class DefaultApiTest extends TestCase
             ->onlyMethods(['__construct'])
             ->disableOriginalConstructor()
             ->getMock();
-        // Inject the mock repository into the DefaultApi instance
+        // Inject the mock servicesitory into the DefaultApi instance
         $reflection = new \ReflectionClass(DefaultApi::class);
-        $repoProp = $reflection->getProperty('repo');
-        $repoProp->setAccessible(true);
-        $repoProp->setValue($this->api, $this->mockRepo);
+        $serviceProp = $reflection->getProperty('service');
+        $serviceProp->setAccessible(true);
+        $serviceProp->setValue($this->api, $this->mockRepo);
     }
 
     /**
