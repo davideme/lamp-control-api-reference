@@ -11,7 +11,7 @@ import (
 func TestLampAPIIntegration(t *testing.T) {
 	// Create a new LampAPI with repository
 	lampAPI := api.NewLampAPI()
-	
+
 	ctx := context.Background()
 
 	// Test create operation
@@ -61,7 +61,7 @@ func TestLampAPIIntegration(t *testing.T) {
 	getRequest := api.GetLampRequestObject{
 		LampId: lamp.Id.String(),
 	}
-	
+
 	getResponse, err := lampAPI.GetLamp(ctx, getRequest)
 	if err != nil {
 		t.Fatalf("GetLamp failed: %v", err)
@@ -75,24 +75,24 @@ func TestLampAPIIntegration(t *testing.T) {
 
 func TestDomainEntitySeparation(t *testing.T) {
 	// This test verifies that domain entities are separate from API models
-	
+
 	// Create a domain entity
 	lampEntity := entities.NewLampEntity(true)
-	
+
 	// Create a mapper
 	mapper := api.NewLampMapper()
-	
+
 	// Convert entity to API model
 	apiModel := mapper.ToAPIModel(lampEntity)
-	
+
 	// Convert API model back to entity
 	convertedEntity := mapper.ToEntity(apiModel)
-	
+
 	// Verify they have the same data
 	if lampEntity.ID != convertedEntity.ID {
 		t.Errorf("Expected ID %v, got %v", lampEntity.ID, convertedEntity.ID)
 	}
-	
+
 	if lampEntity.Status != convertedEntity.Status {
 		t.Errorf("Expected Status %v, got %v", lampEntity.Status, convertedEntity.Status)
 	}
