@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/davideme/lamp-control-api-reference/api/entities"
 )
 
@@ -39,9 +41,15 @@ func (m *LampMapper) CreateEntityFromAPICreate(createModel LampCreate) *entities
 	return entities.NewLampEntity(createModel.Status)
 }
 
-// UpdateEntityFromAPIUpdate updates a domain entity with data from API update model
+// UpdateEntityFromAPIUpdate creates a new domain entity with updated data from API update model
 func (m *LampMapper) UpdateEntityFromAPIUpdate(entity *entities.LampEntity, updateModel LampUpdate) *entities.LampEntity {
-	entity.UpdateStatus(updateModel.Status)
+	// Create a new entity instead of modifying the original to avoid race conditions
+	updatedEntity := &entities.LampEntity{
+		ID:        entity.ID,
+		Status:    updateModel.Status,
+		CreatedAt: entity.CreatedAt,
+		UpdatedAt: time.Now(),
+	}
 
-	return entity
+	return updatedEntity
 }

@@ -67,7 +67,13 @@ func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entit
 		return nil, ErrLampNotFound
 	}
 
-	return lampEntity, nil
+	// Return a copy to avoid race conditions when the entity is modified
+	return &entities.LampEntity{
+		ID:        lampEntity.ID,
+		Status:    lampEntity.Status,
+		CreatedAt: lampEntity.CreatedAt,
+		UpdatedAt: lampEntity.UpdatedAt,
+	}, nil
 }
 
 // Update modifies an existing lamp in the repository
@@ -106,7 +112,13 @@ func (r *InMemoryLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 
 	lampEntities := make([]*entities.LampEntity, 0, len(r.lamps))
 	for _, lampEntity := range r.lamps {
-		lampEntities = append(lampEntities, lampEntity)
+		// Return a copy to avoid race conditions when the entity is modified
+		lampEntities = append(lampEntities, &entities.LampEntity{
+			ID:        lampEntity.ID,
+			Status:    lampEntity.Status,
+			CreatedAt: lampEntity.CreatedAt,
+			UpdatedAt: lampEntity.UpdatedAt,
+		})
 	}
 
 	return lampEntities, nil
