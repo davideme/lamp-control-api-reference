@@ -5,12 +5,11 @@ from the HTTP API models to allow independent evolution.
 """
 
 from datetime import UTC, datetime
-from typing import Optional
 
 
 class LampEntity:
     """Domain entity representing a lamp in the internal model.
-    
+
     This is separate from the HTTP API model to allow independent evolution
     of the internal domain logic and external API contract.
     """
@@ -19,11 +18,11 @@ class LampEntity:
         self,
         id: str,
         status: bool,
-        created_at: Optional[datetime] = None,
-        updated_at: Optional[datetime] = None,
+        created_at: datetime | None = None,
+        updated_at: datetime | None = None,
     ) -> None:
         """Initialize a lamp entity.
-        
+
         Args:
             id: Unique identifier for the lamp
             status: Whether the lamp is on (True) or off (False)
@@ -37,7 +36,7 @@ class LampEntity:
 
     def update_status(self, status: bool) -> None:
         """Update the lamp status and timestamp.
-        
+
         Args:
             status: New status for the lamp
         """

@@ -16,10 +16,10 @@ class LampMapper:
     @staticmethod
     def to_api_model(entity: LampEntity) -> Lamp:
         """Convert from domain entity to API model.
-        
+
         Args:
             entity: Domain entity to convert
-            
+
         Returns:
             API model representation
         """
@@ -33,10 +33,10 @@ class LampMapper:
     @staticmethod
     def to_domain_entity(api_model: Lamp) -> LampEntity:
         """Convert from API model to domain entity.
-        
+
         Args:
             api_model: API model to convert
-            
+
         Returns:
             Domain entity representation
         """
@@ -50,11 +50,11 @@ class LampMapper:
     @staticmethod
     def create_from_api_model(lamp_create: LampCreate, lamp_id: str) -> LampEntity:
         """Create a domain entity from API create model.
-        
+
         Args:
             lamp_create: API create model
             lamp_id: Generated ID for the lamp
-            
+
         Returns:
             New domain entity
         """
@@ -66,11 +66,11 @@ class LampMapper:
     @staticmethod
     def update_from_api_model(entity: LampEntity, lamp_update: LampUpdate) -> LampEntity:
         """Update a domain entity from API update model.
-        
+
         Args:
             entity: Existing domain entity
             lamp_update: API update model
-            
+
         Returns:
             Updated domain entity
         """

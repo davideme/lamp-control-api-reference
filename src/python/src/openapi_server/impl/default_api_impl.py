@@ -4,7 +4,6 @@ from uuid import uuid4
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
 from src.openapi_server.dependencies import get_lamp_repository
-from src.openapi_server.entities.lamp_entity import LampEntity
 from src.openapi_server.mappers.lamp_mapper import LampMapper
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
@@ -38,11 +37,11 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             raise HTTPException(status_code=400, detail="Invalid request data")
 
         lamp_id = str(uuid4())
-        
+
         # Create domain entity from API model
         lamp_entity = LampMapper.create_from_api_model(lamp_create, lamp_id)
         created_entity = self._lamp_repository.create(lamp_entity)
-        
+
         # Convert domain entity back to API model
         return LampMapper.to_api_model(created_entity)
 
@@ -79,7 +78,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             from fastapi import HTTPException
 
             raise HTTPException(status_code=404, detail="Lamp not found")
-        
+
         # Convert domain entity to API model
         return LampMapper.to_api_model(lamp_entity)
 
@@ -95,10 +94,10 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         """
         # For simplicity, we'll return all lamps and ignore pagination for now
         all_lamp_entities = self._lamp_repository.list()
-        
+
         # Convert domain entities to API models
         all_lamps = [LampMapper.to_api_model(entity) for entity in all_lamp_entities]
-        
+
         return ListLamps200Response(
             data=all_lamps,
             next_cursor=None,  # No next page in this simple implementation
@@ -132,7 +131,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             # Update the domain entity using the mapper
             updated_entity = LampMapper.update_from_api_model(existing_entity, lamp_update)
             final_entity = self._lamp_repository.update(updated_entity)
-            
+
             # Convert domain entity back to API model
             return LampMapper.to_api_model(final_entity)
         except LampNotFoundError as err:
