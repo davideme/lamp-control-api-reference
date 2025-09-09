@@ -70,11 +70,11 @@ export class Service {
 
   async createLamp(request: CreateLampRequest, reply: FastifyReply): Promise<void> {
     const body = request.body;
-    
+
     // Convert API model to domain entity
     const lampEntityCreate = LampMapper.toDomainEntityCreate(body);
     const newLampEntity = await this.repository.create(lampEntityCreate);
-    
+
     // Convert domain entity to API model
     const newLamp = LampMapper.toApiModel(newLampEntity);
     return reply.code(201).send(newLamp);
@@ -83,12 +83,12 @@ export class Service {
   async updateLamp(request: UpdateLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
     const body = request.body;
-    
+
     try {
       // Convert API model to domain entity
       const lampEntityUpdate = LampMapper.toDomainEntityUpdate(body);
       const updatedLampEntity = await this.repository.update(lampId, lampEntityUpdate);
-      
+
       // Convert domain entity to API model
       const updatedLamp = LampMapper.toApiModel(updatedLampEntity);
       return reply.code(200).send(updatedLamp);
