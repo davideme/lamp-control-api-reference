@@ -43,6 +43,13 @@ docker run -p 8080:8080 kotlin-server
 * ~Supports collection formats for query parameters: csv, tsv, ssv, pipes.~
 * Some Kotlin and Java types are fully qualified to avoid conflicts with types defined in OpenAPI definitions.
 
+## Health Endpoint
+
+The service provides a health check endpoint for monitoring and liveness probes:
+
+- **GET** `/health` - Returns service health status
+  - Response: `{ "status": "ok" }` with HTTP 200 OK
+
 <a id="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
 

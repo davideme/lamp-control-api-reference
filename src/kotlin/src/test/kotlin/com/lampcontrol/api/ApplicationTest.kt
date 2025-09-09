@@ -38,7 +38,8 @@ class ApplicationTest {
         
         client.get("/health").apply {
             assertEquals(HttpStatusCode.OK, status)
-            assertEquals("OK", bodyAsText())
+            val responseBody = json.decodeFromString<Map<String, String>>(bodyAsText())
+            assertEquals("ok", responseBody["status"])
         }
     }
 
