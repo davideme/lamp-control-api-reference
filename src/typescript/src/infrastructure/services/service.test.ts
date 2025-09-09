@@ -3,7 +3,7 @@
  */
 import { jest } from '@jest/globals';
 import { LampRepository } from '../../domain/repositories/LampRepository';
-import { Lamp, LampCreate, LampUpdate } from '../../domain/models/Lamp';
+import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../../domain/entities/LampEntity';
 import { Service } from './service';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { LampNotFoundError } from '../../domain/errors/DomainError';
@@ -14,10 +14,10 @@ type MockFastifyReply = Partial<FastifyReply>;
 
 // Mock repository
 const mockRepository = {
-  findAll: jest.fn<(limit?: number) => Promise<Lamp[]>>(),
-  findById: jest.fn<(id: string) => Promise<Lamp | undefined>>(),
-  create: jest.fn<(data: LampCreate) => Promise<Lamp>>(),
-  update: jest.fn<(id: string, data: LampUpdate) => Promise<Lamp>>(),
+  findAll: jest.fn<(limit?: number) => Promise<LampEntity[]>>(),
+  findById: jest.fn<(id: string) => Promise<LampEntity | undefined>>(),
+  create: jest.fn<(data: LampEntityCreate) => Promise<LampEntity>>(),
+  update: jest.fn<(id: string, data: LampEntityUpdate) => Promise<LampEntity>>(),
   delete: jest.fn<(id: string) => Promise<void>>(),
 } as jest.Mocked<LampRepository>;
 
@@ -64,7 +64,7 @@ describe('Service', () => {
       }> = {
         query: {},
       };
-      const lamps: Lamp[] = [
+      const lampEntities: LampEntity[] = [
         {
           id: '1',
           status: true,
@@ -78,7 +78,7 @@ describe('Service', () => {
           updatedAt: '2023-01-01T00:00:00.000Z',
         },
       ];
-      mockRepository.findAll.mockResolvedValue(lamps);
+      mockRepository.findAll.mockResolvedValue(lampEntities);
 
       // Act
       await service.listLamps(mockRequest as any, mockReply as any);
@@ -86,7 +86,7 @@ describe('Service', () => {
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        data: lamps,
+        data: lampEntities,
         hasMore: false,
         nextCursor: null,
       });
@@ -100,7 +100,7 @@ describe('Service', () => {
       }> = {
         query: { pageSize: 1 },
       };
-      const lamps: Lamp[] = [
+      const lampEntities: LampEntity[] = [
         {
           id: '1',
           status: true,
@@ -108,7 +108,7 @@ describe('Service', () => {
           updatedAt: '2023-01-01T00:00:00.000Z',
         },
       ];
-      mockRepository.findAll.mockResolvedValue(lamps);
+      mockRepository.findAll.mockResolvedValue(lampEntities);
 
       // Act
       await service.listLamps(mockRequest as any, mockReply as any);
@@ -116,7 +116,7 @@ describe('Service', () => {
       // Assert
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        data: lamps,
+        data: lampEntities,
         hasMore: false,
         nextCursor: null,
       });
@@ -127,24 +127,24 @@ describe('Service', () => {
   describe('getLamp', () => {
     it('should return lamp when it exists', async () => {
       // Arrange
-      const lamp: Lamp = {
+      const lampEntity: LampEntity = {
         id: '1',
         status: true,
         createdAt: '2023-01-01T00:00:00.000Z',
         updatedAt: '2023-01-01T00:00:00.000Z',
       };
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
-        params: { lampId: lamp.id },
+        params: { lampId: lampEntity.id },
       };
-      mockRepository.findById.mockResolvedValue(lamp);
+      mockRepository.findById.mockResolvedValue(lampEntity);
 
       // Act
       await service.getLamp(mockRequest as any, mockReply as any);
 
       // Assert
-      expect(mockRepository.findById).toHaveBeenCalledWith(lamp.id);
+      expect(mockRepository.findById).toHaveBeenCalledWith(lampEntity.id);
       expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith(lamp);
+      expect(mockReply.send).toHaveBeenCalledWith(lampEntity);
     });
 
     it('should return 404 when lamp does not exist', async () => {
@@ -167,7 +167,7 @@ describe('Service', () => {
   describe('createLamp', () => {
     it('should create a new lamp', async () => {
       // Arrange
-      const newLamp: Lamp = {
+      const newLampEntity: LampEntity = {
         id: '1',
         status: true,
         createdAt: '2023-01-01T00:00:00.000Z',
@@ -176,7 +176,7 @@ describe('Service', () => {
       const mockRequest: MockFastifyRequest<{ body: { status: boolean } }> = {
         body: { status: true },
       };
-      mockRepository.create.mockResolvedValue(newLamp);
+      mockRepository.create.mockResolvedValue(newLampEntity);
 
       // Act
       await service.createLamp(mockRequest as any, mockReply as any);
@@ -184,14 +184,14 @@ describe('Service', () => {
       // Assert
       expect(mockRepository.create).toHaveBeenCalledWith({ status: true });
       expect(mockReply.code).toHaveBeenCalledWith(201);
-      expect(mockReply.send).toHaveBeenCalledWith(newLamp);
+      expect(mockReply.send).toHaveBeenCalledWith(newLampEntity);
     });
   });
 
   describe('updateLamp', () => {
     it('should update existing lamp', async () => {
       // Arrange
-      const updatedLamp: Lamp = {
+      const updatedLampEntity: LampEntity = {
         id: '1',
         status: false,
         createdAt: '2023-01-01T00:00:00.000Z',
@@ -204,7 +204,7 @@ describe('Service', () => {
         params: { lampId: '1' },
         body: { status: false },
       };
-      mockRepository.update.mockResolvedValue(updatedLamp);
+      mockRepository.update.mockResolvedValue(updatedLampEntity);
 
       // Act
       await service.updateLamp(mockRequest as any, mockReply as any);
@@ -214,7 +214,7 @@ describe('Service', () => {
         status: false,
       });
       expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith(updatedLamp);
+      expect(mockReply.send).toHaveBeenCalledWith(updatedLampEntity);
     });
 
     it('should return 404 when lamp does not exist', async () => {
