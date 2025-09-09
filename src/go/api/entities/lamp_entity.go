@@ -19,6 +19,7 @@ type LampEntity struct {
 // NewLampEntity creates a new lamp entity with generated ID and timestamps
 func NewLampEntity(status bool) *LampEntity {
 	now := time.Now()
+
 	return &LampEntity{
 		ID:        uuid.New(),
 		Status:    status,

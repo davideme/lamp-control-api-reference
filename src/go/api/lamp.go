@@ -69,6 +69,7 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 
 	// Convert domain entity back to API model
 	lamp := l.mapper.ToAPIModel(lampEntity)
+
 	return CreateLamp201JSONResponse(lamp), nil
 }
 
@@ -101,6 +102,7 @@ func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (Ge
 
 	// Convert domain entity to API model
 	lamp := l.mapper.ToAPIModel(lampEntity)
+
 	return GetLamp200JSONResponse(lamp), nil
 }
 
@@ -131,6 +133,7 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 
 	// Convert domain entity back to API model
 	updatedLamp := l.mapper.ToAPIModel(updatedEntity)
+
 	return UpdateLamp200JSONResponse(updatedLamp), nil
 }
 
