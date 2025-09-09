@@ -14,6 +14,20 @@ This document provides a comparison of the different language implementations in
 | Go | 801 | 207 | 1319 | 1.65 | 98.50 |
 | Kotlin | 583 | 462 | 795 | 1.36 | 79.19 |
 | Ruby | null | null | 0 | N/A | N/A |
+
+## ULOC Metrics
+
+| Language   | App ULOC | App ULOC (No Generated) | Test ULOC | Test/App Ratio | Coverage (%) |
+|------------|----------|-------------------------|-----------|---------------|--------------|
+| TypeScript | 494 | 150 | 237 | 0.92 | 85.48 |
+| Python | 603 | 236 | 214 | 0.55 | 86.40 |
+| Java | 995 | 517 | 365 | 0.58 | 94.04 |
+| C# | 615 | 225 | 281 | 0.84 | 98.59 |
+| PHP | 1360 | 198 | 571 | 0.72 | N/A |
+| Go | 1168 | 179 | 630 | 1.17 | 98.50 |
+| Kotlin | 881 | 382 | 390 | 0.79 | 79.19 |
+| Ruby | null | null | null | N/A | N/A |
+
 ## API Interface Comparison
 
 ### REST API
