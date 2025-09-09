@@ -3,71 +3,90 @@ package com.lampcontrol.service
 import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.entity.LampEntity
+import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.time.Instant
 
 /**
- * In-memory repository implementation for managing lamp operations.
+ * Service layer that handles business logic and coordinates between API and domain layers.
+ * Uses mappers to maintain separation between API models and domain entities.
  */
-class InMemoryLampRepository : LampRepository {
-    // In-memory storage for lamps - using string keys for simplicity
-    private val lamps = ConcurrentHashMap<String, Lamp>()
+class LampService(
+    private val lampRepository: LampRepository,
+    private val lampMapper: LampMapper
+) {
     
     /**
-     * Get all lamps
+     * Get all lamps as API models
      */
-    override fun getAllLamps(): List<Lamp> {
-        return lamps.values.toList()
+    fun getAllLamps(): List<Lamp> {
+        return lampRepository.getAllLamps()
+            .map { lampMapper.toApiModel(it) }
     }
     
     /**
-     * Get a lamp by ID
+     * Get a lamp by string ID and return as API model
      */
-    override fun getLampById(id: String): Lamp? {
-        return lamps[id]
+    fun getLampById(lampId: String): Lamp? {
+        val uuid = try {
+            UUID.fromString(lampId)
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
+        
+        return lampRepository.getLampById(uuid)
+            ?.let { lampMapper.toApiModel(it) }
     }
     
     /**
-     * Create a new lamp
+     * Create a new lamp from API model
      */
-    override fun createLamp(lampCreate: LampCreate): Lamp {
-        val uuid = UUID.randomUUID()
-        val now = Instant.now().toString()
-        val lamp = Lamp(
-            id = uuid,
-            status = lampCreate.status,
-            createdAt = now,
-            updatedAt = now
-        )
-        // Store using string representation of UUID for consistent lookup
-        lamps[uuid.toString()] = lamp
-        return lamp
+    fun createLamp(lampCreate: LampCreate): Lamp {
+        val domainEntity = lampMapper.toDomainEntityCreate(lampCreate)
+        val savedEntity = lampRepository.createLamp(domainEntity)
+        return lampMapper.toApiModel(savedEntity)
     }
     
     /**
-     * Update an existing lamp
+     * Update a lamp by string ID with API update model
      */
-    override fun updateLamp(id: String, lampUpdate: LampUpdate): Lamp? {
-        val existingLamp = lamps[id] ?: return null
-    val now = Instant.now().toString()
-    val updatedLamp = existingLamp.copy(status = lampUpdate.status, updatedAt = now)
-        lamps[id] = updatedLamp
-        return updatedLamp
+    fun updateLamp(lampId: String, lampUpdate: LampUpdate): Lamp? {
+        val uuid = try {
+            UUID.fromString(lampId)
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
+        
+        val existingEntity = lampRepository.getLampById(uuid) ?: return null
+        val updatedEntity = lampMapper.updateDomainEntity(existingEntity, lampUpdate)
+        val savedEntity = lampRepository.updateLamp(updatedEntity) ?: return null
+        return lampMapper.toApiModel(savedEntity)
     }
     
     /**
-     * Delete a lamp by ID
+     * Delete a lamp by string ID
      */
-    override fun deleteLamp(id: String): Boolean {
-        return lamps.remove(id) != null
+    fun deleteLamp(lampId: String): Boolean {
+        val uuid = try {
+            UUID.fromString(lampId)
+        } catch (e: IllegalArgumentException) {
+            return false
+        }
+        
+        return lampRepository.deleteLamp(uuid)
     }
     
     /**
-     * Check if a lamp exists
+     * Check if a lamp exists by string ID
      */
-    override fun lampExists(id: String): Boolean {
-        return lamps.containsKey(id)
+    fun lampExists(lampId: String): Boolean {
+        val uuid = try {
+            UUID.fromString(lampId)
+        } catch (e: IllegalArgumentException) {
+            return false
+        }
+        
+        return lampRepository.lampExists(uuid)
     }
 }

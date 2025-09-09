@@ -30,9 +30,9 @@ import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.api.models.ListLamps200Response
-import com.lampcontrol.repository.LampRepository
+import com.lampcontrol.service.LampService
 
-fun Route.DefaultApi(lampService: LampRepository) {
+fun Route.DefaultApi(lampService: LampService) {
 
     post<Paths.createLamp> {
         try {
