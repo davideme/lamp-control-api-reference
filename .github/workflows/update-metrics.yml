@@ -83,39 +83,10 @@ jobs:
           git commit -m "chore: update SCC code metrics JSON files" || exit 0
           git push
 
-      - name: Extract code coverage percentages
-        id: coverage
-        run: |
-          chmod +x scripts/extract-coverage.sh
-          
-          # Run the script and capture output
-          COVERAGE_OUTPUT=$(./scripts/extract-coverage.sh)
-          echo "$COVERAGE_OUTPUT"
-          
-          # Extract coverage values from script output and set environment variables
-          export TS_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "TS_COVERAGE=" | cut -d'=' -f2)
-          export PY_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "PY_COVERAGE=" | cut -d'=' -f2)
-          export JAVA_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "JAVA_COVERAGE=" | cut -d'=' -f2)
-          export CS_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "CS_COVERAGE=" | cut -d'=' -f2)
-          export PHP_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "PHP_COVERAGE=" | cut -d'=' -f2)
-          export GO_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "GO_COVERAGE=" | cut -d'=' -f2)
-          export KOTLIN_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "KOTLIN_COVERAGE=" | cut -d'=' -f2)
-          export RUBY_COVERAGE=$(echo "$COVERAGE_OUTPUT" | grep "RUBY_COVERAGE=" | cut -d'=' -f2)
-          
-          # Set environment variables for subsequent steps
-          echo "TS_COVERAGE=$TS_COVERAGE" >> $GITHUB_ENV
-          echo "PY_COVERAGE=$PY_COVERAGE" >> $GITHUB_ENV
-          echo "JAVA_COVERAGE=$JAVA_COVERAGE" >> $GITHUB_ENV
-          echo "CS_COVERAGE=$CS_COVERAGE" >> $GITHUB_ENV
-          echo "PHP_COVERAGE=$PHP_COVERAGE" >> $GITHUB_ENV
-          echo "GO_COVERAGE=$GO_COVERAGE" >> $GITHUB_ENV
-          echo "KOTLIN_COVERAGE=$KOTLIN_COVERAGE" >> $GITHUB_ENV
-          echo "RUBY_COVERAGE=$RUBY_COVERAGE" >> $GITHUB_ENV
-
       - name: Generate SCC table
         run: |
-          echo "| Language   | App Lines | App Lines (No Generated) | Test Lines | Test/App Ratio | Coverage (%) |" > tools/metrics.md
-          echo "|------------|-----------|--------------------------|------------|---------------|--------------|" >> tools/metrics.md
+          echo "| Language   | App Lines | App Lines (No Generated) | Test Lines | App ULOC | App ULOC (No Generated) | Test ULOC | App DRYness | App DRYness (No Generated) | Test DRYness |" > tools/metrics.md
+          echo "|------------|-----------|--------------------------|------------|----------|-------------------------|-----------|-------------|----------------------------|--------------|" >> tools/metrics.md
 
           # Define language display names and corresponding folder names
           langs=("TypeScript:typescript" "Python:python" "Java:java" "C#:csharp" "PHP:php" "Go:go" "Kotlin:kotlin" "Ruby:ruby")
@@ -123,6 +94,8 @@ jobs:
           for entry in "${langs[@]}"; do
             lang_name="${entry%%:*}"
             folder="${entry##*:}"
+            
+            # Get lines data
             app_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-tests.json)
             total_lines=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .Code] | add' docs/loc/scc-json-${folder}/scc-${folder}.json)
             
@@ -137,34 +110,43 @@ jobs:
             fi
             
             test_lines=$((total_lines - app_lines))
+            
+            # Get ULOC data
+            app_uloc=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .ULOC] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-tests.json)
+            total_uloc=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .ULOC] | add' docs/loc/scc-json-${folder}/scc-${folder}.json)
+            
+            # Get app ULOC without generated files
+            if [ -f "docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json" ] && [ -s "docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json" ]; then
+              app_uloc_no_generated=$(jq --arg lang_name "$lang_name" '[.[] | select(.Name == $lang_name) | .ULOC] | add' docs/loc/scc-json-${folder}/scc-${folder}-no-generated.json)
+              if [ "$app_uloc_no_generated" = "null" ] || [ -z "$app_uloc_no_generated" ]; then
+                app_uloc_no_generated="$app_uloc"
+              fi
+            else
+              app_uloc_no_generated="$app_uloc"
+            fi
+            
+            test_uloc=$((total_uloc - app_uloc))
+            
+            # Calculate DRYness metrics (ULOC / Lines)
             if [[ "$app_lines" =~ ^[0-9]+$ && "$app_lines" -ne 0 ]]; then
-              ratio=$(awk "BEGIN {printf \"%.2f\", $test_lines/$app_lines}")
+              app_dryness=$(awk "BEGIN {printf \"%.2f\", $app_uloc/$app_lines}")
             else
-              ratio="N/A"
+              app_dryness="N/A"
+            fi
+            
+            if [[ "$app_lines_no_generated" =~ ^[0-9]+$ && "$app_lines_no_generated" -ne 0 ]]; then
+              app_dryness_no_generated=$(awk "BEGIN {printf \"%.2f\", $app_uloc_no_generated/$app_lines_no_generated}")
+            else
+              app_dryness_no_generated="N/A"
+            fi
+            
+            if [[ "$test_lines" =~ ^[0-9]+$ && "$test_lines" -ne 0 ]]; then
+              test_dryness=$(awk "BEGIN {printf \"%.2f\", $test_uloc/$test_lines}")
+            else
+              test_dryness="N/A"
             fi
 
-            # Add coverage
-            if [[ "$lang_name" == "TypeScript" ]]; then
-              coverage="${TS_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "Python" ]]; then
-              coverage="${PY_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "Java" ]]; then
-              coverage="${JAVA_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "C#" ]]; then
-              coverage="${CS_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "PHP" ]]; then
-              coverage="${PHP_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "Go" ]]; then
-              coverage="${GO_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "Kotlin" ]]; then
-              coverage="${KOTLIN_COVERAGE:-N/A}"
-            elif [[ "$lang_name" == "Ruby" ]]; then
-              coverage="${RUBY_COVERAGE:-N/A}"
-            else
-              coverage="N/A"
-            fi
-
-            echo "| $lang_name | $app_lines | $app_lines_no_generated | $test_lines | $ratio | $coverage |" >> tools/metrics.md
+            echo "| $lang_name | $app_lines | $app_lines_no_generated | $test_lines | $app_uloc | $app_uloc_no_generated | $test_uloc | $app_dryness | $app_dryness_no_generated | $test_dryness |" >> tools/metrics.md
           done
 
       - name: Update COMPARISON.md
@@ -175,7 +157,7 @@ jobs:
           # Update the metrics section in COMPARISON.md
           awk -v metrics="$METRICS" '
           BEGIN { p=1 }
-          /^## Code Metrics$/ { p=0; print; print ""; print metrics; next }
+          /^## ULOC Metrics$/ { p=0; print; print ""; print metrics; next }
           /^##[^#]/ { p=1 }
           p { print }
           ' docs/COMPARISON.md > docs/COMPARISON.md.tmp
