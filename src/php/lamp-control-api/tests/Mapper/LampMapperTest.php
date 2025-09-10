@@ -34,7 +34,7 @@ class LampMapperTest extends TestCase
         // Assert
         $data = $apiModel->getData();
         $dataArray = is_object($data) ? get_object_vars($data) : (array)$data;
-        
+
         $this->assertEquals($id->toString(), $dataArray['id']);
         $this->assertTrue($dataArray['status']);
         $this->assertEquals($createdAt->format('c'), $dataArray['createdAt']);
@@ -47,7 +47,7 @@ class LampMapperTest extends TestCase
         $id = Uuid::uuid4();
         $createdAt = '2023-01-01T00:00:00+00:00';
         $updatedAt = '2023-01-02T00:00:00+00:00';
-        
+
         $apiModel = new Lamp();
         $apiModel->setData([
             'id' => $id->toString(),
@@ -99,7 +99,7 @@ class LampMapperTest extends TestCase
     {
         // Arrange
         $originalEntity = LampEntity::create(false);
-        
+
         $lampUpdate = new LampUpdate();
         $lampUpdate->setData(['status' => true]);
 
@@ -117,7 +117,7 @@ class LampMapperTest extends TestCase
     {
         // Arrange
         $originalEntity = LampEntity::create(true);
-        
+
         $lampUpdate = new LampUpdate();
         $lampUpdate->setData([]);
 

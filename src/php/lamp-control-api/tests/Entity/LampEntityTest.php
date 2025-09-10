@@ -98,7 +98,7 @@ class LampEntityTest extends TestCase
         // Assert - should be able to create and manipulate without API dependencies
         $reflection = new \ReflectionClass($entity);
         $apiModelNamespace = 'OpenAPIServer\Model';
-        
+
         // Verify no direct dependency on API model classes in namespace
         $this->assertStringNotContainsString($apiModelNamespace, $reflection->getNamespaceName());
         $this->assertNotNull((string) $entity); // Basic functionality works
