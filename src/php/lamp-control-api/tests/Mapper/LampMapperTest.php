@@ -76,6 +76,7 @@ class LampMapperTest extends TestCase
         $entity = $this->mapper->toDomainEntityCreate($lampCreate);
 
         // Assert
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertNotNull($entity->getId());
         $this->assertTrue($entity->getStatus());
         $this->assertInstanceOf(\DateTimeInterface::class, $entity->getCreatedAt());

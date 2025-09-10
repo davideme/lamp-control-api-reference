@@ -14,6 +14,7 @@ class LampRepositoryTest extends TestCase
         $entity = LampEntity::create(true);
         $createdEntity = $repo->create($entity);
 
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertNotNull($createdEntity);
         $this->assertTrue($createdEntity->getStatus());
         $this->assertTrue($entity->getId()->equals($createdEntity->getId()));

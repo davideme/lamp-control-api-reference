@@ -41,30 +41,22 @@ class ErrorTest extends TestCase
     /**
      * Setup before running any test cases
      */
-    public static function setUpBeforeClass(): void
-    {
-    }
+    public static function setUpBeforeClass(): void {}
 
     /**
      * Setup before running each test case
      */
-    public function setUp(): void
-    {
-    }
+    public function setUp(): void {}
 
     /**
      * Clean up after running each test case
      */
-    public function tearDown(): void
-    {
-    }
+    public function tearDown(): void {}
 
     /**
      * Clean up after running all test cases
      */
-    public static function tearDownAfterClass(): void
-    {
-    }
+    public static function tearDownAfterClass(): void {}
 
     /**
      * Test "Error"
@@ -100,6 +92,7 @@ class ErrorTest extends TestCase
     public function testGetOpenApiSchema()
     {
         $schemaArr = Error::getOpenApiSchema();
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertIsArray($schemaArr);
     }
 }

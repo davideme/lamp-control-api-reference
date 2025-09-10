@@ -25,7 +25,6 @@
 namespace OpenAPIServer\Api;
 
 use OpenAPIServer\Api\DefaultApi;
-use OpenAPIServer\Repository\LampRepository;
 use OpenAPIServer\Service\LampService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -46,9 +45,6 @@ use Slim\Psr7\Uri;
  */
 class DefaultApiTest extends TestCase
 {
-    /** @var MockObject|LampRepository */
-    private $mockRepo;
-
     /** @var MockObject|LampService */
     private $mockService;
 
@@ -80,9 +76,6 @@ class DefaultApiTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->mockRepo = $this->getMockBuilder(LampRepository::class)
-            ->onlyMethods(['create', 'all', 'get', 'update', 'delete'])
-            ->getMock();
         $this->mockService = $this->getMockBuilder(LampService::class)
             ->disableOriginalConstructor()
             ->getMock();

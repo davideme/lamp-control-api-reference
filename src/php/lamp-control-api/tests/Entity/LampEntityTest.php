@@ -15,6 +15,7 @@ class LampEntityTest extends TestCase
         $entity = LampEntity::create(true);
 
         // Assert
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertNotNull($entity->getId());
         $this->assertTrue($entity->getStatus());
         $this->assertInstanceOf(\DateTimeInterface::class, $entity->getCreatedAt());
@@ -101,6 +102,7 @@ class LampEntityTest extends TestCase
 
         // Verify no direct dependency on API model classes in namespace
         $this->assertStringNotContainsString($apiModelNamespace, $reflection->getNamespaceName());
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertNotNull((string) $entity); // Basic functionality works
     }
 }
