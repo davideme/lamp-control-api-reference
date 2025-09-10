@@ -143,7 +143,7 @@ jobs:
             
             if [[ "$app_lines" =~ ^[0-9]+$ && "$app_lines" -ne 0 ]]; then
               ratio=$(awk "BEGIN {printf \"%.2f\", $test_lines/$app_lines}")
-              app_dryness=$(awk "BEGIN {printf \"%.2f\", $app_uloc/$app_lines}")
+              app_dryness=$(awk "BEGIN {printf \"%.2f\", $total_uloc/$total_sloc}")
             else
               ratio="N/A"
               app_dryness="N/A"
