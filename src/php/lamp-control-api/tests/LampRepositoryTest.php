@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class LampRepositoryTest extends TestCase
 {
-    public function testCreateAndGetLamp()
+    public function testCreateAndGetLamp(): void
     {
         $repo = new LampRepository();
         $entity = LampEntity::create(true);
@@ -22,7 +22,7 @@ class LampRepositoryTest extends TestCase
         $this->assertTrue($entity->equals($fetched));
     }
 
-    public function testAllReturnsAllLamps()
+    public function testAllReturnsAllLamps(): void
     {
         $repo = new LampRepository();
         $entity1 = LampEntity::create(true);
@@ -35,7 +35,7 @@ class LampRepositoryTest extends TestCase
         $this->assertCount(2, $all);
     }
 
-    public function testUpdateLamp()
+    public function testUpdateLamp(): void
     {
         $repo = new LampRepository();
         $entity = LampEntity::create(false);
@@ -49,7 +49,7 @@ class LampRepositoryTest extends TestCase
         $this->assertTrue($entity->getId()->equals($result->getId()));
     }
 
-    public function testDeleteLamp()
+    public function testDeleteLamp(): void
     {
         $repo = new LampRepository();
         $entity = LampEntity::create(true);
@@ -61,14 +61,14 @@ class LampRepositoryTest extends TestCase
         $this->assertNull($repo->get($lampId));
     }
 
-    public function testUpdateNonexistentLampReturnsNull()
+    public function testUpdateNonexistentLampReturnsNull(): void
     {
         $repo = new LampRepository();
         $entity = LampEntity::create(true);
         $this->assertNull($repo->update($entity));
     }
 
-    public function testDeleteNonexistentLampReturnsFalse()
+    public function testDeleteNonexistentLampReturnsFalse(): void
     {
         $repo = new LampRepository();
         $this->assertFalse($repo->delete('999'));

@@ -47,6 +47,7 @@ class LampEntity
     public static function create(bool $status): static
     {
         $now = new DateTime();
+        /** @phpstan-ignore-next-line new.static */
         return new static(Uuid::uuid4(), $status, $now, $now);
     }
 
@@ -58,6 +59,7 @@ class LampEntity
      */
     public function withUpdatedStatus(bool $newStatus): static
     {
+        /** @phpstan-ignore-next-line new.static */
         return new static($this->id, $newStatus, $this->createdAt, new DateTime());
     }
 

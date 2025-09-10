@@ -20,7 +20,7 @@ class LampMapperTest extends TestCase
         $this->mapper = new LampMapper();
     }
 
-    public function testToApiModelShouldConvertEntityToApiModel()
+    public function testToApiModelShouldConvertEntityToApiModel(): void
     {
         // Arrange
         $id = Uuid::uuid4();
@@ -41,7 +41,7 @@ class LampMapperTest extends TestCase
         $this->assertEquals($updatedAt->format('c'), $dataArray['updatedAt']);
     }
 
-    public function testToDomainEntityShouldConvertApiModelToEntity()
+    public function testToDomainEntityShouldConvertApiModelToEntity(): void
     {
         // Arrange
         $id = Uuid::uuid4();
@@ -66,7 +66,7 @@ class LampMapperTest extends TestCase
         $this->assertEquals(new DateTime($updatedAt), $entity->getUpdatedAt());
     }
 
-    public function testToDomainEntityCreateShouldCreateEntityFromCreateModel()
+    public function testToDomainEntityCreateShouldCreateEntityFromCreateModel(): void
     {
         // Arrange
         $lampCreate = new LampCreate();
@@ -82,7 +82,7 @@ class LampMapperTest extends TestCase
         $this->assertInstanceOf(\DateTimeInterface::class, $entity->getUpdatedAt());
     }
 
-    public function testToDomainEntityCreateWithMissingStatusShouldDefaultToFalse()
+    public function testToDomainEntityCreateWithMissingStatusShouldDefaultToFalse(): void
     {
         // Arrange
         $lampCreate = new LampCreate();
@@ -95,7 +95,7 @@ class LampMapperTest extends TestCase
         $this->assertFalse($entity->getStatus());
     }
 
-    public function testUpdateDomainEntityShouldUpdateEntityFromUpdateModel()
+    public function testUpdateDomainEntityShouldUpdateEntityFromUpdateModel(): void
     {
         // Arrange
         $originalEntity = LampEntity::create(false);
@@ -113,7 +113,7 @@ class LampMapperTest extends TestCase
         $this->assertGreaterThanOrEqual($originalEntity->getUpdatedAt(), $updatedEntity->getUpdatedAt());
     }
 
-    public function testUpdateDomainEntityWithMissingStatusShouldKeepOriginalStatus()
+    public function testUpdateDomainEntityWithMissingStatusShouldKeepOriginalStatus(): void
     {
         // Arrange
         $originalEntity = LampEntity::create(true);

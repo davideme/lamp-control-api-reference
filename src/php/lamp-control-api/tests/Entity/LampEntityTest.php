@@ -9,7 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 class LampEntityTest extends TestCase
 {
-    public function testCreateShouldGenerateNewIdAndTimestamps()
+    public function testCreateShouldGenerateNewIdAndTimestamps(): void
     {
         // Act
         $entity = LampEntity::create(true);
@@ -22,7 +22,7 @@ class LampEntityTest extends TestCase
         $this->assertEquals($entity->getCreatedAt()->getTimestamp(), $entity->getUpdatedAt()->getTimestamp());
     }
 
-    public function testWithUpdatedStatusShouldCreateUpdatedEntity()
+    public function testWithUpdatedStatusShouldCreateUpdatedEntity(): void
     {
         // Arrange
         $originalEntity = LampEntity::create(false);
@@ -38,7 +38,7 @@ class LampEntityTest extends TestCase
         $this->assertGreaterThan($originalEntity->getUpdatedAt(), $updatedEntity->getUpdatedAt());
     }
 
-    public function testWithUpdatedStatusShouldMaintainImmutability()
+    public function testWithUpdatedStatusShouldMaintainImmutability(): void
     {
         // Arrange
         $originalEntity = LampEntity::create(false);
@@ -52,7 +52,7 @@ class LampEntityTest extends TestCase
         $this->assertNotSame($originalEntity, $updatedEntity); // Different instances
     }
 
-    public function testEqualsShouldReturnTrueForSameId()
+    public function testEqualsShouldReturnTrueForSameId(): void
     {
         // Arrange
         $id = Uuid::uuid4();
@@ -64,7 +64,7 @@ class LampEntityTest extends TestCase
         $this->assertTrue($entity1->equals($entity2));
     }
 
-    public function testEqualsShouldReturnFalseForDifferentId()
+    public function testEqualsShouldReturnFalseForDifferentId(): void
     {
         // Arrange
         $timestamp = new DateTime();
@@ -75,7 +75,7 @@ class LampEntityTest extends TestCase
         $this->assertFalse($entity1->equals($entity2));
     }
 
-    public function testToStringShouldReturnFormattedString()
+    public function testToStringShouldReturnFormattedString(): void
     {
         // Arrange
         $entity = LampEntity::create(true);
@@ -89,7 +89,7 @@ class LampEntityTest extends TestCase
         $this->assertStringContainsString('true', $result);
     }
 
-    public function testDomainEntitySeparationShouldBeIndependentOfApiModels()
+    public function testDomainEntitySeparationShouldBeIndependentOfApiModels(): void
     {
         // This test ensures that LampEntity doesn't depend on any API model classes
         // Arrange

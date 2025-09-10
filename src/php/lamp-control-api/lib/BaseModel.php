@@ -43,7 +43,7 @@ class BaseModel implements OpenApiModelInterface
      * Should be overwritten by inherited class.
      */
     protected const MODEL_SCHEMA =
-        <<<'SCHEMA'
+    <<<'SCHEMA'
     {
         "type" : "object",
         "properties": {}
@@ -102,7 +102,7 @@ SCHEMA;
     /**
      * Gets OAS 3.0 schema mapped to current class.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public static function getOpenApiSchema(): array
     {

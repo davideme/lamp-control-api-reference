@@ -35,7 +35,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'Invalid JSON format',
                 'details' => json_last_error_msg()
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -45,7 +45,7 @@ class DefaultApi extends AbstractDefaultApi
                 'error' => 'INVALID_ARGUMENT',
                 'message' => 'Request body must be a valid JSON object'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -56,7 +56,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Request body must be a JSON object, not an array'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -68,7 +68,7 @@ class DefaultApi extends AbstractDefaultApi
                     'message' => 'The request contains invalid parameters or malformed data',
                     'details' => 'Field names cannot be empty strings'
                 ];
-                $response->getBody()->write(json_encode($errorData));
+                $response->getBody()->write($this->safeJsonEncode($errorData));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
 
@@ -79,7 +79,7 @@ class DefaultApi extends AbstractDefaultApi
                     'message' => 'The request contains invalid parameters or malformed data',
                     'details' => 'Unknown field: ' . $fieldName
                 ];
-                $response->getBody()->write(json_encode($errorData));
+                $response->getBody()->write($this->safeJsonEncode($errorData));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
         }
@@ -91,7 +91,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Missing required field: status'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -102,14 +102,14 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Invalid format for parameter "status": expected boolean'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         $lampCreate = new LampCreate();
         $lampCreate->setData($data);
         $lamp = $this->service->create($lampCreate);
-        $response->getBody()->write(json_encode($lamp->getData()));
+        $response->getBody()->write($this->safeJsonEncode($lamp->getData()));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     }
 
@@ -127,7 +127,7 @@ class DefaultApi extends AbstractDefaultApi
             'hasMore' => false,  // Since we're not implementing actual pagination yet
             'nextCursor' => null
         ];
-        $response->getBody()->write(json_encode($paginatedResponse));
+        $response->getBody()->write($this->safeJsonEncode($paginatedResponse));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
@@ -140,7 +140,7 @@ class DefaultApi extends AbstractDefaultApi
         if (!$lamp) {
             return $response->withStatus(404);
         }
-        $response->getBody()->write(json_encode($lamp->getData()));
+        $response->getBody()->write($this->safeJsonEncode($lamp->getData()));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
@@ -158,7 +158,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'Invalid JSON format',
                 'details' => json_last_error_msg()
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -168,7 +168,7 @@ class DefaultApi extends AbstractDefaultApi
                 'error' => 'INVALID_ARGUMENT',
                 'message' => 'Request body must be a valid JSON object'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -179,7 +179,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Request body must be a JSON object, not an array'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -191,7 +191,7 @@ class DefaultApi extends AbstractDefaultApi
                     'message' => 'The request contains invalid parameters or malformed data',
                     'details' => 'Field names cannot be empty strings'
                 ];
-                $response->getBody()->write(json_encode($errorData));
+                $response->getBody()->write($this->safeJsonEncode($errorData));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
 
@@ -202,7 +202,7 @@ class DefaultApi extends AbstractDefaultApi
                     'message' => 'The request contains invalid parameters or malformed data',
                     'details' => 'Unknown field: ' . $fieldName
                 ];
-                $response->getBody()->write(json_encode($errorData));
+                $response->getBody()->write($this->safeJsonEncode($errorData));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
         }
@@ -214,7 +214,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Missing required field: status'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -225,7 +225,7 @@ class DefaultApi extends AbstractDefaultApi
                 'message' => 'The request contains invalid parameters or malformed data',
                 'details' => 'Invalid format for parameter "status": expected boolean'
             ];
-            $response->getBody()->write(json_encode($errorData));
+            $response->getBody()->write($this->safeJsonEncode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -235,7 +235,7 @@ class DefaultApi extends AbstractDefaultApi
         if (!$lamp) {
             return $response->withStatus(404);
         }
-        $response->getBody()->write(json_encode($lamp->getData()));
+        $response->getBody()->write($this->safeJsonEncode($lamp->getData()));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
@@ -250,5 +250,17 @@ class DefaultApi extends AbstractDefaultApi
             return $response->withStatus(404);
         }
         return $response->withStatus(204);
+    }
+
+    /**
+     * Helper method to safely encode JSON and handle potential failures
+     * 
+     * @param mixed $data The data to encode
+     * @return string The JSON string or fallback error message
+     */
+    private function safeJsonEncode($data): string
+    {
+        $json = json_encode($data);
+        return $json !== false ? $json : '{"error":"JSON_ENCODE_ERROR"}';
     }
 }
