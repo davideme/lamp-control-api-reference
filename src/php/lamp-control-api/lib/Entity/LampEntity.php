@@ -44,10 +44,10 @@ class LampEntity
      * @param bool $status
      * @return static
      */
-    public static function create(bool $status): self
+    public static function create(bool $status): static
     {
         $now = new DateTime();
-        return new self(Uuid::uuid4(), $status, $now, $now);
+        return new static(Uuid::uuid4(), $status, $now, $now);
     }
 
     /**
@@ -56,9 +56,9 @@ class LampEntity
      * @param bool $newStatus
      * @return static
      */
-    public function withUpdatedStatus(bool $newStatus): self
+    public function withUpdatedStatus(bool $newStatus): static
     {
-        return new self($this->id, $newStatus, $this->createdAt, new DateTime());
+        return new static($this->id, $newStatus, $this->createdAt, new DateTime());
     }
 
     /**
