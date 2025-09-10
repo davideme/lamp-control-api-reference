@@ -39,7 +39,7 @@ use Slim\Exception\HttpNotImplementedException;
  */
 class RegisterRoutes
 {
-    /** @var array[] list of all api operations */
+    /** @var array<int, array<string, mixed>> list of all api operations */
     private $operations = [
     [
       'httpMethod' => 'POST',

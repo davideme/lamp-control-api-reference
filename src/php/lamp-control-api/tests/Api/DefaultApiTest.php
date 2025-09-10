@@ -25,7 +25,7 @@
 namespace OpenAPIServer\Api;
 
 use OpenAPIServer\Api\DefaultApi;
-use OpenAPIServer\Repository\LampRepository;
+use OpenAPIServer\Service\LampService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\StreamFactory;
@@ -45,8 +45,8 @@ use Slim\Psr7\Uri;
  */
 class DefaultApiTest extends TestCase
 {
-    /** @var MockObject|LampRepository */
-    private $mockRepo;
+    /** @var MockObject|LampService */
+    private $mockService;
 
     /** @var DefaultApi */
     private $api;
@@ -61,7 +61,7 @@ class DefaultApiTest extends TestCase
         $cookies = [];
         $serverParams = [];
         $streamFactory = new StreamFactory();
-        $stream = $streamFactory->createStream($body ? json_encode($body) : '');
+        $stream = $streamFactory->createStream($body ? (json_encode($body) ?: '{}') : '');
         return new SlimRequest($method, $uri, $headers, $cookies, $serverParams, $stream);
     }
 
@@ -78,18 +78,18 @@ class DefaultApiTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->mockRepo = $this->getMockBuilder(LampRepository::class)
-            ->onlyMethods(['create', 'all', 'get', 'update', 'delete'])
+        $this->mockService = $this->getMockBuilder(LampService::class)
+            ->disableOriginalConstructor()
             ->getMock();
         $this->api = $this->getMockBuilder(DefaultApi::class)
             ->onlyMethods(['__construct'])
             ->disableOriginalConstructor()
             ->getMock();
-        // Inject the mock repository into the DefaultApi instance
+        // Inject the mock service into the DefaultApi instance
         $reflection = new \ReflectionClass(DefaultApi::class);
-        $repoProp = $reflection->getProperty('repo');
-        $repoProp->setAccessible(true);
-        $repoProp->setValue($this->api, $this->mockRepo);
+        $serviceProp = $reflection->getProperty('service');
+        $serviceProp->setAccessible(true);
+        $serviceProp->setValue($this->api, $this->mockService);
     }
 
     /**
@@ -113,24 +113,24 @@ class DefaultApiTest extends TestCase
      *
      * @covers ::createLamp
      */
-    public function testCreateLamp()
+    public function testCreateLamp(): void
     {
         $now = (new \DateTime())->format(\DateTime::ATOM);
         $lampData = ['id' => '1', 'status' => true, 'createdAt' => $now, 'updatedAt' => $now];
         $lampObj = $this->createMock(\OpenAPIServer\Model\Lamp::class);
         $lampObj->method('getData')->willReturn($lampData);
         $lampObj->method('jsonSerialize')->willReturn($lampData);
-        $this->mockRepo->expects($this->once())
+        $this->mockService->expects($this->once())
             ->method('create')
             ->willReturn($lampObj);
-        $this->mockRepo->expects($this->once())
+        $this->mockService->expects($this->once())
             ->method('all')
             ->willReturn([$lampObj]);
-        $this->mockRepo->expects($this->exactly(2))
+        $this->mockService->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive(['1'], ['1'])
             ->willReturnOnConsecutiveCalls($lampObj, null);
-        $this->mockRepo->expects($this->once())
+        $this->mockService->expects($this->once())
             ->method('update')
             ->willReturnCallback(function ($id, $update) use ($now) {
                 // Use a fixed timestamp that's clearly different from creation time
@@ -142,7 +142,7 @@ class DefaultApiTest extends TestCase
                 $updatedLamp->method('jsonSerialize')->willReturn($updatedData);
                 return $updatedLamp;
             });
-        $this->mockRepo->expects($this->once())
+        $this->mockService->expects($this->once())
             ->method('delete')
             ->willReturn(true);
 

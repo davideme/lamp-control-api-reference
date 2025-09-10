@@ -100,6 +100,7 @@ class LampCreateTest extends TestCase
     public function testGetOpenApiSchema()
     {
         $schemaArr = LampCreate::getOpenApiSchema();
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertIsArray($schemaArr);
     }
 }

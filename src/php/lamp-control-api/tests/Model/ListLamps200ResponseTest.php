@@ -120,6 +120,7 @@ class ListLamps200ResponseTest extends TestCase
     public function testGetOpenApiSchema()
     {
         $schemaArr = ListLamps200Response::getOpenApiSchema();
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertIsArray($schemaArr);
     }
 }

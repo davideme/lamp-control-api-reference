@@ -1,15 +1,20 @@
+using System;
 using System.Collections.Concurrent;
-using LampControlApi.Controllers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using LampControlApi.Domain.Entities;
 
 namespace LampControlApi.Services
 {
     /// <summary>
     /// In-memory implementation of the lamp repository.
+    /// Uses domain entities to maintain separation from API models.
     /// </summary>
     public class InMemoryLampRepository : ILampRepository
     {
 #pragma warning disable SA1000 // KeywordsMustBeSpacedCorrectly
-        private readonly ConcurrentDictionary<Guid, Lamp> _lamps = new();
+        private readonly ConcurrentDictionary<Guid, LampEntity> _lamps = new();
 #pragma warning restore SA1000 // KeywordsMustBeSpacedCorrectly
 
         /// <summary>
@@ -20,41 +25,46 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public Task<ICollection<Lamp>> GetAllAsync()
+        public Task<ICollection<LampEntity>> GetAllAsync()
         {
             var lamps = _lamps.Values.ToList();
-            return Task.FromResult<ICollection<Lamp>>(lamps);
+            return Task.FromResult<ICollection<LampEntity>>(lamps);
         }
 
         /// <inheritdoc/>
-        public Task<Lamp?> GetByIdAsync(Guid id)
+        public Task<LampEntity?> GetByIdAsync(Guid id)
         {
             _lamps.TryGetValue(id, out var lamp);
             return Task.FromResult(lamp);
         }
 
         /// <inheritdoc/>
-        public Task<Lamp> CreateAsync(Lamp lamp)
+        public Task<LampEntity> CreateAsync(LampEntity entity)
         {
-            if (lamp.Id == Guid.Empty)
+            if (entity == null)
             {
-                lamp.Id = Guid.NewGuid();
+                throw new ArgumentNullException(nameof(entity));
             }
 
-            _lamps[lamp.Id] = lamp;
-            return Task.FromResult(lamp);
+            _lamps[entity.Id] = entity;
+            return Task.FromResult(entity);
         }
 
         /// <inheritdoc/>
-        public Task<Lamp?> UpdateAsync(Lamp lamp)
+        public Task<LampEntity?> UpdateAsync(LampEntity entity)
         {
-            if (_lamps.ContainsKey(lamp.Id))
+            if (entity == null)
             {
-                _lamps[lamp.Id] = lamp;
-                return Task.FromResult<Lamp?>(lamp);
+                throw new ArgumentNullException(nameof(entity));
             }
 
-            return Task.FromResult<Lamp?>(null);
+            if (_lamps.ContainsKey(entity.Id))
+            {
+                _lamps[entity.Id] = entity;
+                return Task.FromResult<LampEntity?>(entity);
+            }
+
+            return Task.FromResult<LampEntity?>(null);
         }
 
         /// <inheritdoc/>

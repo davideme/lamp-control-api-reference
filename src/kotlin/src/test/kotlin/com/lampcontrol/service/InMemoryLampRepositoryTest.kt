@@ -1,7 +1,6 @@
 package com.lampcontrol.service
 
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.entity.LampEntity
 import org.junit.jupiter.api.Test
 import kotlin.test.*
 
@@ -10,7 +9,8 @@ class InMemoryLampRepositoryTest {
 
     @Test
     fun `create, retrieve, update and delete lamp lifecycle`() {
-        val created = repo.createLamp(LampCreate(status = true))
+        val entity = LampEntity.create(true)
+        val created = repo.createLamp(entity)
 
         assertNotNull(created.id)
         assertTrue(created.status)
@@ -18,20 +18,21 @@ class InMemoryLampRepositoryTest {
         assertNotNull(created.updatedAt)
 
         // retrieval
-        val byId = repo.getLampById(created.id.toString())
+        val byId = repo.getLampById(created.id)
         assertEquals(created, byId)
 
         // update
         val beforeUpdatedAt = created.updatedAt
-        val updated = repo.updateLamp(created.id.toString(), LampUpdate(status = false))
+        val updatedEntity = created.withUpdatedStatus(false)
+        val updated = repo.updateLamp(updatedEntity)
         assertNotNull(updated)
         assertFalse(updated!!.status)
         assertNotEquals(beforeUpdatedAt, updated.updatedAt)
 
         // existence and delete
-        assertTrue(repo.lampExists(created.id.toString()))
-        assertTrue(repo.deleteLamp(created.id.toString()))
-        assertFalse(repo.lampExists(created.id.toString()))
-        assertNull(repo.getLampById(created.id.toString()))
+        assertTrue(repo.lampExists(created.id))
+        assertTrue(repo.deleteLamp(created.id))
+        assertFalse(repo.lampExists(created.id))
+        assertNull(repo.getLampById(created.id))
     }
 }
