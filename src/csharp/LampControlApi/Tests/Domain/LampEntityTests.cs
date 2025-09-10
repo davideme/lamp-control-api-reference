@@ -107,7 +107,7 @@ namespace LampControlApi.Tests.Domain
             // Assert - should be able to create and manipulate without API dependencies
             var entityType = typeof(LampEntity);
             var apiModelNamespace = "LampControlApi.Controllers";
-            
+
             // Verify no direct dependency on API model classes in namespace
             Assert.IsFalse(entityType.Namespace!.Contains(apiModelNamespace));
             Assert.IsNotNull(entity.ToString()); // Basic functionality works
