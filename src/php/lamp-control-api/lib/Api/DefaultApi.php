@@ -254,7 +254,7 @@ class DefaultApi extends AbstractDefaultApi
 
     /**
      * Helper method to safely encode JSON and handle potential failures
-     * 
+     *
      * @param mixed $data The data to encode
      * @return string The JSON string or fallback error message
      */
