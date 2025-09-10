@@ -53,7 +53,12 @@ namespace LampControlApi.Tests.Domain
             // Assert
             Assert.IsFalse(originalEntity.Status);
             Assert.IsTrue(updatedEntity.Status);
-            Assert.AreNotEqual(originalEntity, updatedEntity);
+
+            // Verify immutability - a new object should have been created
+            Assert.IsFalse(ReferenceEquals(originalEntity, updatedEntity));
+
+            // Both entities represent the same domain object (same ID) so they should be equal
+            Assert.AreEqual(originalEntity, updatedEntity);
         }
 
         [TestMethod]
