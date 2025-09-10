@@ -23,7 +23,7 @@ class HealthEndpointTest extends TestCase
      *
      * Test the health endpoint logic separately from the routing.
      */
-    public function testHealthEndpointLogic()
+    public function testHealthEndpointLogic(): void
     {
         // Test the health check logic
         $healthData = ['status' => 'ok'];

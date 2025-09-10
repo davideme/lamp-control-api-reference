@@ -4,10 +4,10 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import com.lampcontrol.api.apis.DefaultApi
-import com.lampcontrol.service.InMemoryLampRepository
+import com.lampcontrol.di.ServiceContainer
 
 fun Application.configureRouting() {
-    val lampService = InMemoryLampRepository()
+    val lampService = ServiceContainer.lampService
     
     routing {
         get("/") {

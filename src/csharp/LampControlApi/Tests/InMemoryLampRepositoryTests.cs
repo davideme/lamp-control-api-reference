@@ -1,4 +1,7 @@
-using LampControlApi.Controllers;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using LampControlApi.Domain.Entities;
 using LampControlApi.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -43,11 +46,7 @@ namespace LampControlApi.Tests
         public async Task CreateAsync_ShouldAddNewLamp()
         {
             // Arrange
-            var newLamp = new Lamp
-            {
-                Id = Guid.NewGuid(),
-                Status = true
-            };
+            var newLamp = LampEntity.Create(true);
 
             // Act
             var createdLamp = await _repository.CreateAsync(newLamp);
@@ -68,11 +67,8 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var expectedId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000");
-            var lamp = new Lamp
-            {
-                Id = expectedId,
-                Status = true
-            };
+            var createdAt = DateTimeOffset.UtcNow;
+            var lamp = new LampEntity(expectedId, true, createdAt, createdAt);
             await _repository.CreateAsync(lamp);
 
             // Act
@@ -93,18 +89,11 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.Parse("123e4567-e89b-12d3-a456-426614174001");
-            var initialLamp = new Lamp
-            {
-                Id = lampId,
-                Status = false
-            };
+            var createdAt = DateTimeOffset.UtcNow;
+            var initialLamp = new LampEntity(lampId, false, createdAt, createdAt);
             await _repository.CreateAsync(initialLamp);
 
-            var updatedLamp = new Lamp
-            {
-                Id = lampId,
-                Status = true // Flip the status
-            };
+            var updatedLamp = initialLamp.WithUpdatedStatus(true); // Flip the status
 
             // Act
             var result = await _repository.UpdateAsync(updatedLamp);
@@ -112,7 +101,7 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(lampId, result.Id);
-            Assert.AreEqual(updatedLamp.Status, result.Status);
+            Assert.IsTrue(result.Status);
         }
 
         /// <summary>
@@ -124,12 +113,9 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.Parse("123e4567-e89b-12d3-a456-426614174002");
-            var lamp = new Lamp
-            {
-                Id = lampId,
-                Status = true
-            };
-            await _repository.CreateAsync(lamp);
+            var lamp = LampEntity.Create(true);
+            var lampWithId = new LampEntity(lampId, lamp.Status, lamp.CreatedAt, lamp.UpdatedAt);
+            await _repository.CreateAsync(lampWithId);
 
             // Act
             var deleted = await _repository.DeleteAsync(lampId);

@@ -12,12 +12,12 @@ import io.ktor.server.metrics.dropwizard.*
 import java.util.concurrent.TimeUnit
 import io.ktor.server.routing.*
 import com.lampcontrol.api.apis.DefaultApi
-import com.lampcontrol.service.InMemoryLampRepository
+import com.lampcontrol.di.ServiceContainer
 import io.ktor.serialization.kotlinx.json.json
 
 
 fun Application.main() {
-    val lampService = InMemoryLampRepository()
+    val lampService = ServiceContainer.lampService
     
     install(DefaultHeaders)
     install(DropwizardMetrics) {

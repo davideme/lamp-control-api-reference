@@ -100,6 +100,7 @@ class ErrorTest extends TestCase
     public function testGetOpenApiSchema()
     {
         $schemaArr = Error::getOpenApiSchema();
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType */
         $this->assertIsArray($schemaArr);
     }
 }

@@ -2,6 +2,7 @@ package com.lampcontrol.service
 
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -9,11 +10,13 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class LampServiceTest {
-    private lateinit var lampService: LampRepository
+    private lateinit var lampService: LampService
 
     @BeforeEach
     fun setUp() {
-    lampService = InMemoryLampRepository()
+        val repository: LampRepository = InMemoryLampRepository()
+        val mapper = LampMapper()
+        lampService = LampService(repository, mapper)
     }
 
     @Test

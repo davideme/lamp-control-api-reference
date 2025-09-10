@@ -98,6 +98,7 @@ class BaseModelTest extends TestCase
                 BasicStringTestClass::getOpenApiSchema(),
             ] as $schema
         ) {
+            /** @phpstan-ignore-next-line function.alreadyNarrowedType, method.alreadyNarrowedType, booleanOr.alwaysTrue */
             $this->assertTrue(is_array($schema) || is_object($schema));
         }
     }
@@ -244,6 +245,7 @@ class BaseModelTest extends TestCase
         $basic = new BasicObjectTestClass();
         $data = ['foo' => 'bar'];
         $basic->setData($data);
+        /** @phpstan-ignore-next-line property.notFound */
         $this->assertSame('bar', $basic->foo);
     }
 
@@ -270,8 +272,11 @@ class BaseModelTest extends TestCase
     public function testSetter()
     {
         $item = new CatRefTestClass();
+        /** @phpstan-ignore-next-line property.notFound */
         $item->className = 'cheshire';
+        /** @phpstan-ignore-next-line property.notFound */
         $item->color = 'black';
+        /** @phpstan-ignore-next-line property.notFound */
         $item->declawed = false;
         $this->assertSame('cheshire', $item->className);
         $this->assertSame('black', $item->color);
@@ -313,6 +318,7 @@ class BaseModelTest extends TestCase
             )
         );
         $item = new CatRefTestClass();
+        /** @phpstan-ignore-next-line property.notFound */
         $item->unknownProp = 'foobar';
     }
 
@@ -329,6 +335,7 @@ class BaseModelTest extends TestCase
             )
         );
         $item = new CatRefTestClass();
+        /** @phpstan-ignore-next-line property.notFound */
         $unknownProp = $item->unknownProp;
     }
 
@@ -350,6 +357,7 @@ class BaseModelTest extends TestCase
     public function testSetterAndGetterOfBasicObject()
     {
         $item = new BasicObjectTestClass();
+        /** @phpstan-ignore-next-line property.notFound */
         $item->unknown = 'foo';
         $this->assertEquals('foo', $item->unknown);
     }

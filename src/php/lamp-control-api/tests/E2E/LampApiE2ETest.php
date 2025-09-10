@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 class LampApiE2ETest extends TestCase
 {
     private static $serverProcess;
-    private static $serverPort;
     private static $baseUrl = 'http://localhost:8080'; // Adjust if your API runs elsewhere
 
     public static function setUpBeforeClass(): void
@@ -18,7 +17,6 @@ class LampApiE2ETest extends TestCase
         fclose($sock);
         $parts = explode(':', $address);
         $port = end($parts);
-        self::$serverPort = $port;
         self::$baseUrl = "http://127.0.0.1:$port";
 
         // Start PHP built-in server in background
@@ -58,6 +56,7 @@ class LampApiE2ETest extends TestCase
     {
         $this->markTestSkipped('must be revisited.');
         // 1. Create lamp
+        // @phpstan-ignore-next-line deadCode.unreachable
         $createResponse = $this->apiRequest('POST', '/v1/lamps', ['status' => true]);
         $this->assertEquals(201, $createResponse['status']);
         $lamp = $createResponse['body'];
@@ -100,6 +99,7 @@ class LampApiE2ETest extends TestCase
         $this->assertEquals(404, $getDeletedResponse['status']);
     }
 
+    /** @phpstan-ignore-next-line method.unused */
     private function apiRequest($method, $path, $body = null)
     {
         $url = self::$baseUrl . $path;
