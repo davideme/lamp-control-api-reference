@@ -78,9 +78,37 @@ class ListLamps200ResponseTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        self::markTestIncomplete(
-            'Test of "ListLamps200Response" model has not been implemented yet.'
-        );
+        
+        // Test that the list lamps response model can be created
+        $this->assertInstanceOf(ListLamps200Response::class, $testListLamps200Response);
+        
+        // Test setting and getting data
+        $responseData = [
+            'data' => [
+                [
+                    'id' => '123e4567-e89b-12d3-a456-426614174000',
+                    'status' => true,
+                    'createdAt' => '2023-01-01T00:00:00Z',
+                    'updatedAt' => '2023-01-01T00:00:00Z'
+                ]
+            ],
+            'nextCursor' => 'cursor123',
+            'hasMore' => false
+        ];
+        $testListLamps200Response->setData($responseData);
+        
+        $retrievedData = $testListLamps200Response->getData();
+        $this->assertEquals($responseData['data'], $retrievedData->data);
+        $this->assertEquals($responseData['nextCursor'], $retrievedData->nextCursor);
+        $this->assertEquals($responseData['hasMore'], $retrievedData->hasMore);
+        
+        // Test JSON serialization
+        $json = json_encode($testListLamps200Response);
+        $this->assertJson($json);
+        $decoded = json_decode($json, true);
+        $this->assertEquals($responseData['data'], $decoded['data']);
+        $this->assertEquals($responseData['nextCursor'], $decoded['nextCursor']);
+        $this->assertEquals($responseData['hasMore'], $decoded['hasMore']);
     }
 
     /**
@@ -88,9 +116,29 @@ class ListLamps200ResponseTest extends TestCase
      */
     public function testPropertyData()
     {
-        self::markTestIncomplete(
-            'Test of "data" property in "ListLamps200Response" model has not been implemented yet.'
-        );
+        $testListLamps200Response = new ListLamps200Response();
+        
+        // Test setting data property with empty array
+        $testListLamps200Response->data = [];
+        $this->assertEquals([], $testListLamps200Response->data);
+        
+        // Test setting data property with lamp data
+        $lampData = [
+            [
+                'id' => '123e4567-e89b-12d3-a456-426614174000',
+                'status' => true,
+                'createdAt' => '2023-01-01T00:00:00Z',
+                'updatedAt' => '2023-01-01T00:00:00Z'
+            ],
+            [
+                'id' => 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+                'status' => false,
+                'createdAt' => '2023-01-02T00:00:00Z',
+                'updatedAt' => '2023-01-02T00:00:00Z'
+            ]
+        ];
+        $testListLamps200Response->data = $lampData;
+        $this->assertEquals($lampData, $testListLamps200Response->data);
     }
 
     /**
@@ -98,9 +146,26 @@ class ListLamps200ResponseTest extends TestCase
      */
     public function testPropertyNextCursor()
     {
-        self::markTestIncomplete(
-            'Test of "nextCursor" property in "ListLamps200Response" model has not been implemented yet.'
-        );
+        $testListLamps200Response = new ListLamps200Response();
+        
+        // Test setting nextCursor to a string value
+        $testListLamps200Response->nextCursor = 'cursor123';
+        $this->assertEquals('cursor123', $testListLamps200Response->nextCursor);
+        
+        // Test setting nextCursor to null (nullable property)
+        $testListLamps200Response->nextCursor = null;
+        $this->assertNull($testListLamps200Response->nextCursor);
+        
+        // Test setting nextCursor to empty string
+        $testListLamps200Response->nextCursor = '';
+        $this->assertEquals('', $testListLamps200Response->nextCursor);
+        
+        // Test that nextCursor property appears in schema and is nullable
+        $schema = ListLamps200Response::getOpenApiSchema();
+        $this->assertArrayHasKey('properties', $schema);
+        $this->assertArrayHasKey('nextCursor', $schema['properties']);
+        $this->assertEquals('string', $schema['properties']['nextCursor']['type']);
+        $this->assertTrue($schema['properties']['nextCursor']['nullable']);
     }
 
     /**
@@ -108,9 +173,29 @@ class ListLamps200ResponseTest extends TestCase
      */
     public function testPropertyHasMore()
     {
-        self::markTestIncomplete(
-            'Test of "hasMore" property in "ListLamps200Response" model has not been implemented yet.'
-        );
+        $testListLamps200Response = new ListLamps200Response();
+        
+        // Test setting hasMore to true
+        $testListLamps200Response->hasMore = true;
+        $this->assertTrue($testListLamps200Response->hasMore);
+        
+        // Test setting hasMore to false
+        $testListLamps200Response->hasMore = false;
+        $this->assertFalse($testListLamps200Response->hasMore);
+        
+        // Test that required hasMore property appears in schema
+        $schema = ListLamps200Response::getOpenApiSchema();
+        $this->assertArrayHasKey('required', $schema);
+        $this->assertContains('hasMore', $schema['required']);
+        $this->assertContains('data', $schema['required']);
+        $this->assertArrayHasKey('properties', $schema);
+        $this->assertArrayHasKey('hasMore', $schema['properties']);
+        $this->assertEquals('boolean', $schema['properties']['hasMore']['type']);
+        
+        // Test data property schema
+        $this->assertArrayHasKey('data', $schema['properties']);
+        $this->assertEquals('array', $schema['properties']['data']['type']);
+        $this->assertArrayHasKey('items', $schema['properties']['data']);
     }
 
     /**
