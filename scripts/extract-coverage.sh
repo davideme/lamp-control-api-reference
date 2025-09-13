@@ -164,20 +164,26 @@ PHP_COVERAGE="N/A"
 
 # Try to find PHP coverage XML files
 if [ -f "$PHP_CLOVER_XML" ]; then
-  # Extract line coverage from Clover XML - get total statements and covered statements
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
-  
-  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+  # Extract line coverage from Clover XML - get the project-level summary metrics
+  PHP_METRICS_LINE=$(grep '<metrics files=' "$PHP_CLOVER_XML")
+  if [ -n "$PHP_METRICS_LINE" ]; then
+    PHP_TOTAL_STATEMENTS=$(echo "$PHP_METRICS_LINE" | sed -n 's/.*\bstatements="\([0-9]*\)".*/\1/p')
+    PHP_COVERED_STATEMENTS=$(echo "$PHP_METRICS_LINE" | sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p')
+    
+    if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
+      PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+    fi
   fi
 elif [ -f "$PHP_ALT_CLOVER_XML" ]; then
   # Try alternative location
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
-  
-  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+  PHP_METRICS_LINE=$(grep '<metrics files=' "$PHP_ALT_CLOVER_XML")
+  if [ -n "$PHP_METRICS_LINE" ]; then
+    PHP_TOTAL_STATEMENTS=$(echo "$PHP_METRICS_LINE" | sed -n 's/.*\bstatements="\([0-9]*\)".*/\1/p')
+    PHP_COVERED_STATEMENTS=$(echo "$PHP_METRICS_LINE" | sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p')
+    
+    if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
+      PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
+    fi
   fi
 fi
 
