@@ -78,9 +78,29 @@ class ErrorTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        self::markTestIncomplete(
-            'Test of "Error" model has not been implemented yet.'
-        );
+        
+        // Test that the error model can be created
+        $this->assertInstanceOf(Error::class, $testError);
+        
+        // Test setting and getting data
+        $errorData = [
+            'error' => 'INVALID_ARGUMENT'
+        ];
+        $testError->setData($errorData);
+        
+        $retrievedData = $testError->getData();
+        $this->assertEquals($errorData['error'], $retrievedData->error);
+        
+        // Test JSON serialization
+        $json = json_encode($testError);
+        $this->assertJson($json);
+        $decoded = json_decode($json, true);
+        $this->assertEquals($errorData['error'], $decoded['error']);
+        
+        // Test creating from data directly
+        $errorFromData = Error::createFromData(['error' => 'NOT_FOUND']);
+        $this->assertInstanceOf(Error::class, $errorFromData);
+        $this->assertEquals('NOT_FOUND', $errorFromData->error);
     }
 
     /**
@@ -88,9 +108,29 @@ class ErrorTest extends TestCase
      */
     public function testPropertyError()
     {
-        self::markTestIncomplete(
-            'Test of "error" property in "Error" model has not been implemented yet.'
-        );
+        $testError = new Error();
+        
+        // Test setting error property
+        $testError->error = 'INVALID_ARGUMENT';
+        $this->assertEquals('INVALID_ARGUMENT', $testError->error);
+        
+        // Test setting different error type
+        $testError->error = 'NOT_FOUND';
+        $this->assertEquals('NOT_FOUND', $testError->error);
+        
+        // Test setting empty string
+        $testError->error = '';
+        $this->assertEquals('', $testError->error);
+        
+        // Test that required error property appears in schema
+        $schema = Error::getOpenApiSchema();
+        $this->assertArrayHasKey('required', $schema);
+        $this->assertContains('error', $schema['required']);
+        $this->assertArrayHasKey('properties', $schema);
+        $this->assertArrayHasKey('error', $schema['properties']);
+        $this->assertEquals('string', $schema['properties']['error']['type']);
+        $this->assertEquals('Error type identifier', $schema['properties']['error']['description']);
+        $this->assertEquals('INVALID_ARGUMENT', $schema['properties']['error']['example']);
     }
 
     /**
