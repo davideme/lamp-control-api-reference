@@ -19,13 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 public class HealthConfiguration {
 
-  /** Register a servlet for the health endpoint at root level, bypassing the context path */
+  /**
+   * Register a servlet for health endpoint at root level. Note: Due to context path configuration,
+   * this servlet serves at /health within the /v1 context. A separate root-level endpoint would
+   * require additional container configuration.
+   */
   @Bean
   public ServletRegistrationBean<HttpServlet> healthServletRegistration() {
     final ServletRegistrationBean<HttpServlet> registration = new ServletRegistrationBean<>();
     registration.setServlet(new HealthServlet());
     registration.addUrlMappings("/health");
     registration.setName("healthServlet");
+    registration.setLoadOnStartup(1);
     return registration;
   }
 

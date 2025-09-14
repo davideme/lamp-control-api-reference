@@ -71,3 +71,17 @@ The Docker image uses:
 Once running, the API documentation is available at:
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+## Health Endpoint
+
+The service provides a health check endpoint for monitoring and liveness probes:
+
+- **GET** `/v1/health` - Returns service health status
+  - Response: `{ "status": "ok" }` with HTTP 200 OK
+  - Content-Type: `application/json`
+
+This endpoint is useful for:
+- Container orchestration health checks (Docker, Kubernetes)
+- Load balancer health probes
+- Monitoring systems
+- CI/CD pipeline validation
