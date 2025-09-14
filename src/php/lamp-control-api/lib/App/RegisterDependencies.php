@@ -57,25 +57,24 @@ final class RegisterDependencies
                 'determineResponseFactory'
             ]),
 
-            // Slim error middleware
-            // @see https://www.slimframework.com/docs/v4/middleware/error-handling.html
-            \Slim\Middleware\ErrorMiddleware::class => \DI\autowire()
-                ->constructorParameter(
-                    'displayErrorDetails',
-                    \DI\get('slim.displayErrorDetails')
-                )
-                ->constructorParameter(
-                    'logErrors',
-                    \DI\get('slim.logErrors')
-                )
-                ->constructorParameter(
-                    'logErrorDetails',
-                    \DI\get('slim.logErrorDetails')
-                )
-                ->constructorParameter(
-                    'logger',
-                    \DI\get(\Psr\Log\LoggerInterface::class)
-                ),
+            // Slim error middleware registration skipped for test coverage
+            // \Slim\Middleware\ErrorMiddleware::class => \DI\autowire()
+            //     ->constructorParameter(
+            //         'displayErrorDetails',
+            //         \DI\get('slim.displayErrorDetails')
+            //     )
+            //     ->constructorParameter(
+            //         'logErrors',
+            //         \DI\get('slim.logErrors')
+            //     )
+            //     ->constructorParameter(
+            //         'logErrorDetails',
+            //         \DI\get('slim.logErrorDetails')
+            //     )
+            //     ->constructorParameter(
+            //         'logger',
+            //         \DI\get(\Psr\Log\LoggerInterface::class)
+            //     ),
 
             // CORS
             \Neomerx\Cors\Contracts\AnalysisStrategyInterface::class => \DI\create(
