@@ -50,6 +50,18 @@ final class RegisterDependencies
     public function __invoke(\DI\ContainerBuilder $containerBuilder): void
     {
         $containerBuilder->addDefinitions([
+            // Slim configuration parameters
+            'slim.displayErrorDetails' => false,
+            'slim.logErrors' => true,
+            'slim.logErrorDetails' => false,
+
+            // Default mode and logger parameters (can be overridden by config files)
+            'mode' => 'production',
+            'logger.name' => 'lamp-api',
+            'logger.path' => 'php://stderr',
+            'logger.level' => \Monolog\Logger::INFO,
+            'logger.options' => [],
+
             // Response factory required as typed argument in next ErrorMiddleware injection
             \Psr\Http\Message\ResponseFactoryInterface::class =>
             \DI\factory([
@@ -57,9 +69,16 @@ final class RegisterDependencies
                 'determineResponseFactory'
             ]),
 
-            // Slim error middleware
-            // @see https://www.slimframework.com/docs/v4/middleware/error-handling.html
+            // Slim error middleware registration
             \Slim\Middleware\ErrorMiddleware::class => \DI\autowire()
+                ->constructorParameter(
+                    'callableResolver',
+                    \DI\get(\Slim\CallableResolver::class)
+                )
+                ->constructorParameter(
+                    'responseFactory',
+                    \DI\get(\Psr\Http\Message\ResponseFactoryInterface::class)
+                )
                 ->constructorParameter(
                     'displayErrorDetails',
                     \DI\get('slim.displayErrorDetails')

@@ -6,12 +6,17 @@
  * regardless of file extensions in the URL path or HTTP method
  */
 
-$requestUri = $_SERVER['REQUEST_URI'];
-$requestMethod = $_SERVER['REQUEST_METHOD'];
+// Guard against CLI invocation where certain server variables may be unset
+$requestUri = $_SERVER['REQUEST_URI'] ?? '';
+$requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-// Parse the URI to remove query parameters
-$parsedUri = parse_url($requestUri);
-$path = $parsedUri['path'] ?? $requestUri;
+// Parse the URI to remove query parameters (avoid deprecation by ensuring string input)
+if ($requestUri !== '') {
+    $parsedUri = parse_url($requestUri);
+    $path = $parsedUri['path'] ?? $requestUri;
+} else {
+    $path = '/';
+}
 
 // Check if this is an API request (starts with /v1/)
 if (strpos($path, '/v1/') === 0) {

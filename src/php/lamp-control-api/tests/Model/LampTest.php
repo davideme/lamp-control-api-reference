@@ -78,9 +78,31 @@ class LampTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        self::markTestIncomplete(
-            'Test of "Lamp" model has not been implemented yet.'
-        );
+
+        // Test that the lamp can be created
+        $this->assertInstanceOf(Lamp::class, $testLamp);
+
+        // Test setting and getting data
+        $lampData = [
+            'id' => '123e4567-e89b-12d3-a456-426614174000',
+            'status' => true,
+            'createdAt' => '2023-01-01T00:00:00Z',
+            'updatedAt' => '2023-01-01T00:00:00Z'
+        ];
+        $testLamp->setData($lampData);
+
+        $retrievedData = $testLamp->getData();
+        $this->assertEquals($lampData['id'], $retrievedData->id);
+        $this->assertEquals($lampData['status'], $retrievedData->status);
+        $this->assertEquals($lampData['createdAt'], $retrievedData->createdAt);
+        $this->assertEquals($lampData['updatedAt'], $retrievedData->updatedAt);
+
+        // Test JSON serialization
+        $json = json_encode($testLamp);
+        $this->assertJson($json);
+        $decoded = json_decode($json, true);
+        $this->assertEquals($lampData['id'], $decoded['id']);
+        $this->assertEquals($lampData['status'], $decoded['status']);
     }
 
     /**
@@ -88,9 +110,21 @@ class LampTest extends TestCase
      */
     public function testPropertyId()
     {
-        self::markTestIncomplete(
-            'Test of "id" property in "Lamp" model has not been implemented yet.'
-        );
+        $testLamp = new Lamp();
+
+        // Test setting id property
+        $testId = '123e4567-e89b-12d3-a456-426614174000';
+        $testLamp->id = $testId;
+        $this->assertEquals($testId, $testLamp->id);
+
+        // Test with different UUID format
+        $testId2 = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+        $testLamp->id = $testId2;
+        $this->assertEquals($testId2, $testLamp->id);
+
+        // Test that invalid property access throws exception
+        $this->expectException(\InvalidArgumentException::class);
+        $invalidProp = $testLamp->invalidProperty;
     }
 
     /**
@@ -98,9 +132,22 @@ class LampTest extends TestCase
      */
     public function testPropertyStatus()
     {
-        self::markTestIncomplete(
-            'Test of "status" property in "Lamp" model has not been implemented yet.'
-        );
+        $testLamp = new Lamp();
+
+        // Test setting status to true
+        $testLamp->status = true;
+        $this->assertTrue($testLamp->status);
+
+        // Test setting status to false
+        $testLamp->status = false;
+        $this->assertFalse($testLamp->status);
+
+        // Test setting status as integer (should work due to PHP type coercion)
+        $testLamp->status = 1;
+        $this->assertEquals(1, $testLamp->status);
+
+        $testLamp->status = 0;
+        $this->assertEquals(0, $testLamp->status);
     }
 
     /**

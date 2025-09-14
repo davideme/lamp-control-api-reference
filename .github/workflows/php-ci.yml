@@ -52,50 +52,45 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
     
-    - name: Run PHPUnit tests
-      run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
-
-    - name: Check code coverage
+    - name: Run PHPUnit tests (Clover only)
       run: |
-        echo "Checking PHP code coverage..."
-        
-        # Extract coverage percentage from the clover XML
+        export XDEBUG_MODE=coverage
+        vendor/bin/phpunit --colors=never --coverage-clover=coverage.xml
+
+    - name: Check code coverage (Clover XML only)
+      run: |
+        echo "Checking PHP code coverage using Clover XML (statements)..."
+        THRESHOLD=80
         if [ -f coverage.xml ]; then
-          # Get the project-level summary metrics
           METRICS_LINE=$(grep '<metrics files=' coverage.xml)
           if [ -n "$METRICS_LINE" ]; then
             TOTAL_STATEMENTS=$(echo "$METRICS_LINE" | sed -n 's/.*\bstatements="\([0-9]*\)".*/\1/p')
             COVERED_STATEMENTS=$(echo "$METRICS_LINE" | sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p')
-            
+            echo "Debug: statements=$TOTAL_STATEMENTS coveredstatements=$COVERED_STATEMENTS"
             if [[ "$TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$COVERED_STATEMENTS" =~ ^[0-9]+$ && "$TOTAL_STATEMENTS" -gt 0 ]]; then
               COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
-              echo "Current PHP code coverage: ${COVERAGE}%"
-              
-              # Check if coverage is at least 80%
-              MEETS_THRESHOLD=$(awk -v cov="$COVERAGE" -v thresh="80" 'BEGIN {print (cov >= thresh)}')
-              
+              echo "Current PHP statement coverage: ${COVERAGE}%"
+              MEETS_THRESHOLD=$(awk -v cov="$COVERAGE" -v thresh="$THRESHOLD" 'BEGIN {print (cov >= thresh)}')
               if [ "$MEETS_THRESHOLD" -eq 0 ]; then
-                echo "❌ Code coverage is ${COVERAGE}%, below required 80%"
-                echo "Please add more tests to increase coverage."
+                echo "❌ Statement coverage is ${COVERAGE}%, below required ${THRESHOLD}%"
                 exit 1
               else
-                echo "✅ Code coverage is ${COVERAGE}%, meets required 80%"
+                echo "✅ Statement coverage is ${COVERAGE}%, meets required ${THRESHOLD}%"
               fi
             else
-              echo "❌ Could not parse coverage data from clover XML"
+              echo "❌ Could not parse statement coverage values"
               exit 1
             fi
           else
-            echo "❌ Could not find project metrics in coverage XML"
+            echo "❌ Could not find metrics line in coverage.xml"
             exit 1
           fi
         else
-          echo "❌ Coverage file coverage.xml not found"
+          echo "❌ coverage.xml not found"
           exit 1
         fi
 
-    - name: Generate HTML coverage report
-      run: vendor/bin/phpunit --coverage-html coverage-report --coverage-clover=coverage.xml
+    # Removed HTML and text coverage generation to keep only Clover output
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4

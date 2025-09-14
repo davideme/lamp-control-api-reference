@@ -63,7 +63,7 @@
     ],
     "test-apis": "phpunit --testsuite Apis",
     "test-models": "phpunit --testsuite Models",
-    "test-coverage": "phpunit --coverage-html coverage --coverage-text",
+    "test-coverage": "phpunit --coverage-cobertura=coverage.xml",
     "phpcs": "phpcs",
     "phplint": "phplint ./ --exclude=vendor",
     "lint": "phpcs --standard=PSR12 --colors -p src tests",

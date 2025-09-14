@@ -68,9 +68,11 @@ $container = $builder->build();
 // Instantiate the app
 $app = Bridge::create($container);
 
+
 // Register middleware
 $middleware = new RegisterMiddlewares();
 $middleware($app);
+
 
 // Add health endpoint
 $app->get('/health', function (Psr\Http\Message\ServerRequestInterface $request, Psr\Http\Message\ResponseInterface $response) {
@@ -91,6 +93,24 @@ $request = $serverRequestCreator->createServerRequestFromGlobals();
 // Get error middleware from container
 // also anti-pattern, of course we know
 $errorMiddleware = $container->get(ErrorMiddleware::class);
+
+// Set custom 404 handler
+use Slim\Exception\HttpNotFoundException;
+
+$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function (
+    Psr\Http\Message\ServerRequestInterface $request,
+    Throwable $exception,
+    bool $displayErrorDetails,
+    bool $logErrors,
+    bool $logErrorDetails
+) {
+    $response = new Slim\Psr7\Response();
+    $response->getBody()->write(json_encode([
+        'error' => 'Not Found',
+        'message' => 'Route not found',
+    ]));
+    return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+});
 
 // Run App & Emit Response
 $response = $app->handle($request);

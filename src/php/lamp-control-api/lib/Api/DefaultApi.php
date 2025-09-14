@@ -17,9 +17,11 @@ class DefaultApi extends AbstractDefaultApi
 {
     private LampService $service;
 
-    public function __construct()
+    public function __construct(?LampRepository $repository = null)
     {
-        $repository = new LampRepository();
+        if ($repository === null) {
+            $repository = new LampRepository();
+        }
         $mapper = new LampMapper();
         $this->service = new LampService($repository, $mapper);
     }

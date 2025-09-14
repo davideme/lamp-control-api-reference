@@ -78,9 +78,29 @@ class LampUpdateTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        self::markTestIncomplete(
-            'Test of "LampUpdate" model has not been implemented yet.'
-        );
+
+        // Test that the lamp update model can be created
+        $this->assertInstanceOf(LampUpdate::class, $testLampUpdate);
+
+        // Test setting and getting data
+        $lampUpdateData = [
+            'status' => false
+        ];
+        $testLampUpdate->setData($lampUpdateData);
+
+        $retrievedData = $testLampUpdate->getData();
+        $this->assertEquals($lampUpdateData['status'], $retrievedData->status);
+
+        // Test JSON serialization
+        $json = json_encode($testLampUpdate);
+        $this->assertJson($json);
+        $decoded = json_decode($json, true);
+        $this->assertEquals($lampUpdateData['status'], $decoded['status']);
+
+        // Test creating from data directly
+        $lampUpdateFromData = LampUpdate::createFromData(['status' => true]);
+        $this->assertInstanceOf(LampUpdate::class, $lampUpdateFromData);
+        $this->assertTrue($lampUpdateFromData->status);
     }
 
     /**
@@ -88,9 +108,24 @@ class LampUpdateTest extends TestCase
      */
     public function testPropertyStatus()
     {
-        self::markTestIncomplete(
-            'Test of "status" property in "LampUpdate" model has not been implemented yet.'
-        );
+        $testLampUpdate = new LampUpdate();
+
+        // Test setting status to true
+        $testLampUpdate->status = true;
+        $this->assertTrue($testLampUpdate->status);
+
+        // Test setting status to false
+        $testLampUpdate->status = false;
+        $this->assertFalse($testLampUpdate->status);
+
+        // Test that required status property appears in schema
+        $schema = LampUpdate::getOpenApiSchema();
+        $this->assertArrayHasKey('required', $schema);
+        $this->assertContains('status', $schema['required']);
+        $this->assertArrayHasKey('properties', $schema);
+        $this->assertArrayHasKey('status', $schema['properties']);
+        $this->assertEquals('boolean', $schema['properties']['status']['type']);
+        $this->assertEquals('New status of the lamp (on/off)', $schema['properties']['status']['description']);
     }
 
     /**

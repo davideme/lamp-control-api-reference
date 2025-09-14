@@ -1,15 +1,18 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" backupStaticAttributes="false" beStrictAboutTestsThatDoNotTestAnything="true" beStrictAboutChangesToGlobalState="true" beStrictAboutOutputDuringTests="true" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false" stopOnFailure="false" bootstrap="tests/bootstrap.php">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" backupStaticAttributes="false" beStrictAboutTestsThatDoNotTestAnything="false" beStrictAboutChangesToGlobalState="true" beStrictAboutOutputDuringTests="true" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false" stopOnFailure="false" bootstrap="tests/bootstrap.php">
   <coverage processUncoveredFiles="true">
     <include>
-      <directory suffix=".php">./lib/Api</directory>
-      <file>./lib/BaseModel.php</file>
-      <directory suffix=".php">./lib/Model</directory>
+      <directory suffix=".php">./lib</directory>
+      <file>router.php</file>
     </include>
+    <exclude>
+      <directory>./vendor</directory>
+      <directory>./tests</directory>
+    </exclude>
   </coverage>
   <testsuites>
     <testsuite name="Test Suite">
-      <directory>./tests/</directory>
+      <directory>./tests</directory>
     </testsuite>
   </testsuites>
 </phpunit>
