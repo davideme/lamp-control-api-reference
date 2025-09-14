@@ -59,7 +59,7 @@ final class RegisterDependencies
             'mode' => 'production',
             'logger.name' => 'lamp-api',
             'logger.path' => 'php://stderr',
-            'logger.level' => \Monolog\Level::Info,
+            'logger.level' => \Monolog\Logger::INFO,
 
             // Response factory required as typed argument in next ErrorMiddleware injection
             \Psr\Http\Message\ResponseFactoryInterface::class =>
