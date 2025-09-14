@@ -78,25 +78,25 @@ class LampUpdateTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        
+
         // Test that the lamp update model can be created
         $this->assertInstanceOf(LampUpdate::class, $testLampUpdate);
-        
+
         // Test setting and getting data
         $lampUpdateData = [
             'status' => false
         ];
         $testLampUpdate->setData($lampUpdateData);
-        
+
         $retrievedData = $testLampUpdate->getData();
         $this->assertEquals($lampUpdateData['status'], $retrievedData->status);
-        
+
         // Test JSON serialization
         $json = json_encode($testLampUpdate);
         $this->assertJson($json);
         $decoded = json_decode($json, true);
         $this->assertEquals($lampUpdateData['status'], $decoded['status']);
-        
+
         // Test creating from data directly
         $lampUpdateFromData = LampUpdate::createFromData(['status' => true]);
         $this->assertInstanceOf(LampUpdate::class, $lampUpdateFromData);
@@ -109,15 +109,15 @@ class LampUpdateTest extends TestCase
     public function testPropertyStatus()
     {
         $testLampUpdate = new LampUpdate();
-        
+
         // Test setting status to true
         $testLampUpdate->status = true;
         $this->assertTrue($testLampUpdate->status);
-        
+
         // Test setting status to false
         $testLampUpdate->status = false;
         $this->assertFalse($testLampUpdate->status);
-        
+
         // Test that required status property appears in schema
         $schema = LampUpdate::getOpenApiSchema();
         $this->assertArrayHasKey('required', $schema);

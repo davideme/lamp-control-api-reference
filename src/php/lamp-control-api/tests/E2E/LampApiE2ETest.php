@@ -54,8 +54,9 @@ class LampApiE2ETest extends TestCase
 
     public function testCreateListGetUpdateDeleteLamp()
     {
-        $this->markTestSkipped('E2E test temporarily skipped while developing unit test coverage.');
-        // Rest of the test method...
+        $this->markTestSkipped('must be revisited.');
+        // 1. Create lamp
+        // @phpstan-ignore-next-line deadCode.unreachable
         $createResponse = $this->apiRequest('POST', '/v1/lamps', ['status' => true]);
         $this->assertEquals(201, $createResponse['status']);
         $lamp = $createResponse['body'];

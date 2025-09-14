@@ -56,10 +56,10 @@ class AbstractDefaultApiTest extends TestCase
     {
         $request = $this->createJsonRequest('POST', '/lamps', ['status' => true]);
         $response = new Response();
-        
+
         $this->expectException(HttpNotImplementedException::class);
         $this->expectExceptionMessage('How about implementing createLamp as a POST method');
-        
+
         $this->api->createLamp($request, $response);
     }
 
@@ -72,10 +72,10 @@ class AbstractDefaultApiTest extends TestCase
     {
         $request = $this->createJsonRequest('DELETE', '/lamps/123');
         $response = new Response();
-        
+
         $this->expectException(HttpNotImplementedException::class);
         $this->expectExceptionMessage('How about implementing deleteLamp as a DELETE method');
-        
+
         $this->api->deleteLamp($request, $response, '123');
     }
 
@@ -88,10 +88,10 @@ class AbstractDefaultApiTest extends TestCase
     {
         $request = $this->createJsonRequest('GET', '/lamps/123');
         $response = new Response();
-        
+
         $this->expectException(HttpNotImplementedException::class);
         $this->expectExceptionMessage('How about implementing getLamp as a GET method');
-        
+
         $this->api->getLamp($request, $response, '123');
     }
 
@@ -104,10 +104,10 @@ class AbstractDefaultApiTest extends TestCase
     {
         $request = $this->createJsonRequest('GET', '/lamps');
         $response = new Response();
-        
+
         $this->expectException(HttpNotImplementedException::class);
         $this->expectExceptionMessage('How about implementing listLamps as a GET method');
-        
+
         $this->api->listLamps($request, $response);
     }
 
@@ -120,10 +120,10 @@ class AbstractDefaultApiTest extends TestCase
     {
         $request = $this->createJsonRequest('PUT', '/lamps/123', ['status' => false]);
         $response = new Response();
-        
+
         $this->expectException(HttpNotImplementedException::class);
         $this->expectExceptionMessage('How about implementing updateLamp as a PUT method');
-        
+
         $this->api->updateLamp($request, $response, '123');
     }
 }

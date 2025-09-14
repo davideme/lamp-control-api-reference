@@ -78,10 +78,10 @@ class ListLamps200ResponseTest extends TestCase
             class_exists($namespacedClassname),
             sprintf('Assertion failed that "%s" class exists', $namespacedClassname)
         );
-        
+
         // Test that the list lamps response model can be created
         $this->assertInstanceOf(ListLamps200Response::class, $testListLamps200Response);
-        
+
         // Test setting and getting data
         $responseData = [
             'data' => [
@@ -96,12 +96,12 @@ class ListLamps200ResponseTest extends TestCase
             'hasMore' => false
         ];
         $testListLamps200Response->setData($responseData);
-        
+
         $retrievedData = $testListLamps200Response->getData();
         $this->assertEquals($responseData['data'], $retrievedData->data);
         $this->assertEquals($responseData['nextCursor'], $retrievedData->nextCursor);
         $this->assertEquals($responseData['hasMore'], $retrievedData->hasMore);
-        
+
         // Test JSON serialization
         $json = json_encode($testListLamps200Response);
         $this->assertJson($json);
@@ -117,11 +117,11 @@ class ListLamps200ResponseTest extends TestCase
     public function testPropertyData()
     {
         $testListLamps200Response = new ListLamps200Response();
-        
+
         // Test setting data property with empty array
         $testListLamps200Response->data = [];
         $this->assertEquals([], $testListLamps200Response->data);
-        
+
         // Test setting data property with lamp data
         $lampData = [
             [
@@ -147,19 +147,19 @@ class ListLamps200ResponseTest extends TestCase
     public function testPropertyNextCursor()
     {
         $testListLamps200Response = new ListLamps200Response();
-        
+
         // Test setting nextCursor to a string value
         $testListLamps200Response->nextCursor = 'cursor123';
         $this->assertEquals('cursor123', $testListLamps200Response->nextCursor);
-        
+
         // Test setting nextCursor to null (nullable property)
         $testListLamps200Response->nextCursor = null;
         $this->assertNull($testListLamps200Response->nextCursor);
-        
+
         // Test setting nextCursor to empty string
         $testListLamps200Response->nextCursor = '';
         $this->assertEquals('', $testListLamps200Response->nextCursor);
-        
+
         // Test that nextCursor property appears in schema and is nullable
         $schema = ListLamps200Response::getOpenApiSchema();
         $this->assertArrayHasKey('properties', $schema);
@@ -174,15 +174,15 @@ class ListLamps200ResponseTest extends TestCase
     public function testPropertyHasMore()
     {
         $testListLamps200Response = new ListLamps200Response();
-        
+
         // Test setting hasMore to true
         $testListLamps200Response->hasMore = true;
         $this->assertTrue($testListLamps200Response->hasMore);
-        
+
         // Test setting hasMore to false
         $testListLamps200Response->hasMore = false;
         $this->assertFalse($testListLamps200Response->hasMore);
-        
+
         // Test that required hasMore property appears in schema
         $schema = ListLamps200Response::getOpenApiSchema();
         $this->assertArrayHasKey('required', $schema);
@@ -191,7 +191,7 @@ class ListLamps200ResponseTest extends TestCase
         $this->assertArrayHasKey('properties', $schema);
         $this->assertArrayHasKey('hasMore', $schema['properties']);
         $this->assertEquals('boolean', $schema['properties']['hasMore']['type']);
-        
+
         // Test data property schema
         $this->assertArrayHasKey('data', $schema['properties']);
         $this->assertEquals('array', $schema['properties']['data']['type']);
