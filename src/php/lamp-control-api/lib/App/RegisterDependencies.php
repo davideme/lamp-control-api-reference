@@ -55,6 +55,12 @@ final class RegisterDependencies
             'slim.logErrors' => true,
             'slim.logErrorDetails' => false,
 
+            // Default mode and logger parameters (can be overridden by config files)
+            'mode' => 'production',
+            'logger.name' => 'lamp-api',
+            'logger.path' => 'php://stderr',
+            'logger.level' => \Monolog\Level::Info,
+
             // Response factory required as typed argument in next ErrorMiddleware injection
             \Psr\Http\Message\ResponseFactoryInterface::class =>
             \DI\factory([
