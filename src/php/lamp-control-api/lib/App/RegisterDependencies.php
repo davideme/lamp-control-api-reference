@@ -50,6 +50,11 @@ final class RegisterDependencies
     public function __invoke(\DI\ContainerBuilder $containerBuilder): void
     {
         $containerBuilder->addDefinitions([
+            // Slim configuration parameters
+            'slim.displayErrorDetails' => false,
+            'slim.logErrors' => true,
+            'slim.logErrorDetails' => false,
+
             // Response factory required as typed argument in next ErrorMiddleware injection
             \Psr\Http\Message\ResponseFactoryInterface::class =>
             \DI\factory([
