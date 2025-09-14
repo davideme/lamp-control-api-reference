@@ -60,7 +60,7 @@ final class RegisterMiddlewares
         // Add Routing Middleware
         $app->addRoutingMiddleware();
 
-        // Add Error Middleware skipped for test coverage
-        // $app->add(\Slim\Middleware\ErrorMiddleware::class);
+        // Add Error Middleware
+        $app->add(\Slim\Middleware\ErrorMiddleware::class);
     }
 }
