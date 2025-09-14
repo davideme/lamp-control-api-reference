@@ -9,7 +9,9 @@ use Slim\Psr7\Response;
 
 class DummyErrorMiddleware extends ErrorMiddleware
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
     public function handleException(ServerRequestInterface $request, \Throwable $exception): ResponseInterface
     {
         return new Response();
