@@ -53,36 +53,36 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
     
     - name: Run PHPUnit tests
-      run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+      run: |
+        # Enable line coverage explicitly
+        export XDEBUG_MODE=coverage
+        vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
 
     - name: Check code coverage
       run: |
-        echo "Checking PHP code coverage..."
-        
-        # Extract coverage percentage from the clover XML
+        echo "Checking PHP code coverage (line-based)..."
         if [ -f coverage.xml ]; then
-          # Get the project-level summary metrics
           METRICS_LINE=$(grep '<metrics files=' coverage.xml)
           if [ -n "$METRICS_LINE" ]; then
+            # Extract line metrics (lines = total executable lines, coveredlines = executed lines)
+            TOTAL_LINES=$(echo "$METRICS_LINE" | sed -n 's/.*\blines="\([0-9]*\)".*/\1/p')
+            COVERED_LINES=$(echo "$METRICS_LINE" | sed -n 's/.*\bcoveredlines="\([0-9]*\)".*/\1/p')
             TOTAL_STATEMENTS=$(echo "$METRICS_LINE" | sed -n 's/.*\bstatements="\([0-9]*\)".*/\1/p')
             COVERED_STATEMENTS=$(echo "$METRICS_LINE" | sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p')
-            
-            if [[ "$TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$COVERED_STATEMENTS" =~ ^[0-9]+$ && "$TOTAL_STATEMENTS" -gt 0 ]]; then
-              COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED_STATEMENTS/$TOTAL_STATEMENTS)*100}")
-              echo "Current PHP code coverage: ${COVERAGE}%"
-              
-              # Check if coverage is at least 80%
-              MEETS_THRESHOLD=$(awk -v cov="$COVERAGE" -v thresh="80" 'BEGIN {print (cov >= thresh)}')
-              
+            echo "Debug: lines=$TOTAL_LINES coveredlines=$COVERED_LINES statements=$TOTAL_STATEMENTS coveredstatements=$COVERED_STATEMENTS"
+            if [[ "$TOTAL_LINES" =~ ^[0-9]+$ && "$COVERED_LINES" =~ ^[0-9]+$ && "$TOTAL_LINES" -gt 0 ]]; then
+              LINE_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED_LINES/$TOTAL_LINES)*100}")
+              echo "Current PHP line coverage: ${LINE_COVERAGE}%"
+              THRESHOLD=80
+              MEETS_THRESHOLD=$(awk -v cov="$LINE_COVERAGE" -v thresh="$THRESHOLD" 'BEGIN {print (cov >= thresh)}')
               if [ "$MEETS_THRESHOLD" -eq 0 ]; then
-                echo "❌ Code coverage is ${COVERAGE}%, below required 80%"
-                echo "Please add more tests to increase coverage."
+                echo "❌ Line coverage is ${LINE_COVERAGE}%, below required ${THRESHOLD}%"
                 exit 1
               else
-                echo "✅ Code coverage is ${COVERAGE}%, meets required 80%"
+                echo "✅ Line coverage is ${LINE_COVERAGE}%, meets required ${THRESHOLD}%"
               fi
             else
-              echo "❌ Could not parse coverage data from clover XML"
+              echo "❌ Could not parse line coverage data from clover XML"
               exit 1
             fi
           else
