@@ -2,8 +2,8 @@
 
 namespace Tests\App\Stubs;
 
-use OpenAPIServer\Cors\AnalyzerInterface;
-use OpenAPIServer\Cors\AnalysisResultInterface;
+use Neomerx\Cors\Contracts\AnalyzerInterface;
+use Neomerx\Cors\Contracts\AnalysisResultInterface;
 
 class DummyAnalyzer implements AnalyzerInterface
 {
