@@ -1,18 +1,3 @@
-use Slim\Exception\HttpMethodNotAllowedException;
-$errorMiddleware->setErrorHandler(HttpMethodNotAllowedException::class, function (
-Psr\Http\Message\ServerRequestInterface $request,
-Throwable $exception,
-bool $displayErrorDetails,
-bool $logErrors,
-bool $logErrorDetails
-) {
-$response = new Slim\Psr7\Response();
-$response->getBody()->write(json_encode([
-'error' => 'Not Found',
-'message' => 'Route not found',
-]));
-return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-});
 <?php
 
 /**
@@ -111,24 +96,8 @@ $errorMiddleware = $container->get(ErrorMiddleware::class);
 
 // Set custom 404 handler
 use Slim\Exception\HttpNotFoundException;
-use Slim\Exception\HttpMethodNotAllowedException;
 
 $errorMiddleware->setErrorHandler(HttpNotFoundException::class, function (
-    Psr\Http\Message\ServerRequestInterface $request,
-    Throwable $exception,
-    bool $displayErrorDetails,
-    bool $logErrors,
-    bool $logErrorDetails
-) {
-    $response = new Slim\Psr7\Response();
-    $response->getBody()->write(json_encode([
-        'error' => 'Not Found',
-        'message' => 'Route not found',
-    ]));
-    return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-});
-
-$errorMiddleware->setErrorHandler(HttpMethodNotAllowedException::class, function (
     Psr\Http\Message\ServerRequestInterface $request,
     Throwable $exception,
     bool $displayErrorDetails,
