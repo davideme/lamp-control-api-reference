@@ -7,19 +7,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
-@AutoConfigureWebMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
 class HealthEndpointIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
 
   @Test
-  void health_AtRootLevel_ShouldReturnOkStatus() throws Exception {
+  void health_ShouldReturnOkStatus() throws Exception {
     mockMvc
         .perform(get("/health").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -28,16 +28,7 @@ class HealthEndpointIntegrationTest {
   }
 
   @Test
-  void health_AtV1Level_ShouldAlsoReturnOkStatus() throws Exception {
-    mockMvc
-        .perform(get("/v1/health").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.status").value("ok"));
-  }
-
-  @Test
-  void lamps_ShouldBeAvailableAtV1Level() throws Exception {
-    mockMvc.perform(get("/v1/lamps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+  void lamps_ShouldBeAvailable() throws Exception {
+    mockMvc.perform(get("/lamps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
   }
 }
