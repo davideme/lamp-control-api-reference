@@ -1,0 +1,12 @@
+# Exclude unnecessary files from Docker build context
+.git
+.gitignore
+.golangci.yml
+README.md
+adr/
+scripts/
+coverage.out
+coverage.html
+*.log
+.vscode
+.idea

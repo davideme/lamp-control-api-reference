@@ -269,6 +269,62 @@ jobs:
             echo "⚠️ No Schemathesis report found"
           fi
 
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    defaults:
+      run:
+        working-directory: src/go
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: src/go
+          load: true
+          tags: lamp-control-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker image
+        run: |
+          # Start the container in the background
+          docker run -d --name test-container -p 8080:8080 lamp-control-api:test
+          
+          # Wait for the container to start
+          sleep 10
+          
+          # Test the health endpoint
+          if curl -f -s http://localhost:8080/health > /dev/null; then
+            echo "✅ Docker container health check passed"
+          else
+            echo "❌ Docker container health check failed"
+            docker logs test-container
+            exit 1
+          fi
+          
+          # Test the API endpoint
+          response=$(curl -s http://localhost:8080/lamps)
+          if echo "$response" | grep -q '"data"'; then
+            echo "✅ Docker container API test passed"
+          else
+            echo "❌ Docker container API test failed"
+            echo "Response: $response"
+            docker logs test-container
+            exit 1
+          fi
+          
+          # Cleanup
+          docker stop test-container
+          docker rm test-container
+
   # security:
   #   name: Security Scan
   #   runs-on: ubuntu-latest
