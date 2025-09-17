@@ -103,3 +103,13 @@ tasks.shadowJar {
         attributes(mapOf("Main-Class" to "io.ktor.server.netty.EngineMain"))
     }
 }
+
+// Make build depend on shadowJar instead of regular jar
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
+
+// Fix task dependencies
+tasks.startScripts {
+    dependsOn(tasks.shadowJar)
+}
