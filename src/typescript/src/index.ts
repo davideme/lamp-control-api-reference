@@ -1,4 +1,4 @@
-import { buildApp } from './infrastructure/app';
+import { buildApp } from './infrastructure/app.js';
 
 buildApp().then((server) => {
   server.listen({ port: 8080 }, (err, address) => {
