@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 import fastify from 'fastify';
 import fastifyOpenapiGlue from 'fastify-openapi-glue';
 import Security from './security.js';
@@ -9,8 +9,12 @@ import Service from './services/service.js';
 const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
 
+// Use a path relative to the project root, which works for both dev and production
+const projectRoot = process.cwd();
+const specPath = join(projectRoot, '../../docs/api/openapi.yaml');
+
 const options = {
-  specification: `${currentDir}/../../../../../docs/api/openapi.yaml`,
+  specification: specPath,
   service: new Service(new InMemoryLampRepository()),
   securityHandlers: new Security(),
   prefix: 'v1',
