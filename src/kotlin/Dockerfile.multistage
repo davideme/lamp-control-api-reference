@@ -1,0 +1,75 @@
+# Multi-stage Dockerfile for Kotlin Ktor Application
+# This version builds from source in a multi-stage approach
+
+# Build stage using Eclipse Temurin JDK 21
+FROM eclipse-temurin:21-jdk AS build-env
+
+# Install required packages and update CA certificates
+RUN apt-get update && \
+    apt-get install -y curl ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set working directory for build
+WORKDIR /app
+
+# Copy Gradle wrapper and configuration files first for better layer caching
+COPY gradlew .
+COPY gradlew.bat .
+COPY gradle/ gradle/
+COPY build.gradle.kts .
+COPY settings.gradle .
+COPY gradle.properties .
+
+# Make gradlew executable
+RUN chmod +x ./gradlew
+
+# Download dependencies first (for better caching)
+RUN ./gradlew dependencies --no-daemon || true
+
+# Copy source code
+COPY src/ src/
+
+# Build the application using shadow JAR (skip tests for Docker build speed)
+RUN ./gradlew shadowJar --no-daemon -x test
+
+# Runtime stage using Eclipse Temurin JRE 21
+FROM eclipse-temurin:21-jre
+
+# Install curl for health check
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built shadow JAR from build stage
+COPY --from=build-env /app/build/libs/kotlin-server-1.0.0.jar /app/kotlin-server.jar
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose the port that Ktor uses
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Run the Ktor application with optimized JVM settings
+CMD ["java", \
+     "-server", \
+     "-Xms512m", \
+     "-Xmx1g", \
+     "-XX:+UseG1GC", \
+     "-XX:MaxGCPauseMillis=100", \
+     "-XX:+UseStringDeduplication", \
+     "-XX:+UseContainerSupport", \
+     "-Djava.security.egd=file:/dev/./urandom", \
+     "-jar", \
+     "kotlin-server.jar"]

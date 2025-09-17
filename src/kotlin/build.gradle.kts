@@ -11,6 +11,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     jacoco
 }
 
@@ -92,4 +93,13 @@ detekt {
     toolVersion = "1.23.4"
     buildUponDefaultConfig = true
     ignoreFailures = true
+}
+
+// Shadow plugin configuration for fat JAR
+tasks.shadowJar {
+    archiveClassifier.set("")
+    mergeServiceFiles()
+    manifest {
+        attributes(mapOf("Main-Class" to "io.ktor.server.netty.EngineMain"))
+    }
 }
