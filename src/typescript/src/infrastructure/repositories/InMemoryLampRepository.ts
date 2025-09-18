@@ -1,6 +1,6 @@
-import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../../domain/entities/LampEntity';
-import { LampRepository } from '../../domain/repositories/LampRepository';
+import { LampNotFoundError } from '../../domain/errors/DomainError.js';
+import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../../domain/entities/LampEntity.js';
+import { LampRepository } from '../../domain/repositories/LampRepository.js';
 
 export class InMemoryLampRepository implements LampRepository {
   private lamps: Map<string, LampEntity> = new Map();

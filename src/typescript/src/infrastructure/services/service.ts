@@ -1,8 +1,8 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampRepository } from '../../domain/repositories/LampRepository';
-import { components, operations } from '../types/api';
-import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { LampMapper } from '../mappers/LampMapper';
+import { LampRepository } from '../../domain/repositories/LampRepository.js';
+import { components, operations } from '../types/api.js';
+import { LampNotFoundError } from '../../domain/errors/DomainError.js';
+import { LampMapper } from '../mappers/LampMapper.js';
 
 type Lamp = components['schemas']['Lamp'];
 
