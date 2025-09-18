@@ -1,0 +1,47 @@
+# Build artifacts
+build/
+.gradle/
+!build/libs/*.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Version control
+.git/
+.gitignore
+
+# Documentation
+*.md
+adr/
+
+# Test files
+src/test/
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+*~
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# OpenAPI Generator files
+.openapi-generator/
+.openapi-generator-ignore
+
+# Code quality reports
+build/reports/
+
+# Gradle cache
+.gradle/
+
+# Other
+Makefile
