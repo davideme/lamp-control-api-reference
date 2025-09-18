@@ -1,0 +1,17 @@
+{
+  "extends": "@tsconfig/node22/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "module": "ESNext",
+    "moduleResolution": "node"
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
