@@ -40,7 +40,7 @@ docker-compose up --build
 The Docker image uses:
 - **Multi-stage build**: Build stage with Poetry dependency installation, production stage with Google's distroless Python image
 - **Poetry dependency management**: Uses Poetry in build stage for reproducible dependency installation
-- **Distroless runtime**: Production stage uses `gcr.io/distroless/python3-debian12` for minimal attack surface
+- **Distroless runtime**: Production stage uses `gcr.io/distroless/python3-debian12:nonroot` for minimal attack surface and non-root execution
 - **Port Configuration**: Supports PORT environment variable for Cloud Run compatibility via launcher script
 - **FastAPI CLI**: Uses the modern `fastapi run` command for production deployment
 

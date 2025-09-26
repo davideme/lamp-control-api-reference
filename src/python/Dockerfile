@@ -22,7 +22,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
 
-FROM gcr.io/distroless/python3-debian12
+FROM gcr.io/distroless/python3-debian12:nonroot
 COPY --from=build-env /app /app
 WORKDIR /app
 
