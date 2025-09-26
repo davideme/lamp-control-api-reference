@@ -3,10 +3,10 @@ FROM python:3.12-slim AS build-env
 WORKDIR /app
 COPY . /app
 
-# Install dependencies directly using pip 
-# Skip SSL certificate verification for this build environment
-RUN pip install --no-cache-dir --upgrade pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
-RUN pip install --no-cache-dir fastapi[standard] uvicorn --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
+# Install dependencies using pip for reliable container builds
+# Note: In production Cloud Run environment, SSL certificates work correctly
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir fastapi[standard] uvicorn
 
 FROM python:3.12-slim
 
