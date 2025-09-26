@@ -1,7 +1,8 @@
-import { buildApp } from './infrastructure/app';
+import { buildApp } from './infrastructure/app.ts';
+import type { FastifyInstance } from 'fastify';
 
-buildApp().then((server) => {
-  server.listen({ port: 8080 }, (err, address) => {
+buildApp().then((server: FastifyInstance) => {
+  server.listen({ port: 8080 }, (err: Error | null, address: string) => {
     if (err) {
       server.log.error(err);
       process.exit(1);

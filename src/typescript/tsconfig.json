@@ -5,8 +5,12 @@
     "rootDir": ".",
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler"
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
   },
   "ts-node": {
     "esm": true,

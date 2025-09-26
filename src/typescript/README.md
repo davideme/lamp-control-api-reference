@@ -61,12 +61,27 @@ src/
 
 ## Development
 
-Start the development server with hot reloading:
+### Traditional TypeScript Development
+Start the development server with hot reloading using tsx:
 ```bash
 npm run dev
 ```
 
-The server will be available at `http://localhost:3000`.
+### Node.js Type Stripping (Node.js 22.6.0+)
+Run TypeScript files directly with Node.js native type stripping:
+```bash
+npm run dev:native
+```
+
+The server will be available at `http://localhost:8080`.
+
+### Type Stripping Benefits
+- **No compilation step**: Run TypeScript files directly
+- **Faster startup**: Eliminates build overhead
+- **Native Node.js support**: Leverages built-in TypeScript processing
+- **Simplified debugging**: Direct execution without source maps
+
+For more details, see [ADR 007: Node.js Type Stripping Compatibility](docs/adr/007-nodejs-type-stripping-compatibility.md).
 
 ## Testing
 
@@ -79,6 +94,23 @@ Run tests with coverage:
 ```bash
 npm run test:coverage
 ```
+
+## Production
+
+### Traditional Build & Deploy
+Build and run the compiled JavaScript:
+```bash
+npm run build
+npm start
+```
+
+### Native Type Stripping (Node.js 22.6.0+)
+Run TypeScript directly in production:
+```bash
+npm run start:native
+```
+
+This eliminates the build step entirely while maintaining production performance.
 
 ## API Documentation
 

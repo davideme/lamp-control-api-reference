@@ -1,4 +1,4 @@
-import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../entities/LampEntity';
+import type { LampEntity, LampEntityCreate, LampEntityUpdate } from '../entities/LampEntity.ts';
 
 export interface LampRepository {
   findAll(limit?: number): Promise<LampEntity[]>;
