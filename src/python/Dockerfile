@@ -2,28 +2,56 @@ FROM python:3.12 AS builder
 
 WORKDIR /usr/src/app
 
-# Copy pyproject.toml to install the app via pip (using the build-backend)
-COPY pyproject.toml poetry.lock ./
-COPY . .
+# Install Poetry using the official installer
+RUN pip install --upgrade pip
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# Install the application using pip (which will use poetry-core as build backend)
-RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --no-cache-dir .
+# Set PATH and configure Poetry
+ENV PATH="/root/.local/bin:$PATH" \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+# Copy dependency files first for better layer caching
+COPY pyproject.toml poetry.lock ./
+
+# Install production dependencies only
+RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+
+# Copy source code
+COPY . .
 
 
 FROM python:3.12 AS test_runner
 WORKDIR /tmp
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /usr/src/app/tests tests
 
-# install test dependencies
-RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pytest pytest-asyncio pytest-cov
+# Install Poetry
+RUN pip install --upgrade pip
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# run tests
-RUN pytest tests
+# Set PATH and configure Poetry
+ENV PATH="/root/.local/bin:$PATH" \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+# Copy project from builder stage
+COPY --from=builder /usr/src/app /usr/src/app
+WORKDIR /usr/src/app
+
+# Install all dependencies (including dev dependencies for testing)
+RUN poetry install && rm -rf $POETRY_CACHE_DIR
+
+# Run tests
+RUN poetry run pytest tests
 
 
 FROM python:3.12 AS service
-WORKDIR /root/app/site-packages
-COPY --from=test_runner /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=test_runner /usr/local/bin /usr/local/bin
+WORKDIR /root/app
+
+# Copy the virtual environment and source code from test stage
+COPY --from=test_runner /usr/src/app/.venv /root/app/.venv
+COPY --from=test_runner /usr/src/app /root/app
+
+# Set environment to use the virtual environment
+ENV PATH="/root/app/.venv/bin:$PATH"
