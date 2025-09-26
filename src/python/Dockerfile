@@ -1,30 +1,29 @@
-FROM python:3.7 AS builder
+FROM python:3.12 AS builder
 
 WORKDIR /usr/src/app
 
-RUN python3 -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-
-RUN pip install --upgrade pip
-
+# Copy pyproject.toml to install the app via pip (using the build-backend)
+COPY pyproject.toml poetry.lock ./
 COPY . .
-RUN pip install --no-cache-dir .
+
+# Install the application using pip (which will use poetry-core as build backend)
+RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --no-cache-dir .
 
 
-FROM python:3.7 AS test_runner
+FROM python:3.12 AS test_runner
 WORKDIR /tmp
-COPY --from=builder /venv /venv
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/src/app/tests tests
-ENV PATH=/venv/bin:$PATH
 
 # install test dependencies
-RUN pip install pytest
+RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pytest pytest-asyncio pytest-cov
 
 # run tests
 RUN pytest tests
 
 
-FROM python:3.7 AS service
+FROM python:3.12 AS service
 WORKDIR /root/app/site-packages
-COPY --from=test_runner /venv /venv
-ENV PATH=/venv/bin:$PATH
+COPY --from=test_runner /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=test_runner /usr/local/bin /usr/local/bin
