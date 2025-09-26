@@ -1,8 +1,8 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampRepository } from '../../domain/repositories/LampRepository';
-import { components, operations } from '../types/api';
-import { LampNotFoundError } from '../../domain/errors/DomainError';
-import { LampMapper } from '../mappers/LampMapper';
+import type { LampRepository } from '../../domain/repositories/LampRepository.ts';
+import type { components, operations } from '../types/api.ts';
+import { LampNotFoundError } from '../../domain/errors/DomainError.ts';
+import { LampMapper } from '../mappers/LampMapper.ts';
 
 type Lamp = components['schemas']['Lamp'];
 
@@ -35,7 +35,11 @@ type DeleteLampRequest = FastifyRequest<{
 
 // service.ts
 export class Service {
-  constructor(private readonly repository: LampRepository) {}
+  private readonly repository: LampRepository;
+
+  constructor(repository: LampRepository) {
+    this.repository = repository;
+  }
 
   async listLamps(request: ListLampsRequest, reply: FastifyReply): Promise<void> {
     const { pageSize = 25 } = request.query;
@@ -56,7 +60,7 @@ export class Service {
   }
 
   async getLamp(request: GetLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params;
+    const { lampId } = request.params as { lampId: string };
     const lampEntity = await this.repository.findById(lampId);
 
     if (!lampEntity) {
@@ -81,7 +85,7 @@ export class Service {
   }
 
   async updateLamp(request: UpdateLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params;
+    const { lampId } = request.params as { lampId: string };
     const body = request.body;
 
     try {
@@ -101,7 +105,7 @@ export class Service {
   }
 
   async deleteLamp(request: DeleteLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params;
+    const { lampId } = request.params as { lampId: string };
     try {
       await this.repository.delete(lampId);
       return reply.code(204).send();

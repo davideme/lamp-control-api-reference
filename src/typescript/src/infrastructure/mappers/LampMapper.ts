@@ -1,5 +1,9 @@
-import { LampEntity, LampEntityCreate, LampEntityUpdate } from '../../domain/entities/LampEntity';
-import { components } from '../types/api';
+import type {
+  LampEntity,
+  LampEntityCreate,
+  LampEntityUpdate,
+} from '../../domain/entities/LampEntity.ts';
+import type { components } from '../types/api.ts';
 
 type LampApiModel = components['schemas']['Lamp'];
 type LampCreateApiModel = components['schemas']['LampCreate'];
