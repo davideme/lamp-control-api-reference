@@ -38,8 +38,10 @@ docker-compose up --build
 ### Docker Image Features
 
 The Docker image uses:
-- **Multi-stage build**: Optimized for production with Python 3.12 slim base
-- **Port Configuration**: Supports PORT environment variable for Cloud Run compatibility
+- **Multi-stage build**: Build stage with Poetry dependency installation, production stage with Google's distroless Python image
+- **Poetry dependency management**: Uses Poetry in build stage for reproducible dependency installation
+- **Distroless runtime**: Production stage uses `gcr.io/distroless/python3-debian12` for minimal attack surface
+- **Port Configuration**: Supports PORT environment variable for Cloud Run compatibility via launcher script
 - **FastAPI CLI**: Uses the modern `fastapi run` command for production deployment
 
 #### Building Docker Image
