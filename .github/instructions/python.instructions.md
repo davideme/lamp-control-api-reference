@@ -27,4 +27,3 @@ When working on this codebase:
 - Handle errors gracefully with proper HTTP status codes
 - Use Pydantic models for request/response validation
 - **ALWAYS run `poetry run black .` and `poetry run ruff check .` before any commit to ensure code formatting and quality**
-- Use the Makefile targets for development workflow (format, lint, test, build)
