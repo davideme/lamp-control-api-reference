@@ -11,6 +11,8 @@ Key frameworks and tools:
 - Uvicorn as the ASGI server
 - Pydantic for data validation and serialization
 - OpenAPI Generator for code generation
+- Black for code formatting
+- Ruff for linting and code analysis
 
 When working on this codebase:
 - Follow Python 3.12+ features and syntax
@@ -24,3 +26,4 @@ When working on this codebase:
 - Maintain consistency with the lamp domain model and OpenAPI specification
 - Handle errors gracefully with proper HTTP status codes
 - Use Pydantic models for request/response validation
+- **ALWAYS run `poetry run black .` and `poetry run ruff check .` before any commit to ensure code formatting and quality**
