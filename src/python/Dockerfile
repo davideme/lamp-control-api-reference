@@ -1,9 +1,12 @@
-FROM python:3.12 AS builder
+FROM python:3.12-slim AS build-env
+COPY . /app
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# Install curl for Poetry installation
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry using the official installer
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Set PATH and configure Poetry
@@ -18,16 +21,13 @@ COPY pyproject.toml poetry.lock ./
 # Install production dependencies only
 RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
-# Copy source code
-COPY . .
 
-
-FROM python:3.12 AS service
-WORKDIR /root/app
-
-# Copy the virtual environment and source code from builder stage
-COPY --from=builder /usr/src/app/.venv /root/app/.venv
-COPY --from=builder /usr/src/app /root/app
+FROM gcr.io/distroless/python3-debian12:nonroot
+COPY --from=build-env /app /app
+WORKDIR /app
 
 # Set environment to use the virtual environment
-ENV PATH="/root/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Use Python launcher script to handle PORT env var for Cloud Run compatibility
+CMD ["python", "launcher.py"]
