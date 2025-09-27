@@ -4,9 +4,11 @@ FROM node:22 AS build-env
 
 WORKDIR /app
 
-# Copy package files and node_modules for dependencies
+# Copy package files for dependency installation
 COPY package*.json ./
-COPY node_modules ./node_modules
+
+# Install all dependencies using npm ci for reproducible builds
+RUN npm ci
 
 # Copy all source files
 COPY src ./src
@@ -18,6 +20,9 @@ COPY docs/api/openapi.yaml /docs/api/openapi.yaml
 
 # Build the TypeScript application
 RUN npm run build
+
+# Remove development dependencies to reduce final image size
+RUN npm prune --omit=dev
 
 # Stage 2: Production runtime  
 FROM gcr.io/distroless/nodejs22-debian12
