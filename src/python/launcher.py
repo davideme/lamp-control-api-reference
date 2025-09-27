@@ -3,27 +3,16 @@
 Launcher script for FastAPI application with Cloud Run PORT support.
 """
 import os
-import sys
+
+import uvicorn
 
 
 def main():
-    port = os.environ.get("PORT", "80")
+    port = int(os.environ.get("PORT", "80"))
 
-    # Build the fastapi run command
-    cmd = [
-        sys.executable,
-        "-m",
-        "fastapi",
-        "run",
-        "src/openapi_server/main.py",
-        "--port",
-        port,
-        "--host",
-        "0.0.0.0",
-    ]
-
-    # Execute the command, replacing the current process
-    os.execv(sys.executable, cmd)
+    # Start the FastAPI application directly with uvicorn
+    # This is more reliable than using the `fastapi run` command in containers
+    uvicorn.run("src.openapi_server.main:app", host="0.0.0.0", port=port, log_level="info")
 
 
 if __name__ == "__main__":

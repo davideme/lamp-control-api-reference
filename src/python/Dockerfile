@@ -1,33 +1,32 @@
-FROM python:3.12-slim AS build-env
-COPY . /app
+FROM python:3.11 AS build-env
+
 WORKDIR /app
 
-# Install curl for Poetry installation
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN pip install poetry
 
-# Install Poetry using the official installer
-RUN pip install --no-cache-dir --upgrade pip
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Set PATH and configure Poetry
-ENV PATH="/root/.local/bin:$PATH" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
-
-# Copy dependency files first for better layer caching
 COPY pyproject.toml poetry.lock ./
 
-# Install production dependencies only
-RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-root --only=main
 
+COPY . .
 
 FROM gcr.io/distroless/python3-debian12:nonroot
-COPY --from=build-env /app /app
+
 WORKDIR /app
 
-# Set environment to use the virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
+# Ensure Python can locate third-party packages installed under /usr/local
+ENV PYTHONPATH="/usr/local/lib/python3.11/site-packages"
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Copy Python packages from build stage
+COPY --from=build-env /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+# Copy the entire /usr/local/bin for any installed scripts
+COPY --from=build-env /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY --from=build-env /app .
 
 # Use Python launcher script to handle PORT env var for Cloud Run compatibility
-CMD ["python", "launcher.py"]
+CMD ["launcher.py"]
