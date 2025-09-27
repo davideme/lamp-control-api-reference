@@ -193,13 +193,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Copy OpenAPI spec to TypeScript directory
-      run: |
-        mkdir -p docs/api
-        cp ../../docs/api/openapi.yaml ./docs/api/
-
     - name: Build Docker image
       run: |
+        # Copy the OpenAPI spec to the expected location for Docker build
+        mkdir -p docs/api
+        cp ../../docs/api/openapi.yaml ./docs/api/
         docker build -t lamp-control-api-ts:latest .
 
     - name: Test Docker container
