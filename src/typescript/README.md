@@ -112,6 +112,26 @@ npm run start:native
 
 This eliminates the build step entirely while maintaining production performance.
 
+### Docker Deployment
+
+Build and run with Docker using the multi-stage Dockerfile:
+
+```bash
+# Build the Docker image
+docker build -t lamp-control-api-ts .
+
+# Run the container
+docker run --rm -p 8080:8080 lamp-control-api-ts
+```
+
+The Docker configuration uses:
+- **Multi-stage build**: Optimized for production with separate build and runtime stages
+- **Node.js 22**: Build stage for compilation and dependency installation
+- **Distroless runtime**: Minimal, secure production runtime environment
+- **Optimized layers**: Efficient Docker layer caching for faster builds
+
+The container exposes the API on port 8080 and includes all necessary dependencies and the OpenAPI specification.
+
 ## API Documentation
 
 The API documentation is available at `http://localhost:8080/api-docs` when the server is running.
