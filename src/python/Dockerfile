@@ -28,5 +28,5 @@ COPY --from=build-env /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --from=build-env /app .
 
-# Use Python launcher script to handle PORT env var for Cloud Run compatibility
+# Use Python launcher script to handle PORT and WORKERS env vars for Cloud Run compatibility
 CMD ["launcher.py"]
