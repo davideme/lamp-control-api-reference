@@ -42,6 +42,7 @@ The Docker image uses:
 - **Poetry dependency management**: Uses Poetry in build stage for reproducible dependency installation
 - **Distroless runtime**: Production stage uses `gcr.io/distroless/python3-debian12:nonroot` for minimal attack surface and non-root execution
 - **Port Configuration**: Supports PORT environment variable for Cloud Run compatibility via launcher script
+- **Worker Configuration**: Supports WORKERS environment variable to control the number of worker processes via launcher script
 - **FastAPI CLI**: Uses the modern `fastapi run` command for production deployment
 
 #### Building Docker Image
@@ -58,6 +59,9 @@ docker run -p 8080:80 lamp-control-api-python
 
 # Run with custom port via environment variable (Cloud Run style)
 docker run -p 8080:8080 -e PORT=8080 lamp-control-api-python
+
+# Run with custom port and workers
+docker run -p 8080:8080 -e PORT=8080 -e WORKERS=5 lamp-control-api-python
 ```
 
 ## Cloud Run Deployment
@@ -67,6 +71,7 @@ This application is optimized for Google Cloud Run deployment:
 ### Environment Variables
 
 - `PORT` - The port for the HTTP server. Cloud Run automatically sets this variable for the ingress container. Defaults to 80 if not set.
+- `WORKERS` - The number of worker processes to run. Defaults to 3 if not set.
 
 ### Cloud Run Notes
 
