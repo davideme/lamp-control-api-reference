@@ -9,7 +9,7 @@ import uvicorn
 
 def main() -> None:
     port = int(os.environ.get("PORT", "80"))
-    workers = int(os.environ.get("WORKERS", "3"))
+    workers = int(os.environ.get("WORKERS", "1"))
 
     # Start the FastAPI application directly with uvicorn
     # This is more reliable than using the `fastapi run` command in containers
