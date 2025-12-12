@@ -22,7 +22,7 @@ class TestLauncher:
             "src.openapi_server.main:app",
             host="0.0.0.0",
             port=80,
-            workers=3,
+            workers=1,
             log_level="info",
         )
 
@@ -36,7 +36,7 @@ class TestLauncher:
             "src.openapi_server.main:app",
             host="0.0.0.0",
             port=8080,
-            workers=3,
+            workers=1,
             log_level="info",
         )
 
