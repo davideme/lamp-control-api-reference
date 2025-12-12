@@ -34,7 +34,11 @@ if (app.Environment.IsDevelopment())
 // Add exception handling middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection if not running on Cloud Run (where TLS is terminated at the load balancer)
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("K_SERVICE")))
+{
+    app.UseHttpsRedirection();
+}
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
