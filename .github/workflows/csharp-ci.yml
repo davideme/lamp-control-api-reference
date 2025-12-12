@@ -279,18 +279,15 @@ jobs:
     
     - name: Start API in background
       run: |
-        export PORT=5169
-        dotnet run --configuration Release --no-build &
+        dotnet run --configuration Release --no-build --urls "http://localhost:5169" &
         echo $! > api.pid
         sleep 10
-      env:
-        PORT: 5169
-
+    
     - name: Wait for API to be ready
       run: |
         timeout 30 bash -c 'until curl -f -s http://localhost:5169/swagger/v1/swagger.json > /dev/null; do sleep 1; done'
         echo "API is ready!"
-
+    
     - name: Run Schemathesis tests
       uses: schemathesis/action@v2
       with:
