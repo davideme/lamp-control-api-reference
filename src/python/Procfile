@@ -1,1 +1,1 @@
-web: poetry run python launcher.py
+web: python launcher.py
