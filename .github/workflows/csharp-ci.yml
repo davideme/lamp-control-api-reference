@@ -32,6 +32,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
@@ -79,6 +80,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
@@ -123,6 +125,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
@@ -160,6 +163,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
@@ -225,6 +229,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
@@ -268,6 +273,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-quality: 'ga'
         cache: true
         cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
         
