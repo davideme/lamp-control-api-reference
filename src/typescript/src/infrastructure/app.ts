@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
 
 const options = {
-  specification: `${currentDir}/../../../../docs/api/openapi.yaml`,
+  specification: `${currentDir}/../../../../../docs/api/openapi.yaml`,
   service: new Service(new InMemoryLampRepository()),
   securityHandlers: new Security(),
   prefix: 'v1',
