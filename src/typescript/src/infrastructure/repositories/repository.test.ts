@@ -101,7 +101,7 @@ describe('InMemoryLampRepository', () => {
       const updateData = { status: false };
 
       // Add a small delay to ensure different timestamps
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Act
       const result = await repository.update(lamp.id, updateData);
@@ -132,7 +132,7 @@ describe('InMemoryLampRepository', () => {
       const updateData = { status: false };
 
       // Add a small delay to ensure different timestamps
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Act
       const result = await repository.update(lamp.id, updateData);
