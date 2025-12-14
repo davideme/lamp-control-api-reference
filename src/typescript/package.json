@@ -9,6 +9,7 @@
   },
   "scripts": {
     "generate-types": "openapi-typescript ../../docs/api/openapi.yaml -o ./src/infrastructure/types/api.ts",
+    "prebuild": "mkdir -p ./openapi && cp ../../docs/api/openapi.yaml ./openapi/openapi.yaml 2>/dev/null || cp ./openapi-fallback.yaml ./openapi/openapi.yaml 2>/dev/null || echo 'Warning: OpenAPI spec not found'",
     "build": "tsc",
     "postinstall": "npm run build",
     "clean": "rm -rf dist",

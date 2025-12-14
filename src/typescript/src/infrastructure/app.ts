@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 import fastify from 'fastify';
 import fastifyOpenapiGlue from 'fastify-openapi-glue';
 import Security from './security.ts';
@@ -9,11 +10,20 @@ import Service from './services/service.ts';
 const __filename = fileURLToPath(import.meta.url);
 const currentDir = dirname(__filename);
 
-// Determine OpenAPI spec path - works for both compiled (dist) and source (tests) contexts
+// Determine OpenAPI spec path - works for compiled (dist), source (tests), and deployment contexts
 const isCompiledContext = currentDir.includes('/dist/');
-const openapiPath = isCompiledContext
-  ? join(currentDir, '../../../../../docs/api/openapi.yaml')
-  : join(currentDir, '../../../../docs/api/openapi.yaml');
+
+// Try multiple paths in order of preference
+let openapiPath: string;
+if (isCompiledContext) {
+  // In production/compiled context, check for bundled spec first
+  const bundledPath = join(currentDir, '../../../openapi/openapi.yaml');
+  const repoPath = join(currentDir, '../../../../../docs/api/openapi.yaml');
+  openapiPath = existsSync(bundledPath) ? bundledPath : repoPath;
+} else {
+  // In test/development context
+  openapiPath = join(currentDir, '../../../../docs/api/openapi.yaml');
+}
 
 const options = {
   specification: openapiPath,
