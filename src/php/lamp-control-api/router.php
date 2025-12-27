@@ -18,8 +18,8 @@ if ($requestUri !== '') {
     $path = '/';
 }
 
-// Check if this is an API request (starts with /v1/)
-if (strpos($path, '/v1/') === 0) {
+// Check if this is an API request (starts with /v1/ or is exactly /v1)
+if (strpos($path, '/v1/') === 0 || $path === '/v1') {
     // Route all API requests to index.php regardless of HTTP method
     $_SERVER['REQUEST_URI'] = $requestUri; // Preserve original URI
     require __DIR__ . '/public/index.php';
