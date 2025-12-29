@@ -223,7 +223,7 @@ jobs:
 
       - name: Wait for API to be ready
         run: |
-          timeout 30 bash -c 'until curl -f -s http://localhost:8080/lamps \
+          timeout 30 bash -c 'until curl -f -s http://localhost:8080/v1/lamps \
             > /dev/null; do sleep 1; done'
           echo "API is ready!"
 
@@ -231,7 +231,7 @@ jobs:
         uses: schemathesis/action@v2
         with:
           schema: docs/api/openapi.yaml
-          base-url: http://localhost:8080
+          base-url: http://localhost:8080/v1
           max-examples: 100
           checks: >-
             status_code_conformance,not_a_server_error,response_schema_conformance
@@ -311,7 +311,7 @@ jobs:
           fi
           
           # Test the API endpoint
-          response=$(curl -s http://localhost:8080/lamps)
+          response=$(curl -s http://localhost:8080/v1/lamps)
           if echo "$response" | grep -q '"data"'; then
             echo "✅ Docker container API test passed"
           else
