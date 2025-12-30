@@ -46,9 +46,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Clear out the servers array in the swagger spec, that skips validating
-	// that server names match. We don't know how this thing will be run.
-	swagger.Servers = nil
+	// Keep servers array to allow proper path validation in middleware
+	// The middleware will validate that requests match the /v1 base path from the OpenAPI spec
 
 	// Create an instance of our handler which satisfies the generated interface
 	lamp := api.NewStrictHandler(api.NewLampAPI(), nil)
@@ -60,13 +59,16 @@ func main() {
 	r.Get("/health", healthHandler)
 
 	// Create a subrouter for API routes that need OpenAPI validation
-	r.Route("/", func(r chi.Router) {
+	r.Route("/v1", func(apiRouter chi.Router) {
 		// Use our validation middleware to check all requests against the
-		// OpenAPI schema.
-		r.Use(middleware.OapiRequestValidator(swagger))
+		// OpenAPI schema. Silence the servers warning as we're handling the /v1 prefix in routing.
+		validatorOptions := &middleware.Options{
+			SilenceServersWarning: true,
+		}
+		apiRouter.Use(middleware.OapiRequestValidatorWithOptions(swagger, validatorOptions))
 
 		// We now register our lamp above as the handler for the interface
-		api.HandlerFromMux(lamp, r)
+		api.HandlerFromMux(lamp, apiRouter)
 	})
 
 	s := &http.Server{
