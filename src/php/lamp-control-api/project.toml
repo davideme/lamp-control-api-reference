@@ -1,0 +1,3 @@
+[[build.env]]
+name = "GOOGLE_CUSTOM_NGINX_CONFIG"
+value = "nginx.conf"
