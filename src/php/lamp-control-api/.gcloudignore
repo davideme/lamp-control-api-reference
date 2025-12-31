@@ -1,0 +1,37 @@
+# This file specifies files that should be ignored when deploying to Google Cloud
+
+# Git files
+.git
+.gitignore
+
+# CI/CD
+.github/
+
+# IDEs
+.vscode/
+.idea/
+
+# Tests
+tests/
+phpunit.xml
+phpunit.xml.dist
+
+# Coverage
+coverage/
+coverage.xml
+.phpunit.result.cache
+
+# Development files
+.php-cs-fixer.cache
+phpcs.xml.dist
+phpstan.neon.dist
+
+# Logs
+logs/
+
+# OpenAPI generator files
+.openapi-generator/
+.openapi-generator-ignore
+
+# Documentation (keeping essential files)
+COVERAGE.md
