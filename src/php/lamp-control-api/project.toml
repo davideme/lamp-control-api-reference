@@ -1,3 +1,7 @@
 [[build.env]]
 name = "BP_PHP_WEB_DIR"
 value = "public"
+
+[[build.env]]
+name = "NGINX_CONF_OVERRIDE"
+value = "nginx.conf"
