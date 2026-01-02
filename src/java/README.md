@@ -85,3 +85,145 @@ This endpoint is useful for:
 - Load balancer health probes
 - Monitoring systems
 - CI/CD pipeline validation
+
+## Database Configuration
+
+This application supports PostgreSQL for persistent data storage using Spring Data JPA with Hibernate and HikariCP connection pooling.
+
+### Configuration Options
+
+The application can run in two modes:
+
+1. **In-Memory Mode** (default when no database is configured): Uses a ConcurrentHashMap for storing lamp entities in memory
+2. **PostgreSQL Mode**: Uses PostgreSQL database for durable storage
+
+### PostgreSQL Setup
+
+#### 1. Using Docker Compose
+
+The easiest way to run PostgreSQL locally is using Docker Compose (from the repository root):
+
+```bash
+docker-compose up -d postgres
+```
+
+This will start a PostgreSQL instance on `localhost:5432` with:
+- Database: `lampcontrol`
+- Username: `lampuser`
+- Password: `lamppass`
+
+#### 2. Manual PostgreSQL Setup
+
+If you prefer to use an existing PostgreSQL instance:
+
+1. Create the database:
+```sql
+CREATE DATABASE lampcontrol;
+CREATE USER lampuser WITH PASSWORD 'lamppass';
+GRANT ALL PRIVILEGES ON DATABASE lampcontrol TO lampuser;
+```
+
+2. The schema will be automatically created by Flyway on application startup using the migration in `src/main/resources/db/migration/V1__Initial_schema.sql`
+
+#### 3. Environment Variables
+
+Configure database connection using environment variables:
+
+```bash
+export DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol
+export DB_USER=lampuser
+export DB_PASSWORD=lamppass
+export DB_POOL_MAX_SIZE=20
+export DB_POOL_MIN_SIZE=5
+```
+
+Or set them in `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/lampcontrol
+spring.datasource.username=lampuser
+spring.datasource.password=lamppass
+spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=5
+```
+
+#### 4. Running with PostgreSQL
+
+```bash
+# Run with PostgreSQL
+mvn spring-boot:run
+
+# Or with environment variables
+DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol \
+DB_USER=lampuser \
+DB_PASSWORD=lamppass \
+mvn spring-boot:run
+```
+
+### Database Migration
+
+The application uses [Flyway](https://flywaydb.org/) for database schema management. Migrations are automatically executed on startup:
+
+- **Location**: `src/main/resources/db/migration/`
+- **Initial Schema**: `V1__Initial_schema.sql`
+
+Flyway will:
+- Create the `lamps` table with appropriate indexes
+- Set up triggers for automatic timestamp updates
+- Enable UUID generation extension
+
+To disable Flyway migrations:
+```properties
+spring.flyway.enabled=false
+```
+
+### Connection Pool Configuration
+
+HikariCP is configured with production-ready defaults:
+
+```properties
+spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.connection-timeout=30000
+spring.datasource.hikari.idle-timeout=600000
+spring.datasource.hikari.max-lifetime=1800000
+spring.datasource.hikari.pool-name=LampControlHikariCP
+```
+
+Adjust these values based on your load requirements.
+
+### Testing with PostgreSQL
+
+Integration tests use [Testcontainers](https://www.testcontainers.org/) to automatically spin up PostgreSQL containers:
+
+```bash
+# Run integration tests (includes PostgreSQL tests)
+mvn test -P integration-tests
+
+# Run only unit tests (no database required)
+mvn test -P unit-tests
+
+# Run all tests
+mvn test -P all-tests
+```
+
+Testcontainers requirements:
+- Docker installed and running
+- Internet connection (to pull postgres:16-alpine image on first run)
+
+### Troubleshooting
+
+**Issue**: Application fails to start with "Failed to determine a suitable driver class"
+
+**Solution**: This means PostgreSQL configuration is incomplete. Either:
+- Remove/comment out `spring.datasource.url` to use in-memory mode
+- Provide complete database configuration (URL, username, password)
+
+**Issue**: Flyway migration fails
+
+**Solution**: 
+- Check PostgreSQL is running: `docker ps` or `pg_isready`
+- Verify connection details in application.properties
+- Check database user has sufficient privileges
+- Review Flyway logs for specific error messages
+
