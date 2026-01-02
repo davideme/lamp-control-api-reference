@@ -77,6 +77,7 @@ func (q *Queries) DeleteLamp(ctx context.Context, arg DeleteLampParams) (int64, 
 const getAllLampsForTest = `-- name: GetAllLampsForTest :many
 SELECT id, is_on, created_at, updated_at, deleted_at
 FROM lamps
+WHERE deleted_at IS NULL
 ORDER BY created_at ASC
 `
 
@@ -166,19 +167,18 @@ func (q *Queries) ListLamps(ctx context.Context, arg ListLampsParams) ([]Lamp, e
 
 const updateLamp = `-- name: UpdateLamp :one
 UPDATE lamps
-SET is_on = $2, updated_at = $3
+SET is_on = $2
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING id, is_on, created_at, updated_at, deleted_at
 `
 
 type UpdateLampParams struct {
-	ID        pgtype.UUID        `json:"id"`
-	IsOn      bool               `json:"is_on"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID   pgtype.UUID `json:"id"`
+	IsOn bool        `json:"is_on"`
 }
 
 func (q *Queries) UpdateLamp(ctx context.Context, arg UpdateLampParams) (Lamp, error) {
-	row := q.db.QueryRow(ctx, updateLamp, arg.ID, arg.IsOn, arg.UpdatedAt)
+	row := q.db.QueryRow(ctx, updateLamp, arg.ID, arg.IsOn)
 	var i Lamp
 	err := row.Scan(
 		&i.ID,

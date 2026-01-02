@@ -22,7 +22,7 @@ WHERE deleted_at IS NULL;
 
 -- name: UpdateLamp :one
 UPDATE lamps
-SET is_on = $2, updated_at = $3
+SET is_on = $2
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING id, is_on, created_at, updated_at, deleted_at;
 
@@ -34,4 +34,5 @@ WHERE id = $1 AND deleted_at IS NULL;
 -- name: GetAllLampsForTest :many
 SELECT id, is_on, created_at, updated_at, deleted_at
 FROM lamps
+WHERE deleted_at IS NULL
 ORDER BY created_at ASC;

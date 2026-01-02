@@ -9,6 +9,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api"
 	"github.com/go-chi/chi/v5"
@@ -39,6 +42,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	port := flag.String("port", "8080", "Port for test HTTP server")
+	requireDB := flag.Bool("require-db", false, "Fail if PostgreSQL connection is configured but fails")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -54,6 +58,7 @@ func main() {
 
 	// Create repository based on environment configuration
 	var lampAPI *api.LampAPI
+	var pool interface{ Close() }
 	dbConfig := api.NewDatabaseConfigFromEnv()
 
 	if dbConfig != nil {
@@ -61,16 +66,19 @@ func main() {
 		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
 			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
 
-		pool, err := api.CreateConnectionPool(ctx, dbConfig)
+		pgPool, err := api.CreateConnectionPool(ctx, dbConfig)
 		if err != nil {
 			log.Printf("Failed to connect to PostgreSQL: %v", err)
+			if *requireDB {
+				log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
+			}
 			log.Printf("Falling back to in-memory repository")
 			lampAPI = api.NewLampAPI()
 		} else {
 			log.Printf("Successfully connected to PostgreSQL")
-			defer pool.Close()
+			pool = pgPool
 
-			postgresRepo := api.NewPostgresLampRepository(pool)
+			postgresRepo := api.NewPostgresLampRepository(pgPool)
 			lampAPI = api.NewLampAPIWithRepository(postgresRepo)
 		}
 	} else {
@@ -104,12 +112,38 @@ func main() {
 	s := &http.Server{
 		Handler:           r,
 		Addr:              net.JoinHostPort("0.0.0.0", *port),
-		ReadHeaderTimeout: 10 * 1e9, // 10 seconds
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	// And we serve HTTP until the world ends.
-	log.Printf("Starting server on %s", s.Addr)
-	if err := s.ListenAndServe(); err != nil {
-		log.Printf("Server error: %v", err)
+	// Set up graceful shutdown
+	shutdownChan := make(chan os.Signal, 1)
+	signal.Notify(shutdownChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		log.Printf("Starting server on %s", s.Addr)
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed: %v", err)
+		}
+	}()
+
+	// Wait for shutdown signal
+	<-shutdownChan
+	log.Println("Shutting down gracefully...")
+
+	// Create shutdown context with timeout
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Shutdown the server
+	if err := s.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server shutdown error: %v", err)
 	}
+
+	// Close database pool if it exists
+	if pool != nil {
+		pool.Close()
+		log.Println("Database connection closed")
+	}
+
+	log.Println("Server stopped")
 }

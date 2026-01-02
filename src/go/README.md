@@ -109,8 +109,8 @@ The application supports PostgreSQL storage through environment variables. If an
 
 2. **Initialize the database schema**:
    ```bash
-   # From repository root
-   psql -h localhost -U lamp_user -d lamp_control -f database/sql/postgresql/schema.sql
+   # From src/go directory
+   psql -h localhost -U lamp_user -d lamp_control -f ../../database/sql/postgresql/schema.sql
    ```
    Default credentials from docker-compose:
    - Host: `localhost`
@@ -139,6 +139,7 @@ export DB_PASSWORD=lamp_password
 
 Using DATABASE_URL:
 ```bash
+# Development only - disables SSL. For production, use sslmode=require or sslmode=verify-full
 export DATABASE_URL="postgres://lamp_user:lamp_password@localhost:5432/lamp_control?sslmode=disable"
 ```
 

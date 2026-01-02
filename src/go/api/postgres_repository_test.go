@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
 	"github.com/google/uuid"
@@ -184,18 +183,11 @@ func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
 	}
 	defer repo.Delete(ctx, lamp1.ID.String())
 
-	// Note: In a real application, proper ordering would be handled by database
-	// or cursor-based pagination. Using short sleeps here only for test purposes
-	// to ensure distinct timestamps for ordering verification.
-	time.Sleep(10 * time.Millisecond)
-
 	err = repo.Create(ctx, lamp2)
 	if err != nil {
 		t.Fatalf("Failed to create lamp2: %v", err)
 	}
 	defer repo.Delete(ctx, lamp2.ID.String())
-
-	time.Sleep(10 * time.Millisecond)
 
 	err = repo.Create(ctx, lamp3)
 	if err != nil {

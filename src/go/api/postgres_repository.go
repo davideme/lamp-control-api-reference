@@ -93,16 +93,10 @@ func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entitie
 		return fmt.Errorf("failed to scan UUID: %w", err)
 	}
 
-	// Convert time.Time to pgtype.Timestamptz
-	updatedAt := pgtype.Timestamptz{
-		Time:  lampEntity.UpdatedAt,
-		Valid: true,
-	}
-
+	// Note: updated_at is automatically set by the database trigger
 	_, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
-		ID:        pgUUID,
-		IsOn:      lampEntity.Status,
-		UpdatedAt: updatedAt,
+		ID:   pgUUID,
+		IsOn: lampEntity.Status,
 	})
 
 	if err != nil {
@@ -189,10 +183,16 @@ func (r *PostgresLampRepository) Exists(ctx context.Context, id string) bool {
 // convertToEntity converts a sqlc Lamp model to a domain LampEntity
 func (r *PostgresLampRepository) convertToEntity(lamp *queries.Lamp) (*entities.LampEntity, error) {
 	// Convert pgtype.UUID to uuid.UUID
+	if !lamp.ID.Valid {
+		return nil, fmt.Errorf("invalid UUID in database record")
+	}
 	var uid uuid.UUID
 	copy(uid[:], lamp.ID.Bytes[:])
 
 	// Convert pgtype.Timestamptz to time.Time
+	if !lamp.CreatedAt.Valid || !lamp.UpdatedAt.Valid {
+		return nil, fmt.Errorf("invalid timestamps in database record")
+	}
 	createdAt := lamp.CreatedAt.Time
 	updatedAt := lamp.UpdatedAt.Time
 

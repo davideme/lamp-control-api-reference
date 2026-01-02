@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -24,9 +25,8 @@ type DatabaseConfig struct {
 // NewDatabaseConfigFromEnv creates a DatabaseConfig from environment variables
 // Returns nil if no PostgreSQL connection parameters are set
 func NewDatabaseConfigFromEnv() *DatabaseConfig {
-	// Check if any PostgreSQL connection parameter is set
-	// If DATABASE_URL is set, we have a connection string
-	// Otherwise, check for individual parameters
+	// Check if PostgreSQL is configured
+	// Require DATABASE_URL OR explicit database name OR both host and user to be set
 	databaseURL := os.Getenv("DATABASE_URL")
 	host := os.Getenv("DB_HOST")
 	portStr := os.Getenv("DB_PORT")
@@ -34,9 +34,12 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 
-	// If DATABASE_URL is set, use it directly (pgx will parse it)
-	// If no connection parameters are set at all, return nil
-	if databaseURL == "" && host == "" && user == "" && password == "" {
+	// Determine if PostgreSQL is actually configured
+	// Consider it configured if:
+	//   - DATABASE_URL is set, or
+	//   - database name is explicitly provided, or
+	//   - both host and user are explicitly provided
+	if databaseURL == "" && database == "" && !(host != "" && user != "") {
 		return nil
 	}
 
@@ -56,7 +59,10 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 		config.Host = host
 	}
 	if portStr != "" {
-		if port, err := strconv.Atoi(portStr); err == nil {
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			log.Printf("Warning: Invalid DB_PORT value '%s', using default %d: %v", portStr, config.Port, err)
+		} else {
 			config.Port = port
 		}
 	}
@@ -72,12 +78,18 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 
 	// Pool configuration
 	if poolMinStr := os.Getenv("DB_POOL_MIN_SIZE"); poolMinStr != "" {
-		if poolMin, err := strconv.Atoi(poolMinStr); err == nil {
+		poolMin, err := strconv.Atoi(poolMinStr)
+		if err != nil {
+			log.Printf("Warning: Invalid DB_POOL_MIN_SIZE value '%s', using default %d: %v", poolMinStr, config.PoolMin, err)
+		} else {
 			config.PoolMin = poolMin
 		}
 	}
 	if poolMaxStr := os.Getenv("DB_POOL_MAX_SIZE"); poolMaxStr != "" {
-		if poolMax, err := strconv.Atoi(poolMaxStr); err == nil {
+		poolMax, err := strconv.Atoi(poolMaxStr)
+		if err != nil {
+			log.Printf("Warning: Invalid DB_POOL_MAX_SIZE value '%s', using default %d: %v", poolMaxStr, config.PoolMax, err)
+		} else {
 			config.PoolMax = poolMax
 		}
 	}
