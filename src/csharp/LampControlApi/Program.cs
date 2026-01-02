@@ -16,19 +16,15 @@ if (!string.IsNullOrEmpty(port))
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Configure database storage based on USE_POSTGRES environment variable or connection string presence
-var usePostgres = Environment.GetEnvironmentVariable("USE_POSTGRES")?.ToLower() == "true"
-    || !string.IsNullOrEmpty(builder.Configuration.GetConnectionString("LampControl"));
+// Configure database storage based on connection string presence
+var connectionString = builder.Configuration.GetConnectionString("LampControl");
+var usePostgres = !string.IsNullOrWhiteSpace(connectionString);
 
 if (usePostgres)
 {
-    // Configure PostgreSQL with Entity Framework Core
-    var connectionString = builder.Configuration.GetConnectionString("LampControl")
-        ?? throw new InvalidOperationException("Connection string 'LampControl' not found.");
-
     builder.Services.AddDbContext<LampControlDbContext>(options =>
     {
-        options.UseNpgsql(connectionString, npgsqlOptions =>
+        options.UseNpgsql(connectionString!, npgsqlOptions =>
         {
             npgsqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 3,

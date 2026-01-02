@@ -104,7 +104,6 @@ namespace LampControlApi.Services
             var updatedEntity = existingEntity with
             {
                 IsOn = entity.Status,
-                UpdatedAt = DateTimeOffset.UtcNow,
             };
 
             // Update the tracked entity reference
@@ -112,7 +111,10 @@ namespace LampControlApi.Services
 
             await this.context.SaveChangesAsync();
 
-            return this.MapToDomain(updatedEntity);
+            // Reload to get the trigger-updated timestamp
+            await this.context.Entry(existingEntity).ReloadAsync();
+
+            return this.MapToDomain(existingEntity);
         }
 
         /// <inheritdoc/>

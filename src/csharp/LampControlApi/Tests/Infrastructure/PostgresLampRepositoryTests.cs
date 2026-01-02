@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using LampControlApi.Domain.Entities;
@@ -43,8 +44,22 @@ namespace LampControlApi.Tests.Infrastructure
 
             this.context = new LampControlDbContext(options);
 
-            // Apply schema - EnsureCreated will create tables based on DbContext model
-            await this.context.Database.EnsureCreatedAsync();
+            // Apply actual schema from schema.sql file (including triggers)
+            var schemaPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "database",
+                "sql",
+                "postgresql",
+                "schema.sql");
+
+            var schemaSql = await File.ReadAllTextAsync(schemaPath);
+            await this.context.Database.ExecuteSqlRawAsync(schemaSql);
 
             this.repository = new PostgresLampRepository(
                 this.context,

@@ -192,11 +192,17 @@ The tests will automatically:
 
 #### Health Checks
 
-When PostgreSQL is configured, a database health check is available:
+The API exposes two health endpoints:
+
+- `/health` - Simple status check (always returns `ok`, backwards compatible)
+- `/healthz` - Detailed health check (includes database connectivity when PostgreSQL is enabled)
 
 ```bash
-# Check database connectivity
+# Simple liveness/status check
 curl https://localhost:7173/health
+
+# Detailed health check including database connectivity (when PostgreSQL is configured)
+curl https://localhost:7173/healthz
 ```
 
 #### Troubleshooting PostgreSQL
