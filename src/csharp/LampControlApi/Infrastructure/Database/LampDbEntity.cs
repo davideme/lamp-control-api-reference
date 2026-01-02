@@ -14,7 +14,7 @@ namespace LampControlApi.Infrastructure.Database
         public Guid Id { get; init; }
 
         /// <summary>
-        /// Gets or initializes a value indicating whether the lamp is turned on (true) or off (false).
+        /// Gets a value indicating whether gets or initializes a value indicating whether the lamp is turned on (true) or off (false).
         /// </summary>
         public bool IsOn { get; init; }
 
