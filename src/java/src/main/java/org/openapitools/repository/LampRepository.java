@@ -6,8 +6,11 @@ import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 
 /**
- * In-memory repository interface for Lamp entities. This interface defines the contract for lamp
- * data operations without being tied to any specific persistence mechanism.
+ * Repository interface for Lamp entities. This interface defines the contract for lamp data
+ * operations without being tied to any specific persistence mechanism.
+ *
+ * <p>Note: This interface is kept minimal to avoid conflicts with JpaRepository methods when using
+ * Spring Data JPA implementation.
  */
 public interface LampRepository {
 
@@ -49,7 +52,12 @@ public interface LampRepository {
    */
   void deleteById(UUID lampId);
 
-  /** Delete all lamp entities. */
+  /**
+   * Delete all lamp entities.
+   *
+   * @deprecated Use with caution. This method is primarily for testing purposes.
+   */
+  @Deprecated
   void deleteAll();
 
   /**

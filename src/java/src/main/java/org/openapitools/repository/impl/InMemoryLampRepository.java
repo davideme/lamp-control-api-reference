@@ -8,14 +8,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Repository;
 
 /**
  * In-memory implementation of the LampRepository. This implementation uses a ConcurrentHashMap to
  * store lamp entities in memory, providing thread-safe operations suitable for testing and
  * development environments.
+ *
+ * <p>This implementation is only activated when no other LampRepository bean is available (i.e.,
+ * when JPA is not configured).
  */
 @Repository
+@ConditionalOnMissingBean(name = "jpaLampRepository")
 public class InMemoryLampRepository implements LampRepository {
 
   private final Map<UUID, LampEntity> lamps = new ConcurrentHashMap<>();
