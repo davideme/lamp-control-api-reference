@@ -1,6 +1,8 @@
 using LampControlApi.Controllers;
+using LampControlApi.Infrastructure.Database;
 using LampControlApi.Middleware;
 using LampControlApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +16,47 @@ if (!string.IsNullOrEmpty(port))
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Register our services
-builder.Services.AddSingleton<ILampRepository, InMemoryLampRepository>();
+// Configure database storage based on USE_POSTGRES environment variable or connection string presence
+var usePostgres = Environment.GetEnvironmentVariable("USE_POSTGRES")?.ToLower() == "true"
+    || !string.IsNullOrEmpty(builder.Configuration.GetConnectionString("LampControl"));
+
+if (usePostgres)
+{
+    // Configure PostgreSQL with Entity Framework Core
+    var connectionString = builder.Configuration.GetConnectionString("LampControl")
+        ?? throw new InvalidOperationException("Connection string 'LampControl' not found.");
+
+    builder.Services.AddDbContext<LampControlDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null);
+        });
+
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+        }
+    });
+
+    // Register PostgreSQL repository
+    builder.Services.AddScoped<ILampRepository, PostgresLampRepository>();
+
+    // Add health checks for database
+    builder.Services.AddHealthChecks()
+        .AddDbContextCheck<LampControlDbContext>("database");
+}
+else
+{
+    // Register in-memory repository (default for testing and development)
+    builder.Services.AddSingleton<ILampRepository, InMemoryLampRepository>();
+    builder.Services.AddHealthChecks();
+}
+
 builder.Services.AddScoped<IController, LampControllerImplementation>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -41,7 +82,7 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("K_SERVICE")))
 }
 
 // Health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapHealthChecks("/health");
 
 // Map controllers
 app.MapControllers();

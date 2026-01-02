@@ -48,6 +48,186 @@ A modern ASP.NET Core Web API for controlling smart lamps, built with .NET 8.0.
 
 The API will be available at `https://localhost:7173` with Swagger UI at `/swagger`.
 
+## Database Storage
+
+### In-Memory Storage (Default)
+
+By default, the application uses an in-memory repository for data persistence. This is suitable for development, testing, and demonstrations.
+
+### PostgreSQL Storage
+
+The application supports PostgreSQL for production-ready, durable data storage with ACID guarantees.
+
+#### Prerequisites for PostgreSQL
+
+- PostgreSQL 12+ (or use Docker)
+- PostgreSQL client tools (optional, for schema management)
+
+#### Setup PostgreSQL with Docker
+
+```bash
+# Start PostgreSQL container
+docker run -d \
+  --name lampcontrol-postgres \
+  -e POSTGRES_DB=lampcontrol \
+  -e POSTGRES_USER=lampuser \
+  -e POSTGRES_PASSWORD=lamppass \
+  -p 5432:5432 \
+  postgres:16-alpine
+
+# Apply schema
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+```
+
+Alternatively, use the project's docker-compose:
+
+```bash
+# From repository root
+docker-compose up -d postgres
+
+# Apply schema
+docker exec -i lamp-control-api-reference-postgres-1 psql -U lampuser -d lampcontrol < database/sql/postgresql/schema.sql
+```
+
+#### Configuration
+
+The application automatically uses PostgreSQL when a connection string is configured.
+
+**Option 1: appsettings.json** (Development)
+
+```json
+{
+  "ConnectionStrings": {
+    "LampControl": "Host=localhost;Port=5432;Database=lampcontrol;Username=lampuser;Password=lamppass;Pooling=true;Maximum Pool Size=50;Connection Idle Lifetime=300"
+  }
+}
+```
+
+**Option 2: Environment Variables** (Production)
+
+```bash
+# Set connection string
+export ConnectionStrings__LampControl="Host=db.production.com;Port=5432;Database=lampcontrol;Username=lampuser;Password=your_secure_password;SSL Mode=Require;Trust Server Certificate=false"
+
+# Or explicitly enable PostgreSQL
+export USE_POSTGRES=true
+export ConnectionStrings__LampControl="your-connection-string"
+
+# Run application
+dotnet run
+```
+
+**Option 3: User Secrets** (Development)
+
+```bash
+# Set connection string in user secrets
+cd LampControlApi
+dotnet user-secrets set "ConnectionStrings:LampControl" "Host=localhost;Port=5432;Database=lampcontrol;Username=lampuser;Password=lamppass"
+dotnet run
+```
+
+#### Connection String Parameters
+
+- `Host` - PostgreSQL server hostname
+- `Port` - PostgreSQL server port (default: 5432)
+- `Database` - Database name
+- `Username` - Database user
+- `Password` - Database password
+- `Pooling` - Enable connection pooling (default: true)
+- `Maximum Pool Size` - Max connections in pool (default: 50)
+- `Connection Idle Lifetime` - Close idle connections after N seconds
+- `SSL Mode` - SSL/TLS mode (Disable, Allow, Prefer, Require)
+- `Trust Server Certificate` - Trust server certificate without validation
+
+#### Schema Management
+
+**Manual Schema Application** (Recommended)
+
+Apply the existing schema from `database/sql/postgresql/schema.sql`:
+
+```bash
+# Using psql
+psql -h localhost -U lampuser -d lampcontrol -f ../../../database/sql/postgresql/schema.sql
+
+# Using Docker
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+```
+
+**Entity Framework Core Migrations** (Alternative)
+
+For future schema changes, you can use EF Core migrations:
+
+```bash
+# Install EF Core CLI tools
+dotnet tool install --global dotnet-ef
+
+# Create migration
+dotnet ef migrations add MigrationName --project LampControlApi
+
+# Apply migration
+dotnet ef database update --project LampControlApi
+
+# Generate SQL script (for manual review/deployment)
+dotnet ef migrations script --output migration.sql
+```
+
+#### Testing with PostgreSQL
+
+Integration tests use Testcontainers to automatically start PostgreSQL containers:
+
+```bash
+# Run all tests (including PostgreSQL integration tests)
+dotnet test
+
+# Run only PostgreSQL integration tests
+dotnet test --filter "FullyQualifiedName~PostgresLampRepositoryTests"
+```
+
+The tests will automatically:
+1. Pull the `postgres:16-alpine` Docker image (if not already present)
+2. Start a PostgreSQL container
+3. Create the test database and schema
+4. Run tests
+5. Clean up the container
+
+#### Health Checks
+
+When PostgreSQL is configured, a database health check is available:
+
+```bash
+# Check database connectivity
+curl https://localhost:7173/health
+```
+
+#### Troubleshooting PostgreSQL
+
+**Connection errors**
+```bash
+# Check PostgreSQL is running
+docker ps | grep postgres
+
+# Check connection string is correct
+dotnet user-secrets list
+
+# Check PostgreSQL logs
+docker logs lampcontrol-postgres
+```
+
+**Schema not applied**
+```bash
+# Verify schema exists
+docker exec -it lampcontrol-postgres psql -U lampuser -d lampcontrol -c "\dt"
+
+# Reapply schema if needed
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+```
+
+**Permission errors**
+```bash
+# Grant necessary permissions
+docker exec -it lampcontrol-postgres psql -U lampuser -d lampcontrol -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO lampuser;"
+```
+
 ## Code Quality
 
 ### Linting and Formatting
