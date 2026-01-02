@@ -150,8 +150,10 @@ func (r *PostgresLampRepository) Delete(ctx context.Context, id string) error {
 func (r *PostgresLampRepository) List(ctx context.Context) ([]*entities.LampEntity, error) {
 	// For simplicity, list all lamps without pagination
 	// In production, you'd want to use proper pagination
+	const defaultLimit = 1000 // Reasonable default limit to prevent unbounded queries
+
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
-		Limit:  1000, // Reasonable default limit
+		Limit:  defaultLimit,
 		Offset: 0,
 	})
 

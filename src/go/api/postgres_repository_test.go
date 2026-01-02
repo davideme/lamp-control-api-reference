@@ -176,7 +176,10 @@ func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
 	}
 	defer repo.Delete(ctx, lamp1.ID.String())
 
-	time.Sleep(10 * time.Millisecond) // Ensure different timestamps
+	// Note: In a real application, proper ordering would be handled by database
+	// or cursor-based pagination. Using short sleeps here only for test purposes
+	// to ensure distinct timestamps for ordering verification.
+	time.Sleep(10 * time.Millisecond)
 
 	err = repo.Create(ctx, lamp2)
 	if err != nil {
