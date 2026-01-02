@@ -75,8 +75,8 @@ docker run -d \
   -p 5432:5432 \
   postgres:16-alpine
 
-# Apply schema
-docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+# Apply schema (run from repository root)
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < database/sql/postgresql/schema.sql
 ```
 
 Alternatively, use the project's docker-compose:
@@ -146,11 +146,11 @@ dotnet run
 Apply the existing schema from `database/sql/postgresql/schema.sql`:
 
 ```bash
-# Using psql
-psql -h localhost -U lampuser -d lampcontrol -f ../../../database/sql/postgresql/schema.sql
+# Using psql (from repository root)
+psql -h localhost -U lampuser -d lampcontrol -f database/sql/postgresql/schema.sql
 
-# Using Docker
-docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+# Using Docker (from repository root)
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < database/sql/postgresql/schema.sql
 ```
 
 **Entity Framework Core Migrations** (Alternative)
@@ -218,8 +218,8 @@ docker logs lampcontrol-postgres
 # Verify schema exists
 docker exec -it lampcontrol-postgres psql -U lampuser -d lampcontrol -c "\dt"
 
-# Reapply schema if needed
-docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+# Reapply schema if needed (from repository root)
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < database/sql/postgresql/schema.sql
 ```
 
 **Permission errors**

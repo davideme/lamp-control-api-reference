@@ -100,15 +100,15 @@ namespace LampControlApi.Services
                 return null;
             }
 
-            // Create updated entity with init setters
+            // Create updated entity with init setters using with-expression
             var updatedEntity = existingEntity with
             {
                 IsOn = entity.Status,
                 UpdatedAt = DateTimeOffset.UtcNow,
             };
 
-            this.context.Entry(existingEntity).State = EntityState.Detached;
-            this.context.Entry(updatedEntity).State = EntityState.Modified;
+            // Update the tracked entity reference
+            this.context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
             await this.context.SaveChangesAsync();
 
@@ -136,8 +136,8 @@ namespace LampControlApi.Services
                 DeletedAt = DateTimeOffset.UtcNow,
             };
 
-            this.context.Entry(existingEntity).State = EntityState.Detached;
-            this.context.Entry(deletedEntity).State = EntityState.Modified;
+            // Update the tracked entity reference
+            this.context.Entry(existingEntity).CurrentValues.SetValues(deletedEntity);
 
             await this.context.SaveChangesAsync();
 

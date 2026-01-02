@@ -29,8 +29,8 @@ export ConnectionStrings__LampControl="Host=localhost;Port=5432;Database=lampcon
 # Start PostgreSQL
 docker run -d --name lampcontrol-postgres -e POSTGRES_DB=lampcontrol -e POSTGRES_USER=lampuser -e POSTGRES_PASSWORD=lamppass -p 5432:5432 postgres:16-alpine
 
-# Apply schema
-docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < ../../../database/sql/postgresql/schema.sql
+# Apply schema (from repository root)
+docker exec -i lampcontrol-postgres psql -U lampuser -d lampcontrol < database/sql/postgresql/schema.sql
 
 # Configure and run
 cd src/csharp
@@ -59,17 +59,17 @@ go get github.com/jackc/pgx/v5/pgxpool
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 ```
 
-3. **Create sqlc configuration** (`sqlc.yaml`):
+3. **Create sqlc configuration** (`sqlc.yaml` in repository root):
 ```yaml
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "internal/repository/queries"
-    schema: "../../../database/sql/postgresql"
+    queries: "src/go/internal/repository/queries"
+    schema: "database/sql/postgresql"
     gen:
       go:
         package: "repository"
-        out: "internal/repository"
+        out: "src/go/internal/repository"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_interface: true
@@ -77,7 +77,7 @@ sql:
         emit_pointers_for_null_types: true
 ```
 
-4. **Create SQL queries** in `internal/repository/queries/lamps.sql`:
+4. **Create SQL queries** in `src/go/internal/repository/queries/lamps.sql`:
 ```sql
 -- name: CreateLamp :one
 INSERT INTO lamps (id, is_on, created_at, updated_at)
