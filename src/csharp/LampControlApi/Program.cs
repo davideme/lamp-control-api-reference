@@ -81,8 +81,11 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("K_SERVICE")))
     app.UseHttpsRedirection();
 }
 
-// Health check endpoint
-app.MapHealthChecks("/health");
+// Simple health check endpoint (backwards compatible)
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+// Detailed health check endpoint (includes database checks if PostgreSQL is configured)
+app.MapHealthChecks("/healthz");
 
 // Map controllers
 app.MapControllers();
