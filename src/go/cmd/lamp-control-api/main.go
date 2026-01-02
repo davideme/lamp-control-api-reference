@@ -55,12 +55,12 @@ func main() {
 	// Create repository based on environment configuration
 	var lampAPI *api.LampAPI
 	dbConfig := api.NewDatabaseConfigFromEnv()
-	
+
 	if dbConfig != nil {
 		// PostgreSQL connection parameters are set, use PostgreSQL repository
 		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
 			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
-		
+
 		pool, err := api.CreateConnectionPool(ctx, dbConfig)
 		if err != nil {
 			log.Printf("Failed to connect to PostgreSQL: %v", err)
@@ -69,7 +69,7 @@ func main() {
 		} else {
 			log.Printf("Successfully connected to PostgreSQL")
 			defer pool.Close()
-			
+
 			postgresRepo := api.NewPostgresLampRepository(pool)
 			lampAPI = api.NewLampAPIWithRepository(postgresRepo)
 		}

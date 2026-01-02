@@ -42,13 +42,13 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 
 	// Use defaults from pgx library
 	config := &DatabaseConfig{
-		Host:     "localhost", // pgx default
-		Port:     5432,        // pgx default
-		Database: "postgres",  // pgx default
+		Host:     "localhost",       // pgx default
+		Port:     5432,              // pgx default
+		Database: "postgres",        // pgx default
 		User:     os.Getenv("USER"), // pgx uses current user by default
 		Password: "",
-		PoolMin:  0,  // pgxpool default
-		PoolMax:  4,  // pgxpool default
+		PoolMin:  0, // pgxpool default
+		PoolMax:  4, // pgxpool default
 	}
 
 	// Override with environment variables if set
