@@ -65,18 +65,16 @@ namespace LampControlApi.Services
 
             this.logger.LogDebug("Creating lamp {LampId} in PostgreSQL database", entity.Id);
 
-            var now = DateTimeOffset.UtcNow;
             var dbEntity = new LampDbEntity
             {
                 Id = entity.Id,
                 IsOn = entity.Status,
-                CreatedAt = now,
-                UpdatedAt = now,
                 DeletedAt = null,
             };
 
             this.context.Lamps.Add(dbEntity);
             await this.context.SaveChangesAsync();
+            await this.context.Entry(dbEntity).ReloadAsync();
 
             return this.MapToDomain(dbEntity);
         }

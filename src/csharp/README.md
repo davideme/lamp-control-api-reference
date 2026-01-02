@@ -109,9 +109,6 @@ The application automatically uses PostgreSQL when a connection string is config
 # Set connection string
 export ConnectionStrings__LampControl="Host=db.production.com;Port=5432;Database=lampcontrol;Username=lampuser;Password=your_secure_password;SSL Mode=Require;Trust Server Certificate=false"
 
-# Or explicitly enable PostgreSQL
-export USE_POSTGRES=true
-export ConnectionStrings__LampControl="your-connection-string"
 
 # Run application
 dotnet run
