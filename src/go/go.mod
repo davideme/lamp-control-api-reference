@@ -1,8 +1,8 @@
 module github.com/davideme/lamp-control-api-reference
 
-go 1.23
+go 1.24.3
 
-toolchain go1.24.11
+tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 require (
 	github.com/getkin/kin-openapi v0.132.0
