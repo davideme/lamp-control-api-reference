@@ -108,8 +108,8 @@ func main() {
 	}
 
 	// And we serve HTTP until the world ends.
+	log.Printf("Starting server on %s", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
 		log.Printf("Server error: %v", err)
-		os.Exit(1)
 	}
 }
