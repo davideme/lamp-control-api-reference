@@ -57,7 +57,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that soft delete query filter excludes deleted records.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task QueryFilter_ShouldExcludeDeletedLamps()
         {
@@ -97,7 +97,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that IgnoreQueryFilters allows retrieving deleted records.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task IgnoreQueryFilters_ShouldIncludeDeletedLamps()
         {
@@ -136,7 +136,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that primary key is properly configured.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task PrimaryKey_ShouldPreventDuplicateIds()
         {
@@ -178,7 +178,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that entity can be added and retrieved.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task AddAndRetrieve_ShouldPersistEntity()
         {
@@ -208,7 +208,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that entity can be updated.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task Update_ShouldModifyEntity()
         {
@@ -241,7 +241,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that query filter works with FindAsync.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task FindAsync_ShouldReturnNullForDeletedEntity()
         {

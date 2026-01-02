@@ -25,7 +25,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Initializes the test by starting a PostgreSQL container and setting up the database context.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [TestInitialize]
         public async Task InitializeAsync()
         {
@@ -65,7 +65,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Cleanup test resources.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [TestCleanup]
         public async Task CleanupAsync()
         {
@@ -83,7 +83,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test creating a lamp in PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task CreateAsync_ShouldPersistLamp()
         {
@@ -110,7 +110,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test getting all lamps from PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetAllAsync_ShouldReturnAllLamps()
         {
@@ -132,7 +132,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test getting a lamp by ID from PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetByIdAsync_ShouldReturnLamp_WhenExists()
         {
@@ -152,7 +152,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test getting a non-existent lamp by ID from PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetByIdAsync_ShouldReturnNull_WhenNotExists()
         {
@@ -169,7 +169,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test updating a lamp in PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task UpdateAsync_ShouldModifyLamp()
         {
@@ -196,7 +196,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test updating a non-existent lamp in PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task UpdateAsync_ShouldReturnNull_WhenNotExists()
         {
@@ -213,7 +213,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test deleting a lamp from PostgreSQL (soft delete).
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task DeleteAsync_ShouldSoftDeleteLamp()
         {
@@ -235,7 +235,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test deleting a non-existent lamp from PostgreSQL.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task DeleteAsync_ShouldReturnFalse_WhenNotExists()
         {
@@ -252,7 +252,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that soft-deleted lamps are not returned by GetAllAsync.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetAllAsync_ShouldNotReturnDeletedLamps()
         {

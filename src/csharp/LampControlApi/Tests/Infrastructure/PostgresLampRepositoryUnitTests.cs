@@ -31,7 +31,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that CreateAsync throws ArgumentNullException when entity is null.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task CreateAsync_ShouldThrowArgumentNullException_WhenEntityIsNull()
         {
@@ -51,7 +51,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that UpdateAsync throws ArgumentNullException when entity is null.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task UpdateAsync_ShouldThrowArgumentNullException_WhenEntityIsNull()
         {
@@ -100,7 +100,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that GetAllAsync returns empty collection when no lamps exist.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetAllAsync_ShouldReturnEmptyCollection_WhenNoLampsExist()
         {
@@ -123,7 +123,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that GetByIdAsync returns null for non-existent ID.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetByIdAsync_ShouldReturnNull_WhenIdDoesNotExist()
         {
@@ -145,7 +145,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that logging occurs for all CRUD operations.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task Operations_ShouldLogDebugMessages()
         {
@@ -179,7 +179,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that CreateAsync preserves entity ID.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task CreateAsync_ShouldPreserveEntityId()
         {
@@ -207,7 +207,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that multiple lamps can be created without conflicts.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task CreateAsync_ShouldHandleMultipleLamps()
         {
@@ -237,7 +237,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that UpdateAsync returns null when updating non-existent lamp.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task UpdateAsync_ShouldReturnNull_WhenLampDoesNotExist()
         {
@@ -260,7 +260,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that DeleteAsync returns false when deleting non-existent lamp.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task DeleteAsync_ShouldReturnFalse_WhenLampDoesNotExist()
         {
@@ -282,7 +282,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that DeleteAsync prevents double deletion.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task DeleteAsync_ShouldReturnFalse_WhenLampAlreadyDeleted()
         {
@@ -308,7 +308,7 @@ namespace LampControlApi.Tests.Infrastructure
         /// <summary>
         /// Test that GetAllAsync orders lamps by creation date.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task GetAllAsync_ShouldOrderByCreatedAt()
         {
