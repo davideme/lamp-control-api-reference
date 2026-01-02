@@ -49,11 +49,13 @@ namespace LampControlApi.Infrastructure.Database
 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
-                    .IsRequired();
+                    .IsRequired()
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
-                    .IsRequired();
+                    .IsRequired()
+                    .ValueGeneratedOnAddOrUpdate();
 
                 entity.Property(e => e.DeletedAt)
                     .HasColumnName("deleted_at");
