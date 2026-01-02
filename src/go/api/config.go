@@ -1,0 +1,130 @@
+package api
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// DatabaseConfig holds PostgreSQL connection configuration
+type DatabaseConfig struct {
+	Host     string
+	Port     int
+	Database string
+	User     string
+	Password string
+	PoolMin  int
+	PoolMax  int
+}
+
+// NewDatabaseConfigFromEnv creates a DatabaseConfig from environment variables
+// Returns nil if no PostgreSQL connection parameters are set
+func NewDatabaseConfigFromEnv() *DatabaseConfig {
+	// Check if any PostgreSQL connection parameter is set
+	// If DATABASE_URL is set, we have a connection string
+	// Otherwise, check for individual parameters
+	databaseURL := os.Getenv("DATABASE_URL")
+	host := os.Getenv("DB_HOST")
+	portStr := os.Getenv("DB_PORT")
+	database := os.Getenv("DB_NAME")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+
+	// If DATABASE_URL is set, use it directly (pgx will parse it)
+	// If no connection parameters are set at all, return nil
+	if databaseURL == "" && host == "" && user == "" && password == "" {
+		return nil
+	}
+
+	// Use defaults from pgx library
+	config := &DatabaseConfig{
+		Host:     "localhost", // pgx default
+		Port:     5432,        // pgx default
+		Database: "postgres",  // pgx default
+		User:     os.Getenv("USER"), // pgx uses current user by default
+		Password: "",
+		PoolMin:  0,  // pgxpool default
+		PoolMax:  4,  // pgxpool default
+	}
+
+	// Override with environment variables if set
+	if host != "" {
+		config.Host = host
+	}
+	if portStr != "" {
+		if port, err := strconv.Atoi(portStr); err == nil {
+			config.Port = port
+		}
+	}
+	if database != "" {
+		config.Database = database
+	}
+	if user != "" {
+		config.User = user
+	}
+	if password != "" {
+		config.Password = password
+	}
+
+	// Pool configuration
+	if poolMinStr := os.Getenv("DB_POOL_MIN_SIZE"); poolMinStr != "" {
+		if poolMin, err := strconv.Atoi(poolMinStr); err == nil {
+			config.PoolMin = poolMin
+		}
+	}
+	if poolMaxStr := os.Getenv("DB_POOL_MAX_SIZE"); poolMaxStr != "" {
+		if poolMax, err := strconv.Atoi(poolMaxStr); err == nil {
+			config.PoolMax = poolMax
+		}
+	}
+
+	return config
+}
+
+// ConnectionString returns a PostgreSQL connection string
+func (c *DatabaseConfig) ConnectionString() string {
+	// If DATABASE_URL is set, use it directly
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		return databaseURL
+	}
+
+	// Otherwise, build from components
+	return fmt.Sprintf(
+		"host=%s port=%d dbname=%s user=%s password=%s",
+		c.Host, c.Port, c.Database, c.User, c.Password,
+	)
+}
+
+// CreateConnectionPool creates a pgxpool connection pool
+func CreateConnectionPool(ctx context.Context, config *DatabaseConfig) (*pgxpool.Pool, error) {
+	// Parse the connection string using pgxpool
+	poolConfig, err := pgxpool.ParseConfig(config.ConnectionString())
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse connection string: %w", err)
+	}
+
+	// Configure pool settings
+	poolConfig.MinConns = int32(config.PoolMin)
+	poolConfig.MaxConns = int32(config.PoolMax)
+	poolConfig.MaxConnLifetime = time.Hour
+	poolConfig.MaxConnIdleTime = 30 * time.Minute
+	poolConfig.HealthCheckPeriod = time.Minute
+
+	// Create the connection pool
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create connection pool: %w", err)
+	}
+
+	// Verify the connection works
+	if err := pool.Ping(ctx); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	return pool, nil
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -40,6 +41,8 @@ func main() {
 	port := flag.String("port", "8080", "Port for test HTTP server")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	swagger, err := api.GetSwagger()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading swagger spec\n: %s", err)
@@ -49,8 +52,35 @@ func main() {
 	// Keep servers array to allow proper path validation in middleware
 	// The middleware will validate that requests match the /v1 base path from the OpenAPI spec
 
+	// Create repository based on environment configuration
+	var lampAPI *api.LampAPI
+	dbConfig := api.NewDatabaseConfigFromEnv()
+	
+	if dbConfig != nil {
+		// PostgreSQL connection parameters are set, use PostgreSQL repository
+		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
+			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
+		
+		pool, err := api.CreateConnectionPool(ctx, dbConfig)
+		if err != nil {
+			log.Printf("Failed to connect to PostgreSQL: %v", err)
+			log.Printf("Falling back to in-memory repository")
+			lampAPI = api.NewLampAPI()
+		} else {
+			log.Printf("Successfully connected to PostgreSQL")
+			defer pool.Close()
+			
+			postgresRepo := api.NewPostgresLampRepository(pool)
+			lampAPI = api.NewLampAPIWithRepository(postgresRepo)
+		}
+	} else {
+		// No PostgreSQL configuration, use in-memory repository
+		log.Printf("No PostgreSQL configuration found, using in-memory repository")
+		lampAPI = api.NewLampAPI()
+	}
+
 	// Create an instance of our handler which satisfies the generated interface
-	lamp := api.NewStrictHandler(api.NewLampAPI(), nil)
+	lamp := api.NewStrictHandler(lampAPI, nil)
 
 	// This is how you set up a basic chi router
 	r := chi.NewRouter()
