@@ -1,13 +1,12 @@
 module github.com/davideme/lamp-control-api-reference
 
-go 1.24.3
-
-tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+go 1.19
 
 require (
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/google/uuid v1.6.0
+	github.com/jackc/pgx/v5 v5.5.1
 	github.com/oapi-codegen/nethttp-middleware v1.1.2
 	github.com/oapi-codegen/runtime v1.1.1
 	go.uber.org/mock v0.5.2
