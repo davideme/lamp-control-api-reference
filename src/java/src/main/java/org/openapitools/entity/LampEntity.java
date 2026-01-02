@@ -46,14 +46,9 @@ public class LampEntity {
   @Column(name = "deleted_at")
   private OffsetDateTime deletedAt;
 
-  public LampEntity() {
-    if (this.id == null) {
-      this.id = UUID.randomUUID();
-    }
-  }
+  public LampEntity() {}
 
   public LampEntity(final Boolean status) {
-    this.id = UUID.randomUUID();
     this.status = status;
   }
 
