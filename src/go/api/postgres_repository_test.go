@@ -61,6 +61,8 @@ func TestPostgresLampRepository(t *testing.T) {
 }
 
 func testPostgresCreate(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Create a lamp entity
@@ -91,6 +93,8 @@ func testPostgresCreate(t *testing.T, repo *PostgresLampRepository) {
 }
 
 func testPostgresGetByID(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Create a lamp
@@ -120,6 +124,8 @@ func testPostgresGetByID(t *testing.T, repo *PostgresLampRepository) {
 }
 
 func testPostgresUpdate(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Create a lamp
@@ -156,6 +162,8 @@ func testPostgresUpdate(t *testing.T, repo *PostgresLampRepository) {
 }
 
 func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Get initial count
@@ -207,6 +215,8 @@ func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
 }
 
 func testPostgresDelete(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Create a lamp
@@ -237,6 +247,8 @@ func testPostgresDelete(t *testing.T, repo *PostgresLampRepository) {
 }
 
 func testPostgresExists(t *testing.T, repo *PostgresLampRepository) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	// Create a lamp

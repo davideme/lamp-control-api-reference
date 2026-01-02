@@ -108,5 +108,8 @@ func main() {
 	}
 
 	// And we serve HTTP until the world ends.
-	log.Fatal(s.ListenAndServe())
+	if err := s.ListenAndServe(); err != nil {
+		log.Printf("Server error: %v", err)
+		os.Exit(1)
+	}
 }

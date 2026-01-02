@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
@@ -32,7 +33,7 @@ func (r *PostgresLampRepository) Create(ctx context.Context, lampEntity *entitie
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
 	if err := pgUUID.Scan(lampEntity.ID[:]); err != nil {
-		return err
+		return fmt.Errorf("failed to scan UUID: %w", err)
 	}
 
 	// Convert time.Time to pgtype.Timestamptz
@@ -51,8 +52,11 @@ func (r *PostgresLampRepository) Create(ctx context.Context, lampEntity *entitie
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	})
+	if err != nil {
+		return fmt.Errorf("failed to create lamp: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 // GetByID retrieves a lamp by its ID
@@ -60,13 +64,13 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 	// Parse UUID string
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse UUID: %w", err)
 	}
 
 	// Convert to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if err := pgUUID.Scan(uid[:]); err != nil {
-		return nil, err
+	if scanErr := pgUUID.Scan(uid[:]); scanErr != nil {
+		return nil, fmt.Errorf("failed to scan UUID: %w", scanErr)
 	}
 
 	lamp, err := r.queries.GetLampByID(ctx, pgUUID)
@@ -74,7 +78,8 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrLampNotFound
 		}
-		return nil, err
+
+		return nil, fmt.Errorf("failed to get lamp: %w", err)
 	}
 
 	return r.convertToEntity(&lamp)
@@ -85,7 +90,7 @@ func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entitie
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
 	if err := pgUUID.Scan(lampEntity.ID[:]); err != nil {
-		return err
+		return fmt.Errorf("failed to scan UUID: %w", err)
 	}
 
 	// Convert time.Time to pgtype.Timestamptz
@@ -104,7 +109,8 @@ func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entitie
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrLampNotFound
 		}
-		return err
+
+		return fmt.Errorf("failed to update lamp: %w", err)
 	}
 
 	return nil
@@ -115,13 +121,13 @@ func (r *PostgresLampRepository) Delete(ctx context.Context, id string) error {
 	// Parse UUID string
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse UUID: %w", err)
 	}
 
 	// Convert to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if err := pgUUID.Scan(uid[:]); err != nil {
-		return err
+	if scanErr := pgUUID.Scan(uid[:]); scanErr != nil {
+		return fmt.Errorf("failed to scan UUID: %w", scanErr)
 	}
 
 	// Soft delete with current timestamp
@@ -136,7 +142,7 @@ func (r *PostgresLampRepository) Delete(ctx context.Context, id string) error {
 	})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete lamp: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -158,7 +164,7 @@ func (r *PostgresLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list lamps: %w", err)
 	}
 
 	lampEntities := make([]*entities.LampEntity, 0, len(lamps))
@@ -176,6 +182,7 @@ func (r *PostgresLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 // Exists checks if a lamp exists in the repository
 func (r *PostgresLampRepository) Exists(ctx context.Context, id string) bool {
 	_, err := r.GetByID(ctx, id)
+
 	return err == nil
 }
 

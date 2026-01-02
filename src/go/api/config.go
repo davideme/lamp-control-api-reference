@@ -108,8 +108,14 @@ func CreateConnectionPool(ctx context.Context, config *DatabaseConfig) (*pgxpool
 	}
 
 	// Configure pool settings
-	poolConfig.MinConns = int32(config.PoolMin)
-	poolConfig.MaxConns = int32(config.PoolMax)
+	if config.PoolMin > 0 && config.PoolMin <= 2147483647 {
+		poolConfig.MinConns = int32(config.PoolMin) // #nosec G115
+	}
+
+	if config.PoolMax > 0 && config.PoolMax <= 2147483647 {
+		poolConfig.MaxConns = int32(config.PoolMax) // #nosec G115
+	}
+
 	poolConfig.MaxConnLifetime = time.Hour
 	poolConfig.MaxConnIdleTime = 30 * time.Minute
 	poolConfig.HealthCheckPeriod = time.Minute
@@ -123,6 +129,7 @@ func CreateConnectionPool(ctx context.Context, config *DatabaseConfig) (*pgxpool
 	// Verify the connection works
 	if err := pool.Ping(ctx); err != nil {
 		pool.Close()
+
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
