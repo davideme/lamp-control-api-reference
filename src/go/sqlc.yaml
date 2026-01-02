@@ -2,6 +2,7 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "api/queries"
+    # NOTE: Path is relative to src/go. Run `sqlc` from src/go or adjust the working directory accordingly.
     # NOTE: Schema path is relative to src/go directory. Run sqlc from src/go.
     schema: "../../database/sql/postgresql"
     gen:

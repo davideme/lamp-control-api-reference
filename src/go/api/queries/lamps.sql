@@ -35,4 +35,5 @@ WHERE id = $1 AND deleted_at IS NULL;
 SELECT id, is_on, created_at, updated_at, deleted_at
 FROM lamps
 WHERE deleted_at IS NULL
+WHERE deleted_at IS NULL
 ORDER BY created_at ASC;
