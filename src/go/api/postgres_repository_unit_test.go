@@ -136,7 +136,7 @@ func TestPostgresRepositoryErrorCases(t *testing.T) {
 
 		// Test that the repository is not nil
 		if repo == nil {
-			t.Error("Expected non-nil repository")
+			t.Fatal("Expected non-nil repository")
 		}
 
 		// Test that the queries are initialized
