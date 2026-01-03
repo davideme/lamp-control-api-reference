@@ -205,7 +205,7 @@ docker-compose up -d postgres
 sleep 5
 
 # Initialize schema
-psql -h localhost -U lamp_user -d lamp_control -f ../../../database/sql/postgresql/schema.sql
+psql -h localhost -U lamp_user -d lamp_control -f database/sql/postgresql/schema.sql
 
 # Run tests with PostgreSQL
 DB_HOST=localhost DB_PORT=5432 DB_NAME=lamp_control \

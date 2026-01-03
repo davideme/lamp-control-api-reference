@@ -39,7 +39,8 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 	//   - DATABASE_URL is set, or
 	//   - database name is explicitly provided, or
 	//   - both host and user are explicitly provided
-	if databaseURL == "" && database == "" && (host == "" || user == "") {
+	postgresConfigured := databaseURL != "" || database != "" || (host != "" && user != "")
+	if !postgresConfigured {
 		return nil
 	}
 
