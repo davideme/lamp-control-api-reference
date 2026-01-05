@@ -2,9 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LampControlApi", "src\csharp\LampControlApi\LampControlApi.csproj", "{12345678-1234-1234-1234-123456789ABC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LampControlApi", "LampControlApi\LampControlApi.csproj", "{12345678-1234-1234-1234-123456789ABC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LampControlApi.Tests", "src\csharp\LampControlApi.Tests\LampControlApi.Tests.csproj", "{87654321-4321-4321-4321-CBA987654321}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LampControlApi.Tests", "LampControlApi.Tests\LampControlApi.Tests.csproj", "{87654321-4321-4321-4321-CBA987654321}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
