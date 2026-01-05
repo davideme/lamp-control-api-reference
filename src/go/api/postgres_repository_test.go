@@ -2,31 +2,86 @@ package api
 
 import (
 	"context"
-	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
 	"github.com/google/uuid"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+// setupPostgresContainer starts a PostgreSQL container for testing
+func setupPostgresContainer(ctx context.Context, t *testing.T) (*postgres.PostgresContainer, *DatabaseConfig) {
+	t.Helper()
+
+	// Get the absolute path to the schema file
+	schemaPath, err := filepath.Abs("../../database/sql/postgresql/schema.sql")
+	if err != nil {
+		t.Fatalf("Failed to get schema path: %v", err)
+	}
+
+	container, err := postgres.Run(ctx,
+		"postgres:13-alpine",
+		postgres.WithDatabase("lamp_control"),
+		postgres.WithUsername("lamp_user"),
+		postgres.WithPassword("lamp_password"),
+		postgres.WithInitScripts(schemaPath),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2),
+		),
+	)
+	if err != nil {
+		t.Fatalf("Failed to start postgres container: %v", err)
+	}
+
+	host, err := container.Host(ctx)
+	if err != nil {
+		container.Terminate(ctx)
+		t.Fatalf("Failed to get container host: %v", err)
+	}
+
+	port, err := container.MappedPort(ctx, "5432")
+	if err != nil {
+		container.Terminate(ctx)
+		t.Fatalf("Failed to get container port: %v", err)
+	}
+
+	config := &DatabaseConfig{
+		Host:     host,
+		Port:     port.Int(),
+		Database: "lamp_control",
+		User:     "lamp_user",
+		Password: "lamp_password",
+		PoolMin:  1,
+		PoolMax:  5,
+	}
+
+	return container, config
+}
+
 // TestPostgresLampRepository tests the PostgreSQL repository implementation
-// These tests require a running PostgreSQL database with the schema initialized
-// Set environment variables to configure the database connection:
-//
-//	DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 func TestPostgresLampRepository(t *testing.T) {
-	// Check if PostgreSQL is configured
-	dbConfig := NewDatabaseConfigFromEnv()
-	if dbConfig == nil {
-		t.Skip("PostgreSQL not configured, skipping integration tests")
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
 	}
 
 	ctx := context.Background()
 
+	// Start PostgreSQL container
+	container, dbConfig := setupPostgresContainer(ctx, t)
+	defer func() {
+		if err := container.Terminate(ctx); err != nil {
+			t.Logf("Failed to terminate container: %v", err)
+		}
+	}()
+
 	// Create connection pool
 	pool, err := CreateConnectionPool(ctx, dbConfig)
 	if err != nil {
-		t.Skipf("Failed to connect to PostgreSQL: %v (skipping integration tests)", err)
+		t.Fatalf("Failed to connect to PostgreSQL: %v", err)
 	}
 	defer pool.Close()
 
