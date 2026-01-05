@@ -96,26 +96,11 @@ jobs:
         run: |
           echo "Checking code coverage..."
 
-          # Filter out generated files from coverage
+          # Filter out generated files and main packages from coverage
           echo "Filtering out generated files from coverage calculation..."
-          grep -v "\.gen\.go:" coverage.out > coverage.filtered.out || true
-          
-          # Filter out sqlc generated files
-          echo "Filtering out sqlc generated files from coverage calculation..."
-          grep -v "/queries/" coverage.filtered.out > coverage.filtered2.out || true
+          grep -vE '(\.gen\.go:|/queries/|/main\.go:)' coverage.out > coverage.filtered.out || true
 
-          # Also filter out main functions/packages which are hard to unit test
-          echo "Filtering out main packages from coverage calculation..."
-          grep -v "/main.go:" coverage.filtered2.out > \
-            coverage.filtered3.out || true
-
-          if [ -s coverage.filtered3.out ]; then
-            mv coverage.filtered3.out coverage.out
-            rm -f coverage.filtered.out coverage.filtered2.out
-          elif [ -s coverage.filtered2.out ]; then
-            mv coverage.filtered2.out coverage.out
-            rm -f coverage.filtered.out
-          elif [ -s coverage.filtered.out ]; then
+          if [ -s coverage.filtered.out ]; then
             mv coverage.filtered.out coverage.out
           else
             echo "⚠️  Warning: No non-generated/non-main files found"
