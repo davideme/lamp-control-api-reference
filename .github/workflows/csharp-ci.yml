@@ -38,7 +38,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
 
     - name: Check code formatting
       run: dotnet format --verify-no-changes --verbosity diagnostic
@@ -86,7 +86,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: Run security scan
       run: |
@@ -132,7 +132,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: Build for Release
       run: dotnet build --configuration Release --no-restore
@@ -171,7 +171,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: Install coverage tools
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
@@ -238,7 +238,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: List all packages
       run: |
@@ -283,7 +283,7 @@ jobs:
           src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: Build application
       run: dotnet build --no-restore --configuration Release
