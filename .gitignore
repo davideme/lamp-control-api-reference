@@ -1,2 +1,5 @@
 .hypothesis/
 *.pid
+
+# AI tooling configuration
+.claude/

@@ -123,33 +123,72 @@ func TestNetJoinHostPort(t *testing.T) {
 }
 
 func TestHealthHandler(t *testing.T) {
-	// Test the health handler function directly
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
-	rr := httptest.NewRecorder()
+	t.Run("GET request returns ok", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/health", nil)
+		rr := httptest.NewRecorder()
 
-	healthHandler(rr, req)
+		healthHandler(rr, req)
 
-	// Check status code
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Expected status code %d, got %d", http.StatusOK, status)
-	}
+		// Check status code
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("Expected status code %d, got %d", http.StatusOK, status)
+		}
 
-	// Check content type
-	expectedContentType := "application/json"
-	if contentType := rr.Header().Get("Content-Type"); contentType != expectedContentType {
-		t.Errorf("Expected content type %s, got %s", expectedContentType, contentType)
-	}
+		// Check content type
+		expectedContentType := "application/json"
+		if contentType := rr.Header().Get("Content-Type"); contentType != expectedContentType {
+			t.Errorf("Expected content type %s, got %s", expectedContentType, contentType)
+		}
 
-	// Check response body
-	var response HealthResponse
-	if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
-		t.Fatalf("Failed to decode response body: %v", err)
-	}
+		// Check response body
+		var response HealthResponse
+		if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
+			t.Fatalf("Failed to decode response body: %v", err)
+		}
 
-	expectedStatus := "ok"
-	if response.Status != expectedStatus {
-		t.Errorf("Expected status %s, got %s", expectedStatus, response.Status)
-	}
+		expectedStatus := "ok"
+		if response.Status != expectedStatus {
+			t.Errorf("Expected status %s, got %s", expectedStatus, response.Status)
+		}
+	})
+
+	t.Run("POST request returns method not allowed", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/health", nil)
+		rr := httptest.NewRecorder()
+
+		healthHandler(rr, req)
+
+		if status := rr.Code; status != http.StatusMethodNotAllowed {
+			t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, status)
+		}
+
+		allow := rr.Header().Get("Allow")
+		if allow != http.MethodGet {
+			t.Errorf("Expected Allow header '%s', got '%s'", http.MethodGet, allow)
+		}
+	})
+
+	t.Run("PUT request returns method not allowed", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPut, "/health", nil)
+		rr := httptest.NewRecorder()
+
+		healthHandler(rr, req)
+
+		if status := rr.Code; status != http.StatusMethodNotAllowed {
+			t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, status)
+		}
+	})
+
+	t.Run("DELETE request returns method not allowed", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/health", nil)
+		rr := httptest.NewRecorder()
+
+		healthHandler(rr, req)
+
+		if status := rr.Code; status != http.StatusMethodNotAllowed {
+			t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, status)
+		}
+	})
 }
 
 func TestHealthEndpointIntegration(t *testing.T) {
