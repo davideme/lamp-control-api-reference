@@ -2,30 +2,20 @@ package org.openapitools.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Entity class representing a Lamp in the system. This entity is mapped to the 'lamps' table in the
  * database using JPA annotations.
  */
 @Entity
-@Table(
-    name = "lamps",
-    indexes = {
-      @Index(name = "idx_lamps_is_on", columnList = "is_on"),
-      @Index(name = "idx_lamps_created_at", columnList = "created_at"),
-      @Index(name = "idx_lamps_deleted_at", columnList = "deleted_at")
-    })
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "lamps")
 public class LampEntity {
 
   @Id
@@ -42,9 +32,6 @@ public class LampEntity {
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
-
-  @Column(name = "deleted_at")
-  private OffsetDateTime deletedAt;
 
   public LampEntity() {}
 
@@ -87,14 +74,6 @@ public class LampEntity {
 
   public void setUpdatedAt(final OffsetDateTime updatedAt) {
     this.updatedAt = updatedAt;
-  }
-
-  public OffsetDateTime getDeletedAt() {
-    return deletedAt;
-  }
-
-  public void setDeletedAt(final OffsetDateTime deletedAt) {
-    this.deletedAt = deletedAt;
   }
 
   @Override

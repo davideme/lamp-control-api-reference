@@ -107,10 +107,7 @@ The easiest way to run PostgreSQL locally is using Docker Compose (from the repo
 docker-compose up -d postgres
 ```
 
-This will start a PostgreSQL instance on `localhost:5432` with:
-- Database: `lampcontrol`
-- Username: `lampuser`
-- Password: `lamppass`
+This will start a PostgreSQL instance on `localhost:5432`. Check the docker-compose.yml file for the exact database name, username, and password configured for your environment.
 
 #### 2. Manual PostgreSQL Setup
 
@@ -119,30 +116,32 @@ If you prefer to use an existing PostgreSQL instance:
 1. Create the database:
 ```sql
 CREATE DATABASE lampcontrol;
-CREATE USER lampuser WITH PASSWORD 'lamppass';
-GRANT ALL PRIVILEGES ON DATABASE lampcontrol TO lampuser;
+CREATE USER your_username WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE lampcontrol TO your_username;
 ```
 
 2. The schema will be automatically created by Flyway on application startup using the migration in `src/main/resources/db/migration/V1__Initial_schema.sql`
 
 #### 3. Environment Variables
 
+**IMPORTANT**: The default credentials in application.properties are intentionally set to "CHANGE_ME" to prevent accidental deployment with weak credentials. You MUST configure proper credentials before running the application.
+
 Configure database connection using environment variables:
 
 ```bash
 export DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol
-export DB_USER=lampuser
-export DB_PASSWORD=lamppass
+export DB_USER=your_username
+export DB_PASSWORD=your_secure_password
 export DB_POOL_MAX_SIZE=20
 export DB_POOL_MIN_SIZE=5
 ```
 
-Or set them in `src/main/resources/application.properties`:
+Or create an `application-local.properties` file (add it to .gitignore):
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/lampcontrol
-spring.datasource.username=lampuser
-spring.datasource.password=lamppass
+spring.datasource.username=your_username
+spring.datasource.password=your_secure_password
 spring.datasource.hikari.maximum-pool-size=20
 spring.datasource.hikari.minimum-idle=5
 ```

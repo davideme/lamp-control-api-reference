@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,11 +16,11 @@ import org.springframework.stereotype.Repository;
  * store lamp entities in memory, providing thread-safe operations suitable for testing and
  * development environments.
  *
- * <p>This implementation is only activated when no other LampRepository bean is available (i.e.,
- * when JPA is not configured).
+ * <p>This implementation is activated when no database URL is configured OR when explicitly enabled
+ * via profile/property.
  */
 @Repository
-@ConditionalOnMissingBean(name = "jpaLampRepository")
+@ConditionalOnProperty(prefix = "spring.datasource", name = "url", matchIfMissing = true)
 public class InMemoryLampRepository implements LampRepository {
 
   private final Map<UUID, LampEntity> lamps = new ConcurrentHashMap<>();

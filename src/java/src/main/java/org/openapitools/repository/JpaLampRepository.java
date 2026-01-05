@@ -2,6 +2,7 @@ package org.openapitools.repository;
 
 import java.util.UUID;
 import org.openapitools.entity.LampEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Repository;
  *
  * <p>This interface extends both JpaRepository and LampRepository to provide JPA-specific methods
  * while maintaining compatibility with the LampRepository interface used by the application.
+ *
+ * <p>Marked as @Primary to take precedence over InMemoryLampRepository when both are available.
  */
 @Repository
+@Primary
 public interface JpaLampRepository extends JpaRepository<LampEntity, UUID>, LampRepository {}

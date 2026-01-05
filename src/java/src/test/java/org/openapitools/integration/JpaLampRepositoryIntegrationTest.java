@@ -29,7 +29,7 @@ class JpaLampRepositoryIntegrationTest {
 
   @Container
   static PostgreSQLContainer<?> postgres =
-      new PostgreSQLContainer<>("postgres:16-alpine")
+      new PostgreSQLContainer<>("postgres:16.1-alpine")
           .withDatabaseName("lampcontrol_test")
           .withUsername("test")
           .withPassword("test");
@@ -44,10 +44,13 @@ class JpaLampRepositoryIntegrationTest {
 
   @Autowired private JpaLampRepository repository;
 
+  private JpaRepository<LampEntity, UUID> jpaRepo;
+
   @BeforeEach
   void setUp() {
-    // Use JpaRepository methods to avoid ambiguity
-    ((JpaRepository<LampEntity, UUID>) repository).deleteAll();
+    // Cast once to avoid repetition in tests
+    jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
+    jpaRepo.deleteAll();
   }
 
   @Test
@@ -56,8 +59,7 @@ class JpaLampRepositoryIntegrationTest {
     final UUID lampId = UUID.randomUUID();
     final LampEntity lamp = new LampEntity(lampId, true);
 
-    // Act - Cast to JpaRepository to use its methods
-    final JpaRepository<LampEntity, UUID> jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
+    // Act
     jpaRepo.save(lamp);
     jpaRepo.flush(); // Force immediate database sync
 
@@ -76,7 +78,6 @@ class JpaLampRepositoryIntegrationTest {
   @Test
   void shouldUpdateLampStatus() {
     // Arrange
-    final JpaRepository<LampEntity, UUID> jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
     final LampEntity lamp = new LampEntity(UUID.randomUUID(), false);
     final LampEntity saved = jpaRepo.save(lamp);
 
@@ -93,7 +94,6 @@ class JpaLampRepositoryIntegrationTest {
   @Test
   void shouldDeleteLamp() {
     // Arrange
-    final JpaRepository<LampEntity, UUID> jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
     final LampEntity lamp = new LampEntity(UUID.randomUUID(), true);
     final LampEntity saved = jpaRepo.save(lamp);
 
@@ -108,7 +108,6 @@ class JpaLampRepositoryIntegrationTest {
   @Test
   void shouldCountLamps() {
     // Arrange
-    final JpaRepository<LampEntity, UUID> jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
     jpaRepo.save(new LampEntity(UUID.randomUUID(), true));
     jpaRepo.save(new LampEntity(UUID.randomUUID(), false));
 
@@ -122,7 +121,6 @@ class JpaLampRepositoryIntegrationTest {
   @Test
   void shouldCheckIfLampExists() {
     // Arrange
-    final JpaRepository<LampEntity, UUID> jpaRepo = (JpaRepository<LampEntity, UUID>) repository;
     final LampEntity lamp = new LampEntity(UUID.randomUUID(), true);
     final LampEntity saved = jpaRepo.save(lamp);
 

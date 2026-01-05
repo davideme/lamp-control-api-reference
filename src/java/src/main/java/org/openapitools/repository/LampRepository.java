@@ -55,7 +55,9 @@ public interface LampRepository {
   /**
    * Delete all lamp entities.
    *
-   * @deprecated Use with caution. This method is primarily for testing purposes.
+   * @deprecated Since 1.0.0. This bulk-delete operation is unsafe for production usage and is
+   *     intended primarily for testing scenarios. Prefer targeted deletions using {@link
+   *     #deleteById(UUID)} or other domain-specific operations instead of removing all records.
    */
   @Deprecated
   void deleteAll();
