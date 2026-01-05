@@ -32,9 +32,8 @@ func NewPostgresLampRepository(pool *pgxpool.Pool) *PostgresLampRepository {
 func (r *PostgresLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if err := pgUUID.Scan(lampEntity.ID[:]); err != nil {
-		return fmt.Errorf("failed to scan UUID: %w", err)
-	}
+	copy(pgUUID.Bytes[:], lampEntity.ID[:])
+	pgUUID.Valid = true
 
 	// Convert time.Time to pgtype.Timestamptz
 	createdAt := pgtype.Timestamptz{
@@ -69,9 +68,8 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 
 	// Convert to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if scanErr := pgUUID.Scan(uid[:]); scanErr != nil {
-		return nil, fmt.Errorf("failed to scan UUID: %w", scanErr)
-	}
+	copy(pgUUID.Bytes[:], uid[:])
+	pgUUID.Valid = true
 
 	lamp, err := r.queries.GetLampByID(ctx, pgUUID)
 	if err != nil {
@@ -89,9 +87,8 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if err := pgUUID.Scan(lampEntity.ID[:]); err != nil {
-		return fmt.Errorf("failed to scan UUID: %w", err)
-	}
+	copy(pgUUID.Bytes[:], lampEntity.ID[:])
+	pgUUID.Valid = true
 
 	// Note: updated_at is automatically set by the database trigger
 	_, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
@@ -120,9 +117,8 @@ func (r *PostgresLampRepository) Delete(ctx context.Context, id string) error {
 
 	// Convert to pgtype.UUID
 	var pgUUID pgtype.UUID
-	if scanErr := pgUUID.Scan(uid[:]); scanErr != nil {
-		return fmt.Errorf("failed to scan UUID: %w", scanErr)
-	}
+	copy(pgUUID.Bytes[:], uid[:])
+	pgUUID.Valid = true
 
 	// Soft delete with current timestamp
 	deletedAt := pgtype.Timestamptz{

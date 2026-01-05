@@ -13,7 +13,7 @@
 		5432
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "docker compose -f docker-compose.yml up -d postgres && sleep 10 && docker compose exec -T postgres psql -U lamp_user -d lamp_control -c 'SELECT 1;'",
+	"postCreateCommand": "docker system prune -f && docker compose -f docker-compose.yml up -d postgres && sleep 10 && docker compose exec -T postgres psql -U lamp_user -d lamp_control -c 'SELECT 1;'",
 	// Configure tool-specific properties.
 	// "customizations": {},
 	// Set environment variables for PostgreSQL connection
