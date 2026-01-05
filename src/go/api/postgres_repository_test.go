@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -17,7 +18,7 @@ func setupPostgresContainer(ctx context.Context, t *testing.T) (*postgres.Postgr
 	t.Helper()
 
 	// Get the absolute path to the schema file
-	schemaPath, err := filepath.Abs("../../database/sql/postgresql/schema.sql")
+	schemaPath, err := filepath.Abs("../../../database/sql/postgresql/schema.sql")
 	if err != nil {
 		t.Fatalf("Failed to get schema path: %v", err)
 	}
