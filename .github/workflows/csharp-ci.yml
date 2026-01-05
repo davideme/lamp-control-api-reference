@@ -33,27 +33,24 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
-        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        cache-dependency-path: |
+          src/csharp/LampControlApi/packages.lock.json
+          src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore --locked-mode
+      run: dotnet restore
 
     - name: Check code formatting
-      run: |
-        dotnet format LampControlApi/LampControlApi.csproj --verify-no-changes --verbosity diagnostic
-        dotnet format LampControlApi.Tests/LampControlApi.Tests.csproj --verify-no-changes --verbosity diagnostic
+      run: dotnet format --verify-no-changes --verbosity diagnostic
     
     - name: Run static analysis
-      run: dotnet build LampControlApi/LampControlApi.csproj --verbosity normal --configuration Release
+      run: dotnet build --verbosity normal --configuration Release
     
     - name: Build application
-      run: |
-        dotnet build LampControlApi/LampControlApi.csproj --no-restore --configuration Release
-        dotnet build LampControlApi.Tests/LampControlApi.Tests.csproj --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
     
     - name: Run tests
-      run: |
-        dotnet test LampControlApi.Tests/LampControlApi.Tests.csproj --configuration Release --logger trx --results-directory ./TestResults
+      run: dotnet test --configuration Release --logger trx --results-directory ./TestResults
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -93,8 +90,7 @@ jobs:
     
     - name: Run security scan
       run: |
-        dotnet list LampControlApi/LampControlApi.csproj package --vulnerable --include-transitive 2>&1 | tee security-scan.log
-        dotnet list LampControlApi.Tests/LampControlApi.Tests.csproj package --vulnerable --include-transitive 2>&1 | tee -a security-scan.log
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee security-scan.log
         if grep -q "has the following vulnerable packages" security-scan.log; then
           echo "❌ Vulnerable packages found!"
           cat security-scan.log
@@ -139,9 +135,7 @@ jobs:
       run: dotnet restore
     
     - name: Build for Release
-      run: |
-        dotnet build LampControlApi/LampControlApi.csproj --configuration Release --no-restore
-        dotnet build LampControlApi.Tests/LampControlApi.Tests.csproj --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
     
     - name: Publish application
       run: dotnet publish LampControlApi/LampControlApi.csproj --configuration Release --no-build --output ./publish
@@ -172,17 +166,19 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
-        cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
+        cache-dependency-path: |
+          src/csharp/LampControlApi/packages.lock.json
+          src/csharp/LampControlApi.Tests/packages.lock.json
         
     - name: Install dependencies
-      run: dotnet restore --locked-mode
+      run: dotnet restore
     
     - name: Install coverage tools
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
     
     - name: Run tests with coverage
       run: |
-        dotnet test LampControlApi.Tests/LampControlApi.Tests.csproj \
+        dotnet test \
           --configuration Release \
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
@@ -246,21 +242,14 @@ jobs:
     
     - name: List all packages
       run: |
-        echo "## Main Project Dependencies" > dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package >> dependency-report.md
+        echo "## All Dependencies" > dependency-report.md
+        dotnet list package >> dependency-report.md
         echo "" >> dependency-report.md
-        echo "## Test Project Dependencies" >> dependency-report.md
-        dotnet list LampControlApi.Tests/LampControlApi.Tests.csproj package >> dependency-report.md
-        echo "" >> dependency-report.md
-        echo "## Transitive Dependencies (Main)" >> dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package --include-transitive >> dependency-report.md
-        echo "" >> dependency-report.md
-        echo "## Transitive Dependencies (Tests)" >> dependency-report.md
-        dotnet list LampControlApi.Tests/LampControlApi.Tests.csproj package --include-transitive >> dependency-report.md
+        echo "## Transitive Dependencies" >> dependency-report.md
+        dotnet list package --include-transitive >> dependency-report.md
         echo "" >> dependency-report.md
         echo "## Outdated Packages" >> dependency-report.md
-        dotnet list LampControlApi/LampControlApi.csproj package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
-        dotnet list LampControlApi.Tests/LampControlApi.Tests.csproj package --outdated >> dependency-report.md || true
+        dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
     
     - name: Upload dependency report
       uses: actions/upload-artifact@v4
@@ -297,7 +286,7 @@ jobs:
       run: dotnet restore
     
     - name: Build application
-      run: dotnet build LampControlApi/LampControlApi.csproj --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
     
     - name: Start API in background
       run: |
