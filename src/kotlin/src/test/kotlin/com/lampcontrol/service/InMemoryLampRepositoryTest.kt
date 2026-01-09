@@ -1,6 +1,7 @@
 package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.*
 
@@ -8,7 +9,7 @@ class InMemoryLampRepositoryTest {
     private val repo = InMemoryLampRepository()
 
     @Test
-    fun `create, retrieve, update and delete lamp lifecycle`() {
+    fun `create, retrieve, update and delete lamp lifecycle`() = runTest {
         val entity = LampEntity.create(true)
         val created = repo.createLamp(entity)
 
