@@ -11,8 +11,6 @@ import java.util.*
 /**
  * Service layer that handles business logic and coordinates between API and domain layers.
  * Uses mappers to maintain separation between API models and domain entities.
- *
- * All methods are suspend functions to support async repository operations.
  */
 class LampService(
     private val lampRepository: LampRepository,

@@ -7,9 +7,6 @@ import java.util.*
  * Repository contract for managing Lamps.
  * This abstracts the storage so implementations can be in-memory or backed by a database.
  * Works with domain entities to maintain separation from API models.
- *
- * All methods are suspend functions to support both synchronous (in-memory)
- * and asynchronous (database) implementations efficiently.
  */
 interface LampRepository {
     suspend fun getAllLamps(): List<LampEntity>
