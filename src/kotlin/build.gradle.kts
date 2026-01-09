@@ -47,6 +47,7 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("io.ktor:ktor-client-content-negotiation")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 }
 
 tasks.test {

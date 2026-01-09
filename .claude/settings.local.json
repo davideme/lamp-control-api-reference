@@ -1,1 +1,8 @@
-
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew compileKotlin:*)",
+      "Bash(./gradlew test:*)"
+    ]
+  }
+}
