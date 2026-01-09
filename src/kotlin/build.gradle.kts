@@ -58,6 +58,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation("org.testcontainers:postgresql:1.21.4")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.junit-pioneer:junit-pioneer:2.3.0")
 }
 
 tasks.test {

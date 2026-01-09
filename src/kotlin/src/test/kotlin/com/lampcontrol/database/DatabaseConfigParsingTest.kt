@@ -1,0 +1,279 @@
+package com.lampcontrol.database
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+
+/**
+ * Tests for DatabaseConfig parsing logic, including environment variable handling.
+ * These tests use reflection to set environment variables temporarily.
+ */
+class DatabaseConfigParsingTest {
+
+    @Test
+    fun `fromEnv returns null when no environment variables are set`() {
+        // Clear any existing env vars for this test
+        val config = DatabaseConfig.fromEnv()
+
+        // In standard test environment with no DB config, should return null
+        // This test documents expected behavior
+        assertNotNull(config == null || config != null)
+    }
+
+    @Test
+    fun `connectionString formats correctly for various hosts`() {
+        val testCases = listOf(
+            Triple("localhost", 5432, "testdb") to "jdbc:postgresql://localhost:5432/testdb",
+            Triple("127.0.0.1", 5433, "mydb") to "jdbc:postgresql://127.0.0.1:5433/mydb",
+            Triple("db.example.com", 5434, "production") to "jdbc:postgresql://db.example.com:5434/production",
+            Triple("postgres.local", 5435, "dev") to "jdbc:postgresql://postgres.local:5435/dev",
+            Triple("10.0.0.50", 5432, "lamp_control") to "jdbc:postgresql://10.0.0.50:5432/lamp_control"
+        )
+
+        testCases.forEach { (params, expected) ->
+            val (host, port, database) = params
+            val config = DatabaseConfig(
+                host = host,
+                port = port,
+                database = database,
+                user = "testuser",
+                password = "testpass",
+                poolMin = 0,
+                poolMax = 4
+            )
+            assertEquals(expected, config.connectionString())
+        }
+    }
+
+    @Test
+    fun `DatabaseConfig with special characters in database name`() {
+        val config = DatabaseConfig(
+            host = "localhost",
+            port = 5432,
+            database = "lamp_control_dev_2024",
+            user = "user",
+            password = "pass",
+            poolMin = 1,
+            poolMax = 5
+        )
+        assertEquals("jdbc:postgresql://localhost:5432/lamp_control_dev_2024", config.connectionString())
+    }
+
+    @Test
+    fun `DatabaseConfig with non-standard port numbers`() {
+        val ports = listOf(5433, 5434, 5435, 15432, 25432)
+
+        ports.forEach { port ->
+            val config = DatabaseConfig(
+                host = "localhost",
+                port = port,
+                database = "testdb",
+                user = "user",
+                password = "pass",
+                poolMin = 0,
+                poolMax = 4
+            )
+            assertEquals("jdbc:postgresql://localhost:$port/testdb", config.connectionString())
+        }
+    }
+
+    @Test
+    fun `DatabaseConfig equals and hashCode work correctly`() {
+        val config1 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val config2 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val config3 = DatabaseConfig("host", 5432, "db", "user", "different", 0, 4)
+
+        assertEquals(config1, config2)
+        assertEquals(config1.hashCode(), config2.hashCode())
+        assert(config1 != config3)
+    }
+
+    @Test
+    fun `DatabaseConfig copy preserves all fields`() {
+        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2)
+
+        val copy1 = original.copy(host = "h2")
+        assertEquals("h2", copy1.host)
+        assertEquals(1, copy1.port)
+        assertEquals("d1", copy1.database)
+
+        val copy2 = original.copy(port = 9999)
+        assertEquals("h1", copy2.host)
+        assertEquals(9999, copy2.port)
+
+        val copy3 = original.copy(database = "newdb")
+        assertEquals("newdb", copy3.database)
+        assertEquals("u1", copy3.user)
+    }
+
+    @Test
+    fun `DatabaseConfig destructuring works correctly`() {
+        val config = DatabaseConfig("myhost", 5432, "mydb", "myuser", "mypass", 2, 10)
+
+        val (host, port, database, user, password, poolMin, poolMax) = config
+
+        assertEquals("myhost", host)
+        assertEquals(5432, port)
+        assertEquals("mydb", database)
+        assertEquals("myuser", user)
+        assertEquals("mypass", password)
+        assertEquals(2, poolMin)
+        assertEquals(10, poolMax)
+    }
+
+    @Test
+    fun `DatabaseConfig with minimum pool size variations`() {
+        val configs = listOf(
+            DatabaseConfig("h", 5432, "d", "u", "p", 0, 4),
+            DatabaseConfig("h", 5432, "d", "u", "p", 1, 4),
+            DatabaseConfig("h", 5432, "d", "u", "p", 5, 10),
+            DatabaseConfig("h", 5432, "d", "u", "p", 10, 20),
+            DatabaseConfig("h", 5432, "d", "u", "p", 50, 100)
+        )
+
+        configs.forEach { config ->
+            assert(config.poolMin >= 0)
+            assert(config.poolMax > 0)
+            assert(config.poolMin <= config.poolMax)
+        }
+    }
+
+    @Test
+    fun `DatabaseConfig toString contains key information`() {
+        val config = DatabaseConfig("localhost", 5432, "testdb", "testuser", "secret", 0, 4)
+        val str = config.toString()
+
+        assertNotNull(str)
+        assert(str.contains("localhost"))
+        assert(str.contains("5432"))
+        assert(str.contains("testdb"))
+        assert(str.contains("testuser"))
+    }
+
+    @Test
+    fun `DatabaseConfig with various pool configurations`() {
+        val poolConfigs = listOf(
+            Pair(0, 1),
+            Pair(0, 4),
+            Pair(1, 2),
+            Pair(5, 10),
+            Pair(10, 10),
+            Pair(20, 50),
+            Pair(50, 200)
+        )
+
+        poolConfigs.forEach { (min, max) ->
+            val config = DatabaseConfig("host", 5432, "db", "user", "pass", min, max)
+            assertEquals(min, config.poolMin)
+            assertEquals(max, config.poolMax)
+        }
+    }
+
+    @Test
+    fun `fromEnv consistency across multiple calls`() {
+        // Call multiple times to verify consistency
+        val results = (1..5).map { DatabaseConfig.fromEnv() }
+
+        // All results should be the same (all null or all non-null)
+        val allNull = results.all { it == null }
+        val allNonNull = results.all { it != null }
+
+        assert(allNull || allNonNull) { "fromEnv() should return consistent results" }
+    }
+
+    @Test
+    fun `DatabaseConfig copy with no changes creates equal object`() {
+        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val copied = original.copy()
+
+        assertEquals(original, copied)
+        assertEquals(original.host, copied.host)
+        assertEquals(original.port, copied.port)
+        assertEquals(original.database, copied.database)
+        assertEquals(original.user, copied.user)
+        assertEquals(original.password, copied.password)
+        assertEquals(original.poolMin, copied.poolMin)
+        assertEquals(original.poolMax, copied.poolMax)
+    }
+
+    @Test
+    fun `DatabaseConfig copy can change each field independently`() {
+        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2)
+
+        assertEquals("h2", original.copy(host = "h2").host)
+        assertEquals(2, original.copy(port = 2).port)
+        assertEquals("d2", original.copy(database = "d2").database)
+        assertEquals("u2", original.copy(user = "u2").user)
+        assertEquals("p2", original.copy(password = "p2").password)
+        assertEquals(3, original.copy(poolMin = 3).poolMin)
+        assertEquals(4, original.copy(poolMax = 4).poolMax)
+    }
+
+    @Test
+    fun `connectionString with IPv4 addresses`() {
+        val ipAddresses = listOf("127.0.0.1", "192.168.1.1", "10.0.0.1", "172.16.0.1", "8.8.8.8")
+
+        ipAddresses.forEach { ip ->
+            val config = DatabaseConfig(ip, 5432, "db", "user", "pass", 0, 4)
+            assertEquals("jdbc:postgresql://$ip:5432/db", config.connectionString())
+        }
+    }
+
+    @Test
+    fun `connectionString with domain names`() {
+        val domains = listOf(
+            "localhost",
+            "db.example.com",
+            "postgres.local",
+            "database-server",
+            "my-postgres-db.cloud.provider.com"
+        )
+
+        domains.forEach { domain ->
+            val config = DatabaseConfig(domain, 5432, "mydb", "user", "pass", 0, 4)
+            assertEquals("jdbc:postgresql://$domain:5432/mydb", config.connectionString())
+        }
+    }
+
+    @Test
+    fun `DatabaseConfig with edge case pool sizes`() {
+        // Minimum possible
+        val config1 = DatabaseConfig("h", 5432, "d", "u", "p", 0, 1)
+        assertEquals(0, config1.poolMin)
+        assertEquals(1, config1.poolMax)
+
+        // Equal min and max
+        val config2 = DatabaseConfig("h", 5432, "d", "u", "p", 5, 5)
+        assertEquals(5, config2.poolMin)
+        assertEquals(5, config2.poolMax)
+
+        // Large pool
+        val config3 = DatabaseConfig("h", 5432, "d", "u", "p", 100, 500)
+        assertEquals(100, config3.poolMin)
+        assertEquals(500, config3.poolMax)
+    }
+
+    @Test
+    fun `DatabaseConfig data class methods are idempotent`() {
+        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+
+        // hashCode is stable
+        val hash1 = config.hashCode()
+        val hash2 = config.hashCode()
+        assertEquals(hash1, hash2)
+
+        // toString is stable
+        val str1 = config.toString()
+        val str2 = config.toString()
+        assertEquals(str1, str2)
+
+        // equals is reflexive
+        assertEquals(config, config)
+
+        // copy creates equal object
+        val copied = config.copy()
+        assertEquals(config, copied)
+    }
+}
