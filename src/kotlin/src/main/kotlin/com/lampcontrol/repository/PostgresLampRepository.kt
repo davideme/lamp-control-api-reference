@@ -48,12 +48,12 @@ class PostgresLampRepository : LampRepository {
     }
 
     override suspend fun updateLamp(entity: LampEntity): LampEntity? = dbQuery {
-        val updatedAt = Instant.now()
+        val newUpdatedAt = Instant.now()
         val rowsUpdated = LampsTable.update(
             where = { (LampsTable.id eq entity.id) and LampsTable.deletedAt.isNull() }
         ) {
             it[isOn] = entity.status
-            it[updatedAt] = updatedAt
+            it[updatedAt] = newUpdatedAt
         }
 
         if (rowsUpdated > 0) {
@@ -62,7 +62,7 @@ class PostgresLampRepository : LampRepository {
                 id = entity.id,
                 status = entity.status,
                 createdAt = entity.createdAt,
-                updatedAt = updatedAt
+                updatedAt = newUpdatedAt
             )
         } else {
             null
