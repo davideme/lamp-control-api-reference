@@ -52,7 +52,7 @@ class PostgresLampRepository : LampRepository {
             where = { (LampsTable.id eq entity.id) and LampsTable.deletedAt.isNull() }
         ) {
             it[isOn] = entity.status
-            it[updatedAt] = Instant.now()
+            it[updatedAt] = entity.updatedAt
         }
 
         if (rowsUpdated > 0) {
