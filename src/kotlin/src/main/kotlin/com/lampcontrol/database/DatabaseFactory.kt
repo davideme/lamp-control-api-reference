@@ -4,18 +4,24 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 /**
  * Factory for database connection management using HikariCP and Exposed
  */
 object DatabaseFactory {
+    private val logger = LoggerFactory.getLogger(DatabaseFactory::class.java)
     /**
      * Initialize database connection from environment variables.
      * Returns null if no PostgreSQL configuration is found.
      */
     fun init(): Database? {
-        val config = DatabaseConfig.fromEnv() ?: return null
+        val config = DatabaseConfig.fromEnv()
+        if (config == null) {
+            logger.warn("Database initialization skipped: PostgreSQL configuration not found in environment variables")
+            return null
+        }
 
         val hikariConfig = HikariConfig().apply {
             jdbcUrl = config.connectionString()
@@ -102,7 +108,11 @@ data class DatabaseConfig(
         private fun parseDatabaseUrl(url: String): DatabaseConfig {
             val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
             val match = regex.matchEntire(url)
-                ?: throw IllegalArgumentException("Invalid DATABASE_URL format: $url")
+                ?: throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'."
+                )
 
             val (user, password, host, port, database) = match.destructured
 
