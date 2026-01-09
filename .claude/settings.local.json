@@ -14,7 +14,8 @@
       "Bash(schemathesis run:*)",
       "Bash(python3:*)",
       "Bash(pkill:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(./gradlew clean:*)"
     ]
   }
 }
