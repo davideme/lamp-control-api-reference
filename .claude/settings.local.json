@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew compileKotlin:*)",
-      "Bash(./gradlew test:*)"
+      "Bash(./gradlew test:*)",
+      "Bash(./src/kotlin/gradlew:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose up:*)",
+      "Bash(docker compose run:*)",
+      "Bash(./gradlew tasks:*)",
+      "Bash(docker compose config:*)",
+      "Bash(curl:*)",
+      "Bash(pip3 install:*)",
+      "Bash(schemathesis run:*)",
+      "Bash(python3:*)",
+      "Bash(pkill:*)"
     ]
   }
 }

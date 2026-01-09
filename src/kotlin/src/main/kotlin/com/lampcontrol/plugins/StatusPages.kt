@@ -1,5 +1,6 @@
 package com.lampcontrol.plugins
 
+import com.lampcontrol.api.models.Error
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -12,25 +13,17 @@ fun Application.configureStatusPages() {
         // Map numeric parse errors to 400 so malformed numeric query params (e.g. pageSize=null)
         // don't surface as 500 Internal Server Error. This lets the client know the input
         // was invalid while preserving `pageSize: kotlin.Int?` in generated `Paths`.
-        // Use respondText with explicit JSON and Content-Type so a body is always sent even
-        // when serialization/content-negotiation isn't available at the time the handler runs.
-        fun jsonError(error: String, message: String?): String {
-            val safeMessage = message?.replace("\"", "\\\"") ?: ""
-            return "{\"error\":\"$error\",\"message\":\"$safeMessage\"}"
-        }
-
         exception<NumberFormatException> { call, cause ->
-            call.respondText(
-                jsonError("Invalid numeric parameter", cause.message),
-                ContentType.Application.Json,
-                HttpStatusCode.BadRequest
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Error(error = "Invalid numeric parameter")
             )
         }
+
         exception<SerializationException> { call, cause ->
-            call.respondText(
-                jsonError("Invalid JSON format", cause.message),
-                ContentType.Application.Json,
-                HttpStatusCode.BadRequest
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Error(error = "Invalid JSON format")
             )
         }
 
@@ -40,10 +33,9 @@ fun Application.configureStatusPages() {
         exception<BadRequestException> { call, cause ->
             val nf = cause.cause
             if (nf is NumberFormatException) {
-                call.respondText(
-                    jsonError("Invalid numeric parameter", nf.message),
-                    ContentType.Application.Json,
-                    HttpStatusCode.BadRequest
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Error(error = "Invalid numeric parameter")
                 )
             } else {
                 // Fallback to the generic handler below by rethrowing so it is caught by the
@@ -51,20 +43,18 @@ fun Application.configureStatusPages() {
                 throw cause
             }
         }
-        
+
         exception<IllegalArgumentException> { call, cause ->
-            call.respondText(
-                jsonError("Invalid argument", cause.message),
-                ContentType.Application.Json,
-                HttpStatusCode.BadRequest
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Error(error = "Invalid argument")
             )
         }
 
         exception<Exception> { call, cause ->
-            call.respondText(
-                jsonError("Internal server error", "An unexpected error occurred"),
-                ContentType.Application.Json,
-                HttpStatusCode.InternalServerError
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                Error(error = "Internal server error")
             )
         }
     }
