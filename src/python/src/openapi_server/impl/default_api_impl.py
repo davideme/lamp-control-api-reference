@@ -2,21 +2,18 @@
 
 from uuid import uuid4
 
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+
+
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
-from src.openapi_server.dependencies import get_db_session, get_lamp_repository, settings
+from src.openapi_server.dependencies import get_lamp_repository
 from src.openapi_server.mappers.lamp_mapper import LampMapper
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
 from src.openapi_server.models.list_lamps200_response import ListLamps200Response
-from src.openapi_server.repositories.lamp_repository import (
-    InMemoryLampRepository,
-    LampNotFoundError,
-)
-from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
+from src.openapi_server.repositories.lamp_repository import LampNotFoundError
+
 
 
 class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]

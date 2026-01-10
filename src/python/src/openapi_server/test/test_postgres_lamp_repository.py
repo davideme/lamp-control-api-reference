@@ -4,7 +4,7 @@ These tests use Testcontainers to spin up a real PostgreSQL instance,
 ensuring that the repository works correctly with an actual database.
 """
 
-import os
+
 from pathlib import Path
 from uuid import uuid4
 

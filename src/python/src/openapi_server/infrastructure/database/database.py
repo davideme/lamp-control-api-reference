@@ -71,7 +71,4 @@ class DatabaseManager:
                 pass
         """
         async with self.async_session_factory() as session:
-            try:
-                yield session
-            finally:
-                await session.close()
+            yield session

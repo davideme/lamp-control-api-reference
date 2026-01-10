@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     initialize_database()
     yield
     # Shutdown
-    if db_manager:
+    if settings.use_postgres and db_manager is not None:
         await db_manager.close()
 
 
