@@ -4,7 +4,6 @@ These tests use Testcontainers to spin up a real PostgreSQL instance,
 ensuring that the repository works correctly with an actual database.
 """
 
-
 from pathlib import Path
 from uuid import uuid4
 
@@ -31,6 +30,7 @@ def postgres_container():
 
         # Get a connection and execute the schema
         import psycopg2
+
         conn = psycopg2.connect(postgres.get_connection_url())
         cur = conn.cursor()
         cur.execute(schema_sql)
@@ -188,8 +188,7 @@ class TestPostgresLampRepository:
 
         # Assert - check database directly
         result = await session.execute(
-            text("SELECT deleted_at FROM lamps WHERE id = :id"),
-            {"id": sample_lamp_entity.id}
+            text("SELECT deleted_at FROM lamps WHERE id = :id"), {"id": sample_lamp_entity.id}
         )
         row = result.fetchone()
         assert row is not None
@@ -241,14 +240,14 @@ class TestPostgresLampRepository:
         # Assert - check database directly
         result = await session.execute(
             text("SELECT id, is_on FROM lamps WHERE id IN (:id1, :id2) ORDER BY is_on"),
-            {"id1": lamp_on.id, "id2": lamp_off.id}
+            {"id1": lamp_on.id, "id2": lamp_off.id},
         )
         rows = result.fetchall()
 
         assert len(rows) == 2
         assert str(rows[0][0]) == lamp_off.id  # is_on = False comes first
         assert rows[0][1] is False
-        assert str(rows[1][0]) == lamp_on.id   # is_on = True comes second
+        assert str(rows[1][0]) == lamp_on.id  # is_on = True comes second
         assert rows[1][1] is True
 
     async def test_concurrent_operations(self, repository, session):

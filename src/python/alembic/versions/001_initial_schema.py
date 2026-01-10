@@ -15,12 +15,14 @@ Or use the provided docker-compose setup which handles this automatically.
 This Alembic migration is provided for reference and to establish the initial
 state for future migrations.
 """
-from alembic import op
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
-revision = '001'
+revision = "001"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,21 +40,37 @@ def upgrade() -> None:
 
     # Create lamps table
     op.create_table(
-        'lamps',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True, server_default=sa.text('UUID_GENERATE_V4()')),
-        sa.Column('is_on', sa.Boolean(), nullable=False, server_default='false'),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+        "lamps",
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            server_default=sa.text("UUID_GENERATE_V4()"),
+        ),
+        sa.Column("is_on", sa.Boolean(), nullable=False, server_default="false"),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
     )
 
     # Create indexes
-    op.create_index('idx_lamps_is_on', 'lamps', ['is_on'])
-    op.create_index('idx_lamps_created_at', 'lamps', ['created_at'])
-    op.create_index('idx_lamps_deleted_at', 'lamps', ['deleted_at'])
+    op.create_index("idx_lamps_is_on", "lamps", ["is_on"])
+    op.create_index("idx_lamps_created_at", "lamps", ["created_at"])
+    op.create_index("idx_lamps_deleted_at", "lamps", ["deleted_at"])
 
     # Create trigger function for updated_at
-    op.execute("""
+    op.execute(
+        """
         CREATE OR REPLACE FUNCTION UPDATE_UPDATED_AT_COLUMN()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -60,23 +78,26 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-    """)
+    """
+    )
 
     # Create trigger
-    op.execute("""
+    op.execute(
+        """
         CREATE TRIGGER update_lamps_updated_at
         BEFORE UPDATE ON lamps
         FOR EACH ROW
         EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
-    """)
+    """
+    )
 
 
 def downgrade() -> None:
     """Remove the initial schema."""
-    op.execute('DROP TRIGGER IF EXISTS update_lamps_updated_at ON lamps')
-    op.execute('DROP FUNCTION IF EXISTS UPDATE_UPDATED_AT_COLUMN()')
-    op.drop_index('idx_lamps_deleted_at', table_name='lamps')
-    op.drop_index('idx_lamps_created_at', table_name='lamps')
-    op.drop_index('idx_lamps_is_on', table_name='lamps')
-    op.drop_table('lamps')
+    op.execute("DROP TRIGGER IF EXISTS update_lamps_updated_at ON lamps")
+    op.execute("DROP FUNCTION IF EXISTS UPDATE_UPDATED_AT_COLUMN()")
+    op.drop_index("idx_lamps_deleted_at", table_name="lamps")
+    op.drop_index("idx_lamps_created_at", table_name="lamps")
+    op.drop_index("idx_lamps_is_on", table_name="lamps")
+    op.drop_table("lamps")
     op.execute('DROP EXTENSION IF EXISTS "uuid-ossp"')

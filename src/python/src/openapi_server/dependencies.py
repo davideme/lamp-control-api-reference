@@ -7,7 +7,6 @@ otherwise, in-memory storage is used.
 """
 
 from collections.abc import AsyncGenerator
-from typing import Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,7 +52,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def get_lamp_repository(
     session: AsyncSession | None = None,
-) -> Union[PostgresLampRepository, InMemoryLampRepository]:
+) -> PostgresLampRepository | InMemoryLampRepository:
     """Get a lamp repository instance based on configuration.
 
     If DATABASE_URL is configured, returns a PostgreSQL repository with a database session.

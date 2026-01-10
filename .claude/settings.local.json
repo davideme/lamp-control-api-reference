@@ -15,8 +15,11 @@
       "Bash(pkill:*)",
       "Bash(poetry install:*)",
       "Bash(poetry lock:*)",
+      "Bash(poetry run black:*)",
       "Bash(poetry run pytest:*)",
       "Bash(poetry run python:*)",
+      "Bash(poetry run ruff check:*)",
+      "Bash(poetry run ruff:*)",
       "Bash(python3:*)",
       "Bash(schemathesis run:*)",
       "Bash(tree:*)"

@@ -84,9 +84,7 @@ class PostgresLampRepository:
             A list of all active lamp entities, ordered by creation time.
         """
         stmt = (
-            select(LampModel)
-            .where(LampModel.deleted_at.is_(None))
-            .order_by(LampModel.created_at)
+            select(LampModel).where(LampModel.deleted_at.is_(None)).order_by(LampModel.created_at)
         )
 
         result = await self._session.execute(stmt)

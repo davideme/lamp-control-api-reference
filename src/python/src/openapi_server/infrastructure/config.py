@@ -11,9 +11,7 @@ class DatabaseSettings(BaseSettings):
     development.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # PostgreSQL connection settings
     db_host: str = "localhost"
