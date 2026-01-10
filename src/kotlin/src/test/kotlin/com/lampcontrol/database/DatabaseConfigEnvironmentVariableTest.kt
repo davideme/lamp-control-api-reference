@@ -279,4 +279,63 @@ class DatabaseConfigEnvironmentVariableTest {
         // All empty strings should be treated as not configured
         assertNull(config)
     }
+
+    @Test
+    @SetEnvironmentVariable(key = "DB_HOST", value = "host")
+    @SetEnvironmentVariable(key = "DB_USER", value = "user")
+    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "7200000")
+    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "900000")
+    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "60000")
+    fun `fromEnv respects timeout env vars`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals(7200000L, config.maxLifetimeMs)  // 2 hours
+        assertEquals(900000L, config.idleTimeoutMs)   // 15 minutes
+        assertEquals(60000L, config.connectionTimeoutMs)  // 60 seconds
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://user:pass@localhost:5432/db")
+    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "1800000")
+    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "600000")
+    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "20000")
+    fun `fromEnv respects timeout env vars with DATABASE_URL`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals(1800000L, config.maxLifetimeMs)  // 30 minutes
+        assertEquals(600000L, config.idleTimeoutMs)   // 10 minutes
+        assertEquals(20000L, config.connectionTimeoutMs)  // 20 seconds
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
+    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "invalid")
+    fun `fromEnv uses default max lifetime when invalid`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals(3600000L, config.maxLifetimeMs)  // Falls back to 1 hour default
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
+    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "invalid")
+    fun `fromEnv uses default idle timeout when invalid`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals(1800000L, config.idleTimeoutMs)  // Falls back to 30 minutes default
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
+    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "invalid")
+    fun `fromEnv uses default connection timeout when invalid`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals(30000L, config.connectionTimeoutMs)  // Falls back to 30 seconds default
+    }
 }

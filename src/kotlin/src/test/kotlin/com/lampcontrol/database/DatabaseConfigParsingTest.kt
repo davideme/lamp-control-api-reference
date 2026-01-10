@@ -41,7 +41,10 @@ class DatabaseConfigParsingTest {
                 user = "testuser",
                 password = "testpass",
                 poolMin = 0,
-                poolMax = 4
+                poolMax = 4,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
             )
             assertEquals(expected, config.connectionString())
         }
@@ -56,7 +59,10 @@ class DatabaseConfigParsingTest {
             user = "user",
             password = "pass",
             poolMin = 1,
-            poolMax = 5
+            poolMax = 5,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
         assertEquals("jdbc:postgresql://localhost:5432/lamp_control_dev_2024", config.connectionString())
     }
@@ -73,7 +79,10 @@ class DatabaseConfigParsingTest {
                 user = "user",
                 password = "pass",
                 poolMin = 0,
-                poolMax = 4
+                poolMax = 4,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
             )
             assertEquals("jdbc:postgresql://localhost:$port/testdb", config.connectionString())
         }
@@ -81,9 +90,9 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig equals and hashCode work correctly`() {
-        val config1 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
-        val config2 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
-        val config3 = DatabaseConfig("host", 5432, "db", "user", "different", 0, 4)
+        val config1 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config2 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config3 = DatabaseConfig("host", 5432, "db", "user", "different", 0, 4, 3600000, 1800000, 30000)
 
         assertEquals(config1, config2)
         assertEquals(config1.hashCode(), config2.hashCode())
@@ -92,7 +101,7 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig copy preserves all fields`() {
-        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2)
+        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2, 3600000, 1800000, 30000)
 
         val copy1 = original.copy(host = "h2")
         assertEquals("h2", copy1.host)
@@ -110,7 +119,7 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig destructuring works correctly`() {
-        val config = DatabaseConfig("myhost", 5432, "mydb", "myuser", "mypass", 2, 10)
+        val config = DatabaseConfig("myhost", 5432, "mydb", "myuser", "mypass", 2, 10, 3600000, 1800000, 30000)
 
         val (host, port, database, user, password, poolMin, poolMax) = config
 
@@ -126,11 +135,11 @@ class DatabaseConfigParsingTest {
     @Test
     fun `DatabaseConfig with minimum pool size variations`() {
         val configs = listOf(
-            DatabaseConfig("h", 5432, "d", "u", "p", 0, 4),
-            DatabaseConfig("h", 5432, "d", "u", "p", 1, 4),
-            DatabaseConfig("h", 5432, "d", "u", "p", 5, 10),
-            DatabaseConfig("h", 5432, "d", "u", "p", 10, 20),
-            DatabaseConfig("h", 5432, "d", "u", "p", 50, 100)
+            DatabaseConfig("h", 5432, "d", "u", "p", 0, 4, 3600000, 1800000, 30000),
+            DatabaseConfig("h", 5432, "d", "u", "p", 1, 4, 3600000, 1800000, 30000),
+            DatabaseConfig("h", 5432, "d", "u", "p", 5, 10, 3600000, 1800000, 30000),
+            DatabaseConfig("h", 5432, "d", "u", "p", 10, 20, 3600000, 1800000, 30000),
+            DatabaseConfig("h", 5432, "d", "u", "p", 50, 100, 3600000, 1800000, 30000)
         )
 
         configs.forEach { config ->
@@ -142,7 +151,7 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig toString contains key information`() {
-        val config = DatabaseConfig("localhost", 5432, "testdb", "testuser", "secret", 0, 4)
+        val config = DatabaseConfig("localhost", 5432, "testdb", "testuser", "secret", 0, 4, 3600000, 1800000, 30000)
         val str = config.toString()
 
         assertNotNull(str)
@@ -165,7 +174,7 @@ class DatabaseConfigParsingTest {
         )
 
         poolConfigs.forEach { (min, max) ->
-            val config = DatabaseConfig("host", 5432, "db", "user", "pass", min, max)
+            val config = DatabaseConfig("host", 5432, "db", "user", "pass", min, max, 3600000, 1800000, 30000)
             assertEquals(min, config.poolMin)
             assertEquals(max, config.poolMax)
         }
@@ -185,7 +194,7 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig copy with no changes creates equal object`() {
-        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
         val copied = original.copy()
 
         assertEquals(original, copied)
@@ -200,7 +209,7 @@ class DatabaseConfigParsingTest {
 
     @Test
     fun `DatabaseConfig copy can change each field independently`() {
-        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2)
+        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2, 3600000, 1800000, 30000)
 
         assertEquals("h2", original.copy(host = "h2").host)
         assertEquals(2, original.copy(port = 2).port)
@@ -216,7 +225,7 @@ class DatabaseConfigParsingTest {
         val ipAddresses = listOf("127.0.0.1", "192.168.1.1", "10.0.0.1", "172.16.0.1", "8.8.8.8")
 
         ipAddresses.forEach { ip ->
-            val config = DatabaseConfig(ip, 5432, "db", "user", "pass", 0, 4)
+            val config = DatabaseConfig(ip, 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
             assertEquals("jdbc:postgresql://$ip:5432/db", config.connectionString())
         }
     }
@@ -232,7 +241,7 @@ class DatabaseConfigParsingTest {
         )
 
         domains.forEach { domain ->
-            val config = DatabaseConfig(domain, 5432, "mydb", "user", "pass", 0, 4)
+            val config = DatabaseConfig(domain, 5432, "mydb", "user", "pass", 0, 4, 3600000, 1800000, 30000)
             assertEquals("jdbc:postgresql://$domain:5432/mydb", config.connectionString())
         }
     }
@@ -240,24 +249,24 @@ class DatabaseConfigParsingTest {
     @Test
     fun `DatabaseConfig with edge case pool sizes`() {
         // Minimum possible
-        val config1 = DatabaseConfig("h", 5432, "d", "u", "p", 0, 1)
+        val config1 = DatabaseConfig("h", 5432, "d", "u", "p", 0, 1, 3600000, 1800000, 30000)
         assertEquals(0, config1.poolMin)
         assertEquals(1, config1.poolMax)
 
         // Equal min and max
-        val config2 = DatabaseConfig("h", 5432, "d", "u", "p", 5, 5)
+        val config2 = DatabaseConfig("h", 5432, "d", "u", "p", 5, 5, 3600000, 1800000, 30000)
         assertEquals(5, config2.poolMin)
         assertEquals(5, config2.poolMax)
 
         // Large pool
-        val config3 = DatabaseConfig("h", 5432, "d", "u", "p", 100, 500)
+        val config3 = DatabaseConfig("h", 5432, "d", "u", "p", 100, 500, 3600000, 1800000, 30000)
         assertEquals(100, config3.poolMin)
         assertEquals(500, config3.poolMax)
     }
 
     @Test
     fun `DatabaseConfig data class methods are idempotent`() {
-        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
 
         // hashCode is stable
         val hash1 = config.hashCode()

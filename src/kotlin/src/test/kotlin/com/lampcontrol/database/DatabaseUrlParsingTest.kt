@@ -222,7 +222,10 @@ class DatabaseUrlParsingTest {
             user = user,
             password = password,
             poolMin = 0, // Default
-            poolMax = 4  // Default
+            poolMax = 4,  // Default
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertEquals("testuser", expectedConfig.user)
@@ -245,7 +248,10 @@ class DatabaseUrlParsingTest {
             user = "lamp_user",  // From DB_USER
             password = "",       // Default or from DB_PASSWORD
             poolMin = 0,         // Default or from DB_POOL_MIN_SIZE
-            poolMax = 4          // Default or from DB_POOL_MAX_SIZE
+            poolMax = 4,          // Default or from DB_POOL_MAX_SIZE
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertNotNull(expectedConfig)
@@ -273,7 +279,10 @@ class DatabaseUrlParsingTest {
             user = "env_user",
             password = "env_pass",
             poolMin = 1,
-            poolMax = 5
+            poolMax = 5,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertNotNull(individualConfig)
@@ -290,7 +299,10 @@ class DatabaseUrlParsingTest {
             user = "user",
             password = "pass",
             poolMin = 0,  // Default from DB_POOL_MIN_SIZE
-            poolMax = 4   // Default from DB_POOL_MAX_SIZE
+            poolMax = 4,   // Default from DB_POOL_MAX_SIZE
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertEquals(0, config.poolMin)
