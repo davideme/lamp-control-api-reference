@@ -26,6 +26,59 @@ Then, run:
 
 This runs all tests and packages the library.
 
+## Configuration
+
+### Database Configuration
+
+The server supports PostgreSQL for persistent storage. Database configuration is optional - if not configured, the server will run with in-memory storage.
+
+#### Environment Variables
+
+Configure the database connection using environment variables:
+
+**Connection Settings:**
+- `DATABASE_URL` - Full database connection URL (format: `postgresql://user:password@host:port/database`)
+- `DB_HOST` - Database host (default: `localhost`)
+- `DB_PORT` - Database port (default: `5432`)
+- `DB_NAME` - Database name (default: `lamp_control`)
+- `DB_USER` - Database user (default: `lamp_user`)
+- `DB_PASSWORD` - Database password (default: empty string)
+
+**Connection Pool Settings:**
+- `DB_POOL_MIN_SIZE` - Minimum pool size (default: `0`)
+- `DB_POOL_MAX_SIZE` - Maximum pool size (default: `4`)
+
+**Connection Pool Timeouts (in milliseconds):**
+- `DB_MAX_LIFETIME_MS` - Maximum lifetime of a connection in the pool (default: `3600000` = 1 hour)
+- `DB_IDLE_TIMEOUT_MS` - Maximum idle time before connection is closed (default: `1800000` = 30 minutes)
+- `DB_CONNECTION_TIMEOUT_MS` - Maximum time to wait for a connection (default: `30000` = 30 seconds)
+
+**Example using DATABASE_URL:**
+```bash
+export DATABASE_URL="postgresql://lamp_user:password@localhost:5432/lamp_control"
+export DB_POOL_MAX_SIZE="10"
+export DB_MAX_LIFETIME_MS="7200000"  # 2 hours
+```
+
+**Example using individual environment variables:**
+```bash
+export DB_HOST="localhost"
+export DB_PORT="5432"
+export DB_NAME="lamp_control"
+export DB_USER="lamp_user"
+export DB_PASSWORD="password"
+export DB_POOL_MIN_SIZE="2"
+export DB_POOL_MAX_SIZE="10"
+export DB_IDLE_TIMEOUT_MS="900000"  # 15 minutes
+```
+
+PostgreSQL is considered configured if any of the following conditions are met:
+- `DATABASE_URL` is set
+- `DB_NAME` is explicitly provided
+- Both `DB_HOST` and `DB_USER` are explicitly provided
+
+If PostgreSQL is not configured, the server will use in-memory storage.
+
 ## Running
 
 The server builds as a fat jar with a main entrypoint. To start the service, run `java -jar ./build/libs/kotlin-server.jar`.
