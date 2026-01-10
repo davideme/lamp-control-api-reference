@@ -12,17 +12,37 @@ Do not edit the class manually.
 """  # noqa: E501
 
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.openapi_server.apis.default_api import router as DefaultApiRouter
+from src.openapi_server.dependencies import db_manager, initialize_database, settings
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle application startup and shutdown events.
+
+    This context manager initializes the database connection on startup
+    and properly closes it on shutdown.
+    """
+    # Startup
+    initialize_database()
+    yield
+    # Shutdown
+    if db_manager:
+        await db_manager.close()
+
 
 app = FastAPI(
     title="Lamp Control API",
     description="A simple API for controlling lamps, demonstrating CRUD operations. ",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -63,5 +83,8 @@ app.include_router(DefaultApiRouter, prefix="/v1")
 
 @app.get("/health")
 async def health():
-    """Health check endpoint for monitoring service availability."""
-    return {"status": "ok"}
+    """Health check endpoint for monitoring service availability.
+
+    Returns the service status and current storage backend type.
+    """
+    return {"status": "ok", "storage": "postgres" if settings.use_postgres else "memory"}
