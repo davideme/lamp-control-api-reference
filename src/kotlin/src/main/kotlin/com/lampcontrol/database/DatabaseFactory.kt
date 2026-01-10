@@ -30,9 +30,9 @@ object DatabaseFactory {
             password = config.password
             maximumPoolSize = config.poolMax
             minimumIdle = config.poolMin
-            maxLifetime = 3600000 // 1 hour
-            idleTimeout = 1800000 // 30 minutes
-            connectionTimeout = 30000 // 30 seconds
+            maxLifetime = config.maxLifetimeMs
+            idleTimeout = config.idleTimeoutMs
+            connectionTimeout = config.connectionTimeoutMs
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
             validate()
@@ -58,7 +58,10 @@ data class DatabaseConfig(
     val user: String,
     val password: String,
     val poolMin: Int,
-    val poolMax: Int
+    val poolMax: Int,
+    val maxLifetimeMs: Long,
+    val idleTimeoutMs: Long,
+    val connectionTimeoutMs: Long
 ) {
     companion object {
         /**
@@ -98,7 +101,10 @@ data class DatabaseConfig(
                 user = user ?: "lamp_user",
                 password = System.getenv("DB_PASSWORD") ?: "",
                 poolMin = System.getenv("DB_POOL_MIN_SIZE")?.toIntOrNull() ?: 0,
-                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4
+                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4,
+                maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: 3600000, // 1 hour
+                idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: 1800000, // 30 minutes
+                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000 // 30 seconds
             )
         }
 
@@ -123,7 +129,10 @@ data class DatabaseConfig(
                 user = user,
                 password = password,
                 poolMin = System.getenv("DB_POOL_MIN_SIZE")?.toIntOrNull() ?: 0,
-                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4
+                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4,
+                maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: 3600000, // 1 hour
+                idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: 1800000, // 30 minutes
+                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000 // 30 seconds
             )
         }
     }

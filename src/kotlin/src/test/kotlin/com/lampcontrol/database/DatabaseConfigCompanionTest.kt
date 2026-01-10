@@ -50,7 +50,10 @@ class DatabaseConfigCompanionTest {
             user = "testuser",
             password = "testpass",
             poolMin = 0,
-            poolMax = 4
+            poolMax = 4,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertNotNull(config)
@@ -60,16 +63,16 @@ class DatabaseConfigCompanionTest {
     @Test
     fun `DatabaseConfig construction with various parameter combinations`() {
         // Test with minimum pool size greater than 0
-        val config1 = DatabaseConfig("host1", 5432, "db1", "user1", "pass1", 5, 10)
+        val config1 = DatabaseConfig("host1", 5432, "db1", "user1", "pass1", 5, 10, 3600000, 1800000, 30000)
         assertEquals(5, config1.poolMin)
 
         // Test with equal pool sizes
-        val config2 = DatabaseConfig("host2", 5433, "db2", "user2", "pass2", 3, 3)
+        val config2 = DatabaseConfig("host2", 5433, "db2", "user2", "pass2", 3, 3, 3600000, 1800000, 30000)
         assertEquals(3, config2.poolMin)
         assertEquals(3, config2.poolMax)
 
         // Test with large pool sizes
-        val config3 = DatabaseConfig("host3", 5434, "db3", "user3", "pass3", 50, 200)
+        val config3 = DatabaseConfig("host3", 5434, "db3", "user3", "pass3", 50, 200, 3600000, 1800000, 30000)
         assertEquals(50, config3.poolMin)
         assertEquals(200, config3.poolMax)
     }
@@ -77,11 +80,11 @@ class DatabaseConfigCompanionTest {
     @Test
     fun `DatabaseConfig construction exercises all parameter paths`() {
         val configs = listOf(
-            DatabaseConfig("h1", 5432, "d1", "u1", "p1", 0, 1),
-            DatabaseConfig("h2", 5433, "d2", "u2", "p2", 1, 2),
-            DatabaseConfig("h3", 5434, "d3", "u3", "p3", 2, 3),
-            DatabaseConfig("h4", 5435, "d4", "u4", "p4", 3, 4),
-            DatabaseConfig("h5", 5436, "d5", "u5", "p5", 4, 5)
+            DatabaseConfig("h1", 5432, "d1", "u1", "p1", 0, 1, 3600000, 1800000, 30000),
+            DatabaseConfig("h2", 5433, "d2", "u2", "p2", 1, 2, 3600000, 1800000, 30000),
+            DatabaseConfig("h3", 5434, "d3", "u3", "p3", 2, 3, 3600000, 1800000, 30000),
+            DatabaseConfig("h4", 5435, "d4", "u4", "p4", 3, 4, 3600000, 1800000, 30000),
+            DatabaseConfig("h5", 5436, "d5", "u5", "p5", 4, 5, 3600000, 1800000, 30000)
         )
 
         configs.forEachIndexed { index, config ->
@@ -97,7 +100,7 @@ class DatabaseConfigCompanionTest {
 
     @Test
     fun `DatabaseConfig data class methods work correctly`() {
-        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
 
         // Test copy
         val copied = config.copy()
@@ -127,14 +130,14 @@ class DatabaseConfigCompanionTest {
         )
 
         testCases.forEach { (host, port, expected) ->
-            val config = DatabaseConfig(host, port, "db", "user", "pass", 0, 4)
+            val config = DatabaseConfig(host, port, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
             assertEquals(expected, config.connectionString())
         }
     }
 
     @Test
     fun `DatabaseConfig component access patterns`() {
-        val config = DatabaseConfig("h", 123, "d", "u", "p", 1, 2)
+        val config = DatabaseConfig("h", 123, "d", "u", "p", 1, 2, 3600000, 1800000, 30000)
 
         // Access each component
         assertEquals("h", config.component1())
@@ -144,11 +147,14 @@ class DatabaseConfigCompanionTest {
         assertEquals("p", config.component5())
         assertEquals(1, config.component6())
         assertEquals(2, config.component7())
+        assertEquals(3600000, config.component8())
+        assertEquals(1800000, config.component9())
+        assertEquals(30000, config.component10())
     }
 
     @Test
     fun `DatabaseConfig multiple copies preserve equality`() {
-        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4)
+        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
         val copy1 = original.copy()
         val copy2 = copy1.copy()
         val copy3 = copy2.copy()
@@ -161,7 +167,7 @@ class DatabaseConfigCompanionTest {
 
     @Test
     fun `DatabaseConfig copy with all parameters changed`() {
-        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2)
+        val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2, 3600000, 1800000, 30000)
         val modified = original.copy(
             host = "h2",
             port = 2,
@@ -169,7 +175,10 @@ class DatabaseConfigCompanionTest {
             user = "u2",
             password = "p2",
             poolMin = 3,
-            poolMax = 4
+            poolMax = 4,
+            maxLifetimeMs = 3600000,
+            idleTimeoutMs = 1800000,
+            connectionTimeoutMs = 30000
         )
 
         assertEquals("h2", modified.host)
