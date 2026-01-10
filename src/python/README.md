@@ -92,23 +92,18 @@ Create a `.env` file in the `src/python` directory:
 cp .env.example .env
 ```
 
-Edit `.env` and set:
+Edit `.env` and uncomment the `DATABASE_URL` line:
 
 ```env
-USE_POSTGRES=true
+# Uncomment this line to enable PostgreSQL
 DATABASE_URL=postgresql+asyncpg://lamp_user:lamp_password@localhost:5432/lamp_control
 
-# Or use individual connection parameters
-# DB_HOST=localhost
-# DB_PORT=5432
-# DB_NAME=lamp_control
-# DB_USER=lamp_user
-# DB_PASSWORD=lamp_password
-
-# Connection pool settings (optional)
+# Optional: Connection pool settings
 DB_POOL_MIN_SIZE=5
 DB_POOL_MAX_SIZE=20
 ```
+
+**Note:** Simply setting `DATABASE_URL` enables PostgreSQL storage. If `DATABASE_URL` is not set (or commented out), the API will use in-memory storage.
 
 #### 5. Run Database Migrations (Optional)
 
@@ -132,13 +127,12 @@ poetry run fastapi run src/openapi_server/main.py --port 8080 --host 0.0.0.0
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `USE_POSTGRES` | Enable PostgreSQL storage backend | `false` |
-| `DATABASE_URL` | Full PostgreSQL connection URL | `postgresql+asyncpg://lamp_user:lamp_password@localhost:5432/lamp_control` |
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_NAME` | Database name | `lamp_control` |
-| `DB_USER` | Database user | `lamp_user` |
-| `DB_PASSWORD` | Database password | `lamp_password` |
+| `DATABASE_URL` | Full PostgreSQL connection URL. If set, enables PostgreSQL storage; if not set, uses in-memory storage. | `None` (in-memory) |
+| `DB_HOST` | PostgreSQL host (fallback if DATABASE_URL not set) | `localhost` |
+| `DB_PORT` | PostgreSQL port (fallback if DATABASE_URL not set) | `5432` |
+| `DB_NAME` | Database name (fallback if DATABASE_URL not set) | `lamp_control` |
+| `DB_USER` | Database user (fallback if DATABASE_URL not set) | `lamp_user` |
+| `DB_PASSWORD` | Database password (fallback if DATABASE_URL not set) | `lamp_password` |
 | `DB_POOL_MIN_SIZE` | Minimum connection pool size | `5` |
 | `DB_POOL_MAX_SIZE` | Maximum connection pool size | `20` |
 

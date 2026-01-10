@@ -2,7 +2,8 @@
 
 This module provides dependency injection for repositories and database sessions.
 It supports conditional activation of PostgreSQL vs in-memory storage based on
-the USE_POSTGRES environment variable.
+the DATABASE_URL environment variable. If DATABASE_URL is set, PostgreSQL is used;
+otherwise, in-memory storage is used.
 """
 
 from collections.abc import AsyncGenerator
@@ -25,10 +26,10 @@ def initialize_database() -> None:
     """Initialize the database manager if PostgreSQL is enabled.
 
     This function should be called during application startup.
-    It creates the database manager only if USE_POSTGRES is true.
+    It creates the database manager only if DATABASE_URL is configured.
     """
     global db_manager
-    if settings.use_postgres:
+    if settings.use_postgres():
         db_manager = DatabaseManager(settings)
 
 
@@ -55,7 +56,7 @@ async def get_lamp_repository(
 ) -> Union[PostgresLampRepository, InMemoryLampRepository]:
     """Get a lamp repository instance based on configuration.
 
-    If USE_POSTGRES is true, returns a PostgreSQL repository with a database session.
+    If DATABASE_URL is configured, returns a PostgreSQL repository with a database session.
     Otherwise, returns the in-memory repository for development/testing.
 
     Args:
@@ -65,7 +66,7 @@ async def get_lamp_repository(
         A lamp repository instance (PostgreSQL or in-memory).
     """
     # When PostgreSQL is enabled, session must be provided via dependency injection
-    if settings.use_postgres:
+    if settings.use_postgres():
         if session is None:
             # This is a fallback; in production, session should be injected
             async for s in get_db_session():

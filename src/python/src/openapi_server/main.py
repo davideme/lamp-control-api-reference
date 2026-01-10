@@ -87,4 +87,4 @@ async def health():
 
     Returns the service status and current storage backend type.
     """
-    return {"status": "ok", "storage": "postgres" if settings.use_postgres else "memory"}
+    return {"status": "ok", "storage": "postgres" if settings.use_postgres() else "memory"}
