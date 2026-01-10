@@ -43,16 +43,33 @@ dependencies {
     implementation("io.ktor:ktor-server-call-id")
     implementation("io.ktor:ktor-server-status-pages")
 
+    // Exposed ORM for PostgreSQL
+    implementation("org.jetbrains.exposed:exposed-core:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.55.0")
+    implementation("org.postgresql:postgresql:42.7.4")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("io.ktor:ktor-client-content-negotiation")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("org.testcontainers:postgresql:1.21.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.junit-pioneer:junit-pioneer:2.3.0")
 }
 
 tasks.test {
     useJUnitPlatform()
     ignoreFailures = true
+
+    // Allow JUnit Pioneer to modify environment variables via reflection
+    jvmArgs(
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang=ALL-UNNAMED"
+    )
 }
 
 tasks.jacocoTestReport {

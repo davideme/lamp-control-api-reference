@@ -1,22 +1,23 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./gradlew clean:*)",
       "Bash(./gradlew compileKotlin:*)",
-      "Bash(./gradlew test:*)",
-      "Bash(./src/kotlin/gradlew:*)",
-      "Bash(docker compose build:*)",
-      "Bash(docker compose up:*)",
-      "Bash(docker compose run:*)",
       "Bash(./gradlew tasks:*)",
-      "Bash(docker compose config:*)",
+      "Bash(./gradlew test:*)",
       "Bash(curl:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose run:*)",
+      "Bash(docker compose up:*)",
+      "Bash(find:*)",
       "Bash(pip3 install:*)",
-      "Bash(schemathesis run:*)",
-      "Bash(python3:*)",
       "Bash(pkill:*)",
-      "Bash(tree:*)",
       "Bash(poetry install:*)",
-      "Bash(poetry lock:*)"
+      "Bash(poetry lock:*)",
+      "Bash(python3:*)",
+      "Bash(schemathesis run:*)",
+      "Bash(tree:*)"
     ]
   }
 }
