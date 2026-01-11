@@ -5,6 +5,8 @@ import fastify from 'fastify';
 import fastifyOpenapiGlue from 'fastify-openapi-glue';
 import Security from './security.ts';
 import { InMemoryLampRepository } from './repositories/InMemoryLampRepository.ts';
+import { PrismaLampRepository } from './repositories/PrismaLampRepository.ts';
+import { closePrismaClient } from './database/client.ts';
 import Service from './services/service.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,9 +27,13 @@ if (isCompiledContext) {
   openapiPath = join(currentDir, '../../../../docs/api/openapi.yaml');
 }
 
+// Select repository based on environment variable
+const repository =
+  process.env.USE_POSTGRES === 'true' ? new PrismaLampRepository() : new InMemoryLampRepository();
+
 const options = {
   specification: openapiPath,
-  service: new Service(new InMemoryLampRepository()),
+  service: new Service(repository),
   securityHandlers: new Security(),
   prefix: 'v1',
 };
@@ -43,6 +49,13 @@ export async function buildApp(): Promise<import('fastify').FastifyInstance> {
   });
 
   server.register(fastifyOpenapiGlue, options);
+
+  // Graceful shutdown - close Prisma connection if using PostgreSQL
+  server.addHook('onClose', async () => {
+    if (process.env.USE_POSTGRES === 'true') {
+      await closePrismaClient();
+    }
+  });
 
   return server;
 }
