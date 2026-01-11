@@ -1,2 +1,6 @@
 .hypothesis/
 *.pid
+
+# AI tooling configuration
+.claude/
+src/kotlin/build/
