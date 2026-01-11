@@ -33,7 +33,14 @@ def postgres_container():
         # Get a connection and execute the schema
         import psycopg2
 
-        conn = psycopg2.connect(postgres.get_connection_url())
+        # Use individual connection parameters instead of URL
+        conn = psycopg2.connect(
+            host=postgres.get_container_host_ip(),
+            port=postgres.get_exposed_port(5432),
+            user=postgres.username,
+            password=postgres.password,
+            dbname=postgres.dbname,
+        )
         cur = conn.cursor()
         cur.execute(schema_sql)
         conn.commit()
