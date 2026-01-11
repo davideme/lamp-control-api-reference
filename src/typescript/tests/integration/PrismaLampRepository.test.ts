@@ -33,9 +33,49 @@ describe('PrismaLampRepository Integration Tests', () => {
     });
 
     // Apply database schema directly from the SQL file
+    // Split and execute individual statements since Prisma cannot execute multiple commands at once
     const schemaPath = join(__dirname, '../../../../database/sql/postgresql/schema.sql');
     const schema = readFileSync(schemaPath, 'utf-8');
-    await prisma.$executeRawUnsafe(schema);
+
+    // Split the SQL file into individual statements
+    // Handle multi-line statements and $$ delimiters for functions
+    const statements: string[] = [];
+    let currentStatement = '';
+    let insideDollarQuote = false;
+
+    const lines = schema.split('\n');
+    for (const line of lines) {
+      // Skip comments
+      if (line.trim().startsWith('--')) {
+        continue;
+      }
+
+      // Track $$ delimiters for function definitions
+      if (line.includes('$$')) {
+        insideDollarQuote = !insideDollarQuote;
+      }
+
+      currentStatement += line + '\n';
+
+      // If we hit a semicolon outside of a $$ block, it's the end of a statement
+      if (line.includes(';') && !insideDollarQuote) {
+        const trimmed = currentStatement.trim();
+        if (trimmed.length > 0) {
+          statements.push(trimmed);
+        }
+        currentStatement = '';
+      }
+    }
+
+    // Add any remaining statement
+    if (currentStatement.trim().length > 0) {
+      statements.push(currentStatement.trim());
+    }
+
+    // Execute each statement individually
+    for (const statement of statements) {
+      await prisma.$executeRawUnsafe(statement);
+    }
 
     repository = new PrismaLampRepository(prisma);
   }, 60000);
