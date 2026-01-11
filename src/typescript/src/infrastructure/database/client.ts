@@ -28,4 +28,12 @@ export async function closePrismaClient(): Promise<void> {
   }
 }
 
-export const prismaClient: PrismaClient = getPrismaClient();
+// Lazy initialization using Proxy to avoid eager initialization issues
+// This ensures the client is only created when actually used, preventing
+// errors when DATABASE_URL is not set (e.g., in unit tests using in-memory storage)
+export const prismaClient = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getPrismaClient();
+    return client[prop as keyof PrismaClient];
+  },
+});
