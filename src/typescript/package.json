@@ -18,8 +18,6 @@
     "start": "node dist/src/index.js",
     "start:native": "node --experimental-strip-types src/index.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",

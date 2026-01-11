@@ -111,29 +111,26 @@ USE_POSTGRES=false npm run dev
 
 For production deployments or when you need persistent storage:
 
-1. **Start PostgreSQL using Docker Compose:**
+1. **Ensure PostgreSQL database is running with the required schema.**
+
+   For local development with Docker Compose:
    ```bash
    docker-compose up -d
    ```
 
-2. **Run Prisma migrations:**
-   ```bash
-   npx prisma migrate dev
-   # or for production
-   npx prisma migrate deploy
-   ```
+   The database schema is managed externally (see `database/sql/postgresql/schema.sql` in the repository root).
 
-3. **Generate Prisma Client:**
+2. **Generate Prisma Client:**
    ```bash
    npx prisma generate
    ```
 
-4. **Run the application with PostgreSQL:**
+3. **Run the application with PostgreSQL:**
    ```bash
    USE_POSTGRES=true npm run dev
    ```
 
-5. **(Optional) Open Prisma Studio to view/edit data:**
+4. **(Optional) Open Prisma Studio to view/edit data:**
    ```bash
    npx prisma studio
    # Opens at http://localhost:5555
@@ -157,10 +154,10 @@ USE_POSTGRES=true  # Set to 'true' to use PostgreSQL, 'false' or unset for in-me
 
 ### Prisma Commands
 
-- `npm run prisma:generate` - Generate Prisma Client
-- `npm run prisma:migrate` - Create and apply a new migration
-- `npm run prisma:deploy` - Apply migrations in production
-- `npm run prisma:studio` - Open Prisma Studio GUI
+- `npm run prisma:generate` - Generate Prisma Client from schema
+- `npm run prisma:studio` - Open Prisma Studio GUI for database inspection
+
+**Note:** Database migrations are managed externally. The Prisma schema in this codebase (`prisma/schema.prisma`) reflects the database structure defined in `database/sql/postgresql/schema.sql` at the repository root.
 
 For more details, see [ADR 007: PostgreSQL Storage with Prisma](docs/adr/007-postgresql-storage.md).
 

@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { PrismaClient } from '@prisma/client';
-import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { PrismaLampRepository } from '../../src/infrastructure/repositories/PrismaLampRepository.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('PrismaLampRepository Integration Tests', () => {
   let container: StartedPostgreSqlContainer;
@@ -20,18 +26,17 @@ describe('PrismaLampRepository Integration Tests', () => {
     const connectionString = container.getConnectionUri();
     process.env.DATABASE_URL = connectionString;
 
-    // Run migrations
-    execSync('npx prisma migrate deploy', {
-      env: { ...process.env, DATABASE_URL: connectionString },
-      stdio: 'inherit',
-    });
-
     // Create Prisma client
     prisma = new PrismaClient({
       datasources: {
         db: { url: connectionString },
       },
     });
+
+    // Apply database schema directly from the SQL file
+    const schemaPath = join(__dirname, '../../../../database/sql/postgresql/schema.sql');
+    const schema = readFileSync(schemaPath, 'utf-8');
+    await prisma.$executeRawUnsafe(schema);
 
     repository = new PrismaLampRepository(prisma);
   }, 60000);
