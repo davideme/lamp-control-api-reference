@@ -1,4 +1,5 @@
 import type { PrismaClient, Lamp as PrismaLamp } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { LampNotFoundError } from '../../domain/errors/DomainError.ts';
 import type {
   LampEntity,
@@ -61,7 +62,11 @@ export class PrismaLampRepository implements LampRepository {
       return this.toEntity(lamp);
     } catch (error) {
       // Prisma throws PrismaClientKnownRequestError with code P2025 if record not found
-      throw new LampNotFoundError(id);
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new LampNotFoundError(id);
+      }
+      // Rethrow other errors (connection issues, constraint violations, etc.)
+      throw error;
     }
   }
 
@@ -77,7 +82,12 @@ export class PrismaLampRepository implements LampRepository {
         },
       });
     } catch (error) {
-      throw new LampNotFoundError(id);
+      // Prisma throws PrismaClientKnownRequestError with code P2025 if record not found
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new LampNotFoundError(id);
+      }
+      // Rethrow other errors (connection issues, constraint violations, etc.)
+      throw error;
     }
   }
 
