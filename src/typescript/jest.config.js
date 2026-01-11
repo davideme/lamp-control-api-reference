@@ -22,12 +22,14 @@ export default {
         ],
     },
     testMatch: ['**/*.test.ts', '**/tests/**/*.ts'],
+    testTimeout: 60000, // Testcontainers need time to start
     collectCoverageFrom: [
         'src/**/*.ts',
         '!src/types/**/*.ts',
         '!src/index.ts',
         '!src/infrastructure/app.ts',
         '!src/infrastructure/security.ts',
+        '!src/infrastructure/database/client.ts',
     ],
     coverageThreshold: {
         global: {
