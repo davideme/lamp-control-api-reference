@@ -80,7 +80,7 @@ describe('PrismaLampRepository Integration Tests', () => {
   it('should throw LampNotFoundError when updating non-existent lamp', async () => {
     await expect(
       repository.update('00000000-0000-0000-0000-000000000000', { status: true }),
-    ).rejects.toThrow('Lamp not found');
+    ).rejects.toThrow('Lamp with ID 00000000-0000-0000-0000-000000000000 not found');
   });
 
   it('should soft delete lamp', async () => {
@@ -93,7 +93,7 @@ describe('PrismaLampRepository Integration Tests', () => {
 
   it('should throw LampNotFoundError when deleting non-existent lamp', async () => {
     await expect(repository.delete('00000000-0000-0000-0000-000000000000')).rejects.toThrow(
-      'Lamp not found',
+      'Lamp with ID 00000000-0000-0000-0000-000000000000 not found',
     );
   });
 
