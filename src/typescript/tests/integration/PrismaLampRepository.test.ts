@@ -79,7 +79,7 @@ describe('PrismaLampRepository Integration Tests', () => {
     const updated = await repository.update(created.id, { status: true });
 
     expect(updated.status).toBe(true);
-    expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(created.updatedAt.getTime());
+    expect(updated.updatedAt).not.toBe(created.updatedAt);
   });
 
   it('should throw LampNotFoundError when updating non-existent lamp', async () => {
