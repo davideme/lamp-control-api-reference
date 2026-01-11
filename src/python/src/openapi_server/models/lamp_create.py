@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, StrictBool
 try:
     from typing import Self
 except ImportError:
-    from typing_extensions import Self
+    from typing import Self
 
 
 class LampCreate(BaseModel):

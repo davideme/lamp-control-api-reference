@@ -17,6 +17,7 @@
       "Bash(poetry install:*)",
       "Bash(poetry lock:*)",
       "Bash(poetry run black:*)",
+      "Bash(poetry run mypy:*)",
       "Bash(poetry run pytest:*)",
       "Bash(poetry run python:*)",
       "Bash(poetry run ruff check:*)",

@@ -23,9 +23,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
     injection system, ensuring proper session lifecycle management.
     """
 
-    def __init__(
-        self, repository: PostgresLampRepository | InMemoryLampRepository
-    ) -> None:
+    def __init__(self, repository: PostgresLampRepository | InMemoryLampRepository) -> None:
         """Initialize the API implementation with a repository.
 
         Args:

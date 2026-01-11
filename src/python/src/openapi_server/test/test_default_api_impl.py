@@ -46,9 +46,7 @@ class TestDefaultApiImpl:
     """Test suite for DefaultApiImpl class."""
 
     @pytest.mark.asyncio
-    async def test_create_lamp(
-        self, api_impl, mock_lamp_repository, sample_lamp_entity
-    ):
+    async def test_create_lamp(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test creating a new lamp."""
         # Arrange
         lamp_create = LampCreate(status=True)
@@ -76,9 +74,7 @@ class TestDefaultApiImpl:
         assert exc_info.value.detail == "Invalid request data"
 
     @pytest.mark.asyncio
-    async def test_get_lamp_success(
-        self, api_impl, mock_lamp_repository, sample_lamp_entity
-    ):
+    async def test_get_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test getting an existing lamp."""
         # Arrange
         mock_lamp_repository.get.return_value = sample_lamp_entity
@@ -107,9 +103,7 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with("nonexistent-id")
 
     @pytest.mark.asyncio
-    async def test_list_lamps(
-        self, api_impl, mock_lamp_repository, sample_lamp_entity
-    ):
+    async def test_list_lamps(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test listing all lamps."""
         # Arrange
         expected_lamp_entities = [sample_lamp_entity]
@@ -127,9 +121,7 @@ class TestDefaultApiImpl:
         mock_lamp_repository.list.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_update_lamp_success(
-        self, api_impl, mock_lamp_repository, sample_lamp_entity
-    ):
+    async def test_update_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test updating an existing lamp."""
         # Arrange
         lamp_update = LampUpdate(status=True)
@@ -173,9 +165,7 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with("nonexistent-id")
 
     @pytest.mark.asyncio
-    async def test_delete_lamp_success(
-        self, api_impl, mock_lamp_repository, sample_lamp_entity
-    ):
+    async def test_delete_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test deleting an existing lamp."""
         # Arrange
 

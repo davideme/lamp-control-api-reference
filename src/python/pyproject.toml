@@ -89,8 +89,13 @@ exclude = [
     'src/openapi_server/models/lamp_update\.py',
     'src/openapi_server/models/lamp_create\.py',
     'src/openapi_server/models/lamp\.py',
+    'src/openapi_server/models/error\.py',
+    'src/openapi_server/models/list_lamps200_response\.py',
+    'src/openapi_server/mappers/lamp_mapper\.py',
     'src/openapi_server/apis/default_api_base\.py',
     'src/openapi_server/apis/default_api\.py',
+    'src/openapi_server/main\.py',
+    'src/openapi_server/impl/default_api_impl\.py',
     'tests/',
 ]
 

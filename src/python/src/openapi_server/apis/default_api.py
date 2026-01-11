@@ -56,7 +56,9 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 )
 async def create_lamp(
     lamp_create: LampCreate = Body(None, description=""),
-    repository: Annotated[PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)] = None,
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
@@ -77,7 +79,9 @@ async def create_lamp(
 )
 async def delete_lamp(
     lampId: StrictStr = Path(..., description=""),
-    repository: Annotated[PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)] = None,
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> None:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
@@ -98,7 +102,9 @@ async def delete_lamp(
 )
 async def get_lamp(
     lampId: StrictStr = Path(..., description=""),
-    repository: Annotated[PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)] = None,
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
@@ -121,7 +127,9 @@ async def list_lamps(
     page_size: Optional[Annotated[int, Field(le=100, ge=1)]] = Query(
         25, description="", alias="pageSize", ge=1, le=100
     ),
-    repository: Annotated[PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)] = None,
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> ListLamps200Response:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
@@ -142,7 +150,9 @@ async def list_lamps(
 async def update_lamp(
     lampId: StrictStr = Path(..., description=""),
     lamp_update: LampUpdate = Body(None, description=""),
-    repository: Annotated[PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)] = None,
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")

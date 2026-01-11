@@ -50,7 +50,9 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_lamp_repository() -> AsyncGenerator[PostgresLampRepository | InMemoryLampRepository, None]:
+async def get_lamp_repository() -> (
+    AsyncGenerator[PostgresLampRepository | InMemoryLampRepository, None]
+):
     """FastAPI dependency that provides a lamp repository instance.
 
     If DATABASE_URL is configured, returns a PostgreSQL repository with a database session.
