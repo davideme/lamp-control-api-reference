@@ -22,7 +22,9 @@ def postgres_container():
     """Start a PostgreSQL container for all tests in this module."""
     with PostgresContainer("postgres:16-alpine", driver="psycopg2") as postgres:
         # Apply the schema
-        schema_path = Path(__file__).parents[6] / "database" / "sql" / "postgresql" / "schema.sql"
+        # Path from: src/python/src/openapi_server/test/test_postgres_lamp_repository.py
+        # Go up to repository root: parents[4] gets us to lamp-control-api-reference/
+        schema_path = Path(__file__).parents[4] / "database" / "sql" / "postgresql" / "schema.sql"
 
         # Read and execute the schema
         with open(schema_path) as f:
