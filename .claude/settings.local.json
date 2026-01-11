@@ -13,6 +13,7 @@
       "Bash(find:*)",
       "Bash(pip3 install:*)",
       "Bash(pkill:*)",
+      "Bash(poetry env info:*)",
       "Bash(poetry install:*)",
       "Bash(poetry lock:*)",
       "Bash(poetry run black:*)",
@@ -20,6 +21,7 @@
       "Bash(poetry run python:*)",
       "Bash(poetry run ruff check:*)",
       "Bash(poetry run ruff:*)",
+      "Bash(python -m pytest:*)",
       "Bash(python3:*)",
       "Bash(schemathesis run:*)",
       "Bash(tree:*)"

@@ -3,26 +3,35 @@
 from uuid import uuid4
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
-from src.openapi_server.dependencies import get_lamp_repository
 from src.openapi_server.mappers.lamp_mapper import LampMapper
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
 from src.openapi_server.models.list_lamps200_response import ListLamps200Response
-from src.openapi_server.repositories.lamp_repository import LampNotFoundError
+from src.openapi_server.repositories.lamp_repository import (
+    InMemoryLampRepository,
+    LampNotFoundError,
+)
+from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
 
 
 class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
     """Implementation of the Default API with repository support.
 
     This implementation supports both in-memory and PostgreSQL storage
-    based on configuration. The repository is obtained via dependency injection
-    for each request when using PostgreSQL.
+    based on configuration. The repository is injected via FastAPI's dependency
+    injection system, ensuring proper session lifecycle management.
     """
 
-    def __init__(self) -> None:
-        """Initialize the API implementation."""
-        pass
+    def __init__(
+        self, repository: PostgresLampRepository | InMemoryLampRepository
+    ) -> None:
+        """Initialize the API implementation with a repository.
+
+        Args:
+            repository: The lamp repository instance (injected by FastAPI).
+        """
+        self.repository = repository
 
     async def create_lamp(self, lamp_create: LampCreate) -> Lamp:
         """Create a new lamp.
@@ -43,12 +52,9 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         lamp_id = str(uuid4())
 
-        # Get repository for this request
-        repository = await get_lamp_repository()
-
         # Create domain entity from API model
         lamp_entity = LampMapper.create_from_api_model(lamp_create, lamp_id)
-        created_entity = await repository.create(lamp_entity)
+        created_entity = await self.repository.create(lamp_entity)
 
         # Convert domain entity back to API model
         return LampMapper.to_api_model(created_entity)
@@ -62,11 +68,8 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         Raises:
             HTTPException: If the lamp is not found.
         """
-        # Get repository for this request
-        repository = await get_lamp_repository()
-
         try:
-            await repository.delete(lamp_id)
+            await self.repository.delete(lamp_id)
         except LampNotFoundError as err:
             from fastapi import HTTPException
 
@@ -84,10 +87,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         Raises:
             HTTPException: If the lamp is not found.
         """
-        # Get repository for this request
-        repository = await get_lamp_repository()
-
-        lamp_entity = await repository.get(lamp_id)
+        lamp_entity = await self.repository.get(lamp_id)
         if lamp_entity is None:
             from fastapi import HTTPException
 
@@ -106,11 +106,8 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         Returns:
             A paginated response containing lamps.
         """
-        # Get repository for this request
-        repository = await get_lamp_repository()
-
         # For simplicity, we'll return all lamps and ignore pagination for now
-        all_lamp_entities = await repository.list()
+        all_lamp_entities = await self.repository.list()
 
         # Convert domain entities to API models
         all_lamps = [LampMapper.to_api_model(entity) for entity in all_lamp_entities]
@@ -139,18 +136,15 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
             raise HTTPException(status_code=400, detail="Invalid request data")
 
-        # Get repository for this request
-        repository = await get_lamp_repository()
-
         try:
             # Get existing lamp entity
-            existing_entity = await repository.get(lamp_id)
+            existing_entity = await self.repository.get(lamp_id)
             if existing_entity is None:
                 raise LampNotFoundError(lamp_id)
 
             # Update the domain entity using the mapper
             updated_entity = LampMapper.update_from_api_model(existing_entity, lamp_update)
-            final_entity = await repository.update(updated_entity)
+            final_entity = await self.repository.update(updated_entity)
 
             # Convert domain entity back to API model
             return LampMapper.to_api_model(final_entity)

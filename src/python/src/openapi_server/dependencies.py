@@ -50,27 +50,24 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_lamp_repository(
-    session: AsyncSession | None = None,
-) -> PostgresLampRepository | InMemoryLampRepository:
-    """Get a lamp repository instance based on configuration.
+async def get_lamp_repository() -> AsyncGenerator[PostgresLampRepository | InMemoryLampRepository, None]:
+    """FastAPI dependency that provides a lamp repository instance.
 
     If DATABASE_URL is configured, returns a PostgreSQL repository with a database session.
     Otherwise, returns the in-memory repository for development/testing.
 
-    Args:
-        session: Optional database session (injected when using PostgreSQL).
+    This is a proper FastAPI dependency using the generator pattern. The session lifecycle
+    is managed by FastAPI - the session is created when the dependency is resolved at the
+    start of the request and automatically closed when the request completes.
 
-    Returns:
+    Yields:
         A lamp repository instance (PostgreSQL or in-memory).
     """
-    # When PostgreSQL is enabled, session must be provided via dependency injection
     if settings.use_postgres():
-        if session is None:
-            # This is a fallback; in production, session should be injected
-            async for s in get_db_session():
-                return PostgresLampRepository(s)
-        return PostgresLampRepository(session)
-
-    # Default to in-memory repository
-    return in_memory_repository
+        # Create session and repository, FastAPI handles cleanup automatically
+        async for session in get_db_session():
+            yield PostgresLampRepository(session)
+            # Session is automatically closed here by FastAPI after request completes
+    else:
+        # In-memory repository doesn't need session management
+        yield in_memory_repository

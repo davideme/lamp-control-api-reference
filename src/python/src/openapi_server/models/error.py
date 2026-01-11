@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, StrictStr
 try:
     from typing import Self
 except ImportError:
-    from typing import Self
+    from typing_extensions import Self
 
 
 class Error(BaseModel):

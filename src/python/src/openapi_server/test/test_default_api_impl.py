@@ -1,6 +1,6 @@
 """Unit tests for the DefaultApiImpl class."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
@@ -23,9 +23,9 @@ def mock_lamp_repository():
 
 
 @pytest.fixture
-def api_impl():
-    """Fixture that provides a DefaultApiImpl instance."""
-    return DefaultApiImpl()
+def api_impl(mock_lamp_repository):
+    """Fixture that provides a DefaultApiImpl instance with mocked repository."""
+    return DefaultApiImpl(repository=mock_lamp_repository)
 
 
 @pytest.fixture
@@ -46,13 +46,11 @@ class TestDefaultApiImpl:
     """Test suite for DefaultApiImpl class."""
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
     async def test_create_lamp(
-        self, mock_get_repo, api_impl, mock_lamp_repository, sample_lamp_entity
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
     ):
         """Test creating a new lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         lamp_create = LampCreate(status=True)
         # Mock repository to return a domain entity
         mock_lamp_repository.create.return_value = sample_lamp_entity
@@ -78,13 +76,11 @@ class TestDefaultApiImpl:
         assert exc_info.value.detail == "Invalid request data"
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
     async def test_get_lamp_success(
-        self, mock_get_repo, api_impl, mock_lamp_repository, sample_lamp_entity
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
     ):
         """Test getting an existing lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         mock_lamp_repository.get.return_value = sample_lamp_entity
 
         # Act
@@ -98,11 +94,9 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with(sample_lamp_entity.id)
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
-    async def test_get_lamp_not_found(self, mock_get_repo, api_impl, mock_lamp_repository):
+    async def test_get_lamp_not_found(self, api_impl, mock_lamp_repository):
         """Test getting a non-existent lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         mock_lamp_repository.get.return_value = None
 
         # Act & Assert
@@ -113,13 +107,11 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with("nonexistent-id")
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
     async def test_list_lamps(
-        self, mock_get_repo, api_impl, mock_lamp_repository, sample_lamp_entity
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
     ):
         """Test listing all lamps."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         expected_lamp_entities = [sample_lamp_entity]
         mock_lamp_repository.list.return_value = expected_lamp_entities
 
@@ -135,13 +127,11 @@ class TestDefaultApiImpl:
         mock_lamp_repository.list.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
     async def test_update_lamp_success(
-        self, mock_get_repo, api_impl, mock_lamp_repository, sample_lamp_entity
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
     ):
         """Test updating an existing lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         lamp_update = LampUpdate(status=True)
         updated_entity = LampEntity(id=sample_lamp_entity.id, status=True)
         mock_lamp_repository.get.return_value = sample_lamp_entity
@@ -169,11 +159,9 @@ class TestDefaultApiImpl:
         assert exc_info.value.detail == "Invalid request data"
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
-    async def test_update_lamp_not_found(self, mock_get_repo, api_impl, mock_lamp_repository):
+    async def test_update_lamp_not_found(self, api_impl, mock_lamp_repository):
         """Test updating a non-existent lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         lamp_update = LampUpdate(status=True)
         mock_lamp_repository.get.return_value = None
 
@@ -185,13 +173,11 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with("nonexistent-id")
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
     async def test_delete_lamp_success(
-        self, mock_get_repo, api_impl, mock_lamp_repository, sample_lamp_entity
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
     ):
         """Test deleting an existing lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
 
         # Act
         await api_impl.delete_lamp(sample_lamp_entity.id)
@@ -200,11 +186,9 @@ class TestDefaultApiImpl:
         mock_lamp_repository.delete.assert_called_once_with(sample_lamp_entity.id)
 
     @pytest.mark.asyncio
-    @patch("src.openapi_server.impl.default_api_impl.get_lamp_repository", new_callable=AsyncMock)
-    async def test_delete_lamp_not_found(self, mock_get_repo, api_impl, mock_lamp_repository):
+    async def test_delete_lamp_not_found(self, api_impl, mock_lamp_repository):
         """Test deleting a non-existent lamp."""
         # Arrange
-        mock_get_repo.return_value = mock_lamp_repository
         mock_lamp_repository.delete.side_effect = LampNotFoundError("nonexistent-id")
 
         # Act & Assert

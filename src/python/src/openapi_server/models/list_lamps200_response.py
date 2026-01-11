@@ -23,7 +23,7 @@ from src.openapi_server.models.lamp import Lamp
 try:
     from typing import Self
 except ImportError:
-    from typing import Self
+    from typing_extensions import Self
 
 
 class ListLamps200Response(BaseModel):
