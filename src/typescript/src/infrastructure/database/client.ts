@@ -28,10 +28,4 @@ export async function closePrismaClient(): Promise<void> {
   }
 }
 
-// Lazy initialization - only create client when actually used
-export const prismaClient = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    const client = getPrismaClient();
-    return client[prop as keyof PrismaClient];
-  },
-});
+export const prismaClient: PrismaClient = getPrismaClient();

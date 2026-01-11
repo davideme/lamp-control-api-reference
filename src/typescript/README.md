@@ -159,7 +159,7 @@ USE_POSTGRES=true  # Set to 'true' to use PostgreSQL, 'false' or unset for in-me
 
 **Note:** Database migrations are managed externally. The Prisma schema in this codebase (`prisma/schema.prisma`) reflects the database structure defined in `database/sql/postgresql/schema.sql` at the repository root.
 
-For more details, see [ADR 007: PostgreSQL Storage with Prisma](docs/adr/007-postgresql-storage.md).
+For more details, see [ADR 008: PostgreSQL Storage with Prisma](docs/adr/008-postgresql-storage.md).
 
 ## Testing
 

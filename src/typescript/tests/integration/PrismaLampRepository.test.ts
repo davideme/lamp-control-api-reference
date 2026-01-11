@@ -24,7 +24,7 @@ describe('PrismaLampRepository Integration Tests', () => {
       .start();
 
     const connectionString = container.getConnectionUri();
-    process.env.DATABASE_URL = connectionString;
+
 
     // Create Prisma client
     prisma = new PrismaClient({
@@ -79,7 +79,7 @@ describe('PrismaLampRepository Integration Tests', () => {
     const updated = await repository.update(created.id, { status: true });
 
     expect(updated.status).toBe(true);
-    expect(updated.updatedAt).not.toBe(created.updatedAt);
+    expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(created.updatedAt.getTime());
   });
 
   it('should throw LampNotFoundError when updating non-existent lamp', async () => {
