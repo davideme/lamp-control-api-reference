@@ -1,21 +1,25 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./gradlew clean:*)",
       "Bash(./gradlew compileKotlin:*)",
+      "Bash(./gradlew tasks:*)",
       "Bash(./gradlew test:*)",
       "Bash(./src/kotlin/gradlew:*)",
-      "Bash(docker compose build:*)",
-      "Bash(docker compose up:*)",
-      "Bash(docker compose run:*)",
-      "Bash(./gradlew tasks:*)",
-      "Bash(docker compose config:*)",
       "Bash(curl:*)",
-      "Bash(pip3 install:*)",
-      "Bash(schemathesis run:*)",
-      "Bash(python3:*)",
-      "Bash(pkill:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose run:*)",
+      "Bash(docker compose up:*)",
       "Bash(find:*)",
-      "Bash(./gradlew clean:*)"
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npm test:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pkill:*)",
+      "Bash(python3:*)",
+      "Bash(schemathesis run:*)"
     ]
   }
 }
