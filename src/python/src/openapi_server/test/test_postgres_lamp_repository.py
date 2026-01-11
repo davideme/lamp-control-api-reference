@@ -4,6 +4,7 @@ These tests use Testcontainers to spin up a real PostgreSQL instance,
 ensuring that the repository works correctly with an actual database.
 """
 
+import asyncio
 from pathlib import Path
 from uuid import uuid4
 
@@ -15,6 +16,14 @@ from testcontainers.postgres import PostgresContainer
 from src.openapi_server.entities.lamp_entity import LampEntity
 from src.openapi_server.repositories.lamp_repository import LampNotFoundError
 from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
+
+
+@pytest.fixture(scope="module")
+def event_loop():
+    """Create a module-scoped event loop for async fixtures."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="module")
