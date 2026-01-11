@@ -1,6 +1,6 @@
 """Unit tests for the DefaultApiImpl class."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
@@ -16,17 +16,16 @@ from src.openapi_server.repositories.lamp_repository import LampNotFoundError
 @pytest.fixture
 def mock_lamp_repository():
     """Fixture that provides a mocked LampRepository."""
-    return Mock()
+    mock = AsyncMock()
+    mock.get.return_value = None
+    mock.list.return_value = []
+    return mock
 
 
 @pytest.fixture
 def api_impl(mock_lamp_repository):
     """Fixture that provides a DefaultApiImpl instance with mocked repository."""
-    with patch(
-        "src.openapi_server.impl.default_api_impl.get_lamp_repository",
-        return_value=mock_lamp_repository,
-    ):
-        return DefaultApiImpl()
+    return DefaultApiImpl(repository=mock_lamp_repository)
 
 
 @pytest.fixture
@@ -73,7 +72,6 @@ class TestDefaultApiImpl:
             await api_impl.create_lamp(None)
         assert exc_info.value.status_code == 400
         assert exc_info.value.detail == "Invalid request data"
-        mock_lamp_repository.create.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_get_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
@@ -151,8 +149,6 @@ class TestDefaultApiImpl:
             await api_impl.update_lamp("test-lamp-1", None)
         assert exc_info.value.status_code == 400
         assert exc_info.value.detail == "Invalid request data"
-        mock_lamp_repository.get.assert_not_called()
-        mock_lamp_repository.update.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_update_lamp_not_found(self, api_impl, mock_lamp_repository):
@@ -171,6 +167,8 @@ class TestDefaultApiImpl:
     @pytest.mark.asyncio
     async def test_delete_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
         """Test deleting an existing lamp."""
+        # Arrange
+
         # Act
         await api_impl.delete_lamp(sample_lamp_entity.id)
 

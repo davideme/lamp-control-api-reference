@@ -19,8 +19,21 @@
       "Bash(npx prisma generate:*)",
       "Bash(pip3 install:*)",
       "Bash(pkill:*)",
+      "Bash(poetry add:*)",
+      "Bash(poetry env info:*)",
+      "Bash(poetry install:*)",
+      "Bash(poetry lock:*)",
+      "Bash(poetry run black:*)",
+      "Bash(poetry run mypy:*)",
+      "Bash(poetry run pytest:*)",
+      "Bash(poetry run python:*)",
+      "Bash(poetry run python3:*)",
+      "Bash(poetry run ruff check:*)",
+      "Bash(poetry run ruff:*)",
+      "Bash(python -m pytest:*)",
       "Bash(python3:*)",
-      "Bash(schemathesis run:*)"
+      "Bash(schemathesis run:*)",
+      "Bash(tree:*)"
     ]
   }
 }

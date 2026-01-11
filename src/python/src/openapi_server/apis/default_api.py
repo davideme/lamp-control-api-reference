@@ -5,6 +5,9 @@ import importlib
 import pkgutil
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
+from src.openapi_server.dependencies import get_lamp_repository
+from src.openapi_server.repositories.lamp_repository import InMemoryLampRepository
+from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
 import src.openapi_server.impl
 
 from fastapi import (  # noqa: F401
@@ -53,10 +56,13 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 )
 async def create_lamp(
     lamp_create: LampCreate = Body(None, description=""),
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().create_lamp(lamp_create)
+    return await BaseDefaultApi.subclasses[0](repository).create_lamp(lamp_create)
 
 
 @router.delete(
@@ -73,10 +79,13 @@ async def create_lamp(
 )
 async def delete_lamp(
     lampId: StrictStr = Path(..., description=""),
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> None:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().delete_lamp(lampId)
+    return await BaseDefaultApi.subclasses[0](repository).delete_lamp(lampId)
 
 
 @router.get(
@@ -93,10 +102,13 @@ async def delete_lamp(
 )
 async def get_lamp(
     lampId: StrictStr = Path(..., description=""),
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().get_lamp(lampId)
+    return await BaseDefaultApi.subclasses[0](repository).get_lamp(lampId)
 
 
 @router.get(
@@ -115,10 +127,13 @@ async def list_lamps(
     page_size: Optional[Annotated[int, Field(le=100, ge=1)]] = Query(
         25, description="", alias="pageSize", ge=1, le=100
     ),
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> ListLamps200Response:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().list_lamps(cursor, page_size)
+    return await BaseDefaultApi.subclasses[0](repository).list_lamps(cursor, page_size)
 
 
 @router.put(
@@ -135,7 +150,10 @@ async def list_lamps(
 async def update_lamp(
     lampId: StrictStr = Path(..., description=""),
     lamp_update: LampUpdate = Body(None, description=""),
+    repository: Annotated[
+        PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
+    ] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().update_lamp(lampId, lamp_update)
+    return await BaseDefaultApi.subclasses[0](repository).update_lamp(lampId, lamp_update)
