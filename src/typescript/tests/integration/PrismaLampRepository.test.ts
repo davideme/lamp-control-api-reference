@@ -25,7 +25,6 @@ describe('PrismaLampRepository Integration Tests', () => {
 
     const connectionString = container.getConnectionUri();
 
-
     // Create Prisma client
     prisma = new PrismaClient({
       datasources: {

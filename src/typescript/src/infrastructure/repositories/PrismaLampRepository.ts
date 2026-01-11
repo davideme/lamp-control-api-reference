@@ -56,7 +56,6 @@ export class PrismaLampRepository implements LampRepository {
         },
         data: {
           isOn: lampUpdate.status,
-
         },
       });
       return this.toEntity(lamp);
