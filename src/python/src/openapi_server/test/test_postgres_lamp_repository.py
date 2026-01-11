@@ -76,15 +76,24 @@ async def engine(postgres_container):
 async def session(engine):
     """Provide a database session for each test.
 
-    Each test gets a fresh session that rolls back at the end,
-    ensuring test isolation.
+    Each test runs in a transaction that is rolled back at the end,
+    ensuring test isolation even when the repository commits.
     """
-    async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    # Create a connection that will be used for the entire test
+    async with engine.connect() as connection:
+        # Start a transaction
+        transaction = await connection.begin()
 
-    async with async_session() as session:
-        yield session
-        # Rollback after each test to maintain isolation
-        await session.rollback()
+        # Create a session bound to this connection
+        async_session = async_sessionmaker(
+            bind=connection, class_=AsyncSession, expire_on_commit=False
+        )
+
+        async with async_session() as session:
+            yield session
+
+            # Rollback the transaction after the test
+            await transaction.rollback()
 
 
 @pytest.fixture
