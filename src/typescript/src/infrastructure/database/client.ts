@@ -5,7 +5,9 @@ let prisma: PrismaClient | undefined;
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
     if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL environment variable is not set. Cannot initialize Prisma Client.');
+      throw new Error(
+        'DATABASE_URL environment variable is not set. Cannot initialize Prisma Client.',
+      );
     }
     prisma = new PrismaClient({
       log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
