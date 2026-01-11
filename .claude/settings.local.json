@@ -20,7 +20,9 @@
       "Bash(pip3 install:*)",
       "Bash(pkill:*)",
       "Bash(python3:*)",
-      "Bash(schemathesis run:*)"
+      "Bash(schemathesis run:*)",
+      "Bash(./mvnw clean:*)",
+      "Bash(mvn clean test:*)"
     ]
   }
 }

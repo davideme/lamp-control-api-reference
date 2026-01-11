@@ -4,15 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import org.openapitools.api.LampsApi;
-import org.openapitools.entity.LampEntity;
-import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
 import org.openapitools.model.ListLamps200Response;
-import org.openapitools.repository.LampRepository;
+import org.openapitools.service.LampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,23 +18,21 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class LampsController implements LampsApi {
 
-  private final LampRepository lampRepository;
-  private final LampMapper lampMapper;
+  private final LampService lampService;
 
   @Autowired
-  public LampsController(final LampRepository lampRepository, final LampMapper lampMapper) {
-    this.lampRepository = lampRepository;
-    this.lampMapper = lampMapper;
+  public LampsController(final LampService lampService) {
+    this.lampService = lampService;
   }
 
   @Override
   public CompletableFuture<ResponseEntity<Lamp>> createLamp(final LampCreate lampCreate) {
     return CompletableFuture.supplyAsync(
         () -> {
-          final LampEntity entity = lampMapper.toEntity(lampCreate.getStatus());
-          final LampEntity savedEntity = lampRepository.save(entity);
-          final Lamp lamp = lampMapper.toModel(savedEntity);
-          return ResponseEntity.status(HttpStatus.CREATED).body(lamp);
+          final Lamp lamp = new Lamp();
+          lamp.setStatus(lampCreate.getStatus());
+          final Lamp created = lampService.create(lamp);
+          return ResponseEntity.status(HttpStatus.CREATED).body(created);
         });
   }
 
@@ -47,8 +42,8 @@ public class LampsController implements LampsApi {
         () -> {
           try {
             final UUID lampUuid = UUID.fromString(lampId);
-            if (lampRepository.existsById(lampUuid)) {
-              lampRepository.deleteById(lampUuid);
+            final boolean deleted = lampService.delete(lampUuid);
+            if (deleted) {
               return ResponseEntity.noContent().<Void>build();
             } else {
               return ResponseEntity.notFound().<Void>build();
@@ -65,14 +60,12 @@ public class LampsController implements LampsApi {
         () -> {
           try {
             final UUID lampUuid = UUID.fromString(lampId);
-            final Optional<LampEntity> entity = lampRepository.findById(lampUuid);
-            return entity
-                .map(
-                    lampEntity -> {
-                      final Lamp lamp = lampMapper.toModel(lampEntity);
-                      return ResponseEntity.ok().body(lamp);
-                    })
-                .orElse(ResponseEntity.notFound().build());
+            final Lamp lamp = lampService.findById(lampUuid);
+            if (lamp != null) {
+              return ResponseEntity.ok().body(lamp);
+            } else {
+              return ResponseEntity.notFound().build();
+            }
           } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
           }
@@ -84,9 +77,7 @@ public class LampsController implements LampsApi {
       final Optional<String> cursor, final Optional<Integer> pageSize) {
     return CompletableFuture.supplyAsync(
         () -> {
-          final List<LampEntity> entities = lampRepository.findAll();
-          final List<Lamp> lamps =
-              entities.stream().map(lampMapper::toModel).collect(Collectors.toList());
+          final List<Lamp> lamps = lampService.findAllActive();
           final ListLamps200Response response = new ListLamps200Response();
           response.setData(lamps);
           response.setHasMore(false);
@@ -101,16 +92,14 @@ public class LampsController implements LampsApi {
         () -> {
           try {
             final UUID lampUuid = UUID.fromString(lampId);
-            final Optional<LampEntity> existingEntity = lampRepository.findById(lampUuid);
-            return existingEntity
-                .map(
-                    entity -> {
-                      entity.setStatus(lampUpdate.getStatus());
-                      final LampEntity savedEntity = lampRepository.save(entity);
-                      final Lamp lamp = lampMapper.toModel(savedEntity);
-                      return ResponseEntity.ok().body(lamp);
-                    })
-                .orElse(ResponseEntity.notFound().build());
+            final Lamp lampData = new Lamp();
+            lampData.setStatus(lampUpdate.getStatus());
+            final Lamp updated = lampService.update(lampUuid, lampData);
+            if (updated != null) {
+              return ResponseEntity.ok().body(updated);
+            } else {
+              return ResponseEntity.notFound().build();
+            }
           } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
           }

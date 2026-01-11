@@ -764,17 +764,22 @@ spring.jpa.properties.hibernate.cache.region.factory_class=org.hibernate.cache.j
 
 ## Implementation Checklist
 
-- [ ] Add Spring Data JPA and PostgreSQL dependencies
-- [ ] Create `LampEntity` with JPA annotations
-- [ ] Create `LampRepository` interface extending `JpaRepository`
-- [ ] Implement `LampService` with transaction management
-- [ ] Configure `application.properties` with database settings
-- [ ] Add Flyway migration with initial schema
-- [ ] Configure HikariCP connection pool
-- [ ] Add health check actuator endpoint
-- [ ] Write integration tests with Testcontainers
-- [ ] Update README with database setup instructions
-- [ ] Document environment variables for production
+- [x] Add Spring Data JPA and PostgreSQL dependencies
+- [x] Create `LampEntity` with JPA annotations
+- [x] Create `LampRepository` interface extending `JpaRepository`
+- [x] Implement `LampService` with transaction management
+- [x] Configure `application.properties` with database settings
+- [x] Add Flyway migration with initial schema
+- [x] Add Flyway migration V2 for soft delete support
+- [x] Configure HikariCP connection pool
+- [x] Add health check endpoint
+- [x] Write integration tests with Testcontainers
+- [x] Add custom query methods (findByStatus, findAllActive, countActive)
+- [x] Implement soft delete with @Where annotation
+- [x] Update README with database setup instructions
+- [x] Document environment variables for production
+
+**Status**: ✅ Fully Implemented (as of 2026-01-11)
 
 ## References
 

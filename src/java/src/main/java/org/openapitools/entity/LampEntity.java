@@ -9,13 +9,18 @@ import java.util.Objects;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
 /**
  * Entity class representing a Lamp in the system. This entity is mapped to the 'lamps' table in the
  * database using JPA annotations.
+ *
+ * <p>Supports soft deletes via the deletedAt field. Soft-deleted entities are automatically
+ * filtered from queries by the @Where clause.
  */
 @Entity
 @Table(name = "lamps")
+@Where(clause = "deleted_at IS NULL")
 public class LampEntity {
 
   @Id
@@ -32,6 +37,9 @@ public class LampEntity {
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
+
+  @Column(name = "deleted_at")
+  private OffsetDateTime deletedAt;
 
   public LampEntity() {}
 
@@ -76,6 +84,14 @@ public class LampEntity {
     this.updatedAt = updatedAt;
   }
 
+  public OffsetDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(final OffsetDateTime deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
   @Override
   public boolean equals(final Object obj) {
     boolean result = false;
@@ -104,6 +120,8 @@ public class LampEntity {
         + createdAt
         + ", updatedAt="
         + updatedAt
+        + ", deletedAt="
+        + deletedAt
         + '}';
   }
 }

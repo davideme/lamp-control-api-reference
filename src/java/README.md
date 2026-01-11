@@ -86,6 +86,29 @@ This endpoint is useful for:
 - Monitoring systems
 - CI/CD pipeline validation
 
+## Architecture
+
+### Service Layer
+
+This application follows a layered architecture pattern:
+
+```
+Controllers → LampService → JpaLampRepository → Hibernate → PostgreSQL
+```
+
+**LampService** (`org.openapitools.service.LampService`):
+- Provides business logic and transaction management
+- Decorated with `@Transactional` for declarative transaction control
+- Implements soft delete operations
+- Handles entity-to-DTO mapping via LampMapper
+- Supports pagination and custom queries
+
+**Benefits**:
+- Clear separation of concerns
+- Centralized transaction management
+- Easier testing with mocked dependencies
+- Business logic isolated from HTTP concerns
+
 ## Database Configuration
 
 This application supports PostgreSQL for persistent data storage using Spring Data JPA with Hibernate and HikariCP connection pooling.
@@ -164,17 +187,29 @@ mvn spring-boot:run
 The application uses [Flyway](https://flywaydb.org/) for database schema management. Migrations are automatically executed on startup:
 
 - **Location**: `src/main/resources/db/migration/`
-- **Initial Schema**: `V1__Initial_schema.sql`
+- **Initial Schema**: `V1__Initial_schema.sql` - Creates lamps table with basic columns
+- **Soft Deletes**: `V2__Add_soft_deletes.sql` - Adds deleted_at column for soft delete support
 
 Flyway will:
 - Create the `lamps` table with appropriate indexes
-- Set up triggers for automatic timestamp updates
+- Add soft delete support with `deleted_at` column
 - Enable UUID generation extension
 
 To disable Flyway migrations:
 ```properties
 spring.flyway.enabled=false
 ```
+
+### Soft Delete Behavior
+
+The application implements soft deletes for lamp entities:
+
+- **DELETE** requests set the `deleted_at` timestamp instead of removing records
+- Soft-deleted lamps are automatically filtered from all queries using Hibernate's `@Where` clause
+- Soft-deleted lamps do NOT appear in list operations or lookups
+- Database retains historical data for audit purposes
+
+This ensures data integrity while providing a logical deletion mechanism.
 
 ### Connection Pool Configuration
 
@@ -205,6 +240,13 @@ mvn test -P unit-tests
 # Run all tests
 mvn test -P all-tests
 ```
+
+**Test Coverage**:
+- **LampServiceTest** - Unit tests for service layer with mocked repository
+- **JpaLampRepositoryIntegrationTest** - Integration tests with real PostgreSQL database
+  - Includes soft delete tests
+  - Custom query method tests (findByStatus, findAllActive, countActive)
+  - Pagination tests
 
 Testcontainers requirements:
 - Docker installed and running
