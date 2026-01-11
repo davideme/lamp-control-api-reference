@@ -19,6 +19,7 @@
       "Bash(npx prisma generate:*)",
       "Bash(pip3 install:*)",
       "Bash(pkill:*)",
+      "Bash(poetry add:*)",
       "Bash(poetry env info:*)",
       "Bash(poetry install:*)",
       "Bash(poetry lock:*)",

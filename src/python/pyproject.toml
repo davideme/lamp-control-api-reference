@@ -31,6 +31,7 @@ black = "^24.1.0"
 ruff = "^0.2.0"
 mypy = "^1.15.0"
 testcontainers = {extras = ["postgres"], version = "^4.10.0"}
+psycopg2-binary = "^2.9.10"
 
 [tool.black]
 line-length = 100
@@ -112,3 +113,4 @@ minversion = "8.0"
 addopts = "-ra -q --cov=src --cov-report=term-missing"
 python_files = ["test_*.py", "*_test.py"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
