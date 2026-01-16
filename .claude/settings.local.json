@@ -43,6 +43,7 @@
       "Bash(python -m pytest:*)",
       "Bash(python3:*)",
       "Bash(schemathesis run:*)",
+      "Bash(tee:*)",
       "Bash(tree:*)"
     ]
   }
