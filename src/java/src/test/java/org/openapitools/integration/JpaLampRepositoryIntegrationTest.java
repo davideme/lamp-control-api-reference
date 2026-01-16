@@ -18,6 +18,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -28,12 +29,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Integration test for JpaLampRepository with PostgreSQL using Testcontainers. This test verifies
  * that the repository works correctly with a real PostgreSQL database instance.
  *
- * <p>This test explicitly imports DataSource and JPA auto-configuration since they are excluded by
- * default in the main application.
+ * <p>This test explicitly imports DataSource and JPA auto-configuration and enables JPA
+ * repositories since they are excluded by default in the main application.
  */
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@EnableJpaRepositories(basePackages = "org.openapitools.repository")
 @ImportAutoConfiguration({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 class JpaLampRepositoryIntegrationTest {
 
