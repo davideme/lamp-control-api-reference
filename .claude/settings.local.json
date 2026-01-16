@@ -16,6 +16,7 @@
       "Bash(find:*)",
       "Bash(mvn clean test:*)",
       "Bash(mvn compile:*)",
+      "Bash(mvn pmd:check:*)",
       "Bash(mvn spotbugs:check:*)",
       "Bash(npm install)",
       "Bash(npm run build:*)",
