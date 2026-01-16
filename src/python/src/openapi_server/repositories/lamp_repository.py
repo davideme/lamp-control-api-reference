@@ -1,4 +1,9 @@
-"""Repository for managing lamp data."""
+"""Repository for managing lamp data with in-memory storage.
+
+This module provides the in-memory implementation of the lamp repository.
+The repository interface is async to maintain compatibility with the
+PostgreSQL repository implementation.
+"""
 
 from src.openapi_server.entities.lamp_entity import LampEntity
 
@@ -16,14 +21,20 @@ class LampNotFoundError(Exception):
         super().__init__(f"Lamp with ID {lamp_id} not found")
 
 
-class LampRepository:
-    """Repository for managing lamp data with in-memory storage."""
+class InMemoryLampRepository:
+    """Repository for managing lamp data with in-memory storage.
+
+    This implementation uses an in-memory dictionary for storage and is
+    suitable for development and testing. All methods are async to maintain
+    compatibility with the PostgreSQL repository implementation, even though
+    the operations are synchronous.
+    """
 
     def __init__(self) -> None:
         """Initialize the repository with an empty lamp store."""
         self._lamps: dict[str, LampEntity] = {}
 
-    def create(self, lamp_entity: LampEntity) -> LampEntity:
+    async def create(self, lamp_entity: LampEntity) -> LampEntity:
         """Create a new lamp.
 
         Args:
@@ -35,7 +46,7 @@ class LampRepository:
         self._lamps[lamp_entity.id] = lamp_entity
         return lamp_entity
 
-    def get(self, lamp_id: str) -> LampEntity | None:
+    async def get(self, lamp_id: str) -> LampEntity | None:
         """Get a specific lamp.
 
         Args:
@@ -46,7 +57,7 @@ class LampRepository:
         """
         return self._lamps.get(lamp_id)
 
-    def list(self) -> list[LampEntity]:
+    async def list(self) -> list[LampEntity]:
         """List all lamps.
 
         Returns:
@@ -54,7 +65,7 @@ class LampRepository:
         """
         return list(self._lamps.values())
 
-    def update(self, lamp_entity: LampEntity) -> LampEntity:
+    async def update(self, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp.
 
         Args:
@@ -71,7 +82,7 @@ class LampRepository:
         self._lamps[lamp_entity.id] = lamp_entity
         return lamp_entity
 
-    def delete(self, lamp_id: str) -> None:
+    async def delete(self, lamp_id: str) -> None:
         """Delete a lamp.
 
         Args:
