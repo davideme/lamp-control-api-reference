@@ -2,6 +2,7 @@ package org.openapitools.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,8 @@ class JpaLampRepositoryIntegrationTest {
   }
 
   @Autowired private JpaLampRepository repository;
+
+  @Autowired private EntityManager entityManager;
 
   private JpaRepository<LampEntity, UUID> jpaRepo;
 
@@ -146,7 +149,7 @@ class JpaLampRepositoryIntegrationTest {
     saved.setDeletedAt(OffsetDateTime.now());
     jpaRepo.save(saved);
     jpaRepo.flush();
-    jpaRepo.clear(); // Clear persistence context to force fresh query
+    entityManager.clear(); // Clear persistence context to force fresh query
 
     // Assert - soft deleted lamp should not be found by findById due to @Where clause
     final Optional<LampEntity> retrieved = jpaRepo.findById(saved.getId());
