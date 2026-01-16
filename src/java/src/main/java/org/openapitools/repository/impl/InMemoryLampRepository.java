@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,6 +33,20 @@ public class InMemoryLampRepository implements LampRepository {
   @Override
   public List<LampEntity> findAll() {
     return new ArrayList<>(lamps.values());
+  }
+
+  @Override
+  public Page<LampEntity> findAll(final Pageable pageable) {
+    final List<LampEntity> allLamps = new ArrayList<>(lamps.values());
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min(start + pageable.getPageSize(), allLamps.size());
+
+    if (start >= allLamps.size()) {
+      return new PageImpl<>(List.of(), pageable, allLamps.size());
+    }
+
+    final List<LampEntity> pageContent = allLamps.subList(start, end);
+    return new PageImpl<>(pageContent, pageable, allLamps.size());
   }
 
   @Override
