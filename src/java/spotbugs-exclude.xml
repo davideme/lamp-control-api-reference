@@ -42,6 +42,13 @@
         <Method name="&lt;init&gt;" />
     </Match>
 
+    <!-- Exclude EI_EXPOSE_REP2 for Spring dependency injection in services -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="~.*\.service\..*" />
+        <Method name="&lt;init&gt;" />
+    </Match>
+
     <!-- Suppress clone-without-super for our custom DateFormat which intentionally reinitializes internal state -->
     <Match>
         <Bug pattern="CN_IDIOM_NO_SUPER_CALL" />
