@@ -1,8 +1,6 @@
 package org.openapitools.repository;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 
 /**
