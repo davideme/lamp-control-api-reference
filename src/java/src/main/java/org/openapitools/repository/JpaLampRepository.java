@@ -3,6 +3,7 @@ package org.openapitools.repository;
 import java.util.List;
 import java.util.UUID;
 import org.openapitools.entity.LampEntity;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,10 +18,15 @@ import org.springframework.stereotype.Repository;
  * custom domain-specific query methods. It does NOT extend LampRepository to avoid method ambiguity
  * issues between JpaRepository and LampRepository method signatures.
  *
+ * <p>This repository is only activated when a database URL is configured via the
+ * spring.datasource.url property. When no database is configured, the InMemoryLampRepository is
+ * used instead.
+ *
  * <p>Marked as @Primary to take precedence over InMemoryLampRepository when both are available.
  */
 @Repository
 @Primary
+@ConditionalOnProperty(prefix = "spring.datasource", name = "url")
 public interface JpaLampRepository extends JpaRepository<LampEntity, UUID> {
 
   /**

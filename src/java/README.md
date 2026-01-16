@@ -93,7 +93,12 @@ This endpoint is useful for:
 This application follows a layered architecture pattern:
 
 ```
-Controllers → LampService → JpaLampRepository → Hibernate → PostgreSQL
+Controllers → LampService → LampRepository (interface)
+                                 ↓
+                    ┌────────────┴─────────────┐
+                    ↓                          ↓
+         InMemoryLampRepository    JpaLampRepository → Hibernate → PostgreSQL
+            (default)                  (when DATABASE_URL is set)
 ```
 
 **LampService** (`org.openapitools.service.LampService`):
@@ -111,14 +116,26 @@ Controllers → LampService → JpaLampRepository → Hibernate → PostgreSQL
 
 ## Database Configuration
 
-This application supports PostgreSQL for persistent data storage using Spring Data JPA with Hibernate and HikariCP connection pooling.
+This application supports two storage modes:
 
 ### Configuration Options
 
-The application can run in two modes:
+**By default, the application uses an in-memory repository** - no database setup required. This is ideal for:
+- Local development and testing
+- Quick demos and prototyping
+- Environments where persistence is not needed
 
-1. **In-Memory Mode** (default when no database is configured): Uses a ConcurrentHashMap for storing lamp entities in memory
+The application automatically switches to PostgreSQL mode when you provide a `DATABASE_URL` environment variable:
+
+1. **In-Memory Mode** (default): Uses a ConcurrentHashMap for storing lamp entities in memory
+   - Activated when: No `DATABASE_URL` is set
+   - Data is lost on application restart
+   - No database installation needed
+
 2. **PostgreSQL Mode**: Uses PostgreSQL database for durable storage
+   - Activated when: `DATABASE_URL` environment variable is set
+   - Provides persistence across restarts
+   - Requires PostgreSQL database
 
 ### PostgreSQL Setup
 
@@ -147,14 +164,20 @@ GRANT ALL PRIVILEGES ON DATABASE lampcontrol TO your_username;
 
 #### 3. Environment Variables
 
-**IMPORTANT**: The default credentials in application.properties are intentionally set to "CHANGE_ME" to prevent accidental deployment with weak credentials. You MUST configure proper credentials before running the application.
-
-Configure database connection using environment variables:
+Configure database connection using environment variables to enable PostgreSQL mode:
 
 ```bash
+# Required to enable PostgreSQL mode
 export DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol
-export DB_USER=your_username
+
+# Database credentials
+export DB_USER=lampuser
 export DB_PASSWORD=your_secure_password
+
+# Enable Flyway migrations (required for PostgreSQL mode)
+export FLYWAY_ENABLED=true
+
+# Optional: Connection pool tuning
 export DB_POOL_MAX_SIZE=20
 export DB_POOL_MIN_SIZE=5
 ```
@@ -163,20 +186,22 @@ Or create an `application-local.properties` file (add it to .gitignore):
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/lampcontrol
-spring.datasource.username=your_username
+spring.datasource.username=lampuser
 spring.datasource.password=your_secure_password
+spring.flyway.enabled=true
 spring.datasource.hikari.maximum-pool-size=20
 spring.datasource.hikari.minimum-idle=5
 ```
 
-#### 4. Running with PostgreSQL
+#### 4. Running the Application
 
 ```bash
-# Run with PostgreSQL
+# Run in-memory mode (default - no setup needed)
 mvn spring-boot:run
 
-# Or with environment variables
+# Run with PostgreSQL (requires DATABASE_URL)
 DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol \
+FLYWAY_ENABLED=true \
 DB_USER=lampuser \
 DB_PASSWORD=lamppass \
 mvn spring-boot:run
