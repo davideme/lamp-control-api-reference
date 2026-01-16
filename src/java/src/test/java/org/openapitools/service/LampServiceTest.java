@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
-import org.openapitools.repository.JpaLampRepository;
+import org.openapitools.repository.LampRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +29,7 @@ import org.springframework.data.domain.Pageable;
 @ExtendWith(MockitoExtension.class)
 class LampServiceTest {
 
-  @Mock private JpaLampRepository repository;
+  @Mock private LampRepository repository;
 
   @Mock private LampMapper mapper;
 
