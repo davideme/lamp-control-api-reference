@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
-import org.openapitools.repository.JpaLampRepository;
+import org.openapitools.repository.LampRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,10 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LampService {
 
-  private final JpaLampRepository repository;
+  private final LampRepository repository;
   private final LampMapper mapper;
 
-  public LampService(final JpaLampRepository repository, final LampMapper mapper) {
+  public LampService(final LampRepository repository, final LampMapper mapper) {
     this.repository = repository;
     this.mapper = mapper;
   }

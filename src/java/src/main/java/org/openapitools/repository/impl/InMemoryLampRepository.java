@@ -1,11 +1,13 @@
 package org.openapitools.repository.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -47,6 +49,7 @@ public class InMemoryLampRepository implements LampRepository {
     copy.setStatus(entity.getStatus());
     copy.setCreatedAt(entity.getCreatedAt());
     copy.setUpdatedAt(entity.getUpdatedAt());
+    copy.setDeletedAt(entity.getDeletedAt());
 
     lamps.put(copy.getId(), copy);
     return copy;
@@ -70,6 +73,27 @@ public class InMemoryLampRepository implements LampRepository {
   @Override
   public long count() {
     return lamps.size();
+  }
+
+  @Override
+  public List<LampEntity> findByStatus(final Boolean isOn) {
+    return lamps.values().stream()
+        .filter(lamp -> lamp.getDeletedAt() == null)
+        .filter(lamp -> lamp.getStatus().equals(isOn))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<LampEntity> findAllActive() {
+    return lamps.values().stream()
+        .filter(lamp -> lamp.getDeletedAt() == null)
+        .sorted(Comparator.comparing(LampEntity::getCreatedAt))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public long countActive() {
+    return lamps.values().stream().filter(lamp -> lamp.getDeletedAt() == null).count();
   }
 
   /**

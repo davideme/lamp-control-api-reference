@@ -13,8 +13,9 @@ import org.springframework.stereotype.Repository;
  * implementation of this interface at runtime, supporting full CRUD operations with PostgreSQL
  * database.
  *
- * <p>This interface extends both JpaRepository and LampRepository to provide JPA-specific methods
- * while maintaining compatibility with the LampRepository interface used by the application.
+ * <p>This interface extends both JpaRepository (for CRUD operations) and LampRepository (for
+ * domain-specific queries). Since LampRepository only declares custom domain methods and not the
+ * standard CRUD methods, there is no method ambiguity.
  *
  * <p>Marked as @Primary to take precedence over InMemoryLampRepository when both are available.
  */
@@ -31,6 +32,7 @@ public interface JpaLampRepository extends JpaRepository<LampEntity, UUID>, Lamp
    * @param isOn the status to filter by (true for on, false for off)
    * @return list of lamps with the specified status
    */
+  @Override
   List<LampEntity> findByStatus(Boolean isOn);
 
   /**
@@ -40,6 +42,7 @@ public interface JpaLampRepository extends JpaRepository<LampEntity, UUID>, Lamp
    *
    * @return list of all active lamps ordered by creation time ascending
    */
+  @Override
   @Query("SELECT l FROM LampEntity l WHERE l.deletedAt IS NULL ORDER BY l.createdAt ASC")
   List<LampEntity> findAllActive();
 
@@ -50,6 +53,7 @@ public interface JpaLampRepository extends JpaRepository<LampEntity, UUID>, Lamp
    *
    * @return count of active lamps
    */
+  @Override
   @Query("SELECT COUNT(l) FROM LampEntity l WHERE l.deletedAt IS NULL")
   long countActive();
 }
