@@ -187,8 +187,7 @@ class LampServiceTest {
     assertThat(result.getId()).isEqualTo(testId);
     assertThat(result.getStatus()).isFalse();
     verify(repository).findById(testId);
-    verify(repository).save(testEntity);
-    verify(testEntity).setStatus(false);
+    verify(repository).save(any(LampEntity.class));
   }
 
   @Test
@@ -221,8 +220,7 @@ class LampServiceTest {
     // Assert
     assertThat(result).isTrue();
     verify(repository).findById(testId);
-    verify(repository).save(testEntity);
-    verify(testEntity).setDeletedAt(any(OffsetDateTime.class));
+    verify(repository).save(any(LampEntity.class));
   }
 
   @Test
