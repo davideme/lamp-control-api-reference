@@ -1,6 +1,5 @@
 package org.openapitools.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -39,9 +38,6 @@ public class LampService {
   private final LampRepository repository;
   private final LampMapper mapper;
 
-  @SuppressFBWarnings(
-      value = "EI_EXPOSE_REP2",
-      justification = "Repository is a Spring-managed bean injected via constructor for DI")
   public LampService(final LampRepository repository, final LampMapper mapper) {
     this.repository = repository;
     this.mapper = mapper;

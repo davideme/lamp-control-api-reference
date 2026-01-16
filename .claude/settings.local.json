@@ -6,6 +6,7 @@
       "Bash(./gradlew tasks:*)",
       "Bash(./gradlew test:*)",
       "Bash(./mvnw clean:*)",
+      "Bash(./mvnw compile:*)",
       "Bash(./src/kotlin/gradlew:*)",
       "Bash(curl:*)",
       "Bash(docker compose build:*)",
