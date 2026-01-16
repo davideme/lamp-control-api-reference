@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.JpaLampRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,10 +27,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * Integration test for JpaLampRepository with PostgreSQL using Testcontainers. This test verifies
  * that the repository works correctly with a real PostgreSQL database instance.
+ *
+ * <p>This test explicitly imports DataSource and JPA auto-configuration since they are excluded by
+ * default in the main application.
  */
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ImportAutoConfiguration({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 class JpaLampRepositoryIntegrationTest {
 
   @Container
