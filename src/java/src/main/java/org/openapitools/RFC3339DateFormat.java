@@ -18,7 +18,7 @@ public final class RFC3339DateFormat extends DateFormat {
 
   public RFC3339DateFormat() {
     super();
-    this.calendar = new GregorianCalendar();
+    this.calendar = new GregorianCalendar(TIMEZONE_Z);
   }
 
   @Override
