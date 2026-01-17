@@ -66,20 +66,39 @@ func main() {
 		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
 			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
 
-		pgPool, err := api.CreateConnectionPool(ctx, dbConfig)
-		if err != nil {
-			log.Printf("Failed to connect to PostgreSQL: %v", err)
+		// Run database migrations before creating connection pool
+		connectionString := dbConfig.ConnectionString()
+		// golang-migrate requires postgres:// prefix instead of postgresql://
+		// and needs sslmode parameter
+		if len(connectionString) >= 10 && connectionString[:10] == "host=" {
+			// If using component-based connection string, convert to URL format for migrate
+			connectionString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+				dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
+		}
+
+		if err := api.RunMigrations(connectionString); err != nil {
+			log.Printf("Failed to run database migrations: %v", err)
 			if *requireDB {
-				log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
+				log.Fatal("Database migrations required but failed (--require-db flag set)")
 			}
 			log.Printf("Falling back to in-memory repository")
 			lampAPI = api.NewLampAPI()
 		} else {
-			log.Printf("Successfully connected to PostgreSQL")
-			pool = pgPool
+			pgPool, err := api.CreateConnectionPool(ctx, dbConfig)
+			if err != nil {
+				log.Printf("Failed to connect to PostgreSQL: %v", err)
+				if *requireDB {
+					log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
+				}
+				log.Printf("Falling back to in-memory repository")
+				lampAPI = api.NewLampAPI()
+			} else {
+				log.Printf("Successfully connected to PostgreSQL")
+				pool = pgPool
 
-			postgresRepo := api.NewPostgresLampRepository(pgPool)
-			lampAPI = api.NewLampAPIWithRepository(postgresRepo)
+				postgresRepo := api.NewPostgresLampRepository(pgPool)
+				lampAPI = api.NewLampAPIWithRepository(postgresRepo)
+			}
 		}
 	} else {
 		// No PostgreSQL configuration, use in-memory repository
