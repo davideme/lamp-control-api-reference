@@ -36,21 +36,24 @@ func RunMigrations(connectionString string) error {
 	}()
 
 	// Run migrations
-	if err := m.Up(); err != nil {
-		if err == migrate.ErrNoChange {
+	if migErr := m.Up(); migErr != nil {
+		if migErr == migrate.ErrNoChange {
 			log.Println("Database schema is up to date (no migrations to apply)")
+
 			return nil
 		}
-		return fmt.Errorf("failed to run migrations: %w", err)
+
+		return fmt.Errorf("failed to run migrations: %w", migErr)
 	}
 
 	// Get current version
 	version, dirty, err := m.Version()
-	if err != nil && err != migrate.ErrNilVersion {
+	switch {
+	case err != nil && err != migrate.ErrNilVersion:
 		log.Printf("Warning: could not determine migration version: %v", err)
-	} else if dirty {
+	case dirty:
 		log.Printf("Warning: database is in dirty state at version %d", version)
-	} else {
+	default:
 		log.Printf("Successfully applied migrations. Current schema version: %d", version)
 	}
 
