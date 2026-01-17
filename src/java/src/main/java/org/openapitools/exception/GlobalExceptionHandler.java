@@ -17,6 +17,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final String INVALID_ARG_ERROR = "INVALID_ARGUMENT";
+
   /**
    * Handle validation constraint violations (e.g., @Min, @Max annotations).
    *
@@ -26,7 +28,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<Error> handleConstraintViolationException(
       final ConstraintViolationException ex) {
-    final Error error = new Error("INVALID_ARGUMENT");
+    final Error error = new Error(INVALID_ARG_ERROR);
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
@@ -39,7 +41,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Error> handleMethodArgumentNotValidException(
       final MethodArgumentNotValidException ex) {
-    final Error error = new Error("INVALID_ARGUMENT");
+    final Error error = new Error(INVALID_ARG_ERROR);
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
@@ -52,7 +54,31 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<Error> handleMethodArgumentTypeMismatchException(
       final MethodArgumentTypeMismatchException ex) {
-    final Error error = new Error("INVALID_ARGUMENT");
+    final Error error = new Error(INVALID_ARG_ERROR);
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle null pointer exceptions that may occur during request processing.
+   *
+   * @param ex the null pointer exception
+   * @return 400 Bad Request with error details
+   */
+  @ExceptionHandler(NullPointerException.class)
+  public ResponseEntity<Error> handleNullPointerException(final NullPointerException ex) {
+    final Error error = new Error(INVALID_ARG_ERROR);
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle illegal argument exceptions (e.g., invalid UUID format).
+   *
+   * @param ex the illegal argument exception
+   * @return 400 Bad Request with error details
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<Error> handleIllegalArgumentException(final IllegalArgumentException ex) {
+    final Error error = new Error(INVALID_ARG_ERROR);
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 }

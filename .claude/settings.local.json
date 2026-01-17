@@ -5,6 +5,8 @@
       "Bash(./gradlew compileKotlin:*)",
       "Bash(./gradlew tasks:*)",
       "Bash(./gradlew test:*)",
+      "Bash(./mvnw clean:*)",
+      "Bash(./mvnw compile:*)",
       "Bash(./src/kotlin/gradlew:*)",
       "Bash(curl:*)",
       "Bash(docker compose build:*)",
@@ -12,6 +14,14 @@
       "Bash(docker compose run:*)",
       "Bash(docker compose up:*)",
       "Bash(find:*)",
+      "Bash(java:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn clean test:*)",
+      "Bash(mvn compile:*)",
+      "Bash(mvn pmd:check:*)",
+      "Bash(mvn spotbugs:check:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn:*)",
       "Bash(npm install)",
       "Bash(npm run build:*)",
       "Bash(npm run test:integration:*)",
@@ -33,6 +43,7 @@
       "Bash(python -m pytest:*)",
       "Bash(python3:*)",
       "Bash(schemathesis run:*)",
+      "Bash(tee:*)",
       "Bash(tree:*)"
     ]
   }
