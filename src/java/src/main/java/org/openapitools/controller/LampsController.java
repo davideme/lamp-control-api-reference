@@ -42,24 +42,19 @@ public class LampsController implements LampsApi {
   public CompletableFuture<ResponseEntity<Void>> deleteLamp(final String lampId) {
     return CompletableFuture.supplyAsync(
             () -> {
-              final UUID lampUuid = UUID.fromString(lampId);
-              final boolean deleted = lampService.delete(lampUuid);
-              if (deleted) {
-                return ResponseEntity.noContent().<Void>build();
-              } else {
-                return ResponseEntity.notFound().<Void>build();
-              }
-            })
-        .exceptionally(
-            throwable -> {
-              final Throwable cause =
-                  throwable.getCause() != null ? throwable.getCause() : throwable;
-              if (cause instanceof IllegalArgumentException) {
+              try {
+                final UUID lampUuid = UUID.fromString(lampId);
+                final boolean deleted = lampService.delete(lampUuid);
+                if (deleted) {
+                  return ResponseEntity.noContent().<Void>build();
+                } else {
+                  return ResponseEntity.notFound().<Void>build();
+                }
+              } catch (IllegalArgumentException e) {
                 final Error error = new Error("INVALID_ARGUMENT");
                 return (ResponseEntity<Void>)
                     (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
               }
-              throw new RuntimeException(throwable);
             });
   }
 
@@ -68,24 +63,19 @@ public class LampsController implements LampsApi {
   public CompletableFuture<ResponseEntity<Lamp>> getLamp(final String lampId) {
     return CompletableFuture.supplyAsync(
             () -> {
-              final UUID lampUuid = UUID.fromString(lampId);
-              final Lamp lamp = lampService.findById(lampUuid);
-              if (lamp != null) {
-                return ResponseEntity.ok().body(lamp);
-              } else {
-                return ResponseEntity.notFound().build();
-              }
-            })
-        .exceptionally(
-            throwable -> {
-              final Throwable cause =
-                  throwable.getCause() != null ? throwable.getCause() : throwable;
-              if (cause instanceof IllegalArgumentException) {
+              try {
+                final UUID lampUuid = UUID.fromString(lampId);
+                final Lamp lamp = lampService.findById(lampUuid);
+                if (lamp != null) {
+                  return ResponseEntity.ok().body(lamp);
+                } else {
+                  return ResponseEntity.notFound().build();
+                }
+              } catch (IllegalArgumentException e) {
                 final Error error = new Error("INVALID_ARGUMENT");
                 return (ResponseEntity<Lamp>)
                     (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
               }
-              throw new RuntimeException(throwable);
             });
   }
 
@@ -108,26 +98,21 @@ public class LampsController implements LampsApi {
       final String lampId, final LampUpdate lampUpdate) {
     return CompletableFuture.supplyAsync(
             () -> {
-              final UUID lampUuid = UUID.fromString(lampId);
-              final Lamp lampData = new Lamp();
-              lampData.setStatus(lampUpdate.getStatus());
-              final Lamp updated = lampService.update(lampUuid, lampData);
-              if (updated != null) {
-                return ResponseEntity.ok().body(updated);
-              } else {
-                return ResponseEntity.notFound().build();
-              }
-            })
-        .exceptionally(
-            throwable -> {
-              final Throwable cause =
-                  throwable.getCause() != null ? throwable.getCause() : throwable;
-              if (cause instanceof IllegalArgumentException) {
+              try {
+                final UUID lampUuid = UUID.fromString(lampId);
+                final Lamp lampData = new Lamp();
+                lampData.setStatus(lampUpdate.getStatus());
+                final Lamp updated = lampService.update(lampUuid, lampData);
+                if (updated != null) {
+                  return ResponseEntity.ok().body(updated);
+                } else {
+                  return ResponseEntity.notFound().build();
+                }
+              } catch (IllegalArgumentException e) {
                 final Error error = new Error("INVALID_ARGUMENT");
                 return (ResponseEntity<Lamp>)
                     (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
               }
-              throw new RuntimeException(throwable);
             });
   }
 }
