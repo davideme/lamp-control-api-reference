@@ -74,10 +74,8 @@ Each implementation has detailed instructions in `.github/instructions/[language
 - **Python**: FastAPI with Poetry, pytest, and Pydantic models
 - **Java**: Spring Boot with comprehensive quality tools
 - **C#**: ASP.NET Core with StyleCop analyzers
-- **PHP**: Slim Framework with PSR standards
 - **Go**: Chi Router with oapi-codegen, high test coverage
 - **Kotlin**: Ktor with coroutines and serialization
-- **Ruby**: Rails API with multi-database support (planned)
 
 ## Quality Metrics and Comparison
 

@@ -12,10 +12,8 @@ This directory contains GitHub Copilot coding agent instructions for the Lamp Co
 ├── python.instructions.md      # Python-specific guidance
 ├── java.instructions.md        # Java-specific guidance
 ├── csharp.instructions.md      # C#-specific guidance
-├── php.instructions.md         # PHP-specific guidance
 ├── go.instructions.md          # Go-specific guidance
-├── kotlin.instructions.md      # Kotlin-specific guidance
-└── ruby.instructions.md        # Ruby-specific guidance
+└── kotlin.instructions.md      # Kotlin-specific guidance
 ```
 
 ## How It Works

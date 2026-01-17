@@ -39,7 +39,6 @@ The project already uses OpenAPI Generator for multiple language implementations
 - Go (using `go-server` generator with chi router)
 - Python (using `python-fastapi` generator)
 - C# (using NSwag for ASP.NET Core)
-- PHP (using `php-slim4` generator)
 
 Using OpenAPI Generator for Kotlin maintains consistency in tooling and workflow across all implementations.
 

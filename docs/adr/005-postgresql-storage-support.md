@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The Lamp Control API Reference project currently includes multiple language implementations (C#, Go, Java, Kotlin, Python, TypeScript, PHP, and Ruby) with varying levels of database support. While the project has SQL schema definitions for both MySQL and PostgreSQL in the `database/sql/` directory, not all language implementations have fully integrated PostgreSQL storage capabilities.
+The Lamp Control API Reference project currently includes multiple language implementations (C#, Go, Java, Kotlin, Python, and TypeScript) with varying levels of database support. While the project has SQL schema definitions for both MySQL and PostgreSQL in the `database/sql/` directory, not all language implementations have fully integrated PostgreSQL storage capabilities.
 
 Key considerations:
 

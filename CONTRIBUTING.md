@@ -38,7 +38,7 @@ This document provides guidelines for contributors based on the DORA (DevOps Res
   feat: add lamp on/off toggle endpoint to TypeScript REST API
   fix: resolve MongoDB connection issue in Go implementation
   docs: update API documentation for Python GraphQL interface
-  test: add integration tests for PHP gRPC service
+  test: add integration tests for Kotlin gRPC service
   refactor: improve Java repository pattern implementation
   ```
 - **Pull Requests**: Create focused PRs that implement a single feature or fix

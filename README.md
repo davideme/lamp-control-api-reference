@@ -26,16 +26,14 @@ The simple lamp resource (with ID and on/off state) allows for complete CRUD ope
 
 ## Languages Included
 
-The project currently includes implementations in **8 programming languages**, each demonstrating language-specific best practices and patterns:
+The project currently includes implementations in **6 programming languages**, each demonstrating language-specific best practices and patterns:
 
 - **TypeScript** - Node.js with Express.js, comprehensive type safety
 - **Python** - FastAPI with modern async/await patterns
 - **Java** - Spring Boot with enterprise-grade patterns
 - **C#** - ASP.NET Core with .NET 8 features
-- **PHP** - Slim Framework with modern PHP 8.1+ features
 - **Go** - Chi Router with goroutines and channels
 - **Kotlin** - Ktor framework with coroutines
-- **Ruby** - Rails API (in development)
 
 Each implementation maintains functional consistency while showcasing language-specific idioms, frameworks, and best practices.
 
@@ -72,10 +70,8 @@ lamp-control-api-reference/
 │   ├── python/                   # FastAPI implementation
 │   ├── java/                     # Spring Boot implementation
 │   ├── csharp/                   # ASP.NET Core implementation
-│   ├── php/                      # Slim Framework implementation
 │   ├── go/                       # Chi Router implementation
-│   ├── kotlin/                   # Ktor implementation
-│   └── ruby/                     # Rails API implementation
+│   └── kotlin/                   # Ktor implementation
 ├── database/                     # Database schemas and setup scripts
 ├── .github/                      # GitHub Actions workflows and templates
 └── CONTRIBUTING.md               # Detailed contribution guidelines
@@ -119,10 +115,8 @@ This project uses a comprehensive approach to compare implementations across mul
 | Python     | 346       | 217                      | 215        | 0.62          | 86.40        |
 | Java       | 691       | 555                      | 619        | 0.90          | 92.00        |
 | C#         | 412       | 254                      | 435        | 1.06          | 98.59        |
-| PHP        | 1419      | 774                      | 1158       | 0.82          | 88.89        |
 | Go         | 715       | 197                      | 1307       | 1.83          | 98.60        |
 | Kotlin     | 583       | 462                      | 795        | 1.36          | 79.19        |
-| Ruby       | -         | -                        | -          | -             | -            |
 
 *Detailed analysis and insights available in [docs/COMPARISON.md](docs/COMPARISON.md)*
 
@@ -195,7 +189,6 @@ Each language implementation has specific requirements documented in their respe
 - [Python Requirements](src/python/README.md)
 - [Java Requirements](src/java/README.md)
 - [C# Requirements](src/csharp/README.md)
-- [PHP Requirements](src/php/README.md)
 - [Go Requirements](src/go/README.md)
 - [Kotlin Requirements](src/kotlin/README.md)
 
