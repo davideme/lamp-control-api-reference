@@ -64,8 +64,17 @@ public class InMemoryLampRepository implements LampRepository {
     final LampEntity copy = new LampEntity();
     copy.setId(entity.getId());
     copy.setStatus(entity.getStatus());
-    copy.setCreatedAt(entity.getCreatedAt());
-    copy.setUpdatedAt(entity.getUpdatedAt());
+
+    // Preserve existing timestamps or use new entity's auto-generated ones
+    // This prevents null timestamps from being saved
+    copy.setCreatedAt(
+        entity.getCreatedAt() != null
+            ? entity.getCreatedAt()
+            : copy.getCreatedAt());
+    copy.setUpdatedAt(
+        entity.getUpdatedAt() != null
+            ? entity.getUpdatedAt()
+            : copy.getUpdatedAt());
     copy.setDeletedAt(entity.getDeletedAt());
 
     lamps.put(copy.getId(), copy);
