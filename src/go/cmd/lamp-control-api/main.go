@@ -40,10 +40,96 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// runMigrationsOnly runs database migrations and exits
+func runMigrationsOnly(requireDB bool) {
+	dbConfig := api.NewDatabaseConfigFromEnv()
+	if dbConfig == nil {
+		log.Println("No PostgreSQL configuration found, nothing to migrate")
+		if requireDB {
+			log.Fatal("PostgreSQL configuration required but not found (--require-db flag set)")
+		}
+		return
+	}
+
+	log.Printf("Running migrations for database: host=%s port=%d database=%s user=%s",
+		dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
+
+	connectionString := dbConfig.ConnectionString()
+	if len(connectionString) >= 10 && connectionString[:10] == "host=" {
+		connectionString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
+	}
+
+	if err := api.RunMigrations(connectionString); err != nil {
+		log.Printf("Migration failed: %v", err)
+		os.Exit(1)
+	}
+
+	log.Println("Migrations completed successfully")
+}
+
+// initializeRepository creates and initializes the lamp repository
+func initializeRepository(ctx context.Context, runMigrations bool, requireDB bool) (*api.LampAPI, interface{ Close() }) {
+	var lampAPI *api.LampAPI
+	var pool interface{ Close() }
+	dbConfig := api.NewDatabaseConfigFromEnv()
+
+	if dbConfig != nil {
+		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
+			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
+
+		// Run database migrations if requested
+		if runMigrations {
+			connectionString := dbConfig.ConnectionString()
+			if len(connectionString) >= 10 && connectionString[:10] == "host=" {
+				connectionString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+					dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
+			}
+
+			if err := api.RunMigrations(connectionString); err != nil {
+				log.Printf("Failed to run database migrations: %v", err)
+				if requireDB {
+					log.Fatal("Database migrations required but failed (--require-db flag set)")
+				}
+				log.Printf("Falling back to in-memory repository")
+				lampAPI = api.NewLampAPI()
+				return lampAPI, nil
+			}
+		}
+
+		pgPool, err := api.CreateConnectionPool(ctx, dbConfig)
+		if err != nil {
+			log.Printf("Failed to connect to PostgreSQL: %v", err)
+			if requireDB {
+				log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
+			}
+			log.Printf("Falling back to in-memory repository")
+			lampAPI = api.NewLampAPI()
+		} else {
+			log.Printf("Successfully connected to PostgreSQL")
+			pool = pgPool
+			postgresRepo := api.NewPostgresLampRepository(pgPool)
+			lampAPI = api.NewLampAPIWithRepository(postgresRepo)
+		}
+	} else {
+		log.Printf("No PostgreSQL configuration found, using in-memory repository")
+		lampAPI = api.NewLampAPI()
+	}
+
+	return lampAPI, pool
+}
+
 func main() {
 	port := flag.String("port", "8080", "Port for test HTTP server")
 	requireDB := flag.Bool("require-db", false, "Fail if PostgreSQL connection is configured but fails")
+	mode := flag.String("mode", "serve", "Operation mode: 'serve' (migrate and start server), 'migrate' (run migrations only), 'serve-only' (start server without migrations)")
 	flag.Parse()
+
+	// Handle migrate-only mode
+	if *mode == "migrate" {
+		runMigrationsOnly(*requireDB)
+		return
+	}
 
 	ctx := context.Background()
 
@@ -53,58 +139,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Keep servers array to allow proper path validation in middleware
-	// The middleware will validate that requests match the /v1 base path from the OpenAPI spec
-
-	// Create repository based on environment configuration
-	var lampAPI *api.LampAPI
-	var pool interface{ Close() }
-	dbConfig := api.NewDatabaseConfigFromEnv()
-
-	if dbConfig != nil {
-		// PostgreSQL connection parameters are set, use PostgreSQL repository
-		log.Printf("Initializing PostgreSQL repository with config: host=%s port=%d database=%s user=%s",
-			dbConfig.Host, dbConfig.Port, dbConfig.Database, dbConfig.User)
-
-		// Run database migrations before creating connection pool
-		connectionString := dbConfig.ConnectionString()
-		// golang-migrate requires postgres:// prefix instead of postgresql://
-		// and needs sslmode parameter
-		if len(connectionString) >= 10 && connectionString[:10] == "host=" {
-			// If using component-based connection string, convert to URL format for migrate
-			connectionString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-				dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
-		}
-
-		if err := api.RunMigrations(connectionString); err != nil {
-			log.Printf("Failed to run database migrations: %v", err)
-			if *requireDB {
-				log.Fatal("Database migrations required but failed (--require-db flag set)")
-			}
-			log.Printf("Falling back to in-memory repository")
-			lampAPI = api.NewLampAPI()
-		} else {
-			pgPool, err := api.CreateConnectionPool(ctx, dbConfig)
-			if err != nil {
-				log.Printf("Failed to connect to PostgreSQL: %v", err)
-				if *requireDB {
-					log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
-				}
-				log.Printf("Falling back to in-memory repository")
-				lampAPI = api.NewLampAPI()
-			} else {
-				log.Printf("Successfully connected to PostgreSQL")
-				pool = pgPool
-
-				postgresRepo := api.NewPostgresLampRepository(pgPool)
-				lampAPI = api.NewLampAPIWithRepository(postgresRepo)
-			}
-		}
-	} else {
-		// No PostgreSQL configuration, use in-memory repository
-		log.Printf("No PostgreSQL configuration found, using in-memory repository")
-		lampAPI = api.NewLampAPI()
-	}
+	// Initialize repository based on mode
+	runMigrations := *mode == "serve" // Only run migrations in default 'serve' mode
+	lampAPI, pool := initializeRepository(ctx, runMigrations, *requireDB)
 
 	// Create an instance of our handler which satisfies the generated interface
 	lamp := api.NewStrictHandler(lampAPI, nil)
