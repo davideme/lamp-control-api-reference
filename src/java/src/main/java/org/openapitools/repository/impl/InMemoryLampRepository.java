@@ -60,37 +60,47 @@ public class InMemoryLampRepository implements LampRepository {
       entity.setId(UUID.randomUUID());
     }
 
+    // Check if this is an update or create operation
+    final UUID entityId = entity.getId();
+    final LampEntity existing = lamps.get(entityId);
+    final boolean isUpdate = existing != null;
+
     // Create a copy to avoid external modifications
     final LampEntity copy = new LampEntity();
     copy.setId(entity.getId());
     copy.setStatus(entity.getStatus());
     copy.setDeletedAt(entity.getDeletedAt());
 
-    // Preserve existing timestamps or use new entity's auto-generated ones
-    // This prevents null timestamps from being saved
-    this.preserveTimestamps(entity, copy);
+    // Set timestamps: preserve createdAt on updates, always update updatedAt
+    this.setTimestamps(entity, copy, existing, isUpdate);
 
     lamps.put(copy.getId(), copy);
     return copy;
   }
 
-  private void preserveTimestamps(final LampEntity source, final LampEntity target) {
-    final java.time.OffsetDateTime sourceCreatedAt = source.getCreatedAt();
-    final java.time.OffsetDateTime sourceUpdatedAt = source.getUpdatedAt();
-    final java.time.OffsetDateTime targetCreatedAt = target.getCreatedAt();
-    final java.time.OffsetDateTime targetUpdatedAt = target.getUpdatedAt();
+  private void setTimestamps(
+      final LampEntity source,
+      final LampEntity target,
+      final LampEntity existing,
+      final boolean isUpdate) {
+    final java.time.OffsetDateTime now = java.time.OffsetDateTime.now();
 
-    if (sourceCreatedAt != null) {
-      target.setCreatedAt(sourceCreatedAt);
+    // For updates: preserve createdAt from existing entity
+    // For creates: use source's createdAt or generate new timestamp
+    if (isUpdate) {
+      final java.time.OffsetDateTime existingCreatedAt = existing.getCreatedAt();
+      target.setCreatedAt(existingCreatedAt);
     } else {
-      target.setCreatedAt(targetCreatedAt);
+      final java.time.OffsetDateTime sourceCreatedAt = source.getCreatedAt();
+      if (sourceCreatedAt != null) {
+        target.setCreatedAt(sourceCreatedAt);
+      } else {
+        target.setCreatedAt(now);
+      }
     }
 
-    if (sourceUpdatedAt != null) {
-      target.setUpdatedAt(sourceUpdatedAt);
-    } else {
-      target.setUpdatedAt(targetUpdatedAt);
-    }
+    // Always update updatedAt to current time
+    target.setUpdatedAt(now);
   }
 
   @Override
