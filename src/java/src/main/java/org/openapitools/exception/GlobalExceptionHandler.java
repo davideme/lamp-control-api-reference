@@ -55,4 +55,28 @@ public class GlobalExceptionHandler {
     final Error error = new Error("INVALID_ARGUMENT");
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
+
+  /**
+   * Handle null pointer exceptions that may occur during request processing.
+   *
+   * @param ex the null pointer exception
+   * @return 400 Bad Request with error details
+   */
+  @ExceptionHandler(NullPointerException.class)
+  public ResponseEntity<Error> handleNullPointerException(final NullPointerException ex) {
+    final Error error = new Error("INVALID_ARGUMENT");
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle illegal argument exceptions (e.g., invalid UUID format).
+   *
+   * @param ex the illegal argument exception
+   * @return 400 Bad Request with error details
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<Error> handleIllegalArgumentException(final IllegalArgumentException ex) {
+    final Error error = new Error("INVALID_ARGUMENT");
+    return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+  }
 }

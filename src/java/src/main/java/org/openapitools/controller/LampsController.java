@@ -49,7 +49,7 @@ public class LampsController implements LampsApi {
               return ResponseEntity.notFound().<Void>build();
             }
           } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().<Void>build();
+            return ResponseEntity.badRequest().<Void>build();
           }
         });
   }
@@ -67,7 +67,7 @@ public class LampsController implements LampsApi {
               return ResponseEntity.notFound().build();
             }
           } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
           }
         });
   }
@@ -101,7 +101,7 @@ public class LampsController implements LampsApi {
               return ResponseEntity.notFound().build();
             }
           } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
           }
         });
   }
