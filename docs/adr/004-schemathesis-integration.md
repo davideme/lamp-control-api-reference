@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The Lamp Control API Reference project includes multiple language implementations (C#, TypeScript, Java, Python, PHP, Go, Kotlin, and Ruby) that all need to conform to the same OpenAPI specification. Manual testing alone is insufficient for ensuring:
+The Lamp Control API Reference project includes multiple language implementations (C#, TypeScript, Java, Python, Go, and Kotlin) that all need to conform to the same OpenAPI specification. Manual testing alone is insufficient for ensuring:
 
 1. **API Contract Compliance**: All implementations must return responses that match the OpenAPI schema exactly
 2. **Edge Case Coverage**: Manual tests often miss boundary conditions and unexpected input combinations
@@ -107,14 +107,11 @@ Each language implementation includes its own detailed ADR documenting the speci
 The following implementations currently have Schemathesis integration:
 
 - **Python**: [ADR 004: Schemathesis Integration](/src/python/docs/adr/004-schemathesis-integration.md)
-- **C#**: [ADR 005: Schemathesis Integration](/src/csharp/adr/005-schemathesis-integration.md)  
+- **C#**: [ADR 005: Schemathesis Integration](/src/csharp/adr/005-schemathesis-integration.md)
 - **TypeScript**: [ADR 006: Schemathesis Integration](/src/typescript/docs/adr/006-schemathesis-integration.md)
 - **Kotlin**: [ADR 006: Schemathesis Integration](/src/kotlin/adr/006-schemathesis-integration.md)
 - **Go**: [ADR 007: Schemathesis Integration](/src/go/adr/007-schemathesis-integration.md)
-- **PHP**: [ADR 004: Schemathesis Integration](/src/php/adr/004-schemathesis-integration.md)
 - **Java**: [ADR 009: Schemathesis Integration](/src/java/adr/009-schemathesis-integration.md)
-
-*Note: Ruby implementation does not yet have Schemathesis integration.*
 
 ### Common Implementation Pattern
 

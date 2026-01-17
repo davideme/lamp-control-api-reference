@@ -49,14 +49,6 @@ jobs:
           cache: 'maven'
           cache-dependency-path: 'src/java/pom.xml'
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
-          tools: composer:v2
-          coverage: xdebug
-      
       - name: Install poetry
         run: pipx install poetry
 

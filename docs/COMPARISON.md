@@ -10,10 +10,8 @@ This document provides a comparison of the different language implementations in
 | Python | 609 | 330 | 285 | 0.47 | 86.40 | 1612 | 695 | 0.43 |
 | Java | 1156 | 924 | 743 | 0.64 | 89.88 | 2737 | 1048 | 0.38 |
 | C# | 519 | 361 | 622 | 1.20 | 98.59 | 1967 | 798 | 0.41 |
-| PHP | 1420 | 543 | 1160 | 0.82 | N/A | 4376 | 1665 | 0.38 |
 | Go | 889 | 295 | 1490 | 1.68 | 98.60 | 3220 | 1337 | 0.42 |
 | Kotlin | 692 | 571 | 914 | 1.32 | 82.34 | 2253 | 1030 | 0.46 |
-| Ruby | null | null | 0 | N/A | N/A | null | null | N/A |
 ## ULOC Metrics
 
 | Language   | App ULOC | App ULOC (No Generated) | Test ULOC | Test/App Ratio | Coverage (%) |
@@ -22,10 +20,8 @@ This document provides a comparison of the different language implementations in
 | Python | 603 | 236 | 214 | 0.55 | 86.40 |
 | Java | 995 | 517 | 365 | 0.58 | 94.04 |
 | C# | 615 | 225 | 281 | 0.84 | 98.59 |
-| PHP | 1360 | 198 | 571 | 0.72 | N/A |
 | Go | 1168 | 179 | 630 | 1.17 | 98.50 |
 | Kotlin | 881 | 382 | 390 | 0.79 | 79.19 |
-| Ruby | null | null | null | N/A | N/A |
 
 ## API Interface Comparison
 

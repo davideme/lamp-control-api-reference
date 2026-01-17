@@ -60,9 +60,9 @@ The reference implementation will include the following languages:
 - TypeScript
 - Python
 - Java
-- PHP
-- Ruby
+- C#
 - Go
+- Kotlin
 
 #### 3.2.2 Database Support
 Each language implementation must support the following database options:
