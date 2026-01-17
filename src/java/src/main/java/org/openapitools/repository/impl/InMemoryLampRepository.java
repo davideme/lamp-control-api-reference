@@ -36,23 +36,11 @@ public class InMemoryLampRepository implements LampRepository {
       entity.setId(UUID.randomUUID());
     }
 
-    // Check if this is an update to an existing entity
-    final LampEntity existing = lamps.get(entity.getId());
-    final boolean isUpdate = existing != null;
-
     // Create a copy to avoid external modifications
     final LampEntity copy = new LampEntity();
     copy.setId(entity.getId());
     copy.setStatus(entity.getStatus());
-
-    // Preserve createdAt from existing entity on updates, or use entity's value for new records
-    if (isUpdate) {
-      copy.setCreatedAt(existing.getCreatedAt());
-    } else {
-      copy.setCreatedAt(entity.getCreatedAt());
-    }
-
-    // Always use the entity's updatedAt value
+    copy.setCreatedAt(entity.getCreatedAt());
     copy.setUpdatedAt(entity.getUpdatedAt());
 
     lamps.put(copy.getId(), copy);
