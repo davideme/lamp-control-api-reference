@@ -23,6 +23,13 @@ object DatabaseFactory {
             return null
         }
 
+        // Run database migrations before initializing connection pool
+        val migrationSuccess = FlywayConfig.runMigrations(config)
+        if (!migrationSuccess) {
+            logger.error("Database migrations failed. Database connection will not be initialized.")
+            return null
+        }
+
         val hikariConfig = HikariConfig().apply {
             jdbcUrl = config.connectionString()
             driverClassName = "org.postgresql.Driver"
