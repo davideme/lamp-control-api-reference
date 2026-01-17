@@ -51,6 +51,10 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:5.1.0")
 
+    // Flyway for database migrations
+    implementation("org.flywaydb:flyway-core:10.21.0")
+    implementation("org.flywaydb:flyway-database-postgresql:10.21.0")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
