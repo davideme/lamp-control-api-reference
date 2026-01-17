@@ -24,6 +24,19 @@ import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGe
 public class OpenApiGeneratorApplication {
 
   public static void main(final String[] args) {
+    // Determine operation mode from command line arguments
+    ApplicationMode.Mode mode = ApplicationMode.parseMode(args);
+
+    // Handle migrate-only mode
+    if (mode == ApplicationMode.Mode.MIGRATE) {
+      ApplicationMode.runMigrationsOnly(args);
+      return;
+    }
+
+    // Configure Spring properties based on mode
+    ApplicationMode.configureMode(mode);
+
+    // Start Spring Boot application
     SpringApplication.run(OpenApiGeneratorApplication.class, args);
   }
 
