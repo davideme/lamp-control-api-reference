@@ -1,12 +1,11 @@
 package com.lampcontrol.api.models
 
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class ApiModelsTest {
-
     @Test
     fun `ListLamps200Response can be created with data`() {
         val lamp1 = Lamp(id = UUID.randomUUID(), status = true, createdAt = "2024-01-01T00:00:00Z", updatedAt = "2024-01-01T00:00:00Z")
@@ -63,12 +62,13 @@ class ApiModelsTest {
     @Test
     fun `Lamp can be created with all properties`() {
         val id = UUID.randomUUID()
-        val lamp = Lamp(
-            id = id,
-            status = true,
-            createdAt = "2024-01-01T00:00:00Z",
-            updatedAt = "2024-01-01T00:00:00Z"
-        )
+        val lamp =
+            Lamp(
+                id = id,
+                status = true,
+                createdAt = "2024-01-01T00:00:00Z",
+                updatedAt = "2024-01-01T00:00:00Z",
+            )
 
         assertEquals(id, lamp.id)
         assertEquals(true, lamp.status)

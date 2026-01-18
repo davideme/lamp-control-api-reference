@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 class InMemoryLampRepository : LampRepository {
     // In-memory storage for lamps - using UUID keys
     private val lamps = ConcurrentHashMap<UUID, LampEntity>()
-    
+
     /**
      * Get all lamps
      */

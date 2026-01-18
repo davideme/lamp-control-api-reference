@@ -4,10 +4,12 @@ import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.entity.LampEntity
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class LampMapperTest {
     private val mapper = LampMapper()
@@ -17,12 +19,13 @@ class LampMapperTest {
         // Given
         val uuid = UUID.randomUUID()
         val now = Instant.now()
-        val entity = LampEntity(
-            id = uuid,
-            status = true,
-            createdAt = now,
-            updatedAt = now
-        )
+        val entity =
+            LampEntity(
+                id = uuid,
+                status = true,
+                createdAt = now,
+                updatedAt = now,
+            )
 
         // When
         val apiModel = mapper.toApiModel(entity)
@@ -39,12 +42,13 @@ class LampMapperTest {
         // Given
         val uuid = UUID.randomUUID()
         val timestamp = "2023-01-01T00:00:00Z"
-        val apiModel = Lamp(
-            id = uuid,
-            status = false,
-            createdAt = timestamp,
-            updatedAt = timestamp
-        )
+        val apiModel =
+            Lamp(
+                id = uuid,
+                status = false,
+                createdAt = timestamp,
+                updatedAt = timestamp,
+            )
 
         // When
         val entity = mapper.toDomainEntity(apiModel)

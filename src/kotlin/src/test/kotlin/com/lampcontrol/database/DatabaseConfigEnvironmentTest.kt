@@ -9,21 +9,21 @@ import kotlin.test.assertNotNull
  * These tests focus on the static factory methods and edge cases.
  */
 class DatabaseConfigEnvironmentTest {
-
     @Test
     fun `DatabaseConfig can be constructed with all parameters`() {
-        val config = DatabaseConfig(
-            host = "production.db.example.com",
-            port = 5432,
-            database = "production_db",
-            user = "prod_user",
-            password = "secure_password_123",
-            poolMin = 10,
-            poolMax = 50,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "production.db.example.com",
+                port = 5432,
+                database = "production_db",
+                user = "prod_user",
+                password = "secure_password_123",
+                poolMin = 10,
+                poolMax = 50,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertNotNull(config)
         assertEquals("production.db.example.com", config.host)
@@ -37,18 +37,19 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig with empty password`() {
-        val config = DatabaseConfig(
-            host = "localhost",
-            port = 5432,
-            database = "testdb",
-            user = "testuser",
-            password = "",
-            poolMin = 0,
-            poolMax = 4,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "localhost",
+                port = 5432,
+                database = "testdb",
+                user = "testuser",
+                password = "",
+                poolMin = 0,
+                poolMax = 4,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertEquals("", config.password)
         assertNotNull(config.connectionString())
@@ -56,18 +57,19 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig with very large pool size`() {
-        val config = DatabaseConfig(
-            host = "localhost",
-            port = 5432,
-            database = "db",
-            user = "user",
-            password = "pass",
-            poolMin = 100,
-            poolMax = 500,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "localhost",
+                port = 5432,
+                database = "db",
+                user = "user",
+                password = "pass",
+                poolMin = 100,
+                poolMax = 500,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertEquals(100, config.poolMin)
         assertEquals(500, config.poolMax)
@@ -75,18 +77,19 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig with IPv6 host`() {
-        val config = DatabaseConfig(
-            host = "::1",
-            port = 5432,
-            database = "db",
-            user = "user",
-            password = "pass",
-            poolMin = 0,
-            poolMax = 4,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "::1",
+                port = 5432,
+                database = "db",
+                user = "user",
+                password = "pass",
+                poolMin = 0,
+                poolMax = 4,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertEquals("::1", config.host)
         assertEquals("jdbc:postgresql://::1:5432/db", config.connectionString())
@@ -110,18 +113,19 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig component destructuring works`() {
-        val config = DatabaseConfig(
-            host = "myhost",
-            port = 5433,
-            database = "mydb",
-            user = "myuser",
-            password = "mypass",
-            poolMin = 5,
-            poolMax = 20,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "myhost",
+                port = 5433,
+                database = "mydb",
+                user = "myuser",
+                password = "mypass",
+                poolMin = 5,
+                poolMax = 20,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         val (host, port, db, user, pass, min, max, maxLifetime, idleTimeout, connectionTimeout) = config
 
@@ -153,18 +157,19 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig with FQDN host`() {
-        val config = DatabaseConfig(
-            host = "db.production.company.com",
-            port = 5432,
-            database = "maindb",
-            user = "appuser",
-            password = "secret",
-            poolMin = 1,
-            poolMax = 10,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "db.production.company.com",
+                port = 5432,
+                database = "maindb",
+                user = "appuser",
+                password = "secret",
+                poolMin = 1,
+                poolMax = 10,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         val connStr = config.connectionString()
         assert(connStr.contains("db.production.company.com"))

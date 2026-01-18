@@ -1,19 +1,18 @@
 package com.lampcontrol.database
 
-import org.junitpioneer.jupiter.SetEnvironmentVariable
-import org.junitpioneer.jupiter.ClearEnvironmentVariable
 import org.junit.jupiter.api.Test
+import org.junitpioneer.jupiter.ClearEnvironmentVariable
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertFailsWith
 
 /**
  * Tests for DatabaseConfig.fromEnv() using JUnit Pioneer to set environment variables.
  * These tests exercise the actual environment variable parsing code paths.
  */
 class DatabaseConfigEnvironmentVariableTest {
-
     @Test
     @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://testuser:testpass@localhost:5432/testdb")
     fun `fromEnv parses DATABASE_URL correctly`() {
@@ -25,8 +24,8 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals("localhost", config.host)
         assertEquals(5432, config.port)
         assertEquals("testdb", config.database)
-        assertEquals(0, config.poolMin)  // Default
-        assertEquals(4, config.poolMax)  // Default
+        assertEquals(0, config.poolMin) // Default
+        assertEquals(4, config.poolMax) // Default
     }
 
     @Test
@@ -84,9 +83,9 @@ class DatabaseConfigEnvironmentVariableTest {
         assertNotNull(config)
         assertEquals("myhost", config.host)
         assertEquals("myuser", config.user)
-        assertEquals(5432, config.port)  // Default
-        assertEquals("lamp_control", config.database)  // Default
-        assertEquals("", config.password)  // Default
+        assertEquals(5432, config.port) // Default
+        assertEquals("lamp_control", config.database) // Default
+        assertEquals("", config.password) // Default
     }
 
     @Test
@@ -116,10 +115,10 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals("localhost", config.host)  // Default
-        assertEquals(5432, config.port)  // Default
+        assertEquals("localhost", config.host) // Default
+        assertEquals(5432, config.port) // Default
         assertEquals("my_database", config.database)
-        assertEquals("lamp_user", config.user)  // Default
+        assertEquals("lamp_user", config.user) // Default
     }
 
     @Test
@@ -150,7 +149,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(5432, config.port)  // Falls back to default
+        assertEquals(5432, config.port) // Falls back to default
     }
 
     @Test
@@ -161,7 +160,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(0, config.poolMin)  // Falls back to default
+        assertEquals(0, config.poolMin) // Falls back to default
     }
 
     @Test
@@ -172,7 +171,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(4, config.poolMax)  // Falls back to default
+        assertEquals(4, config.poolMax) // Falls back to default
     }
 
     @Test
@@ -290,9 +289,9 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(7200000L, config.maxLifetimeMs)  // 2 hours
-        assertEquals(900000L, config.idleTimeoutMs)   // 15 minutes
-        assertEquals(60000L, config.connectionTimeoutMs)  // 60 seconds
+        assertEquals(7200000L, config.maxLifetimeMs) // 2 hours
+        assertEquals(900000L, config.idleTimeoutMs) // 15 minutes
+        assertEquals(60000L, config.connectionTimeoutMs) // 60 seconds
     }
 
     @Test
@@ -304,9 +303,9 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(1800000L, config.maxLifetimeMs)  // 30 minutes
-        assertEquals(600000L, config.idleTimeoutMs)   // 10 minutes
-        assertEquals(20000L, config.connectionTimeoutMs)  // 20 seconds
+        assertEquals(1800000L, config.maxLifetimeMs) // 30 minutes
+        assertEquals(600000L, config.idleTimeoutMs) // 10 minutes
+        assertEquals(20000L, config.connectionTimeoutMs) // 20 seconds
     }
 
     @Test
@@ -316,7 +315,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(3600000L, config.maxLifetimeMs)  // Falls back to 1 hour default
+        assertEquals(3600000L, config.maxLifetimeMs) // Falls back to 1 hour default
     }
 
     @Test
@@ -326,7 +325,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(1800000L, config.idleTimeoutMs)  // Falls back to 30 minutes default
+        assertEquals(1800000L, config.idleTimeoutMs) // Falls back to 30 minutes default
     }
 
     @Test
@@ -336,6 +335,6 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(30000L, config.connectionTimeoutMs)  // Falls back to 30 seconds default
+        assertEquals(30000L, config.connectionTimeoutMs) // Falls back to 30 seconds default
     }
 }

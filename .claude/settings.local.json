@@ -3,6 +3,8 @@
     "allow": [
       "Bash(./gradlew clean:*)",
       "Bash(./gradlew compileKotlin:*)",
+      "Bash(./gradlew ktlintCheck:*)",
+      "Bash(./gradlew ktlintFormat:*)",
       "Bash(./gradlew tasks:*)",
       "Bash(./gradlew test:*)",
       "Bash(./mvnw clean:*)",
@@ -15,6 +17,7 @@
       "Bash(docker compose up:*)",
       "Bash(find:*)",
       "Bash(java:*)",
+      "Bash(make lint:*)",
       "Bash(mvn clean compile:*)",
       "Bash(mvn clean test:*)",
       "Bash(mvn compile:*)",
@@ -24,6 +27,7 @@
       "Bash(mvn:*)",
       "Bash(npm install)",
       "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
       "Bash(npm run test:integration:*)",
       "Bash(npm test:*)",
       "Bash(npx prisma generate:*)",
@@ -42,6 +46,7 @@
       "Bash(poetry run ruff:*)",
       "Bash(python -m pytest:*)",
       "Bash(python3:*)",
+      "Bash(ruff check:*)",
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
       "Bash(tree:*)"

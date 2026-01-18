@@ -7,7 +7,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class LampRepositoryFactoryTest {
-
     @Test
     fun `create returns a repository instance`() {
         // When

@@ -3,8 +3,8 @@ package com.lampcontrol.plugins
 import com.lampcontrol.api.models.Error
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.plugins.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import kotlinx.serialization.SerializationException
 
@@ -16,14 +16,14 @@ fun Application.configureStatusPages() {
         exception<NumberFormatException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                Error(error = "Invalid numeric parameter")
+                Error(error = "Invalid numeric parameter"),
             )
         }
 
         exception<SerializationException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                Error(error = "Invalid JSON format")
+                Error(error = "Invalid JSON format"),
             )
         }
 
@@ -35,7 +35,7 @@ fun Application.configureStatusPages() {
             if (nf is NumberFormatException) {
                 call.respond(
                     HttpStatusCode.BadRequest,
-                    Error(error = "Invalid numeric parameter")
+                    Error(error = "Invalid numeric parameter"),
                 )
             } else {
                 // Fallback to the generic handler below by rethrowing so it is caught by the
@@ -47,14 +47,14 @@ fun Application.configureStatusPages() {
         exception<IllegalArgumentException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                Error(error = "Invalid argument")
+                Error(error = "Invalid argument"),
             )
         }
 
         exception<Exception> { call, cause ->
             call.respond(
                 HttpStatusCode.InternalServerError,
-                Error(error = "Internal server error")
+                Error(error = "Internal server error"),
             )
         }
     }

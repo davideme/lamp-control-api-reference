@@ -1,11 +1,9 @@
 package com.lampcontrol.database
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 
 class DatabaseFactoryTest {
-
     @Test
     fun `init returns null when no database configuration is present`() {
         // Given: No DATABASE_URL or DB_NAME environment variables are set in test environment
