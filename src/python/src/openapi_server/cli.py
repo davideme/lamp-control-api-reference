@@ -12,9 +12,9 @@ import sys
 from pathlib import Path
 
 import uvicorn
-from alembic.config import Config
 
 from alembic import command
+from alembic.config import Config
 from src.openapi_server.infrastructure.config import DatabaseSettings
 
 logger = logging.getLogger(__name__)
