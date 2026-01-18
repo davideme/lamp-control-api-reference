@@ -8,6 +8,7 @@ import asyncio
 from pathlib import Path
 from uuid import uuid4
 
+import psycopg2
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -40,8 +41,6 @@ def postgres_container():
             schema_sql = f.read()
 
         # Get a connection and execute the schema
-        import psycopg2
-
         # Use individual connection parameters instead of URL
         conn = psycopg2.connect(
             host=postgres.get_container_host_ip(),

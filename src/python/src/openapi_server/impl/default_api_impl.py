@@ -2,6 +2,8 @@
 
 from uuid import uuid4
 
+from fastapi import HTTPException
+
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
 from src.openapi_server.mappers.lamp_mapper import LampMapper
 from src.openapi_server.models.lamp import Lamp
@@ -44,8 +46,6 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             HTTPException: If the lamp creation data is invalid.
         """
         if lamp_create is None:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=400, detail="Invalid request data")
 
         lamp_id = str(uuid4())
@@ -69,8 +69,6 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         try:
             await self.repository.delete(lamp_id)
         except LampNotFoundError as err:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=404, detail="Lamp not found") from err
 
     async def get_lamp(self, lamp_id: str) -> Lamp:
@@ -87,8 +85,6 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         """
         lamp_entity = await self.repository.get(lamp_id)
         if lamp_entity is None:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=404, detail="Lamp not found")
 
         # Convert domain entity to API model
@@ -130,8 +126,6 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             HTTPException: If the lamp is not found or update data is invalid.
         """
         if lamp_update is None:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=400, detail="Invalid request data")
 
         try:
@@ -147,6 +141,4 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             # Convert domain entity back to API model
             return LampMapper.to_api_model(final_entity)
         except LampNotFoundError as err:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=404, detail="Lamp not found") from err

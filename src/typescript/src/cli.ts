@@ -17,8 +17,8 @@ const HOST = process.env.HOST || '0.0.0.0';
 /**
  * Run Prisma migrations only and exit
  */
-async function runMigrationsOnly() {
-  console.log('Running migrations only...');
+async function runMigrationsOnly(): Promise<void> {
+  console.warn('Running migrations only...');
 
   if (process.env.USE_POSTGRES !== 'true') {
     console.warn('No PostgreSQL configuration found (USE_POSTGRES not set), nothing to migrate');
@@ -26,12 +26,12 @@ async function runMigrationsOnly() {
   }
 
   try {
-    console.log('Running Prisma migrations...');
+    console.warn('Running Prisma migrations...');
     execSync('npx prisma migrate deploy', {
       stdio: 'inherit',
       env: process.env,
     });
-    console.log('Migrations completed successfully');
+    console.warn('Migrations completed successfully');
   } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);
@@ -41,24 +41,24 @@ async function runMigrationsOnly() {
 /**
  * Start the server with optional migrations
  */
-async function startServer(runMigrations: boolean) {
+async function startServer(runMigrations: boolean): Promise<void> {
   if (runMigrations) {
-    console.log('Starting server with automatic migrations...');
+    console.warn('Starting server with automatic migrations...');
     if (process.env.USE_POSTGRES === 'true') {
       try {
-        console.log('Running Prisma migrations...');
+        console.warn('Running Prisma migrations...');
         execSync('npx prisma migrate deploy', {
           stdio: 'inherit',
           env: process.env,
         });
-        console.log('Migrations completed');
+        console.warn('Migrations completed');
       } catch (error) {
         console.error('Migration failed:', error);
         process.exit(1);
       }
     }
   } else {
-    console.log('Starting server without running migrations...');
+    console.warn('Starting server without running migrations...');
   }
 
   const server = await buildApp();
@@ -74,7 +74,7 @@ async function startServer(runMigrations: boolean) {
 /**
  * Main CLI entry point
  */
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const modeArg = args.find((arg) => arg.startsWith('--mode='));
   const mode = modeArg ? modeArg.split('=')[1] : 'serve';
