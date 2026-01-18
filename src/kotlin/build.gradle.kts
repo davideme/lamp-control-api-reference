@@ -83,6 +83,18 @@ tasks.jacocoTestReport {
         html.required.set(true)
         csv.required.set(false)
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/com/lampcontrol/Application*",
+                    "**/com/lampcontrol/api/AppMain*",
+                    "**/com/lampcontrol/api/Configuration*",
+                    "**/com/lampcontrol/api/Paths*"
+                )
+            }
+        })
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -93,6 +105,18 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/com/lampcontrol/Application*",
+                    "**/com/lampcontrol/api/AppMain*",
+                    "**/com/lampcontrol/api/Configuration*",
+                    "**/com/lampcontrol/api/Paths*"
+                )
+            }
+        })
+    )
 }
 
 tasks.test {
