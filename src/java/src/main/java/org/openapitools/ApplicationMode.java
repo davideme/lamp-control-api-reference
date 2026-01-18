@@ -70,7 +70,10 @@ public class ApplicationMode {
           case "serve":
             return Mode.SERVE;
           default:
-            logger.error("Invalid mode: {}. Valid modes are: serve, migrate, serve-only", mode);
+            // Sanitize mode value to prevent CRLF injection in logs
+            String sanitizedMode = mode.replaceAll("[\\r\\n]", "_");
+            logger.error(
+                "Invalid mode: {}. Valid modes are: serve, migrate, serve-only", sanitizedMode);
             System.exit(1);
         }
       }
