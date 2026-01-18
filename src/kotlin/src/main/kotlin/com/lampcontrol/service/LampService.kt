@@ -3,7 +3,6 @@ package com.lampcontrol.service
 import com.lampcontrol.api.models.Lamp
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
-import com.lampcontrol.entity.LampEntity
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import java.util.*
@@ -14,9 +13,8 @@ import java.util.*
  */
 class LampService(
     private val lampRepository: LampRepository,
-    private val lampMapper: LampMapper
+    private val lampMapper: LampMapper,
 ) {
-
     /**
      * Get all lamps as API models
      */
@@ -29,11 +27,12 @@ class LampService(
      * Get a lamp by string ID and return as API model
      */
     suspend fun getLampById(lampId: String): Lamp? {
-        val uuid = try {
-            UUID.fromString(lampId)
-        } catch (e: IllegalArgumentException) {
-            return null
-        }
+        val uuid =
+            try {
+                UUID.fromString(lampId)
+            } catch (e: IllegalArgumentException) {
+                return null
+            }
 
         return lampRepository.getLampById(uuid)
             ?.let { lampMapper.toApiModel(it) }
@@ -51,12 +50,16 @@ class LampService(
     /**
      * Update a lamp by string ID with API update model
      */
-    suspend fun updateLamp(lampId: String, lampUpdate: LampUpdate): Lamp? {
-        val uuid = try {
-            UUID.fromString(lampId)
-        } catch (e: IllegalArgumentException) {
-            return null
-        }
+    suspend fun updateLamp(
+        lampId: String,
+        lampUpdate: LampUpdate,
+    ): Lamp? {
+        val uuid =
+            try {
+                UUID.fromString(lampId)
+            } catch (e: IllegalArgumentException) {
+                return null
+            }
 
         val existingEntity = lampRepository.getLampById(uuid) ?: return null
         val updatedEntity = lampMapper.updateDomainEntity(existingEntity, lampUpdate)
@@ -68,11 +71,12 @@ class LampService(
      * Delete a lamp by string ID
      */
     suspend fun deleteLamp(lampId: String): Boolean {
-        val uuid = try {
-            UUID.fromString(lampId)
-        } catch (e: IllegalArgumentException) {
-            return false
-        }
+        val uuid =
+            try {
+                UUID.fromString(lampId)
+            } catch (e: IllegalArgumentException) {
+                return false
+            }
 
         return lampRepository.deleteLamp(uuid)
     }
@@ -81,11 +85,12 @@ class LampService(
      * Check if a lamp exists by string ID
      */
     suspend fun lampExists(lampId: String): Boolean {
-        val uuid = try {
-            UUID.fromString(lampId)
-        } catch (e: IllegalArgumentException) {
-            return false
-        }
+        val uuid =
+            try {
+                UUID.fromString(lampId)
+            } catch (e: IllegalArgumentException) {
+                return false
+            }
 
         return lampRepository.lampExists(uuid)
     }

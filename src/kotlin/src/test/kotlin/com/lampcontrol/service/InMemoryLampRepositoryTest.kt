@@ -3,37 +3,43 @@ package com.lampcontrol.service
 import com.lampcontrol.entity.LampEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class InMemoryLampRepositoryTest {
     private val repo = InMemoryLampRepository()
 
     @Test
-    fun `create, retrieve, update and delete lamp lifecycle`() = runTest {
-        val entity = LampEntity.create(true)
-        val created = repo.createLamp(entity)
+    fun `create, retrieve, update and delete lamp lifecycle`() =
+        runTest {
+            val entity = LampEntity.create(true)
+            val created = repo.createLamp(entity)
 
-        assertNotNull(created.id)
-        assertTrue(created.status)
-        assertNotNull(created.createdAt)
-        assertNotNull(created.updatedAt)
+            assertNotNull(created.id)
+            assertTrue(created.status)
+            assertNotNull(created.createdAt)
+            assertNotNull(created.updatedAt)
 
-        // retrieval
-        val byId = repo.getLampById(created.id)
-        assertEquals(created, byId)
+            // retrieval
+            val byId = repo.getLampById(created.id)
+            assertEquals(created, byId)
 
-        // update
-        val beforeUpdatedAt = created.updatedAt
-        val updatedEntity = created.withUpdatedStatus(false)
-        val updated = repo.updateLamp(updatedEntity)
-        assertNotNull(updated)
-        assertFalse(updated!!.status)
-        assertNotEquals(beforeUpdatedAt, updated.updatedAt)
+            // update
+            val beforeUpdatedAt = created.updatedAt
+            val updatedEntity = created.withUpdatedStatus(false)
+            val updated = repo.updateLamp(updatedEntity)
+            assertNotNull(updated)
+            assertFalse(updated!!.status)
+            assertNotEquals(beforeUpdatedAt, updated.updatedAt)
 
-        // existence and delete
-        assertTrue(repo.lampExists(created.id))
-        assertTrue(repo.deleteLamp(created.id))
-        assertFalse(repo.lampExists(created.id))
-        assertNull(repo.getLampById(created.id))
-    }
+            // existence and delete
+            assertTrue(repo.lampExists(created.id))
+            assertTrue(repo.deleteLamp(created.id))
+            assertFalse(repo.lampExists(created.id))
+            assertNull(repo.getLampById(created.id))
+        }
 }

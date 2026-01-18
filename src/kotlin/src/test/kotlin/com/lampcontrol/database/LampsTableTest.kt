@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class LampsTableTest {
-
     @Test
     fun `LampsTable has correct table name`() {
         assertEquals("lamps", LampsTable.tableName)

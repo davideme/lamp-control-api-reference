@@ -1,12 +1,12 @@
 package com.lampcontrol.entity
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.util.*
 
 class LampEntityTest {
-
     @Test
     fun `should create new lamp entity with generated ID and timestamps`() {
         // When
@@ -59,7 +59,7 @@ class LampEntityTest {
         // Then - should be able to create and manipulate without API dependencies
         val entityClass = entity::class.java
         val apiModelPackage = "com.lampcontrol.api.models"
-        
+
         // Verify no direct dependency on API model classes
         assertFalse(entityClass.name.contains(apiModelPackage))
         assertNotNull(entity.toString()) // Basic functionality works

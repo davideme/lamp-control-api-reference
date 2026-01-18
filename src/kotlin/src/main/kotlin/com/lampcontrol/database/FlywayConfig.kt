@@ -1,6 +1,5 @@
 package com.lampcontrol.database
 
-import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
 
@@ -21,17 +20,18 @@ object FlywayConfig {
         return try {
             logger.info("Starting database migrations with Flyway")
 
-            val flyway = Flyway.configure()
-                .dataSource(
-                    config.connectionString(),
-                    config.user,
-                    config.password
-                )
-                .locations("classpath:db/migration")
-                .baselineOnMigrate(true)
-                .baselineVersion("0")
-                .validateOnMigrate(true)
-                .load()
+            val flyway =
+                Flyway.configure()
+                    .dataSource(
+                        config.connectionString(),
+                        config.user,
+                        config.password,
+                    )
+                    .locations("classpath:db/migration")
+                    .baselineOnMigrate(true)
+                    .baselineVersion("0")
+                    .validateOnMigrate(true)
+                    .load()
 
             val migrationsExecuted = flyway.migrate()
 
@@ -39,12 +39,12 @@ object FlywayConfig {
                 logger.info(
                     "Successfully executed {} migration(s). Current schema version: {}",
                     migrationsExecuted.migrationsExecuted,
-                    migrationsExecuted.targetSchemaVersion
+                    migrationsExecuted.targetSchemaVersion,
                 )
             } else {
                 logger.info(
                     "Database schema is up to date at version: {}",
-                    flyway.info().current()?.version ?: "baseline"
+                    flyway.info().current()?.version ?: "baseline",
                 )
             }
 

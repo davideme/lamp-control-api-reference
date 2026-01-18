@@ -11,7 +11,7 @@ data class LampEntity(
     val id: UUID,
     val status: Boolean,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
 ) {
     companion object {
         /**
@@ -23,18 +23,18 @@ data class LampEntity(
                 id = UUID.randomUUID(),
                 status = status,
                 createdAt = now,
-                updatedAt = now
+                updatedAt = now,
             )
         }
     }
-    
+
     /**
      * Create an updated copy of this entity with a new status and updated timestamp
      */
     fun withUpdatedStatus(newStatus: Boolean): LampEntity {
         return copy(
             status = newStatus,
-            updatedAt = Instant.now()
+            updatedAt = Instant.now(),
         )
     }
 }

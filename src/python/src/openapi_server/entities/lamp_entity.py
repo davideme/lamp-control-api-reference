@@ -49,6 +49,10 @@ class LampEntity:
             return False
         return self.id == other.id and self.status == other.status
 
+    def __hash__(self) -> int:
+        """Generate hash based on ID."""
+        return hash(self.id)
+
     def __repr__(self) -> str:
         """String representation of the lamp entity."""
         return (

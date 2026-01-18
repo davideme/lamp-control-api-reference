@@ -12,6 +12,7 @@ import java.sql.Connection
  */
 object DatabaseFactory {
     private val logger = LoggerFactory.getLogger(DatabaseFactory::class.java)
+
     /**
      * Initialize database connection from environment variables.
      * Returns null if no PostgreSQL configuration is found.
@@ -23,27 +24,33 @@ object DatabaseFactory {
             return null
         }
 
-        // Run database migrations before initializing connection pool
-        val migrationSuccess = FlywayConfig.runMigrations(config)
-        if (!migrationSuccess) {
-            logger.error("Database migrations failed. Database connection will not be initialized.")
-            return null
+        // Run database migrations before initializing connection pool (unless skipped)
+        val skipMigrations = System.getProperty("skip.migrations") == "true"
+        if (!skipMigrations) {
+            val migrationSuccess = FlywayConfig.runMigrations(config)
+            if (!migrationSuccess) {
+                logger.error("Database migrations failed. Database connection will not be initialized.")
+                return null
+            }
+        } else {
+            logger.info("Skipping database migrations (serve-only mode)")
         }
 
-        val hikariConfig = HikariConfig().apply {
-            jdbcUrl = config.connectionString()
-            driverClassName = "org.postgresql.Driver"
-            username = config.user
-            password = config.password
-            maximumPoolSize = config.poolMax
-            minimumIdle = config.poolMin
-            maxLifetime = config.maxLifetimeMs
-            idleTimeout = config.idleTimeoutMs
-            connectionTimeout = config.connectionTimeoutMs
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-            validate()
-        }
+        val hikariConfig =
+            HikariConfig().apply {
+                jdbcUrl = config.connectionString()
+                driverClassName = "org.postgresql.Driver"
+                username = config.user
+                password = config.password
+                maximumPoolSize = config.poolMax
+                minimumIdle = config.poolMin
+                maxLifetime = config.maxLifetimeMs
+                idleTimeout = config.idleTimeoutMs
+                connectionTimeout = config.connectionTimeoutMs
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+                validate()
+            }
 
         val dataSource = HikariDataSource(hikariConfig)
         val database = Database.connect(dataSource)
@@ -68,7 +75,7 @@ data class DatabaseConfig(
     val poolMax: Int,
     val maxLifetimeMs: Long,
     val idleTimeoutMs: Long,
-    val connectionTimeoutMs: Long
+    val connectionTimeoutMs: Long,
 ) {
     companion object {
         /**
@@ -87,9 +94,10 @@ data class DatabaseConfig(
             val user = System.getenv("DB_USER")
 
             // Check if PostgreSQL is configured
-            val postgresConfigured = !databaseUrl.isNullOrEmpty() ||
-                                    !database.isNullOrEmpty() ||
-                                    (!host.isNullOrEmpty() && !user.isNullOrEmpty())
+            val postgresConfigured =
+                !databaseUrl.isNullOrEmpty() ||
+                    !database.isNullOrEmpty() ||
+                    (!host.isNullOrEmpty() && !user.isNullOrEmpty())
 
             if (!postgresConfigured) {
                 return null
@@ -111,7 +119,7 @@ data class DatabaseConfig(
                 poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4,
                 maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: 3600000, // 1 hour
                 idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: 1800000, // 30 minutes
-                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000 // 30 seconds
+                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000, // 30 seconds
             )
         }
 
@@ -120,12 +128,13 @@ data class DatabaseConfig(
          */
         private fun parseDatabaseUrl(url: String): DatabaseConfig {
             val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-            val match = regex.matchEntire(url)
-                ?: throw IllegalArgumentException(
-                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
-                        "'postgresql://user:password@host:5432/database' or " +
-                        "'postgres://user:password@host:5432/database'."
-                )
+            val match =
+                regex.matchEntire(url)
+                    ?: throw IllegalArgumentException(
+                        "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                            "'postgresql://user:password@host:5432/database' or " +
+                            "'postgres://user:password@host:5432/database'.",
+                    )
 
             val (user, password, host, port, database) = match.destructured
 
@@ -139,7 +148,7 @@ data class DatabaseConfig(
                 poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: 4,
                 maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: 3600000, // 1 hour
                 idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: 1800000, // 30 minutes
-                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000 // 30 seconds
+                connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000, // 30 seconds
             )
         }
     }

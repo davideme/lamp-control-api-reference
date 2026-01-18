@@ -2,7 +2,6 @@ package com.lampcontrol.database
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 /**
@@ -10,7 +9,6 @@ import kotlin.test.assertNotNull
  * These tests focus on exercising the code paths in fromEnv() and parseDatabaseUrl().
  */
 class DatabaseConfigCompanionTest {
-
     @Test
     fun `fromEnv can be called without exceptions`() {
         // This exercises the fromEnv() code path
@@ -43,18 +41,19 @@ class DatabaseConfigCompanionTest {
     @Test
     fun `DatabaseConfig can be created via constructor`() {
         // This tests the primary constructor which is part of the companion's scope
-        val config = DatabaseConfig(
-            host = "testhost",
-            port = 5432,
-            database = "testdb",
-            user = "testuser",
-            password = "testpass",
-            poolMin = 0,
-            poolMax = 4,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val config =
+            DatabaseConfig(
+                host = "testhost",
+                port = 5432,
+                database = "testdb",
+                user = "testuser",
+                password = "testpass",
+                poolMin = 0,
+                poolMax = 4,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertNotNull(config)
         assertEquals("testhost", config.host)
@@ -79,13 +78,14 @@ class DatabaseConfigCompanionTest {
 
     @Test
     fun `DatabaseConfig construction exercises all parameter paths`() {
-        val configs = listOf(
-            DatabaseConfig("h1", 5432, "d1", "u1", "p1", 0, 1, 3600000, 1800000, 30000),
-            DatabaseConfig("h2", 5433, "d2", "u2", "p2", 1, 2, 3600000, 1800000, 30000),
-            DatabaseConfig("h3", 5434, "d3", "u3", "p3", 2, 3, 3600000, 1800000, 30000),
-            DatabaseConfig("h4", 5435, "d4", "u4", "p4", 3, 4, 3600000, 1800000, 30000),
-            DatabaseConfig("h5", 5436, "d5", "u5", "p5", 4, 5, 3600000, 1800000, 30000)
-        )
+        val configs =
+            listOf(
+                DatabaseConfig("h1", 5432, "d1", "u1", "p1", 0, 1, 3600000, 1800000, 30000),
+                DatabaseConfig("h2", 5433, "d2", "u2", "p2", 1, 2, 3600000, 1800000, 30000),
+                DatabaseConfig("h3", 5434, "d3", "u3", "p3", 2, 3, 3600000, 1800000, 30000),
+                DatabaseConfig("h4", 5435, "d4", "u4", "p4", 3, 4, 3600000, 1800000, 30000),
+                DatabaseConfig("h5", 5436, "d5", "u5", "p5", 4, 5, 3600000, 1800000, 30000),
+            )
 
         configs.forEachIndexed { index, config ->
             assertEquals("h${index + 1}", config.host)
@@ -121,13 +121,14 @@ class DatabaseConfigCompanionTest {
 
     @Test
     fun `DatabaseConfig with various connection string formats`() {
-        val testCases = listOf(
-            Triple("localhost", 5432, "jdbc:postgresql://localhost:5432/db"),
-            Triple("127.0.0.1", 5432, "jdbc:postgresql://127.0.0.1:5432/db"),
-            Triple("db.example.com", 5432, "jdbc:postgresql://db.example.com:5432/db"),
-            Triple("10.0.0.1", 5433, "jdbc:postgresql://10.0.0.1:5433/db"),
-            Triple("postgres.local", 5434, "jdbc:postgresql://postgres.local:5434/db")
-        )
+        val testCases =
+            listOf(
+                Triple("localhost", 5432, "jdbc:postgresql://localhost:5432/db"),
+                Triple("127.0.0.1", 5432, "jdbc:postgresql://127.0.0.1:5432/db"),
+                Triple("db.example.com", 5432, "jdbc:postgresql://db.example.com:5432/db"),
+                Triple("10.0.0.1", 5433, "jdbc:postgresql://10.0.0.1:5433/db"),
+                Triple("postgres.local", 5434, "jdbc:postgresql://postgres.local:5434/db"),
+            )
 
         testCases.forEach { (host, port, expected) ->
             val config = DatabaseConfig(host, port, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
@@ -168,18 +169,19 @@ class DatabaseConfigCompanionTest {
     @Test
     fun `DatabaseConfig copy with all parameters changed`() {
         val original = DatabaseConfig("h1", 1, "d1", "u1", "p1", 1, 2, 3600000, 1800000, 30000)
-        val modified = original.copy(
-            host = "h2",
-            port = 2,
-            database = "d2",
-            user = "u2",
-            password = "p2",
-            poolMin = 3,
-            poolMax = 4,
-            maxLifetimeMs = 3600000,
-            idleTimeoutMs = 1800000,
-            connectionTimeoutMs = 30000
-        )
+        val modified =
+            original.copy(
+                host = "h2",
+                port = 2,
+                database = "d2",
+                user = "u2",
+                password = "p2",
+                poolMin = 3,
+                poolMax = 4,
+                maxLifetimeMs = 3600000,
+                idleTimeoutMs = 1800000,
+                connectionTimeoutMs = 30000,
+            )
 
         assertEquals("h2", modified.host)
         assertEquals(2, modified.port)

@@ -4,6 +4,16 @@ using LampControlApi.Middleware;
 using LampControlApi.Services;
 using Microsoft.EntityFrameworkCore;
 
+// Parse operation mode from command line arguments
+var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode="))?.Split('=')[1] ?? "serve";
+
+// Handle migrate-only mode
+if (mode == "migrate")
+{
+    RunMigrationsOnly(args);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure Kestrel to use PORT environment variable if set (required for Cloud Run)
@@ -61,6 +71,30 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Run migrations if in 'serve' mode (default) and PostgreSQL is configured
+if (mode == "serve" && usePostgres)
+{
+    Console.WriteLine("Running database migrations...");
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<LampControlDbContext>();
+        try
+        {
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Migration failed: {ex.Message}");
+            Environment.Exit(1);
+        }
+    }
+}
+else if (mode == "serve-only")
+{
+    Console.WriteLine("Starting server without running migrations...");
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -87,6 +121,43 @@ app.MapHealthChecks("/healthz");
 app.MapControllers();
 
 app.Run();
+
+// Helper method for migrate-only mode
+static void RunMigrationsOnly(string[] args)
+{
+    Console.WriteLine("Running migrations only...");
+
+    var builder = WebApplication.CreateBuilder(args);
+    var connectionString = builder.Configuration.GetConnectionString("LampControl");
+
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        Console.WriteLine("No PostgreSQL configuration found, nothing to migrate");
+        return;
+    }
+
+    builder.Services.AddDbContext<LampControlDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString!);
+    });
+
+    var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<LampControlDbContext>();
+        try
+        {
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Migration failed: {ex.Message}");
+            Environment.Exit(1);
+        }
+    }
+}
 
 /// <summary>
 /// Entry point for the LampControlApi application. This partial class is used for test accessibility.

@@ -8,12 +8,15 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -25,29 +28,30 @@ import kotlin.test.assertTrue
  */
 @Testcontainers
 class PostgresLampRepositoryTest {
-
     companion object {
         @Container
-        private val postgres = PostgreSQLContainer("postgres:16").apply {
-            withDatabaseName("lamp_control_test")
-            withUsername("test")
-            withPassword("test")
-        }
+        private val postgres =
+            PostgreSQLContainer("postgres:16").apply {
+                withDatabaseName("lamp_control_test")
+                withUsername("test")
+                withPassword("test")
+            }
 
         private lateinit var database: Database
 
         @JvmStatic
         @BeforeAll
         fun setupDatabase() {
-            val hikariConfig = HikariConfig().apply {
-                jdbcUrl = postgres.jdbcUrl
-                driverClassName = "org.postgresql.Driver"
-                username = postgres.username
-                password = postgres.password
-                maximumPoolSize = 5
-                minimumIdle = 1
-                isAutoCommit = false
-            }
+            val hikariConfig =
+                HikariConfig().apply {
+                    jdbcUrl = postgres.jdbcUrl
+                    driverClassName = "org.postgresql.Driver"
+                    username = postgres.username
+                    password = postgres.password
+                    maximumPoolSize = 5
+                    minimumIdle = 1
+                    isAutoCommit = false
+                }
 
             val dataSource = HikariDataSource(hikariConfig)
             database = Database.connect(dataSource)
@@ -82,211 +86,228 @@ class PostgresLampRepositoryTest {
     }
 
     @Test
-    fun `getAllLamps returns empty list when no lamps exist`() = runBlocking {
-        val lamps = repository.getAllLamps()
+    fun `getAllLamps returns empty list when no lamps exist`() =
+        runBlocking {
+            val lamps = repository.getAllLamps()
 
-        assertTrue(lamps.isEmpty())
-    }
-
-    @Test
-    fun `createLamp persists lamp to database`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-
-        val created = repository.createLamp(entity)
-
-        assertNotNull(created)
-        assertEquals(entity.id, created.id)
-        assertEquals(entity.status, created.status)
-        assertEquals(entity.createdAt, created.createdAt)
-        assertEquals(entity.updatedAt, created.updatedAt)
-    }
+            assertTrue(lamps.isEmpty())
+        }
 
     @Test
-    fun `getLampById returns lamp when it exists`() = runBlocking {
-        val entity = LampEntity.create(status = false)
-        repository.createLamp(entity)
+    fun `createLamp persists lamp to database`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
 
-        val retrieved = repository.getLampById(entity.id)
+            val created = repository.createLamp(entity)
 
-        assertNotNull(retrieved)
-        assertEquals(entity.id, retrieved.id)
-        assertEquals(entity.status, retrieved.status)
-    }
-
-    @Test
-    fun `getLampById returns null when lamp does not exist`() = runBlocking {
-        val nonExistentId = UUID.randomUUID()
-
-        val retrieved = repository.getLampById(nonExistentId)
-
-        assertNull(retrieved)
-    }
+            assertNotNull(created)
+            assertEquals(entity.id, created.id)
+            assertEquals(entity.status, created.status)
+            assertEquals(entity.createdAt, created.createdAt)
+            assertEquals(entity.updatedAt, created.updatedAt)
+        }
 
     @Test
-    fun `getAllLamps returns all non-deleted lamps`() = runBlocking {
-        val lamp1 = LampEntity.create(status = true)
-        val lamp2 = LampEntity.create(status = false)
-        val lamp3 = LampEntity.create(status = true)
+    fun `getLampById returns lamp when it exists`() =
+        runBlocking {
+            val entity = LampEntity.create(status = false)
+            repository.createLamp(entity)
 
-        repository.createLamp(lamp1)
-        repository.createLamp(lamp2)
-        repository.createLamp(lamp3)
+            val retrieved = repository.getLampById(entity.id)
 
-        val lamps = repository.getAllLamps()
-
-        assertEquals(3, lamps.size)
-        assertTrue(lamps.any { it.id == lamp1.id })
-        assertTrue(lamps.any { it.id == lamp2.id })
-        assertTrue(lamps.any { it.id == lamp3.id })
-    }
+            assertNotNull(retrieved)
+            assertEquals(entity.id, retrieved.id)
+            assertEquals(entity.status, retrieved.status)
+        }
 
     @Test
-    fun `updateLamp updates status and timestamp`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
+    fun `getLampById returns null when lamp does not exist`() =
+        runBlocking {
+            val nonExistentId = UUID.randomUUID()
 
-        // Wait a bit to ensure timestamp changes
-        Thread.sleep(10)
+            val retrieved = repository.getLampById(nonExistentId)
 
-        val updated = entity.withUpdatedStatus(newStatus = false)
-        val result = repository.updateLamp(updated)
-
-        assertNotNull(result)
-        assertEquals(updated.id, result.id)
-        assertEquals(false, result.status)
-        assertTrue(result.updatedAt > entity.updatedAt)
-    }
+            assertNull(retrieved)
+        }
 
     @Test
-    fun `updateLamp returns null when lamp does not exist`() = runBlocking {
-        val nonExistentEntity = LampEntity(
-            id = UUID.randomUUID(),
-            status = true,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
+    fun `getAllLamps returns all non-deleted lamps`() =
+        runBlocking {
+            val lamp1 = LampEntity.create(status = true)
+            val lamp2 = LampEntity.create(status = false)
+            val lamp3 = LampEntity.create(status = true)
 
-        val result = repository.updateLamp(nonExistentEntity)
+            repository.createLamp(lamp1)
+            repository.createLamp(lamp2)
+            repository.createLamp(lamp3)
 
-        assertNull(result)
-    }
+            val lamps = repository.getAllLamps()
 
-    @Test
-    fun `deleteLamp soft deletes lamp`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
-
-        val deleted = repository.deleteLamp(entity.id)
-
-        assertTrue(deleted)
-
-        // Verify lamp is not returned by queries
-        val retrieved = repository.getLampById(entity.id)
-        assertNull(retrieved)
-
-        val allLamps = repository.getAllLamps()
-        assertTrue(allLamps.none { it.id == entity.id })
-    }
+            assertEquals(3, lamps.size)
+            assertTrue(lamps.any { it.id == lamp1.id })
+            assertTrue(lamps.any { it.id == lamp2.id })
+            assertTrue(lamps.any { it.id == lamp3.id })
+        }
 
     @Test
-    fun `deleteLamp returns false when lamp does not exist`() = runBlocking {
-        val nonExistentId = UUID.randomUUID()
+    fun `updateLamp updates status and timestamp`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
 
-        val deleted = repository.deleteLamp(nonExistentId)
+            // Wait a bit to ensure timestamp changes
+            Thread.sleep(10)
 
-        assertTrue(!deleted)
-    }
+            val updated = entity.withUpdatedStatus(newStatus = false)
+            val result = repository.updateLamp(updated)
 
-    @Test
-    fun `deleteLamp returns false when lamp already deleted`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
-        repository.deleteLamp(entity.id)
-
-        // Try to delete again
-        val deleted = repository.deleteLamp(entity.id)
-
-        assertTrue(!deleted)
-    }
+            assertNotNull(result)
+            assertEquals(updated.id, result.id)
+            assertEquals(false, result.status)
+            assertTrue(result.updatedAt > entity.updatedAt)
+        }
 
     @Test
-    fun `lampExists returns true when lamp exists`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
+    fun `updateLamp returns null when lamp does not exist`() =
+        runBlocking {
+            val nonExistentEntity =
+                LampEntity(
+                    id = UUID.randomUUID(),
+                    status = true,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                )
 
-        val exists = repository.lampExists(entity.id)
+            val result = repository.updateLamp(nonExistentEntity)
 
-        assertTrue(exists)
-    }
-
-    @Test
-    fun `lampExists returns false when lamp does not exist`() = runBlocking {
-        val nonExistentId = UUID.randomUUID()
-
-        val exists = repository.lampExists(nonExistentId)
-
-        assertTrue(!exists)
-    }
+            assertNull(result)
+        }
 
     @Test
-    fun `lampExists returns false when lamp is deleted`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
-        repository.deleteLamp(entity.id)
+    fun `deleteLamp soft deletes lamp`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
 
-        val exists = repository.lampExists(entity.id)
+            val deleted = repository.deleteLamp(entity.id)
 
-        assertTrue(!exists)
-    }
+            assertTrue(deleted)
 
-    @Test
-    fun `updateLamp does not affect deleted lamps`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        repository.createLamp(entity)
-        repository.deleteLamp(entity.id)
+            // Verify lamp is not returned by queries
+            val retrieved = repository.getLampById(entity.id)
+            assertNull(retrieved)
 
-        val updated = entity.withUpdatedStatus(newStatus = false)
-        val result = repository.updateLamp(updated)
-
-        assertNull(result)
-    }
+            val allLamps = repository.getAllLamps()
+            assertTrue(allLamps.none { it.id == entity.id })
+        }
 
     @Test
-    fun `multiple lamps can be managed independently`() = runBlocking {
-        val lamp1 = LampEntity.create(status = true)
-        val lamp2 = LampEntity.create(status = false)
+    fun `deleteLamp returns false when lamp does not exist`() =
+        runBlocking {
+            val nonExistentId = UUID.randomUUID()
 
-        repository.createLamp(lamp1)
-        repository.createLamp(lamp2)
+            val deleted = repository.deleteLamp(nonExistentId)
 
-        // Update lamp1
-        val updated1 = lamp1.withUpdatedStatus(newStatus = false)
-        repository.updateLamp(updated1)
-
-        // Delete lamp2
-        repository.deleteLamp(lamp2.id)
-
-        // Verify final state
-        val allLamps = repository.getAllLamps()
-        assertEquals(1, allLamps.size)
-        assertEquals(lamp1.id, allLamps[0].id)
-        assertEquals(false, allLamps[0].status)
-    }
+            assertTrue(!deleted)
+        }
 
     @Test
-    fun `created and updated timestamps are preserved correctly`() = runBlocking {
-        val entity = LampEntity.create(status = true)
-        val createdTime = entity.createdAt
+    fun `deleteLamp returns false when lamp already deleted`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
+            repository.deleteLamp(entity.id)
 
-        repository.createLamp(entity)
+            // Try to delete again
+            val deleted = repository.deleteLamp(entity.id)
 
-        Thread.sleep(10)
+            assertTrue(!deleted)
+        }
 
-        val updated = entity.withUpdatedStatus(newStatus = false)
-        val result = repository.updateLamp(updated)
+    @Test
+    fun `lampExists returns true when lamp exists`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
 
-        assertNotNull(result)
-        assertEquals(createdTime, result.createdAt)
-        assertTrue(result.updatedAt > createdTime)
-    }
+            val exists = repository.lampExists(entity.id)
+
+            assertTrue(exists)
+        }
+
+    @Test
+    fun `lampExists returns false when lamp does not exist`() =
+        runBlocking {
+            val nonExistentId = UUID.randomUUID()
+
+            val exists = repository.lampExists(nonExistentId)
+
+            assertTrue(!exists)
+        }
+
+    @Test
+    fun `lampExists returns false when lamp is deleted`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
+            repository.deleteLamp(entity.id)
+
+            val exists = repository.lampExists(entity.id)
+
+            assertTrue(!exists)
+        }
+
+    @Test
+    fun `updateLamp does not affect deleted lamps`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            repository.createLamp(entity)
+            repository.deleteLamp(entity.id)
+
+            val updated = entity.withUpdatedStatus(newStatus = false)
+            val result = repository.updateLamp(updated)
+
+            assertNull(result)
+        }
+
+    @Test
+    fun `multiple lamps can be managed independently`() =
+        runBlocking {
+            val lamp1 = LampEntity.create(status = true)
+            val lamp2 = LampEntity.create(status = false)
+
+            repository.createLamp(lamp1)
+            repository.createLamp(lamp2)
+
+            // Update lamp1
+            val updated1 = lamp1.withUpdatedStatus(newStatus = false)
+            repository.updateLamp(updated1)
+
+            // Delete lamp2
+            repository.deleteLamp(lamp2.id)
+
+            // Verify final state
+            val allLamps = repository.getAllLamps()
+            assertEquals(1, allLamps.size)
+            assertEquals(lamp1.id, allLamps[0].id)
+            assertEquals(false, allLamps[0].status)
+        }
+
+    @Test
+    fun `created and updated timestamps are preserved correctly`() =
+        runBlocking {
+            val entity = LampEntity.create(status = true)
+            val createdTime = entity.createdAt
+
+            repository.createLamp(entity)
+
+            Thread.sleep(10)
+
+            val updated = entity.withUpdatedStatus(newStatus = false)
+            val result = repository.updateLamp(updated)
+
+            assertNotNull(result)
+            assertEquals(createdTime, result.createdAt)
+            assertTrue(result.updatedAt > createdTime)
+        }
 }

@@ -10,9 +10,14 @@ import java.util.*
  */
 interface LampRepository {
     suspend fun getAllLamps(): List<LampEntity>
+
     suspend fun getLampById(id: UUID): LampEntity?
+
     suspend fun createLamp(entity: LampEntity): LampEntity
+
     suspend fun updateLamp(entity: LampEntity): LampEntity?
+
     suspend fun deleteLamp(id: UUID): Boolean
+
     suspend fun lampExists(id: UUID): Boolean
 }
