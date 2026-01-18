@@ -3,4 +3,6 @@
 
 # AI tooling configuration
 .claude/
+!.claude/settings.json
+!.claude/hooks/
 src/kotlin/build/
