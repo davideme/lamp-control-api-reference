@@ -5,7 +5,7 @@ using LampControlApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 // Parse operation mode from command line arguments
-var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode="))?.Split('=')[1] ?? "serve";
+var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode="))?.Split('=')[1] ?? "serve-only";
 
 // Handle migrate-only mode
 if (mode == "migrate")

@@ -13,7 +13,7 @@ private val logger = LoggerFactory.getLogger("Application")
 
 fun main(args: Array<String>) {
     // Parse command line arguments
-    val mode = args.find { it.startsWith("--mode=") }?.substringAfter("=") ?: "serve"
+    val mode = args.find { it.startsWith("--mode=") }?.substringAfter("=") ?: "serve-only"
 
     when (mode) {
         "migrate" -> runMigrationsOnly()
