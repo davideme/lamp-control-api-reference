@@ -1,5 +1,6 @@
 """Unit tests for the DefaultApiImpl class."""
 
+from datetime import datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -31,8 +32,6 @@ def api_impl(mock_lamp_repository):
 @pytest.fixture
 def sample_lamp():
     """Fixture that provides a sample lamp API model for testing."""
-    from datetime import datetime
-
     return Lamp(id="test-lamp-1", status=True, created_at=datetime.now(), updated_at=datetime.now())
 
 

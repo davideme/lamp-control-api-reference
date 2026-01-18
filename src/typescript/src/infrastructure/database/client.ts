@@ -32,7 +32,8 @@ export async function closePrismaClient(): Promise<void> {
 // This ensures the client is only created when actually used, preventing
 // errors when DATABASE_URL is not set (e.g., in unit tests using in-memory storage)
 export const prismaClient = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get(_target, prop): any {
     const client = getPrismaClient();
     return client[prop as keyof PrismaClient];
   },

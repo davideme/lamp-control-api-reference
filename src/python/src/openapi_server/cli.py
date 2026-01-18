@@ -7,14 +7,14 @@ This module provides CLI commands for running the application in different modes
 """
 
 import argparse
-import sys
 import logging
+import sys
 from pathlib import Path
 
 import uvicorn
-from alembic import command
 from alembic.config import Config
 
+from alembic import command
 from src.openapi_server.infrastructure.config import DatabaseSettings
 
 logger = logging.getLogger(__name__)
