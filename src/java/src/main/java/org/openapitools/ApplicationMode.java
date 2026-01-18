@@ -1,6 +1,7 @@
 package org.openapitools;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Locale;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class ApplicationMode {
   public static Mode parseMode(String[] args) {
     for (String arg : args) {
       if (arg.startsWith("--mode=")) {
-        String mode = arg.substring(7).toLowerCase();
+        String mode = arg.substring(7).toLowerCase(Locale.ROOT);
         switch (mode) {
           case "migrate":
             return Mode.MIGRATE;
