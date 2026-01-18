@@ -1,5 +1,6 @@
 package org.openapitools;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -57,7 +58,15 @@ public class ApplicationMode {
     }
   }
 
-  /** Determine the operation mode from command line arguments */
+  /**
+   * Determine the operation mode from command line arguments.
+   *
+   * @param args command line arguments
+   * @return the operation mode
+   */
+  @SuppressFBWarnings(
+      value = "CRLF_INJECTION_LOGS",
+      justification = "Mode value is sanitized by removing CR/LF characters before logging")
   public static Mode parseMode(String[] args) {
     for (String arg : args) {
       if (arg.startsWith("--mode=")) {
