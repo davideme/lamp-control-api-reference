@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail  # Removed -e to allow continuing on errors
 
 # Only run in remote environment (Claude Code on the web)
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
@@ -11,33 +11,51 @@ echo "🚀 Setting up development environment..."
 # Go setup
 echo "📦 Setting up Go dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/go"
-go mod download
-go mod tidy
+if go mod download 2>/dev/null; then
+  go mod tidy 2>/dev/null || true
+  echo "✓ Go dependencies ready"
+else
+  echo "⚠ Network unavailable - Go dependencies will be downloaded on first use"
+fi
 
 # Install golangci-lint if not available
 if ! command -v golangci-lint &> /dev/null; then
   echo "🔧 Installing golangci-lint..."
-  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
-  # Add GOPATH/bin to PATH for this session
-  echo "export PATH=\$PATH:$(go env GOPATH)/bin" >> "$CLAUDE_ENV_FILE"
+  if curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh 2>/dev/null | sh -s -- -b $(go env GOPATH)/bin 2>/dev/null; then
+    # Add GOPATH/bin to PATH for this session
+    echo "export PATH=\$PATH:$(go env GOPATH)/bin" >> "$CLAUDE_ENV_FILE"
+    echo "✓ golangci-lint installed"
+  else
+    echo "⚠ Network unavailable - golangci-lint not installed"
+  fi
 fi
 
 # Java/Maven setup
 echo "📦 Setting up Java/Maven dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/java"
-mvn dependency:resolve -q
+if mvn dependency:resolve -q 2>/dev/null; then
+  echo "✓ Java dependencies ready"
+else
+  echo "⚠ Network unavailable - Maven dependencies will be downloaded on first use"
+fi
 
 # Python/Poetry setup
 echo "📦 Setting up Python/Poetry dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/python"
-poetry install --no-interaction
+if poetry install --no-interaction 2>/dev/null; then
+  echo "✓ Python dependencies ready"
+else
+  echo "⚠ Network unavailable - Poetry dependencies will be installed on first use"
+fi
 
 # Return to project root
 cd "$CLAUDE_PROJECT_DIR"
 
-echo "✅ Development environment ready!"
+echo ""
+echo "✅ Development environment setup complete!"
 echo ""
 echo "Available linters:"
-echo "  - Go: golangci-lint"
-echo "  - Java: mvn spotless:check"
-echo "  - Python: poetry run black . && poetry run ruff check . --fix"
+echo "  - Go: golangci-lint (use 'golangci-lint run' in src/go)"
+echo "  - Java: mvn spotless:check (use 'mvn spotless:check' in src/java)"
+echo "  - Python: black + ruff (use 'poetry run black . && poetry run ruff check . --fix' in src/python)"
+echo ""
