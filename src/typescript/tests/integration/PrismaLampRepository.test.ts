@@ -115,6 +115,8 @@ describe('PrismaLampRepository Integration Tests', () => {
 
   it('should update lamp status', async () => {
     const created = await repository.create({ status: false });
+    // Wait a small amount to ensure timestamps differ
+    await new Promise((resolve) => setTimeout(resolve, 10));
     const updated = await repository.update(created.id, { status: true });
 
     expect(updated.status).toBe(true);
