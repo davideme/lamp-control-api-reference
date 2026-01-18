@@ -16,6 +16,7 @@
       "Bash(docker compose run:*)",
       "Bash(docker compose up:*)",
       "Bash(find:*)",
+      "Bash(golangci-lint run:*)",
       "Bash(java:*)",
       "Bash(make lint:*)",
       "Bash(mvn clean compile:*)",

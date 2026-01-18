@@ -48,6 +48,7 @@ func runMigrationsOnly(requireDB bool) {
 		if requireDB {
 			log.Fatal("PostgreSQL configuration required but not found (--require-db flag set)")
 		}
+
 		return
 	}
 
@@ -93,6 +94,7 @@ func initializeRepository(ctx context.Context, runMigrations bool, requireDB boo
 				}
 				log.Printf("Falling back to in-memory repository")
 				lampAPI = api.NewLampAPI()
+
 				return lampAPI, nil
 			}
 		}
@@ -128,6 +130,7 @@ func main() {
 	// Handle migrate-only mode
 	if *mode == "migrate" {
 		runMigrationsOnly(*requireDB)
+
 		return
 	}
 
