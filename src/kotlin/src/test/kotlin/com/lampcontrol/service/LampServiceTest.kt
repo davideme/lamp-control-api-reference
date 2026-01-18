@@ -3,6 +3,7 @@ package com.lampcontrol.service
 import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.mapper.LampMapper
+import com.lampcontrol.repository.LampRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
