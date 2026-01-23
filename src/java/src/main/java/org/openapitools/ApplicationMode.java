@@ -14,9 +14,9 @@ public class ApplicationMode {
   private static final Logger logger = LoggerFactory.getLogger(ApplicationMode.class);
 
   public enum Mode {
-    SERVE, // Default: run migrations then start server
-    MIGRATE, // Run migrations only and exit
-    SERVE_ONLY // Start server without running migrations
+    SERVE_ONLY, // Default: start server without running migrations
+    SERVE, // Run migrations then start server
+    MIGRATE // Run migrations only and exit
   }
 
   /** Run migrations only and exit */
@@ -88,7 +88,7 @@ public class ApplicationMode {
         }
       }
     }
-    return Mode.SERVE; // Default mode
+    return Mode.SERVE_ONLY; // Default mode
   }
 
   /** Configure Spring properties based on the mode */

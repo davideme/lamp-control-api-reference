@@ -3,9 +3,9 @@
  * Command-line interface for Lamp Control API
  *
  * Supports three operation modes:
- * - serve: Run migrations and start server (default)
+ * - serve-only: Start server without migrations (default)
+ * - serve: Run migrations and start server
  * - migrate: Run migrations only
- * - serve-only: Start server without migrations
  */
 
 import { execSync } from 'child_process';
@@ -77,7 +77,7 @@ async function startServer(runMigrations: boolean): Promise<void> {
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const modeArg = args.find((arg) => arg.startsWith('--mode='));
-  const mode = modeArg ? modeArg.split('=')[1] : 'serve';
+  const mode = modeArg ? modeArg.split('=')[1] : 'serve-only';
 
   switch (mode) {
     case 'migrate':

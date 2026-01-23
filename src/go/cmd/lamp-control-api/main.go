@@ -124,7 +124,7 @@ func initializeRepository(ctx context.Context, runMigrations bool, requireDB boo
 func main() {
 	port := flag.String("port", "8080", "Port for test HTTP server")
 	requireDB := flag.Bool("require-db", false, "Fail if PostgreSQL connection is configured but fails")
-	mode := flag.String("mode", "serve", "Operation mode: 'serve' (migrate and start server), 'migrate' (run migrations only), 'serve-only' (start server without migrations)")
+	mode := flag.String("mode", "serve-only", "Operation mode: 'serve-only' (start server without migrations, default), 'serve' (migrate and start server), 'migrate' (run migrations only)")
 	flag.Parse()
 
 	// Handle migrate-only mode

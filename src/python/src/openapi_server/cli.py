@@ -1,9 +1,9 @@
 """Command-line interface for Lamp Control API.
 
 This module provides CLI commands for running the application in different modes:
-- serve: Run migrations and start the server (default)
+- serve-only: Start server without running migrations (default)
+- serve: Run migrations and start the server
 - migrate: Run migrations only
-- serve-only: Start server without running migrations
 """
 
 import argparse
@@ -94,9 +94,9 @@ def main():
     parser.add_argument(
         "--mode",
         choices=["serve", "migrate", "serve-only"],
-        default="serve",
-        help="Operation mode: serve (default, migrate and start server), "
-        "migrate (run migrations only), serve-only (start server without migrations)",
+        default="serve-only",
+        help="Operation mode: serve-only (default, start server without migrations), "
+        "serve (migrate and start server), migrate (run migrations only)",
     )
     parser.add_argument(
         "--log-level",

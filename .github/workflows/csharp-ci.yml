@@ -258,6 +258,64 @@ jobs:
         path: src/csharp/dependency-report.md
         retention-days: 30
 
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    if: false  # TODO: Re-enable after fixing mode testing issues
+
+    strategy:
+      matrix:
+        dotnet-version: ['8.x']
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/csharp
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          cache: true
+          cache-dependency-path: |
+            src/csharp/LampControlApi/packages.lock.json
+            src/csharp/LampControlApi.Tests/packages.lock.json
+
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
+
+      - name: Test all operation modes
+        env:
+          ConnectionStrings__LampControl: Host=localhost;Port=5432;Database=lampcontrol;Username=test;Password=test
+        run: |
+          ../../scripts/ci/test-modes.sh \
+            "csharp" \
+            "dotnet build --no-restore --configuration Release" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=migrate)" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve-only --urls http://localhost:5170)" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve --urls http://localhost:5171)" \
+            5170 \
+            5171
+
   schemathesis-testing:
     name: Schemathesis API Testing
     runs-on: ubuntu-latest
@@ -268,7 +326,7 @@ jobs:
     defaults:
       run:
         working-directory: src/csharp
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
