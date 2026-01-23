@@ -81,6 +81,9 @@ test_migrate_mode() {
     # Set DATABASE_URL with sslmode=disable for test environments
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
 
+    # Enable PostgreSQL for applications that check this flag (TypeScript, Kotlin)
+    export USE_POSTGRES="true"
+
     # Also set individual DB_* variables for applications that don't parse DATABASE_URL
     export DB_HOST="$POSTGRES_HOST"
     export DB_PORT="$POSTGRES_PORT"
@@ -123,6 +126,9 @@ test_serve_only_mode() {
 
     # Use existing database from migrate test with sslmode=disable
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
+
+    # Enable PostgreSQL for applications that check this flag (TypeScript, Kotlin)
+    export USE_POSTGRES="true"
 
     # Also set individual DB_* variables for applications that don't parse DATABASE_URL
     export DB_HOST="$POSTGRES_HOST"
@@ -198,6 +204,9 @@ test_serve_mode() {
 
     # Set DATABASE_URL with sslmode=disable for test environments
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve?sslmode=disable"
+
+    # Enable PostgreSQL for applications that check this flag (TypeScript, Kotlin)
+    export USE_POSTGRES="true"
 
     # Also set individual DB_* variables for applications that don't parse DATABASE_URL
     export DB_HOST="$POSTGRES_HOST"
