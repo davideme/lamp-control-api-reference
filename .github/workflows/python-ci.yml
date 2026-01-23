@@ -164,7 +164,7 @@ jobs:
         run: |
           ../../scripts/ci/test-modes.sh \
             "python" \
-            "poetry install --no-interaction --no-root" \
+            "poetry install --no-interaction" \
             "poetry run python -m openapi_server.cli --mode=migrate" \
             "poetry run python -m openapi_server.cli --mode=serve-only" \
             "poetry run python -m openapi_server.cli --mode=serve" \
