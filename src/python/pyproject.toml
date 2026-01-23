@@ -13,7 +13,8 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-package-mode = false
+package-mode = true
+packages = [{include = "openapi_server", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
