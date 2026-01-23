@@ -21,6 +21,12 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+// Configure run task to pass environment variables to the application
+tasks.named<JavaExec>("run") {
+    // Pass all environment variables to the application
+    environment = System.getenv()
+}
+
 repositories {
     mavenCentral()
 }
