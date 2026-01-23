@@ -81,6 +81,13 @@ test_migrate_mode() {
     # Set DATABASE_URL with sslmode=disable for test environments
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
 
+    # Also set individual DB_* variables for applications that don't parse DATABASE_URL
+    export DB_HOST="$POSTGRES_HOST"
+    export DB_PORT="$POSTGRES_PORT"
+    export DB_NAME="lampcontrol_prod"
+    export DB_USER="$POSTGRES_USER"
+    export DB_PASSWORD="$POSTGRES_PASSWORD"
+
     # Run migrations
     log_info "Running: $migrate_cmd"
     if eval "$migrate_cmd"; then
@@ -113,6 +120,13 @@ test_serve_only_mode() {
 
     # Use existing database from migrate test with sslmode=disable
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
+
+    # Also set individual DB_* variables for applications that don't parse DATABASE_URL
+    export DB_HOST="$POSTGRES_HOST"
+    export DB_PORT="$POSTGRES_PORT"
+    export DB_NAME="lampcontrol_prod"
+    export DB_USER="$POSTGRES_USER"
+    export DB_PASSWORD="$POSTGRES_PASSWORD"
 
     # Start server in background
     log_info "Starting server: $serve_only_cmd"
@@ -178,6 +192,13 @@ test_serve_mode() {
 
     # Set DATABASE_URL with sslmode=disable for test environments
     export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve?sslmode=disable"
+
+    # Also set individual DB_* variables for applications that don't parse DATABASE_URL
+    export DB_HOST="$POSTGRES_HOST"
+    export DB_PORT="$POSTGRES_PORT"
+    export DB_NAME="lampcontrol_serve"
+    export DB_USER="$POSTGRES_USER"
+    export DB_PASSWORD="$POSTGRES_PASSWORD"
 
     # Start server in background
     log_info "Starting server with migrations: $serve_cmd"
