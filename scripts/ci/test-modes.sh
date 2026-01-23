@@ -97,8 +97,8 @@ test_migrate_mode() {
         return 1
     fi
 
-    # Verify tables exist
-    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_prod exists lamp; then
+    # Verify tables exist (check for 'lamps' table - plural)
+    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_prod exists lamps; then
         log_info "Migration created database schema"
     else
         log_error "Database schema not created"
@@ -152,8 +152,8 @@ test_serve_only_mode() {
         return 1
     fi
 
-    # Verify tables exist (from migrate step)
-    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_prod exists lamp; then
+    # Verify tables exist (from migrate step) - check for 'lamps' table (plural)
+    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_prod exists lamps; then
         log_info "Database schema exists (from migrate step)"
     else
         log_error "Database schema missing"
@@ -214,8 +214,8 @@ test_serve_mode() {
         return 1
     fi
 
-    # Verify tables exist (created by serve mode)
-    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_serve exists lamp; then
+    # Verify tables exist (created by serve mode) - check for 'lamps' table (plural)
+    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_serve exists lamps; then
         log_info "Serve mode created database schema"
     else
         log_error "Database schema not created by serve mode"

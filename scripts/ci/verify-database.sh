@@ -45,7 +45,7 @@ log_error() {
 verify_table() {
     local dbname="$1"
     local expected_state="$2"
-    local table="${3:-lamp}"
+    local table="${3:-lamps}"
 
     # Query to count tables
     local count
@@ -88,7 +88,7 @@ verify_table() {
 main() {
     local dbname="${1:-}"
     local expected_state="${2:-}"
-    local table="${3:-lamp}"
+    local table="${3:-lamps}"
 
     if [ -z "$dbname" ] || [ -z "$expected_state" ]; then
         echo "Usage: $0 <dbname> <state> [table]"
@@ -96,7 +96,7 @@ main() {
         echo "Arguments:"
         echo "  dbname  Database name to check"
         echo "  state   Expected state: 'exists' or 'not-exists'"
-        echo "  table   Table name to check (default: lamp)"
+        echo "  table   Table name to check (default: lamps)"
         echo ""
         echo "Environment variables:"
         echo "  POSTGRES_HOST     PostgreSQL host (default: localhost)"
