@@ -192,7 +192,7 @@ jobs:
           ../../scripts/ci/test-modes.sh \
             "kotlin" \
             "./gradlew build --no-daemon" \
-            "./gradlew run --args='--mode=migrate' --no-daemon > /dev/null 2>&1" \
+            "./gradlew run --args='--mode=migrate' --no-daemon" \
             "KTOR_PORT=8081 ./gradlew run --args='--mode=serve-only' --no-daemon > /dev/null 2>&1" \
             "KTOR_PORT=8082 ./gradlew run --args='--mode=serve' --no-daemon > /dev/null 2>&1" \
             8081 \

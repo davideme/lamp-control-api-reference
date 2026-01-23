@@ -147,7 +147,7 @@ jobs:
           ../../scripts/ci/test-modes.sh \
             "typescript" \
             "npm ci && npm run build" \
-            "npm start -- --mode=migrate > /dev/null 2>&1" \
+            "npm start -- --mode=migrate" \
             "PORT=8081 npm start -- --mode=serve-only > /dev/null 2>&1" \
             "PORT=8082 npm start -- --mode=serve > /dev/null 2>&1" \
             8081 \
