@@ -99,6 +99,132 @@ jobs:
         git commit -m "chore: update TypeScript coverage summary" || exit 0
         git push
 
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/typescript
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: src/typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Test migrate mode
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/lampcontrol_prod
+        run: |
+          # Create clean database for production pattern testing
+          PGPASSWORD=test psql -h localhost -U test -d postgres -c "DROP DATABASE IF EXISTS lampcontrol_prod;"
+          PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE lampcontrol_prod;"
+
+          # Run migrations
+          npm start -- --mode=migrate
+
+          # Verify exit code is 0
+          if [ $? -ne 0 ]; then
+            echo "❌ Migrate mode failed"
+            exit 1
+          fi
+
+          # Verify tables exist
+          PGPASSWORD=test psql -h localhost -U test -d lampcontrol_prod \
+            -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'lamp';" | grep lamp
+
+          echo "✅ Migrate mode passed"
+
+      - name: Test serve-only mode (production pattern - depends on migrate)
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/lampcontrol_prod
+          PORT: 8081
+        run: |
+          # Use same database from migrate step (simulates production deployment)
+          # Database already has schema from previous migrate step
+
+          # Start server without migrations
+          npm start -- --mode=serve-only &
+          SERVER_PID=$!
+          sleep 10
+
+          # Test health endpoint
+          curl -f http://localhost:8081/health || (echo "❌ Health check failed"; kill $SERVER_PID; exit 1)
+
+          # Verify tables exist (from migrate step)
+          TABLE_COUNT=$(PGPASSWORD=test psql -h localhost -U test -d lampcontrol_prod \
+            -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'lamp';")
+          if [ "$TABLE_COUNT" -eq 0 ]; then
+            echo "❌ Database schema missing (should exist from migrate step)"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          # Test API endpoint (should work with existing schema)
+          curl -f http://localhost:8081/v1/lamps || (echo "❌ API endpoint failed"; kill $SERVER_PID; exit 1)
+
+          kill $SERVER_PID
+          echo "✅ Serve-only mode passed (production pattern: migrate → serve-only)"
+
+      - name: Test serve mode
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/lampcontrol_serve
+          PORT: 8082
+        run: |
+          # Create clean database
+          PGPASSWORD=test psql -h localhost -U test -d postgres -c "DROP DATABASE IF EXISTS lampcontrol_serve;"
+          PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE lampcontrol_serve;"
+
+          # Start server with migrations
+          npm start -- --mode=serve &
+          SERVER_PID=$!
+          sleep 15
+
+          # Verify tables exist
+          PGPASSWORD=test psql -h localhost -U test -d lampcontrol_serve \
+            -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'lamp';" | grep lamp
+
+          # Test health endpoint
+          curl -f http://localhost:8082/health || (echo "❌ Health check failed"; kill $SERVER_PID; exit 1)
+
+          # Test API endpoint
+          curl -f http://localhost:8082/v1/lamps || (echo "❌ API endpoint failed"; kill $SERVER_PID; exit 1)
+
+          kill $SERVER_PID
+          echo "✅ Serve mode passed"
+
   schemathesis-testing:
     runs-on: ubuntu-latest
     needs: build-and-test
