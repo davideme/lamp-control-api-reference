@@ -15,7 +15,7 @@
     "clean": "rm -rf dist",
     "dev": "tsx src/index.ts",
     "dev:native": "node --experimental-strip-types src/index.ts",
-    "start": "node dist/src/index.js",
+    "start": "node dist/src/cli.js",
     "start:native": "node --experimental-strip-types src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
