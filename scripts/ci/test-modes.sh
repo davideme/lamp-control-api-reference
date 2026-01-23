@@ -78,8 +78,8 @@ test_migrate_mode() {
     # Create clean database
     "$SCRIPT_DIR/setup-test-databases.sh" create lampcontrol_prod
 
-    # Set DATABASE_URL
-    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod"
+    # Set DATABASE_URL with sslmode=disable for test environments
+    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
 
     # Run migrations
     log_info "Running: $migrate_cmd"
@@ -111,8 +111,8 @@ test_serve_only_mode() {
 
     log_section "Testing SERVE-ONLY mode ($language) - Production Pattern"
 
-    # Use existing database from migrate test
-    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod"
+    # Use existing database from migrate test with sslmode=disable
+    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
 
     # Start server in background
     log_info "Starting server: $serve_only_cmd"
@@ -176,8 +176,8 @@ test_serve_mode() {
     # Create clean database
     "$SCRIPT_DIR/setup-test-databases.sh" create lampcontrol_serve
 
-    # Set DATABASE_URL
-    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve"
+    # Set DATABASE_URL with sslmode=disable for test environments
+    export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve?sslmode=disable"
 
     # Start server in background
     log_info "Starting server with migrations: $serve_cmd"
