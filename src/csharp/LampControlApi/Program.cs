@@ -28,6 +28,13 @@ builder.Services.AddControllers();
 
 // Configure database storage based on connection string presence
 var connectionString = builder.Configuration.GetConnectionString("LampControl");
+
+// Fallback to environment variable if configuration is empty
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__LampControl");
+}
+
 var usePostgres = !string.IsNullOrWhiteSpace(connectionString);
 
 if (usePostgres)
@@ -129,6 +136,12 @@ static void RunMigrationsOnly(string[] args)
 
     var builder = WebApplication.CreateBuilder(args);
     var connectionString = builder.Configuration.GetConnectionString("LampControl");
+
+    // Fallback to environment variable if configuration is empty
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__LampControl");
+    }
 
     if (string.IsNullOrWhiteSpace(connectionString))
     {

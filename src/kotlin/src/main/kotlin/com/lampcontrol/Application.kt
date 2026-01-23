@@ -61,7 +61,11 @@ fun startServer(runMigrations: Boolean) {
         System.setProperty("skip.migrations", "true")
     }
 
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    val port = System.getenv("KTOR_PORT")?.toIntOrNull()
+        ?: System.getenv("PORT")?.toIntOrNull()
+        ?: 8080
+
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
