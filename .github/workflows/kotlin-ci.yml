@@ -182,6 +182,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Test all operation modes
+        timeout-minutes: 10
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
@@ -191,9 +192,9 @@ jobs:
           ../../scripts/ci/test-modes.sh \
             "kotlin" \
             "./gradlew build --no-daemon" \
-            "./gradlew run --args='--mode=migrate' --no-daemon" \
-            "KTOR_PORT=8081 ./gradlew run --args='--mode=serve-only' --no-daemon" \
-            "KTOR_PORT=8082 ./gradlew run --args='--mode=serve' --no-daemon" \
+            "./gradlew run --args='--mode=migrate' --no-daemon > /dev/null 2>&1" \
+            "KTOR_PORT=8081 ./gradlew run --args='--mode=serve-only' --no-daemon > /dev/null 2>&1" \
+            "KTOR_PORT=8082 ./gradlew run --args='--mode=serve' --no-daemon > /dev/null 2>&1" \
             8081 \
             8082
 

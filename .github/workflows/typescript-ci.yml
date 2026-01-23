@@ -142,13 +142,14 @@ jobs:
         run: npm ci
 
       - name: Test all operation modes
+        timeout-minutes: 10
         run: |
           ../../scripts/ci/test-modes.sh \
             "typescript" \
             "npm ci && npm run build" \
-            "npm start -- --mode=migrate" \
-            "PORT=8081 npm start -- --mode=serve-only" \
-            "PORT=8082 npm start -- --mode=serve" \
+            "npm start -- --mode=migrate > /dev/null 2>&1" \
+            "PORT=8081 npm start -- --mode=serve-only > /dev/null 2>&1" \
+            "PORT=8082 npm start -- --mode=serve > /dev/null 2>&1" \
             8081 \
             8082
 
