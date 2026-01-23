@@ -304,14 +304,14 @@ jobs:
 
       - name: Test all operation modes
         env:
-          ConnectionStrings__DefaultConnection: Host=localhost;Port=5432;Database=lampcontrol;Username=test;Password=test
+          ConnectionStrings__LampControl: Host=localhost;Port=5432;Database=lampcontrol;Username=test;Password=test
         run: |
           ../../scripts/ci/test-modes.sh \
             "csharp" \
             "dotnet build --no-restore --configuration Release" \
-            "cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=migrate" \
-            "cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve-only --urls http://localhost:5170" \
-            "cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve --urls http://localhost:5171" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=migrate)" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve-only --urls http://localhost:5170)" \
+            "(cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve --urls http://localhost:5171)" \
             5170 \
             5171
 
