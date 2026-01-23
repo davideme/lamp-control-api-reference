@@ -16,6 +16,8 @@
       "Bash(docker compose config:*)",
       "Bash(docker compose run:*)",
       "Bash(docker compose up:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet tool install:*)",
       "Bash(find:*)",
       "Bash(git add:*)",
       "Bash(git checkout:*)",
