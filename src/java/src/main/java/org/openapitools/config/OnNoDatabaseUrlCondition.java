@@ -18,7 +18,7 @@ public class OnNoDatabaseUrlCondition extends SpringBootCondition {
       ConditionContext context, AnnotatedTypeMetadata metadata) {
     String url = context.getEnvironment().getProperty("spring.datasource.url");
 
-    if (url == null || url.trim().isEmpty()) {
+    if (url == null || url.isBlank()) {
       return ConditionOutcome.match(
           "spring.datasource.url is not set or is empty (using in-memory repository)");
     }
