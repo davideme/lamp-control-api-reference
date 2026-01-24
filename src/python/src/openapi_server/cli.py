@@ -41,7 +41,7 @@ def run_migrations_only():
 
         # Create Alembic config
         alembic_cfg = Config(str(alembic_ini))
-        alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.get_connection_string())
 
         # Run migrations
         command.upgrade(alembic_cfg, "head")
@@ -68,7 +68,7 @@ def start_server(run_migrations: bool = True, port: int | None = None):
                 alembic_ini = Path(__file__).parent.parent.parent / "alembic.ini"
                 if alembic_ini.exists():
                     alembic_cfg = Config(str(alembic_ini))
-                    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
+                    alembic_cfg.set_main_option("sqlalchemy.url", settings.get_connection_string())
                     command.upgrade(alembic_cfg, "head")
                     logger.info("Migrations completed")
                 else:

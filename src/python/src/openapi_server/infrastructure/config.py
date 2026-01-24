@@ -51,6 +51,17 @@ class DatabaseSettings(BaseSettings):
             url = self.database_url
             if url.startswith("postgresql://"):
                 url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+            # asyncpg doesn't support sslmode query parameter like psycopg2
+            # Remove sslmode=disable as asyncpg defaults to no SSL verification in test environments
+            # In production, SSL should be configured via asyncpg-specific parameters
+            if "sslmode=disable" in url or "sslmode=require" in url:
+                import re
+                # Remove sslmode parameter and clean up extra & or ?
+                url = re.sub(r'[?&]sslmode=[^&]*', '', url)
+                # Clean up trailing ? or &
+                url = re.sub(r'[?&]$', '', url)
+
             return url
 
         # Fallback to building from individual parameters
