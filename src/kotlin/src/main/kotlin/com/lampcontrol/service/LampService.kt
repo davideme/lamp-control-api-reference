@@ -5,7 +5,7 @@ import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
-import java.util.*
+import java.util.UUID
 
 /**
  * Service layer that handles business logic and coordinates between API and domain layers.
@@ -30,7 +30,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return null
             }
 
@@ -57,7 +57,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return null
             }
 
@@ -74,7 +74,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return false
             }
 
@@ -88,7 +88,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return false
             }
 

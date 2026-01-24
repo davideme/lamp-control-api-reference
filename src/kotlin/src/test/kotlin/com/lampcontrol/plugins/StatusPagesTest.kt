@@ -1,3 +1,5 @@
+@file:Suppress("TooGenericExceptionThrown")
+
 package com.lampcontrol.plugins
 
 import com.lampcontrol.module

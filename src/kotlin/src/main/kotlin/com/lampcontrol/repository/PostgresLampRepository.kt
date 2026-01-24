@@ -2,12 +2,16 @@ package com.lampcontrol.repository
 
 import com.lampcontrol.database.LampsTable
 import com.lampcontrol.entity.LampEntity
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.update
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 /**
  * PostgreSQL implementation of LampRepository using Exposed ORM.

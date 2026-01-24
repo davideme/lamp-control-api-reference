@@ -9,6 +9,8 @@
 * https://openapi-generator.tech
 * Do not edit the class manually.
 */
+@file:Suppress("WildcardImport", "EmptyDefaultConstructor")
+
 package com.lampcontrol.api
 
 import com.lampcontrol.api.models.*

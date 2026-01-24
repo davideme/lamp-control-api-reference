@@ -1,3 +1,5 @@
+@file:Suppress("WildcardImport")
+
 package com.lampcontrol.api.infrastructure
 
 import io.ktor.http.auth.*

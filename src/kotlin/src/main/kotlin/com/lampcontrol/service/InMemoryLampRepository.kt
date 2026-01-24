@@ -2,7 +2,7 @@ package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
 import com.lampcontrol.repository.LampRepository
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -39,7 +39,7 @@ class InMemoryLampRepository : LampRepository {
      * Update an existing lamp
      */
     override suspend fun updateLamp(entity: LampEntity): LampEntity? {
-        val existingLamp = lamps[entity.id] ?: return null
+        if (lamps[entity.id] == null) return null
         lamps[entity.id] = entity
         return entity
     }

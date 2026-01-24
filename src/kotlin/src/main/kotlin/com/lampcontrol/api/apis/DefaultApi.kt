@@ -9,6 +9,8 @@
 * https://openapi-generator.tech
 * Do not edit the class manually.
 */
+@file:Suppress("WildcardImport", "LongMethod", "TooGenericExceptionCaught", "SwallowedException", "FunctionNaming", "MagicNumber")
+
 package com.lampcontrol.api.apis
 
 import com.lampcontrol.api.Paths
