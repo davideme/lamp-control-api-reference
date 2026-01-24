@@ -57,10 +57,11 @@ class DatabaseSettings(BaseSettings):
             # In production, SSL should be configured via asyncpg-specific parameters
             if "sslmode=disable" in url or "sslmode=require" in url:
                 import re
+
                 # Remove sslmode parameter and clean up extra & or ?
-                url = re.sub(r'[?&]sslmode=[^&]*', '', url)
+                url = re.sub(r"[?&]sslmode=[^&]*", "", url)
                 # Clean up trailing ? or &
-                url = re.sub(r'[?&]$', '', url)
+                url = re.sub(r"[?&]$", "", url)
 
             return url
 
