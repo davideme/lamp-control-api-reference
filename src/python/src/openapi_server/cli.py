@@ -53,7 +53,7 @@ def run_migrations_only():
         sys.exit(1)
 
 
-def start_server(run_migrations: bool = True, port: int = None):
+def start_server(run_migrations: bool = True, port: int | None = None):
     """Start the FastAPI server.
 
     Args:
