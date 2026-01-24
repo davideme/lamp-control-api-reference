@@ -47,7 +47,11 @@ class DatabaseSettings(BaseSettings):
             ValueError: If database_url is not configured.
         """
         if self.database_url:
-            return self.database_url
+            # Convert postgresql:// to postgresql+asyncpg:// for async driver
+            url = self.database_url
+            if url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
 
         # Fallback to building from individual parameters
         return (
