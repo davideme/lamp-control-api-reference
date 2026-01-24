@@ -147,24 +147,37 @@ test_serve_only_mode() {
     eval "$serve_only_cmd" &
     local server_pid=$!
 
-    # Wait for startup
-    sleep 5
+    # Wait for server to be ready (with retries)
+    log_info "Waiting for server to be ready..."
+    local max_attempts=15
+    local attempt=0
+    local server_ready=false
 
-    # Verify server is running
-    if ! kill -0 "$server_pid" 2>/dev/null; then
-        log_error "Server process died"
-        return 1
-    fi
+    while [ $attempt -lt $max_attempts ]; do
+        sleep 1
+        attempt=$((attempt + 1))
 
-    # Test health endpoint
-    log_info "Testing health endpoint: http://localhost:$health_port/health"
-    if curl -f -s "http://localhost:$health_port/health" > /dev/null; then
-        log_info "Health endpoint responded"
-    else
-        log_error "Health endpoint failed"
+        # Check if server process is still alive
+        if ! kill -0 "$server_pid" 2>/dev/null; then
+            log_error "Server process died during startup"
+            return 1
+        fi
+
+        # Try to connect to health endpoint
+        if curl -f -s "http://localhost:$health_port/health" > /dev/null 2>&1; then
+            server_ready=true
+            log_info "Server ready after $attempt seconds"
+            break
+        fi
+    done
+
+    if [ "$server_ready" = false ]; then
+        log_error "Health endpoint failed after $max_attempts seconds"
         cleanup_server "$server_pid"
         return 1
     fi
+
+    log_info "Health endpoint responded"
 
     # Verify tables exist (from migrate step) - check for 'lamps' table (plural)
     if "$SCRIPT_DIR/verify-database.sh" lampcontrol_prod exists lamps; then
@@ -226,12 +239,33 @@ test_serve_mode() {
     eval "$serve_cmd" &
     local server_pid=$!
 
-    # Wait for startup (longer for migrations)
-    sleep 10
+    # Wait for server to be ready (longer timeout for migrations)
+    log_info "Waiting for server to be ready (with migrations)..."
+    local max_attempts=20
+    local attempt=0
+    local server_ready=false
 
-    # Verify server is running
-    if ! kill -0 "$server_pid" 2>/dev/null; then
-        log_error "Server process died"
+    while [ $attempt -lt $max_attempts ]; do
+        sleep 1
+        attempt=$((attempt + 1))
+
+        # Check if server process is still alive
+        if ! kill -0 "$server_pid" 2>/dev/null; then
+            log_error "Server process died during startup"
+            return 1
+        fi
+
+        # Try to connect to health endpoint
+        if curl -f -s "http://localhost:$health_port/health" > /dev/null 2>&1; then
+            server_ready=true
+            log_info "Server ready after $attempt seconds"
+            break
+        fi
+    done
+
+    if [ "$server_ready" = false ]; then
+        log_error "Server never became ready after $max_attempts seconds"
+        cleanup_server "$server_pid"
         return 1
     fi
 
