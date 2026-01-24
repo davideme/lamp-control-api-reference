@@ -95,6 +95,9 @@ test_migrate_mode() {
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
     export FLYWAY_ENABLED="true"
 
+    # C# specific variables (Npgsql connection string format)
+    export ConnectionStrings__LampControl="Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=lampcontrol_prod;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD"
+
     # Run migrations
     log_info "Running: $migrate_cmd"
     if eval "$migrate_cmd"; then
@@ -141,6 +144,9 @@ test_serve_only_mode() {
     # Spring Boot specific variables (Java)
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
     export FLYWAY_ENABLED="true"
+
+    # C# specific variables (Npgsql connection string format)
+    export ConnectionStrings__LampControl="Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=lampcontrol_prod;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD"
 
     # Start server in background
     log_info "Starting server: $serve_only_cmd"
@@ -233,6 +239,9 @@ test_serve_mode() {
     # Spring Boot specific variables (Java)
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve?sslmode=disable"
     export FLYWAY_ENABLED="true"
+
+    # C# specific variables (Npgsql connection string format)
+    export ConnectionStrings__LampControl="Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=lampcontrol_serve;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD"
 
     # Start server in background
     log_info "Starting server with migrations: $serve_cmd"
