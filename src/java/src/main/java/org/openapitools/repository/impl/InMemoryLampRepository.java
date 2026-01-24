@@ -8,9 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.openapitools.config.OnNoDatabaseUrlCondition;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +22,11 @@ import org.springframework.stereotype.Repository;
  * store lamp entities in memory, providing thread-safe operations suitable for testing and
  * development environments.
  *
- * <p>This implementation is activated when no database URL is configured OR when explicitly enabled
- * via profile/property.
+ * <p>This implementation is activated when no database URL is configured (i.e., when
+ * spring.datasource.url is empty or missing).
  */
 @Repository
-@ConditionalOnProperty(prefix = "spring.datasource", name = "url", matchIfMissing = true)
+@Conditional(OnNoDatabaseUrlCondition.class)
 public class InMemoryLampRepository implements LampRepository {
 
   private final Map<UUID, LampEntity> lamps = new ConcurrentHashMap<>();

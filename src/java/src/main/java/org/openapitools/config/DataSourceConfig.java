@@ -4,22 +4,22 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * DataSource configuration for PostgreSQL database connectivity.
  *
- * <p>This configuration is only activated when spring.datasource.url is set. When no database URL
- * is configured, the application uses an in-memory repository instead.
+ * <p>This configuration is only activated when spring.datasource.url is set to a non-empty value.
+ * When no database URL is configured, the application uses an in-memory repository instead.
  *
  * <p>Uses HikariCP for connection pooling with settings from application.properties (spring
  * .datasource.hikari.*).
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.datasource", name = "url")
+@Conditional(OnDatabaseUrlCondition.class)
 public class DataSourceConfig {
 
   @Value("${spring.datasource.url}")
