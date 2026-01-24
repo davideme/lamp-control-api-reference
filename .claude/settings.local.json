@@ -3,6 +3,7 @@
     "allow": [
       "Bash(./gradlew clean:*)",
       "Bash(./gradlew compileKotlin:*)",
+      "Bash(./gradlew detekt:*)",
       "Bash(./gradlew ktlintCheck:*)",
       "Bash(./gradlew ktlintFormat:*)",
       "Bash(./gradlew tasks:*)",
@@ -20,6 +21,7 @@
       "Bash(dotnet tool install:*)",
       "Bash(find:*)",
       "Bash(gh issue create:*)",
+      "Bash(gh issue view:*)",
       "Bash(gh pr checks:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",

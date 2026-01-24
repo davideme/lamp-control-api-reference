@@ -143,5 +143,6 @@ ktlint {
 detekt {
     toolVersion = "1.23.4"
     buildUponDefaultConfig = true
-    ignoreFailures = true
+    config.setFrom("$projectDir/detekt.yml")
+    ignoreFailures = false
 }

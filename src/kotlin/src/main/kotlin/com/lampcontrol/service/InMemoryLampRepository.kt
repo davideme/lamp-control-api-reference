@@ -39,7 +39,7 @@ class InMemoryLampRepository : LampRepository {
      * Update an existing lamp
      */
     override suspend fun updateLamp(entity: LampEntity): LampEntity? {
-        val existingLamp = lamps[entity.id] ?: return null
+        if (lamps[entity.id] == null) return null
         lamps[entity.id] = entity
         return entity
     }

@@ -30,7 +30,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return null
             }
 
@@ -57,7 +57,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return null
             }
 
@@ -74,7 +74,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return false
             }
 
@@ -88,7 +88,7 @@ class LampService(
         val uuid =
             try {
                 UUID.fromString(lampId)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return false
             }
 

@@ -2,14 +2,20 @@ package com.lampcontrol
 
 import com.lampcontrol.database.DatabaseConfig
 import com.lampcontrol.database.FlywayConfig
-import com.lampcontrol.plugins.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import com.lampcontrol.plugins.configureHTTP
+import com.lampcontrol.plugins.configureMonitoring
+import com.lampcontrol.plugins.configureResources
+import com.lampcontrol.plugins.configureRouting
+import com.lampcontrol.plugins.configureSerialization
+import com.lampcontrol.plugins.configureStatusPages
+import io.ktor.server.application.Application
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
 private val logger = LoggerFactory.getLogger("Application")
+private const val DEFAULT_PORT = 8080
 
 fun main(args: Array<String>) {
     // Parse command line arguments
@@ -63,7 +69,7 @@ fun startServer(runMigrations: Boolean) {
 
     val port = System.getenv("KTOR_PORT")?.toIntOrNull()
         ?: System.getenv("PORT")?.toIntOrNull()
-        ?: 8080
+        ?: DEFAULT_PORT
 
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)

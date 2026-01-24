@@ -1,3 +1,5 @@
+@file:Suppress("WildcardImport", "FunctionNaming", "MagicNumber")
+
 package com.lampcontrol.api
 
 // Use this file to hold package-level internal functions that return receiver object passed to the `install` method.

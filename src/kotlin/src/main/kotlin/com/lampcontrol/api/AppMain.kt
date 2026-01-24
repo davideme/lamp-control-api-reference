@@ -1,3 +1,5 @@
+@file:Suppress("WildcardImport", "MagicNumber")
+
 package com.lampcontrol.api
 
 import com.codahale.metrics.Slf4jReporter
