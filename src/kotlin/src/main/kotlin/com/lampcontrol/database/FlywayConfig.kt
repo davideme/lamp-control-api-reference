@@ -1,3 +1,5 @@
+@file:Suppress("TooGenericExceptionCaught")
+
 package com.lampcontrol.database
 
 import org.flywaydb.core.Flyway

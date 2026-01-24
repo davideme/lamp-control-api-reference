@@ -1,3 +1,5 @@
+@file:Suppress("SwallowedException")
+
 package com.lampcontrol.serialization
 
 import kotlinx.serialization.decodeFromString
