@@ -2,8 +2,9 @@ package org.openapitools.repository;
 
 import java.util.List;
 import java.util.UUID;
+import org.openapitools.config.OnDatabaseUrlCondition;
 import org.openapitools.entity.LampEntity;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Primary
-@ConditionalOnProperty(prefix = "spring.datasource", name = "url")
+@Conditional(OnDatabaseUrlCondition.class)
 public interface JpaLampRepository extends JpaRepository<LampEntity, UUID> {
 
   /**

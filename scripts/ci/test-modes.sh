@@ -93,6 +93,7 @@ test_migrate_mode() {
 
     # Spring Boot specific variables (Java)
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
+    export FLYWAY_ENABLED="true"
 
     # Run migrations
     log_info "Running: $migrate_cmd"
@@ -139,6 +140,7 @@ test_serve_only_mode() {
 
     # Spring Boot specific variables (Java)
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_prod?sslmode=disable"
+    export FLYWAY_ENABLED="true"
 
     # Start server in background
     log_info "Starting server: $serve_only_cmd"
@@ -217,6 +219,7 @@ test_serve_mode() {
 
     # Spring Boot specific variables (Java)
     export SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/lampcontrol_serve?sslmode=disable"
+    export FLYWAY_ENABLED="true"
 
     # Start server in background
     log_info "Starting server with migrations: $serve_cmd"
