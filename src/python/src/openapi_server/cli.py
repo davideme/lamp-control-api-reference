@@ -53,11 +53,12 @@ def run_migrations_only():
         sys.exit(1)
 
 
-def start_server(run_migrations: bool = True):
+def start_server(run_migrations: bool = True, port: int = None):
     """Start the FastAPI server.
 
     Args:
         run_migrations: Whether to run migrations before starting the server
+        port: Port to run the server on (overrides PORT env var)
     """
     if run_migrations:
         logger.info("Starting server with automatic migrations...")
@@ -78,11 +79,14 @@ def start_server(run_migrations: bool = True):
     else:
         logger.info("Starting server without running migrations...")
 
+    # Resolve port: CLI argument > PORT env var > default (8080)
+    server_port = port if port is not None else int(os.getenv("PORT", "8080"))
+
     # Start uvicorn server
     uvicorn.run(
         "src.openapi_server.main:app",
         host="0.0.0.0",
-        port=int(os.getenv("PORT", "8080")),
+        port=server_port,
         log_level="info",
     )
 
@@ -105,6 +109,12 @@ def main():
         default="INFO",
         help="Logging level (default: INFO)",
     )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Port to run the server on (default: PORT env var or 8080)",
+    )
 
     args = parser.parse_args()
 
@@ -118,9 +128,9 @@ def main():
     if args.mode == "migrate":
         run_migrations_only()
     elif args.mode == "serve":
-        start_server(run_migrations=True)
+        start_server(run_migrations=True, port=args.port)
     elif args.mode == "serve-only":
-        start_server(run_migrations=False)
+        start_server(run_migrations=False, port=args.port)
 
 
 if __name__ == "__main__":
