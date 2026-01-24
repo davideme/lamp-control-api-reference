@@ -2,7 +2,7 @@ package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
 import com.lampcontrol.repository.LampRepository
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**

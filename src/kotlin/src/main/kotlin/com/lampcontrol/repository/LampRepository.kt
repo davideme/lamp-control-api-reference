@@ -1,7 +1,7 @@
 package com.lampcontrol.repository
 
 import com.lampcontrol.entity.LampEntity
-import java.util.*
+import java.util.UUID
 
 /**
  * Repository contract for managing Lamps.

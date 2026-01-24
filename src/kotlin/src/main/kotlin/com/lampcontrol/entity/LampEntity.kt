@@ -1,7 +1,7 @@
 package com.lampcontrol.entity
 
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 /**
  * Domain entity representing a Lamp in the system.

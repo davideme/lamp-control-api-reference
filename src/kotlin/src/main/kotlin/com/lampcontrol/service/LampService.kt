@@ -5,7 +5,7 @@ import com.lampcontrol.api.models.LampCreate
 import com.lampcontrol.api.models.LampUpdate
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
-import java.util.*
+import java.util.UUID
 
 /**
  * Service layer that handles business logic and coordinates between API and domain layers.
