@@ -49,7 +49,7 @@ class LampsControllerTest {
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps").accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -70,7 +70,7 @@ class LampsControllerTest {
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -90,7 +90,7 @@ class LampsControllerTest {
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -109,7 +109,7 @@ class LampsControllerTest {
     MvcResult result =
         mockMvc
             .perform(
-                post("/lamps")
+                post("/v1/lamps")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampCreate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -131,7 +131,7 @@ class LampsControllerTest {
     // When & Then
     mockMvc
         .perform(
-            post("/lamps")
+            post("/v1/lamps")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}")
                 .accept(MediaType.APPLICATION_JSON))
@@ -151,7 +151,7 @@ class LampsControllerTest {
     MvcResult result =
         mockMvc
             .perform(
-                put("/lamps/{lampId}", testLampId)
+                put("/v1/lamps/{lampId}", testLampId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampUpdate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -178,7 +178,7 @@ class LampsControllerTest {
     MvcResult result =
         mockMvc
             .perform(
-                put("/lamps/{lampId}", testLampId)
+                put("/v1/lamps/{lampId}", testLampId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampUpdate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -196,7 +196,7 @@ class LampsControllerTest {
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(delete("/lamps/{lampId}", testLampId))
+            .perform(delete("/v1/lamps/{lampId}", testLampId))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -211,7 +211,7 @@ class LampsControllerTest {
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(delete("/lamps/{lampId}", testLampId))
+            .perform(delete("/v1/lamps/{lampId}", testLampId))
             .andExpect(request().asyncStarted())
             .andReturn();
 

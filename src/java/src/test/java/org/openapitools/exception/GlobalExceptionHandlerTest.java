@@ -30,7 +30,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void testInvalidPageSizeNegative() throws Exception {
     mockMvc
-        .perform(get("/lamps").param("pageSize", "-1"))
+        .perform(get("/v1/lamps").param("pageSize", "-1"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.error").value("INVALID_ARGUMENT"));
@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void testInvalidPageSizeZero() throws Exception {
     mockMvc
-        .perform(get("/lamps").param("pageSize", "0"))
+        .perform(get("/v1/lamps").param("pageSize", "0"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.error").value("INVALID_ARGUMENT"));
@@ -48,7 +48,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void testInvalidPageSizeTooLarge() throws Exception {
     mockMvc
-        .perform(get("/lamps").param("pageSize", "101"))
+        .perform(get("/v1/lamps").param("pageSize", "101"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.error").value("INVALID_ARGUMENT"));
@@ -57,7 +57,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void testInvalidPageSizeNotNumeric() throws Exception {
     mockMvc
-        .perform(get("/lamps").param("pageSize", "abc"))
+        .perform(get("/v1/lamps").param("pageSize", "abc"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.error").value("INVALID_ARGUMENT"));
