@@ -11,6 +11,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     jacoco
 }
 
@@ -19,6 +20,20 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("kotlin-server")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    manifest {
+        attributes["Main-Class"] = "com.lampcontrol.ApplicationKt"
+    }
+}
+
+// Ensure the fat JAR is built as part of the standard assemble/build lifecycle
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
 }
 
 // Configure run task to pass environment variables to the application
