@@ -31,6 +31,11 @@ tasks.shadowJar {
     }
 }
 
+// Ensure the fat JAR is built as part of the standard assemble/build lifecycle
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
+}
+
 // Configure run task to pass environment variables to the application
 tasks.named<JavaExec>("run") {
     // Pass all environment variables to the application
