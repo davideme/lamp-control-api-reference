@@ -35,14 +35,13 @@ public class DataSourceConfig {
   private String driverClassName;
 
   /**
-   * Creates a HikariCP DataSource bean configured from application.properties.
+   * Creates a HikariConfig bean configured from application.properties.
    *
-   * @return configured DataSource using HikariCP connection pooling
+   * @return configured HikariConfig with core JDBC properties and hikari-specific settings
    */
   @Bean
   @ConfigurationProperties(prefix = "spring.datasource.hikari")
-  public DataSource dataSource() {
-    // HikariConfig will be populated from spring.datasource.hikari.* properties
+  public HikariConfig hikariConfig() {
     HikariConfig config = new HikariConfig();
 
     // Set core JDBC properties
@@ -51,6 +50,17 @@ public class DataSourceConfig {
     config.setPassword(password);
     config.setDriverClassName(driverClassName);
 
-    return new HikariDataSource(config);
+    return config;
+  }
+
+  /**
+   * Creates a HikariCP DataSource bean from the configured HikariConfig.
+   *
+   * @param hikariConfig the HikariConfig bean with all properties already applied
+   * @return configured DataSource using HikariCP connection pooling
+   */
+  @Bean
+  public DataSource dataSource(HikariConfig hikariConfig) {
+    return new HikariDataSource(hikariConfig);
   }
 }
