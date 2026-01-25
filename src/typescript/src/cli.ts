@@ -21,7 +21,9 @@ async function runMigrationsOnly(): Promise<void> {
   console.warn('Running migrations only...');
 
   if (!process.env.DATABASE_URL && !process.env.DB_HOST) {
-    console.warn('No PostgreSQL configuration found (DATABASE_URL or DB_HOST not set), nothing to migrate');
+    console.warn(
+      'No PostgreSQL configuration found (DATABASE_URL or DB_HOST not set), nothing to migrate',
+    );
     return;
   }
 
