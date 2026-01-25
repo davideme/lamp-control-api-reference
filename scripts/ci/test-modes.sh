@@ -279,10 +279,26 @@ test_serve_mode() {
     fi
 
     # Verify tables exist (created by serve mode) - check for 'lamps' table (plural)
-    if "$SCRIPT_DIR/verify-database.sh" lampcontrol_serve exists lamps; then
+    # Use retry loop because migrations may still be running after health endpoint is ready
+    local table_check_attempts=0
+    local table_check_max=10
+    local table_exists=false
+
+    log_info "Waiting for migrations to complete..."
+    while [ $table_check_attempts -lt $table_check_max ]; do
+        if "$SCRIPT_DIR/verify-database.sh" lampcontrol_serve exists lamps 2>/dev/null; then
+            table_exists=true
+            log_info "Table 'lamps' exists after $((table_check_attempts + 1)) check(s)"
+            break
+        fi
+        table_check_attempts=$((table_check_attempts + 1))
+        sleep 1
+    done
+
+    if [ "$table_exists" = true ]; then
         log_info "Serve mode created database schema"
     else
-        log_error "Database schema not created by serve mode"
+        log_error "Database schema not created by serve mode (checked $table_check_max times)"
         cleanup_server "$server_pid"
         return 1
     fi
