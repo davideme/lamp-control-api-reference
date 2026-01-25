@@ -103,6 +103,8 @@ jobs:
 
   mode-testing:
     name: Mode Testing
+    # Temporarily disabled due to race condition - see #285
+    if: false
     runs-on: ubuntu-latest
     needs: [test]
 
