@@ -63,7 +63,12 @@
       "Bash(ruff check:*)",
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(pg_isready:*)",
+      "Bash(gh pr create:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git stash pop:*)"
     ]
   }
 }

@@ -28,7 +28,7 @@ if (isCompiledContext) {
 }
 
 // Select repository based on environment variable
-const usePostgres = !!(process.env.DATABASE_URL || process.env.DB_HOST);
+const usePostgres = !!process.env.DATABASE_URL;
 const repository = usePostgres ? new PrismaLampRepository() : new InMemoryLampRepository();
 
 const options = {
@@ -52,7 +52,7 @@ export async function buildApp(): Promise<import('fastify').FastifyInstance> {
 
   // Graceful shutdown - close Prisma connection if using PostgreSQL
   server.addHook('onClose', async () => {
-    if (process.env.DATABASE_URL || process.env.DB_HOST) {
+    if (usePostgres) {
       await closePrismaClient();
     }
   });
