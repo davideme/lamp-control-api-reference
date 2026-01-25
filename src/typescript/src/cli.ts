@@ -20,8 +20,8 @@ const HOST = process.env.HOST || '0.0.0.0';
 async function runMigrationsOnly(): Promise<void> {
   console.warn('Running migrations only...');
 
-  if (process.env.USE_POSTGRES !== 'true') {
-    console.warn('No PostgreSQL configuration found (USE_POSTGRES not set), nothing to migrate');
+  if (!process.env.DATABASE_URL) {
+    console.warn('No PostgreSQL configuration found (DATABASE_URL not set), nothing to migrate');
     return;
   }
 
@@ -44,7 +44,7 @@ async function runMigrationsOnly(): Promise<void> {
 async function startServer(runMigrations: boolean): Promise<void> {
   if (runMigrations) {
     console.warn('Starting server with automatic migrations...');
-    if (process.env.USE_POSTGRES === 'true') {
+    if (process.env.DATABASE_URL) {
       try {
         console.warn('Running Prisma migrations...');
         execSync('npx prisma migrate deploy', {
