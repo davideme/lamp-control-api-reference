@@ -3,8 +3,8 @@ package org.openapitools.config;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -20,7 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * application uses an in-memory repository.
  */
 @Configuration
-@ConditionalOnBean(DataSource.class)
+@Conditional(OnDatabaseUrlCondition.class)
 @EnableJpaRepositories(basePackages = "org.openapitools.repository")
 public class JpaConfig {
 

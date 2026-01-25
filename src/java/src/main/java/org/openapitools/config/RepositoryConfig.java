@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.JpaLampRepository;
 import org.openapitools.repository.LampRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
@@ -33,7 +33,7 @@ public class RepositoryConfig {
    */
   @Bean
   @Primary
-  @ConditionalOnBean(JpaLampRepository.class)
+  @Conditional(OnDatabaseUrlCondition.class)
   public LampRepository lampRepository(final JpaLampRepository jpaRepository) {
     return new LampRepository() {
       @Override
