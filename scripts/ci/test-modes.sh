@@ -286,6 +286,12 @@ test_serve_mode() {
 
     log_info "Waiting for migrations to complete..."
     while [ $table_check_attempts -lt $table_check_max ]; do
+        # Check if server process is still alive
+        if ! kill -0 "$server_pid" 2>/dev/null; then
+            log_error "Server process died during migrations"
+            return 1
+        fi
+
         if "$SCRIPT_DIR/verify-database.sh" lampcontrol_serve exists lamps 2>/dev/null; then
             table_exists=true
             log_info "Table 'lamps' exists after $((table_check_attempts + 1)) check(s)"
