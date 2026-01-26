@@ -2,17 +2,35 @@ openapi: 3.0.3
 info:
   title: Lamp Control API
   description: |
-    A simple API for controlling lamps, demonstrating CRUD operations.
-  version: 1.0.0
+    A simple API for controlling lamps, demonstrating CRUD operations and common ORM patterns.
+
+    ## ORM Problem Demonstrations
+
+    This API includes endpoints that demonstrate solutions to common ORM challenges:
+
+    ### N+1 Query Problem
+    - `GET /buildings?include=rooms.lamps` - Fetches nested resources efficiently
+    - `GET /buildings/{id}/rooms?include=lamps` - Minimizes queries when including relations
+
+    ### Repeated Reads Problem
+    - `POST /lamps/bulk-toggle` - Validates room for each lamp without querying the same room multiple times
+
+    ### Transaction Isolation Problem
+    - `POST /rooms/{roomId}/lamps/bulk-move` - Moves multiple lamps atomically (all or nothing)
+  version: 1.1.0
 
 servers:
   - url: /v1
 
 paths:
+  # ============================================
+  # Lamp Endpoints (existing)
+  # ============================================
   /lamps:
     get:
       summary: List all lamps
       operationId: listLamps
+      tags: [Lamps]
       parameters:
         - in: query
           name: cursor
@@ -51,6 +69,7 @@ paths:
     post:
       summary: Create a new lamp
       operationId: createLamp
+      tags: [Lamps]
       requestBody:
         required: true
         content:
@@ -79,6 +98,7 @@ paths:
     get:
       summary: Get a specific lamp
       operationId: getLamp
+      tags: [Lamps]
       parameters:
         - name: lampId
           in: path
@@ -109,6 +129,7 @@ paths:
     put:
       summary: Update a lamp's status
       operationId: updateLamp
+      tags: [Lamps]
       parameters:
         - name: lampId
           in: path
@@ -143,6 +164,7 @@ paths:
     delete:
       summary: Delete a lamp
       operationId: deleteLamp
+      tags: [Lamps]
       parameters:
         - name: lampId
           in: path
@@ -165,8 +187,454 @@ paths:
         '404':
           description: Lamp not found
 
+  /lamps/bulk-toggle:
+    post:
+      summary: Toggle multiple lamps
+      description: |
+        Toggle the status of multiple lamps. Each lamp's room must be validated as active before toggling.
+
+        **Functional Requirement:** Must not query the same room multiple times even if multiple lamps belong to the same room.
+      operationId: bulkToggleLamps
+      tags: [Lamps, Bulk Operations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkToggleLampsRequest'
+      responses:
+        '200':
+          description: Lamps toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkToggleLampsResponse'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: One or more lamps not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: One or more lamps belong to inactive (deleted) rooms
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # Building Endpoints
+  # ============================================
+  /buildings:
+    get:
+      summary: List all buildings
+      description: |
+        List all buildings, optionally including their rooms and lamps.
+
+        **Functional Requirement:** When including nested resources, must minimize database queries regardless of the number of buildings returned.
+      operationId: listBuildings
+      tags: [Buildings]
+      parameters:
+        - name: include
+          in: query
+          description: Comma-separated list of relations to include (rooms, rooms.lamps)
+          schema:
+            type: string
+            example: "rooms,rooms.lamps"
+      responses:
+        '200':
+          description: A list of buildings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Building'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new building
+      operationId: createBuilding
+      tags: [Buildings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildingCreate'
+      responses:
+        '201':
+          description: Building created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /buildings/{buildingId}:
+    get:
+      summary: Get a specific building
+      description: |
+        Get a single building by ID, optionally including nested resources.
+
+        **Functional Requirement:** Must minimize database queries when including nested resources.
+      operationId: getBuilding
+      tags: [Buildings]
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: include
+          in: query
+          description: Comma-separated list of relations to include (rooms, rooms.lamps)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Building details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+        '404':
+          description: Building not found
+    put:
+      summary: Update a building
+      operationId: updateBuilding
+      tags: [Buildings]
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildingUpdate'
+      responses:
+        '200':
+          description: Building updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Building not found
+    delete:
+      summary: Delete a building
+      operationId: deleteBuilding
+      tags: [Buildings]
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Building deleted successfully
+        '404':
+          description: Building not found
+
+  /buildings/{buildingId}/rooms:
+    get:
+      summary: List rooms in a building
+      description: |
+        List all rooms in a building, optionally including their lamps.
+
+        **Functional Requirement:** Must minimize database queries regardless of the number of rooms returned.
+      operationId: listRoomsInBuilding
+      tags: [Rooms]
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: include
+          in: query
+          description: Comma-separated list of relations to include (lamps)
+          schema:
+            type: string
+            example: "lamps"
+      responses:
+        '200':
+          description: A list of rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Room'
+        '404':
+          description: Building not found
+    post:
+      summary: Create a room in a building
+      operationId: createRoomInBuilding
+      tags: [Rooms]
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomCreate'
+      responses:
+        '201':
+          description: Room created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Building not found
+
+  # ============================================
+  # Room Endpoints
+  # ============================================
+  /rooms/{roomId}:
+    get:
+      summary: Get a specific room
+      operationId: getRoom
+      tags: [Rooms]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: include
+          in: query
+          description: Comma-separated list of relations to include (lamps, building)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Room details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Room not found
+    put:
+      summary: Update a room
+      operationId: updateRoom
+      tags: [Rooms]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomUpdate'
+      responses:
+        '200':
+          description: Room updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Room not found
+    delete:
+      summary: Delete a room
+      operationId: deleteRoom
+      tags: [Rooms]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Room deleted successfully
+        '404':
+          description: Room not found
+
+  /rooms/{roomId}/lamps:
+    get:
+      summary: List lamps in a room
+      operationId: listLampsInRoom
+      tags: [Lamps, Rooms]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of lamps in the room
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lamp'
+        '404':
+          description: Room not found
+    post:
+      summary: Create a lamp in a room
+      operationId: createLampInRoom
+      tags: [Lamps, Rooms]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LampCreate'
+      responses:
+        '201':
+          description: Lamp created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lamp'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Room not found
+
+  /rooms/{roomId}/lamps/bulk-move:
+    post:
+      summary: Move multiple lamps to another room
+      description: |
+        Move multiple lamps from the current room to a target room.
+
+        **Functional Requirements:**
+        - Validate source room exists and all lamps belong to it
+        - Validate target room exists
+        - **Must be atomic** - either all lamps move or none do
+        - **Must handle concurrent requests safely** - no race conditions
+      operationId: bulkMoveLamps
+      tags: [Lamps, Rooms, Bulk Operations]
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          description: Source room ID (lamps must currently be in this room)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkMoveLampsRequest'
+      responses:
+        '200':
+          description: Lamps moved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkMoveLampsResponse'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Source room, target room, or one or more lamps not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - one or more lamps do not belong to the source room
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
+    # ============================================
+    # Lamp Schemas
+    # ============================================
     Lamp:
       type: object
       properties:
@@ -177,6 +645,11 @@ components:
         status:
           type: boolean
           description: Whether the lamp is turned on (true) or off (false)
+        roomId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of the room this lamp belongs to (null if not assigned)
         createdAt:
           type: string
           format: date-time
@@ -209,6 +682,202 @@ components:
       required:
         - status
 
+    # ============================================
+    # Building Schemas
+    # ============================================
+    Building:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the building
+        name:
+          type: string
+          description: Name of the building
+        address:
+          type: string
+          nullable: true
+          description: Address of the building
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the building was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the building was last updated
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+          description: Rooms in this building (only included when requested via include parameter)
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+
+    BuildingCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the building
+        address:
+          type: string
+          description: Address of the building
+      required:
+        - name
+
+    BuildingUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the building
+        address:
+          type: string
+          nullable: true
+          description: Address of the building
+
+    # ============================================
+    # Room Schemas
+    # ============================================
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the room
+        name:
+          type: string
+          description: Name of the room
+        floor:
+          type: integer
+          nullable: true
+          description: Floor number where the room is located
+        buildingId:
+          type: string
+          format: uuid
+          description: ID of the building this room belongs to
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the room was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the room was last updated
+        lamps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lamp'
+          description: Lamps in this room (only included when requested via include parameter)
+        building:
+          $ref: '#/components/schemas/Building'
+          description: Building this room belongs to (only included when requested via include parameter)
+      required:
+        - id
+        - name
+        - buildingId
+        - createdAt
+        - updatedAt
+
+    RoomCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the room
+        floor:
+          type: integer
+          description: Floor number where the room is located
+      required:
+        - name
+
+    RoomUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the room
+        floor:
+          type: integer
+          nullable: true
+          description: Floor number where the room is located
+
+    # ============================================
+    # Bulk Operation Schemas
+    # ============================================
+    BulkToggleLampsRequest:
+      type: object
+      properties:
+        lampIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          description: List of lamp IDs to toggle
+        status:
+          type: boolean
+          description: Target status (true=on, false=off). If omitted, each lamp is toggled to its opposite state.
+      required:
+        - lampIds
+
+    BulkToggleLampsResponse:
+      type: object
+      properties:
+        toggledCount:
+          type: integer
+          description: Number of lamps successfully toggled
+        lamps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lamp'
+          description: The updated lamps
+      required:
+        - toggledCount
+        - lamps
+
+    BulkMoveLampsRequest:
+      type: object
+      properties:
+        lampIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          description: List of lamp IDs to move
+        targetRoomId:
+          type: string
+          format: uuid
+          description: ID of the room to move the lamps to
+      required:
+        - lampIds
+        - targetRoomId
+
+    BulkMoveLampsResponse:
+      type: object
+      properties:
+        movedCount:
+          type: integer
+          description: Number of lamps successfully moved
+        lamps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lamp'
+          description: The moved lamps with their updated roomId
+      required:
+        - movedCount
+        - lamps
+
+    # ============================================
+    # Error Schema
+    # ============================================
     Error:
       type: object
       properties:
@@ -216,5 +885,21 @@ components:
           type: string
           description: Error type identifier
           example: "INVALID_ARGUMENT"
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          description: Additional error details
       required:
         - error
+
+tags:
+  - name: Lamps
+    description: Lamp management operations
+  - name: Buildings
+    description: Building management operations
+  - name: Rooms
+    description: Room management operations
+  - name: Bulk Operations
+    description: Operations that affect multiple resources atomically
