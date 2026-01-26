@@ -10,7 +10,7 @@ info:
 
     ### N+1 Query Problem
     - `GET /buildings?include=rooms.lamps` - Fetches nested resources efficiently
-    - `GET /buildings/{id}/rooms?include=lamps` - Minimizes queries when including relations
+    - `GET /buildings/{buildingId}/rooms?include=lamps` - Minimizes queries when including relations
 
     ### Repeated Reads Problem
     - `POST /lamps/bulk-toggle` - Validates room for each lamp without querying the same room multiple times
