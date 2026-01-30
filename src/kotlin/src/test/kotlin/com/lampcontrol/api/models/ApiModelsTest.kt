@@ -1,9 +1,8 @@
 package com.lampcontrol.api.models
 
-import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.*
+import org.junit.jupiter.api.Test
 
 class ApiModelsTest {
     @Test

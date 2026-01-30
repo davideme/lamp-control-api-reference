@@ -1,12 +1,9 @@
 package com.lampcontrol.models
 
-import com.lampcontrol.api.models.Lamp
-import com.lampcontrol.api.models.ListLamps200Response
-import org.junit.jupiter.api.Test
+import com.lampcontrol.api.models.*
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
+import kotlin.test.*
+import org.junit.jupiter.api.Test
 
 class ListLamps200ResponseTest {
     @Test

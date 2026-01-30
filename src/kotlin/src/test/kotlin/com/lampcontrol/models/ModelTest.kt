@@ -1,17 +1,13 @@
 package com.lampcontrol.models
 
-import com.lampcontrol.api.models.Lamp
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.*
 import com.lampcontrol.serialization.UUIDSerializer
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import java.util.UUID
+import kotlin.test.*
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import org.junit.jupiter.api.Test
-import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class ModelTest {
     private val json =

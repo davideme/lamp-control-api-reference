@@ -1,10 +1,8 @@
 package com.lampcontrol.repository
 
 import com.lampcontrol.service.InMemoryLampRepository
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class LampRepositoryFactoryTest {
     @Test

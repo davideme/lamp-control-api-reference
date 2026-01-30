@@ -1,22 +1,16 @@
 package com.lampcontrol.api
 
-import com.lampcontrol.api.infrastructure.ApiKeyCredential
-import com.lampcontrol.api.infrastructure.ApiKeyLocation
-import com.lampcontrol.api.infrastructure.ApiPrincipal
-import com.lampcontrol.api.infrastructure.apiKeyAuth
-import io.ktor.client.request.get
-import io.ktor.client.request.header
+import com.lampcontrol.api.infrastructure.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.install
-import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.*
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.*
 import io.ktor.server.testing.testApplication
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class ApiKeyAuthTest {
     @Test

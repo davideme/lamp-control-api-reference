@@ -1,8 +1,6 @@
 package com.lampcontrol.mapper
 
-import com.lampcontrol.api.models.Lamp
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.*
 import com.lampcontrol.entity.LampEntity
 import java.time.Instant
 

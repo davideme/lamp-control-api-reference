@@ -11,23 +11,5 @@ tab_width = 4
 trim_trailing_whitespace = true
 
 [*.kt]
-ktlint_standard_no-wildcard-imports = enabled
-
-# Disable wildcard import rule for generated API files
-[src/main/kotlin/com/lampcontrol/api/apis/*.kt]
-ktlint_standard_no-wildcard-imports = disabled
-
-[src/main/kotlin/com/lampcontrol/api/AppMain.kt]
-ktlint_standard_no-wildcard-imports = disabled
-
-[src/main/kotlin/com/lampcontrol/api/Configuration.kt]
-ktlint_standard_no-wildcard-imports = disabled
-
-[src/main/kotlin/com/lampcontrol/api/Paths.kt]
-ktlint_standard_no-wildcard-imports = disabled
-
-[src/main/kotlin/com/lampcontrol/api/infrastructure/*.kt]
-ktlint_standard_no-wildcard-imports = disabled
-
-[src/main/kotlin/com/lampcontrol/api/models/*.kt]
+# Allow wildcard imports to reduce verbosity and line count
 ktlint_standard_no-wildcard-imports = disabled
