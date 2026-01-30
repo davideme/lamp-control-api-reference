@@ -25,6 +25,7 @@ import io.ktor.server.resources.get
 import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.server.response.*
+import io.ktor.server.routing.Route
 
 fun Route.DefaultApi(lampService: LampService) {
     post<Paths.createLamp> {
