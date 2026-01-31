@@ -11,8 +11,7 @@
 */
 package com.lampcontrol.api.models
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 /**
  *

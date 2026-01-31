@@ -1,8 +1,7 @@
 package com.lampcontrol.di
 
 import com.lampcontrol.mapper.LampMapper
-import com.lampcontrol.repository.LampRepository
-import com.lampcontrol.repository.LampRepositoryFactory
+import com.lampcontrol.repository.*
 import com.lampcontrol.service.LampService
 
 /**

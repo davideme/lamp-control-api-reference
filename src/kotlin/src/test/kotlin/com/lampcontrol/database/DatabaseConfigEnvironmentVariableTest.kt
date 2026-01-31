@@ -1,12 +1,8 @@
 package com.lampcontrol.database
 
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import org.junitpioneer.jupiter.ClearEnvironmentVariable
-import org.junitpioneer.jupiter.SetEnvironmentVariable
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import org.junitpioneer.jupiter.*
 
 /**
  * Tests for DatabaseConfig.fromEnv() using JUnit Pioneer to set environment variables.

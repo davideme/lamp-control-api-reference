@@ -2,13 +2,12 @@
 
 package com.lampcontrol.serialization
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import org.junit.jupiter.api.Test
-import java.util.UUID
-import kotlin.test.assertEquals
 
 class UUIDSerializerTest {
     private val json =

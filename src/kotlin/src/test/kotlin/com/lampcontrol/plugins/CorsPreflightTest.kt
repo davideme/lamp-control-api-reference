@@ -1,14 +1,11 @@
 package com.lampcontrol.plugins
 
 import com.lampcontrol.module
-import io.ktor.client.request.header
-import io.ktor.client.request.options
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.server.testing.testApplication
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CorsPreflightTest {
     @Test

@@ -1,8 +1,6 @@
 package com.lampcontrol.service
 
-import com.lampcontrol.api.models.Lamp
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.*
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import java.util.UUID

@@ -1,8 +1,7 @@
 package com.lampcontrol.database
 
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 /**
  * Tests for DatabaseConfig.Companion methods, particularly the parsing logic.

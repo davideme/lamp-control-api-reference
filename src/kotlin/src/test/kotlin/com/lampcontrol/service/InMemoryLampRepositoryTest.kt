@@ -1,14 +1,9 @@
 package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
+import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class InMemoryLampRepositoryTest {
     private val repo = InMemoryLampRepository()

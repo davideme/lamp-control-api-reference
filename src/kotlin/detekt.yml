@@ -723,7 +723,4 @@ style:
     active: true
     ignoreLateinitVar: false
   WildcardImport:
-    active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/api/**']
-    excludeImports:
-      - 'java.util.*'
+    active: false

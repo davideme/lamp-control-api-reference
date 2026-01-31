@@ -14,10 +14,7 @@
 package com.lampcontrol.api.apis
 
 import com.lampcontrol.api.Paths
-import com.lampcontrol.api.models.Error
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
-import com.lampcontrol.api.models.ListLamps200Response
+import com.lampcontrol.api.models.*
 import com.lampcontrol.service.LampService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -28,7 +25,7 @@ import io.ktor.server.resources.get
 import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
 
 fun Route.DefaultApi(lampService: LampService) {
     post<Paths.createLamp> {

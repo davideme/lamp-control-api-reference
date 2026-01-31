@@ -7,13 +7,11 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.*
 import io.ktor.server.testing.testApplication
+import kotlin.test.*
 import kotlinx.serialization.SerializationException
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class StatusPagesTest {
     @Test
