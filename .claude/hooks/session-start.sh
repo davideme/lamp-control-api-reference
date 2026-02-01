@@ -11,8 +11,8 @@ echo "🚀 Setting up development environment..."
 # Go setup
 echo "📦 Setting up Go dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/go"
-if go mod download 2>/dev/null; then
-  go mod tidy 2>/dev/null || true
+if go mod download >/dev/null 2>&1; then
+  go mod tidy >/dev/null 2>&1 || true
   echo "✓ Go dependencies ready"
 else
   echo "⚠ Network unavailable - Go dependencies will be downloaded on first use"
@@ -21,7 +21,7 @@ fi
 # Install golangci-lint if not available
 if ! command -v golangci-lint &> /dev/null; then
   echo "🔧 Installing golangci-lint..."
-  if curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh 2>/dev/null | sh -s -- -b $(go env GOPATH)/bin 2>/dev/null; then
+  if curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh 2>/dev/null | sh -s -- -b $(go env GOPATH)/bin >/dev/null 2>&1; then
     # Add GOPATH/bin to PATH for this session
     echo "export PATH=\$PATH:$(go env GOPATH)/bin" >> "$CLAUDE_ENV_FILE"
     echo "✓ golangci-lint installed"
@@ -33,7 +33,7 @@ fi
 # Java/Maven setup
 echo "📦 Setting up Java/Maven dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/java"
-if mvn dependency:resolve -q 2>/dev/null; then
+if mvn dependency:resolve -q >/dev/null 2>&1; then
   echo "✓ Java dependencies ready"
 else
   echo "⚠ Network unavailable - Maven dependencies will be downloaded on first use"
@@ -42,7 +42,7 @@ fi
 # Kotlin/Gradle setup
 echo "📦 Setting up Kotlin/Gradle dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/kotlin"
-if ./gradlew dependencies --quiet 2>/dev/null; then
+if ./gradlew dependencies --quiet >/dev/null 2>&1; then
   echo "✓ Kotlin dependencies ready"
 else
   echo "⚠ Network unavailable - Gradle dependencies will be downloaded on first use"
@@ -51,7 +51,7 @@ fi
 # Python/Poetry setup
 echo "📦 Setting up Python/Poetry dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/python"
-if poetry install --no-interaction 2>/dev/null; then
+if poetry install --no-interaction >/dev/null 2>&1; then
   echo "✓ Python dependencies ready"
 else
   echo "⚠ Network unavailable - Poetry dependencies will be installed on first use"
