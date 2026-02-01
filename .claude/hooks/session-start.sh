@@ -39,6 +39,15 @@ else
   echo "⚠ Network unavailable - Maven dependencies will be downloaded on first use"
 fi
 
+# Kotlin/Gradle setup
+echo "📦 Setting up Kotlin/Gradle dependencies..."
+cd "$CLAUDE_PROJECT_DIR/src/kotlin"
+if ./gradlew dependencies --quiet 2>/dev/null; then
+  echo "✓ Kotlin dependencies ready"
+else
+  echo "⚠ Network unavailable - Gradle dependencies will be downloaded on first use"
+fi
+
 # Python/Poetry setup
 echo "📦 Setting up Python/Poetry dependencies..."
 cd "$CLAUDE_PROJECT_DIR/src/python"
@@ -57,5 +66,6 @@ echo ""
 echo "Available linters:"
 echo "  - Go: golangci-lint (use 'golangci-lint run' in src/go)"
 echo "  - Java: mvn spotless:check (use 'mvn spotless:check' in src/java)"
+echo "  - Kotlin: ktlint + detekt (use './gradlew ktlintCheck detekt' from root or src/kotlin)"
 echo "  - Python: black + ruff (use 'poetry run black . && poetry run ruff check . --fix' in src/python)"
 echo ""
