@@ -1,11 +1,10 @@
 package com.lampcontrol.database
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.*
+import java.sql.Connection
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.slf4j.LoggerFactory
-import java.sql.Connection
 
 /**
  * Factory for database connection management using HikariCP and Exposed

@@ -1,18 +1,12 @@
 package com.lampcontrol
 
-import com.lampcontrol.database.DatabaseConfig
-import com.lampcontrol.database.FlywayConfig
-import com.lampcontrol.plugins.configureHTTP
-import com.lampcontrol.plugins.configureMonitoring
-import com.lampcontrol.plugins.configureResources
-import com.lampcontrol.plugins.configureRouting
-import com.lampcontrol.plugins.configureSerialization
-import com.lampcontrol.plugins.configureStatusPages
+import com.lampcontrol.database.*
+import com.lampcontrol.plugins.*
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
+import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("Application")
 private const val DEFAULT_PORT = 8080

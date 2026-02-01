@@ -1,8 +1,7 @@
 package com.lampcontrol.database
 
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class LampsTableTest {
     @Test

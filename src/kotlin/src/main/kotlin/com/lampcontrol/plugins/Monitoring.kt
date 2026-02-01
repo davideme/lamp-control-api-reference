@@ -1,7 +1,6 @@
 package com.lampcontrol.plugins
 
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
+import io.ktor.server.application.*
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.request.path

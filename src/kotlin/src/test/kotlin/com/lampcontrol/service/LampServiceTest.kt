@@ -1,17 +1,11 @@
 package com.lampcontrol.service
 
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.*
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
 
 class LampServiceTest {
     private lateinit var lampService: LampService
