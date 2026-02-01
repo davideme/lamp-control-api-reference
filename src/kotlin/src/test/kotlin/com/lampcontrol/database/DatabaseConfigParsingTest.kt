@@ -15,9 +15,8 @@ class DatabaseConfigParsingTest {
     fun `fromEnv returns null when no environment variables are set`() {
         // In standard test environment with no DB config, should return null
         // This test documents expected behavior and verifies fromEnv() doesn't throw
-        val config = DatabaseConfig.fromEnv()
+        DatabaseConfig.fromEnv()
         // Method executes successfully without exceptions
-        assertTrue(true)
     }
 
     @ParameterizedTest

@@ -168,12 +168,11 @@ class DatabaseConfigTest {
     fun `fromEnv returns null when no environment variables are set`() {
         // This tests the case where DATABASE_URL, DB_NAME, DB_HOST, and DB_USER are all not set
         // In the test environment, these are typically not set by default
-        val config = DatabaseConfig.fromEnv()
+        DatabaseConfig.fromEnv()
 
         // Should return null when no PostgreSQL configuration is detected
         // This may return a config if environment variables are set, which is also valid
         // The important part is that the method doesn't throw an exception
-        assertTrue(true)
     }
 
     @ParameterizedTest
