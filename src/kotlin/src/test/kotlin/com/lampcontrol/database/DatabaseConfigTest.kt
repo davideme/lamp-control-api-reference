@@ -173,7 +173,7 @@ class DatabaseConfigTest {
         // Should return null when no PostgreSQL configuration is detected
         // This may return a config if environment variables are set, which is also valid
         // The important part is that the method doesn't throw an exception
-        assertNotNull(config != null || config == null) // Always true, but exercises the code path
+        assertTrue(true)
     }
 
     @ParameterizedTest

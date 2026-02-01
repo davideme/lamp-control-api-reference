@@ -17,7 +17,7 @@ class DatabaseConfigCompanionTest {
 
         // Config may be null or not null depending on environment
         // The test is primarily to exercise the code path
-        assertNotNull(config == null || config != null)
+        assertTrue(true)
     }
 
     @Test
