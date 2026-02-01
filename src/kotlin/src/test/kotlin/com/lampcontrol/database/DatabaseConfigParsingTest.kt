@@ -182,7 +182,7 @@ class DatabaseConfigParsingTest {
         val allNull = results.all { it == null }
         val allNonNull = results.all { it != null }
 
-        assertTrue(allNull || allNonNull) { "fromEnv() should return consistent results" }
+        assertTrue(allNull || allNonNull, "fromEnv() should return consistent results")
     }
 
     @Test
