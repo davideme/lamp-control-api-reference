@@ -11,7 +11,7 @@ This document provides a comparison of the different language implementations in
 | Java | 1653 | 1369 | 1059 | 0.64 | 21.40 | 4101 | 1712 | 0.42 |
 | C# | 950 | 686 | 1356 | 1.43 | 98.59 | 3787 | 1400 | 0.37 |
 | Go | 1499 | 691 | 2290 | 1.53 | 56.00 | 5050 | 2179 | 0.43 |
-| Kotlin | 1109 | 968 | 2876 | 2.59 | N/A | 5270 | 2476 | 0.47 |
+| Kotlin | 1082 | 945 | 2693 | 2.49 | N/A | 5003 | 2395 | 0.48 |
 ## ULOC Metrics
 
 | Language   | App ULOC | App ULOC (No Generated) | Test ULOC | Test/App Ratio | Coverage (%) |
