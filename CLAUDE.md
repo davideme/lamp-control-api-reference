@@ -296,12 +296,102 @@ All implementations must conform to this spec. When modifying the API:
 
 Aim for >85% coverage across all implementations. Current metrics in `docs/COMPARISON.md`.
 
-### Testing Approach
+### Unit vs Integration Tests: Decision Heuristic
 
-Each implementation includes:
-- **Unit tests**: Domain logic, mappers, utilities
-- **Integration tests**: Database operations, API endpoints
-- **Testcontainers** (where supported): Real PostgreSQL in Docker for integration tests
+> **Ask: "Could this bug exist even if the database worked perfectly?"**
+>
+> - **Yes** → Unit test
+> - **No** → Integration test
+
+### What to Unit Test
+
+Test the **"what"** of your business logic in isolation:
+
+- **Validation logic** — Email format, required fields, business rules (e.g., "discount cannot exceed 50%")
+- **Calculations and transformations** — Price computation, date manipulations, data mapping
+- **State transitions** — Order status flows, user lifecycle states, workflow progressions
+- **Conditional business logic** — "If user is premium, apply X"; "If order exceeds threshold, do Y"
+- **Error handling paths** — Edge cases and malformed states that are hard to trigger via HTTP
+- **Pure functions** — Any function that takes input and returns output without side effects
+
+**Characteristics:**
+- No database, no HTTP, no file system
+- Fast execution (milliseconds)
+- If you need to mock more than one or two dependencies, it's probably an integration test in disguise
+- Test the logic, not the wiring
+
+**Examples:**
+```
+✓ validateEmail("bad-email") returns validation error
+✓ calculateOrderTotal(items, discount) returns correct sum
+✓ canUserAccessResource(user, resource) returns true/false based on permissions
+✓ parseImportFile(rawData) transforms to expected structure
+```
+
+### What to Integration Test
+
+Test the **"how"** of your system components working together:
+
+- **Happy path per endpoint** — POST creates resource, GET retrieves it, PUT updates, DELETE removes
+- **Database constraints** — Unique constraints, foreign keys, cascades behave as expected
+- **Query correctness** — Filters, pagination, sorting return expected results
+- **Transaction behavior** — Rollback on failure, concurrent access handling
+- **Authentication/authorization** — Correct HTTP status codes for authenticated/unauthorized requests
+- **Serialization edge cases** — Nulls, empty arrays, dates, timezone handling in JSON responses
+- **Error responses** — API returns proper error format and status codes for invalid requests
+
+**Characteristics:**
+- Real database (containerized, reset between runs)
+- Real HTTP requests to your API
+- Minimal test data setup—just enough to verify the scenario
+- One test per meaningful scenario, not per code path
+- Slower execution (acceptable: seconds per test)
+
+**Examples:**
+```
+✓ POST /users with valid data returns 201 and creates user in database
+✓ GET /users?status=active returns only active users
+✓ POST /users with duplicate email returns 409 Conflict
+✓ DELETE /orders/{id} cascades to order_items
+✓ GET /protected-resource without token returns 401
+```
+
+### What NOT to Test
+
+**Don't unit test:**
+- Simple getters/setters or data classes with no logic
+- Framework behavior (your ORM's save method works)
+- Code paths already covered by integration tests with no additional business logic
+
+**Don't integration test:**
+- Every permutation of validation errors (unit test the validator instead)
+- Internal implementation details
+- Scenarios already covered by contract tests (e.g., Schemathesis)
+
+### Test Placement Summary
+
+| Scenario | Test Type |
+|----------|-----------|
+| Email validation rejects invalid format | Unit |
+| POST /users rejects invalid email with 400 | Integration |
+| Price calculation with discount | Unit |
+| GET /orders returns correct total | Integration |
+| Permission check logic | Unit |
+| Unauthorized request returns 401 | Integration |
+| Data transformation function | Unit |
+| Database unique constraint enforced | Integration |
+| State machine transitions | Unit |
+| Concurrent updates don't corrupt data | Integration |
+
+### Testing Guidelines for Contributors
+
+When writing tests:
+
+1. **Default to integration tests** for endpoint behavior—they catch real bugs
+2. **Extract to unit tests** when you find yourself writing multiple integration tests to cover logic branches
+3. **Never mock the database in integration tests**—use a real instance (Testcontainers)
+4. **Keep unit tests focused**—one assertion per logical concept
+5. **Name tests by behavior**, not by method: `rejects_order_when_inventory_insufficient` not `test_create_order_3`
 
 ### Running Integration Tests
 
