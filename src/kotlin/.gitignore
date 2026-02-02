@@ -1,3 +1,6 @@
 build/
 .gradle/
 
+# Detekt CLI and reports
+detekt-cli-*.jar
+detekt-report.*
