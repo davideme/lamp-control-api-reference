@@ -13,11 +13,10 @@ class DatabaseConfigCompanionTest {
         // This exercises the fromEnv() code path
         // In test environment, this will typically return null
         // but the important part is the method executes without errors
-        val config = DatabaseConfig.fromEnv()
+        DatabaseConfig.fromEnv()
 
         // Config may be null or not null depending on environment
         // The test is primarily to exercise the code path
-        assertNotNull(config == null || config != null)
     }
 
     @Test

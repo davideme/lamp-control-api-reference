@@ -2,6 +2,10 @@ package com.lampcontrol.database
 
 import kotlin.test.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 
 /**
  * Tests for DATABASE_URL parsing logic.
@@ -9,54 +13,60 @@ import org.junit.jupiter.api.Test
  * by simulating what would happen if environment variables were set.
  */
 class DatabaseUrlParsingTest {
-    @Test
-    fun `DATABASE_URL format parsing logic validation`() {
-        // Test the regex pattern that parseDatabaseUrl uses
-        val validUrls =
-            listOf(
-                "postgresql://user:pass@localhost:5432/dbname",
-                "postgres://user:pass@localhost:5432/dbname",
-                "postgresql://myuser:mypass@db.example.com:5433/production",
-                "postgres://testuser:testpass@127.0.0.1:5432/testdb",
-                "postgresql://admin:secret123@10.0.0.1:5432/lamp_control",
-            )
+    private val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
 
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "postgresql://user:pass@localhost:5432/dbname",
+            "postgres://user:pass@localhost:5432/dbname",
+            "postgresql://myuser:mypass@db.example.com:5433/production",
+            "postgres://testuser:testpass@127.0.0.1:5432/testdb",
+            "postgresql://admin:secret123@10.0.0.1:5432/lamp_control",
+            "postgresql://user:pass@localhost:5432/db",
+            "postgresql://user:pass@127.0.0.1:5432/db",
+            "postgresql://user:pass@db.example.com:5432/db",
+            "postgresql://user:pass@postgres-server:5432/db",
+            "postgresql://user:pass@10.0.0.50:5432/db",
+        ],
+    )
+    fun `DATABASE_URL format parsing validation`(url: String) {
+        val match = regex.matchEntire(url)
+        assertNotNull(match, "Should match valid DATABASE_URL: $url")
 
-        validUrls.forEach { url ->
-            val match = regex.matchEntire(url)
-            assertNotNull(match, "Should match valid DATABASE_URL: $url")
-
-            val (user, password, host, port, database) = match.destructured
-            assertNotNull(user)
-            assertNotNull(password)
-            assertNotNull(host)
-            assertNotNull(port)
-            assertNotNull(database)
-        }
+        val (user, password, host, port, database) = match.destructured
+        assertNotNull(user)
+        assertNotNull(password)
+        assertNotNull(host)
+        assertNotNull(port)
+        assertNotNull(database)
     }
 
-    @Test
-    fun `DATABASE_URL regex extracts correct components`() {
-        val testUrl = "postgresql://myuser:mypass@db.example.com:5433/production"
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val match = regex.matchEntire(testUrl)
+    @ParameterizedTest
+    @MethodSource("databaseUrlTestCases")
+    @Suppress("LongParameterList")
+    fun `DATABASE_URL regex extracts correct components`(
+        url: String,
+        expectedUser: String,
+        expectedPassword: String,
+        expectedHost: String,
+        expectedPort: String,
+        expectedDatabase: String,
+    ) {
+        val match = regex.matchEntire(url)
         assertNotNull(match)
 
         val (user, password, host, port, database) = match.destructured
 
-        assertEquals("myuser", user)
-        assertEquals("mypass", password)
-        assertEquals("db.example.com", host)
-        assertEquals("5433", port)
-        assertEquals("production", database)
+        assertEquals(expectedUser, user)
+        assertEquals(expectedPassword, password)
+        assertEquals(expectedHost, host)
+        assertEquals(expectedPort, port)
+        assertEquals(expectedDatabase, database)
     }
 
     @Test
     fun `DATABASE_URL supports both postgresql and postgres schemes`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
         val postgresqlUrl = "postgresql://user:pass@host:5432/db"
         val postgresUrl = "postgres://user:pass@host:5432/db"
 
@@ -64,143 +74,56 @@ class DatabaseUrlParsingTest {
         assertNotNull(regex.matchEntire(postgresUrl))
     }
 
-    @Test
-    fun `DATABASE_URL regex handles various host formats`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val hostFormats =
-            listOf(
-                "postgresql://user:pass@localhost:5432/db",
-                "postgresql://user:pass@127.0.0.1:5432/db",
-                "postgresql://user:pass@db.example.com:5432/db",
-                "postgresql://user:pass@postgres-server:5432/db",
-                "postgresql://user:pass@10.0.0.50:5432/db",
-            )
-
-        hostFormats.forEach { url ->
-            val match = regex.matchEntire(url)
-            assertNotNull(match, "Should parse host from: $url")
-        }
-    }
-
-    @Test
-    fun `DATABASE_URL regex handles various port numbers`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val ports = listOf(5432, 5433, 5434, 15432, 25432)
-
-        ports.forEach { port ->
-            val url = "postgresql://user:pass@localhost:$port/db"
-            val match = regex.matchEntire(url)
-            assertNotNull(match)
-
-            val (_, _, _, extractedPort, _) = match.destructured
-            assertEquals(port.toString(), extractedPort)
-        }
-    }
-
-    @Test
-    fun `DATABASE_URL regex handles passwords with special characters`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        // Note: The regex uses [^@]+ for password, which means it stops at the first @
-        // This is correct because @ separates password from host
-        val testCases =
-            listOf(
-                "postgresql://user:simple@host:5432/db" to "simple",
-                "postgresql://user:pass123!@host:5432/db" to "pass123!",
-                "postgresql://user:p-ssw0rd_123@host:5432/db" to "p-ssw0rd_123",
-                "postgresql://user:SecurePass123@host:5432/db" to "SecurePass123",
-            )
-
-        testCases.forEach { (url, expectedPassword) ->
-            val match = regex.matchEntire(url)
-            assertNotNull(match, "Should parse: $url")
-
-            val (_, password, _, _, _) = match.destructured
-            assertEquals(expectedPassword, password)
-        }
-    }
-
-    @Test
-    fun `DATABASE_URL regex handles usernames with special characters`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val testCases =
-            listOf(
-                "postgresql://simple:pass@host:5432/db" to "simple",
-                "postgresql://user_name:pass@host:5432/db" to "user_name",
-                "postgresql://user-name:pass@host:5432/db" to "user-name",
-                "postgresql://user.name:pass@host:5432/db" to "user.name",
-            )
-
-        testCases.forEach { (url, expectedUser) ->
-            val match = regex.matchEntire(url)
-            assertNotNull(match, "Should parse: $url")
-
-            val (user, _, _, _, _) = match.destructured
-            assertEquals(expectedUser, user)
-        }
-    }
-
-    @Test
-    fun `DATABASE_URL regex handles database names with underscores and numbers`() {
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val dbNames =
-            listOf(
-                "simple",
-                "lamp_control",
-                "my_database_2024",
-                "test-db",
-                "production123",
-                "db_dev_v2",
-            )
-
-        dbNames.forEach { dbName ->
-            val url = "postgresql://user:pass@host:5432/$dbName"
-            val match = regex.matchEntire(url)
-            assertNotNull(match, "Should parse database name: $dbName")
-
-            val (_, _, _, _, extractedDb) = match.destructured
-            assertEquals(dbName, extractedDb)
-        }
-    }
-
-    @Test
-    fun `DATABASE_URL regex correctly extracts from Heroku-style URLs`() {
-        // Heroku typically provides URLs like: postgres://user:pass@host:5432/dbname
-        val herokuUrl = "postgres://abcdefg:hijklmnop123456789@ec2-1-2-3-4.compute-1.amazonaws.com:5432/d1a2b3c4d5e6"
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-
-        val match = regex.matchEntire(herokuUrl)
+    @ParameterizedTest
+    @ValueSource(ints = [5432, 5433, 5434, 15432, 25432])
+    fun `DATABASE_URL regex handles various port numbers`(port: Int) {
+        val url = "postgresql://user:pass@localhost:$port/db"
+        val match = regex.matchEntire(url)
         assertNotNull(match)
 
-        val (user, password, host, port, database) = match.destructured
-
-        assertEquals("abcdefg", user)
-        assertEquals("hijklmnop123456789", password)
-        assertEquals("ec2-1-2-3-4.compute-1.amazonaws.com", host)
-        assertEquals("5432", port)
-        assertEquals("d1a2b3c4d5e6", database)
+        val (_, _, _, extractedPort, _) = match.destructured
+        assertEquals(port.toString(), extractedPort)
     }
 
-    @Test
-    fun `DATABASE_URL regex correctly extracts from Render-style URLs`() {
-        // Render provides URLs like: postgresql://user:pass@hostname:5432/dbname
-        val renderUrl = "postgresql://lamp_user:secure_password_123@dpg-abc123.oregon-postgres.render.com:5432/lamp_control_db"
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
+    @ParameterizedTest
+    @CsvSource(
+        "postgresql://user:simple@host:5432/db, simple",
+        "postgresql://user:pass123!@host:5432/db, pass123!",
+        "postgresql://user:p-ssw0rd_123@host:5432/db, p-ssw0rd_123",
+        "postgresql://user:SecurePass123@host:5432/db, SecurePass123",
+    )
+    fun `DATABASE_URL regex handles passwords with special characters`(url: String, expectedPassword: String) {
+        val match = regex.matchEntire(url)
+        assertNotNull(match, "Should parse: $url")
 
-        val match = regex.matchEntire(renderUrl)
-        assertNotNull(match)
+        val (_, password, _, _, _) = match.destructured
+        assertEquals(expectedPassword, password)
+    }
 
-        val (user, password, host, port, database) = match.destructured
+    @ParameterizedTest
+    @CsvSource(
+        "postgresql://simple:pass@host:5432/db, simple",
+        "postgresql://user_name:pass@host:5432/db, user_name",
+        "postgresql://user-name:pass@host:5432/db, user-name",
+        "postgresql://user.name:pass@host:5432/db, user.name",
+    )
+    fun `DATABASE_URL regex handles usernames with special characters`(url: String, expectedUser: String) {
+        val match = regex.matchEntire(url)
+        assertNotNull(match, "Should parse: $url")
 
-        assertEquals("lamp_user", user)
-        assertEquals("secure_password_123", password)
-        assertEquals("dpg-abc123.oregon-postgres.render.com", host)
-        assertEquals("5432", port)
-        assertEquals("lamp_control_db", database)
+        val (user, _, _, _, _) = match.destructured
+        assertEquals(expectedUser, user)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["simple", "lamp_control", "my_database_2024", "test-db", "production123", "db_dev_v2"])
+    fun `DATABASE_URL regex handles database names with underscores and numbers`(dbName: String) {
+        val url = "postgresql://user:pass@host:5432/$dbName"
+        val match = regex.matchEntire(url)
+        assertNotNull(match, "Should parse database name: $dbName")
+
+        val (_, _, _, _, extractedDb) = match.destructured
+        assertEquals(dbName, extractedDb)
     }
 
     @Test
@@ -210,7 +133,6 @@ class DatabaseUrlParsingTest {
         // but we can verify the regex pattern works correctly
 
         val exampleUrl = "postgresql://testuser:testpass@localhost:5432/testdb"
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
 
         val match = regex.matchEntire(exampleUrl)
         assertNotNull(match)
@@ -244,11 +166,6 @@ class DatabaseUrlParsingTest {
     @Test
     fun `fromEnv would handle individual env vars correctly if set`() {
         // This test documents the expected behavior when individual env vars are set
-        // Testing the logic that would execute if DB_HOST and DB_USER were set
-
-        // Values from environment variables:
-        // host from DB_HOST, port from DB_PORT (default 5432), database from DB_NAME (default lamp_control)
-        // user from DB_USER, password from DB_PASSWORD, pool sizes from DB_POOL_MIN_SIZE/DB_POOL_MAX_SIZE
         val expectedConfig =
             DatabaseConfig(
                 host = "localhost",
@@ -276,7 +193,6 @@ class DatabaseUrlParsingTest {
 
         // If DATABASE_URL is set, it should be parsed first
         val databaseUrlConfig = "postgresql://url_user:url_pass@url_host:5433/url_db"
-        val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
         val match = regex.matchEntire(databaseUrlConfig)
         assertNotNull(match)
 
@@ -301,8 +217,6 @@ class DatabaseUrlParsingTest {
 
     @Test
     fun `pool size defaults when not specified in environment`() {
-        // Tests the default pool size values used when env vars are not set
-        // poolMin defaults from DB_POOL_MIN_SIZE, poolMax defaults from DB_POOL_MAX_SIZE
         val config =
             DatabaseConfig(
                 host = "host",
@@ -328,8 +242,6 @@ class DatabaseUrlParsingTest {
         // 2. DB_NAME is explicitly provided
         // 3. Both DB_HOST and DB_USER are explicitly provided
 
-        // Simulate these detection conditions
-        // Each condition maps to: databaseUrl is not empty, database is not empty, host and user are not empty
         val conditions =
             listOf(
                 "DATABASE_URL set" to true,
@@ -340,5 +252,38 @@ class DatabaseUrlParsingTest {
         conditions.forEach { (condition, shouldBeConfigured) ->
             assertEquals(true, shouldBeConfigured, "PostgreSQL should be configured when: $condition")
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun databaseUrlTestCases() =
+            listOf(
+                arrayOf(
+                    "postgresql://myuser:mypass@db.example.com:5433/production",
+                    "myuser",
+                    "mypass",
+                    "db.example.com",
+                    "5433",
+                    "production",
+                ),
+                arrayOf(
+                    "postgres://abcdefg:hijklmnop123456789@" +
+                        "ec2-1-2-3-4.compute-1.amazonaws.com:5432/d1a2b3c4d5e6",
+                    "abcdefg",
+                    "hijklmnop123456789",
+                    "ec2-1-2-3-4.compute-1.amazonaws.com",
+                    "5432",
+                    "d1a2b3c4d5e6",
+                ),
+                arrayOf(
+                    "postgresql://lamp_user:secure_password_123@" +
+                        "dpg-abc123.oregon-postgres.render.com:5432/lamp_control_db",
+                    "lamp_user",
+                    "secure_password_123",
+                    "dpg-abc123.oregon-postgres.render.com",
+                    "5432",
+                    "lamp_control_db",
+                ),
+            )
     }
 }
