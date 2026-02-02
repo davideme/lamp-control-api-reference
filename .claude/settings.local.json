@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./gradlew build:*)",
       "Bash(./gradlew clean:*)",
       "Bash(./gradlew compileKotlin:*)",
       "Bash(./gradlew detekt:*)",
@@ -23,12 +24,16 @@
       "Bash(gh issue create:*)",
       "Bash(gh issue view:*)",
       "Bash(gh pr checks:*)",
+      "Bash(gh pr create:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(git add:*)",
       "Bash(git checkout:*)",
       "Bash(git commit:*)",
+      "Bash(git pull:*)",
       "Bash(git push:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git stash:*)",
       "Bash(golangci-lint run:*)",
       "Bash(java:*)",
       "Bash(make lint:*)",
@@ -45,6 +50,7 @@
       "Bash(npm run test:integration:*)",
       "Bash(npm test:*)",
       "Bash(npx prisma generate:*)",
+      "Bash(pg_isready:*)",
       "Bash(pip3 install:*)",
       "Bash(pkill:*)",
       "Bash(poetry add:*)",
@@ -63,12 +69,7 @@
       "Bash(ruff check:*)",
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
-      "Bash(tree:*)",
-      "Bash(pg_isready:*)",
-      "Bash(gh pr create:*)",
-      "Bash(git pull:*)",
-      "Bash(git stash:*)",
-      "Bash(git stash pop:*)"
+      "Bash(tree:*)"
     ]
   }
 }

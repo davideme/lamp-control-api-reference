@@ -2,38 +2,29 @@ package com.lampcontrol.database
 
 import kotlin.test.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 
 class DatabaseConfigTest {
-    @Test
-    fun `connectionString builds correct JDBC URL with custom host and port`() {
+    @ParameterizedTest
+    @CsvSource(
+        "db.example.com, 5433, mydb, jdbc:postgresql://db.example.com:5433/mydb",
+        "localhost, 5432, lamp_control, jdbc:postgresql://localhost:5432/lamp_control",
+        "192.168.1.100, 5433, testdb, jdbc:postgresql://192.168.1.100:5433/testdb",
+        "10.0.0.1, 5432, db, jdbc:postgresql://10.0.0.1:5432/db",
+        "example.com, 5432, db, jdbc:postgresql://example.com:5432/db",
+        "db.internal.network, 5433, mydb, jdbc:postgresql://db.internal.network:5433/mydb",
+        "host, 5432, my-special_db.123, jdbc:postgresql://host:5432/my-special_db.123",
+    )
+    fun `connectionString builds correct JDBC URL`(host: String, port: Int, database: String, expected: String) {
         val config =
             DatabaseConfig(
-                host = "db.example.com",
-                port = 5433,
-                database = "mydb",
-                user = "myuser",
-                password = "mypass",
-                poolMin = 2,
-                poolMax = 10,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
-            )
-
-        val connectionString = config.connectionString()
-
-        assertEquals("jdbc:postgresql://db.example.com:5433/mydb", connectionString)
-    }
-
-    @Test
-    fun `connectionString works with localhost`() {
-        val config =
-            DatabaseConfig(
-                host = "localhost",
-                port = 5432,
-                database = "lamp_control",
-                user = "lamp_user",
-                password = "password",
+                host = host,
+                port = port,
+                database = database,
+                user = "user",
+                password = "pass",
                 poolMin = 0,
                 poolMax = 4,
                 maxLifetimeMs = 3600000,
@@ -41,9 +32,23 @@ class DatabaseConfigTest {
                 connectionTimeoutMs = 30000,
             )
 
-        val connectionString = config.connectionString()
+        assertEquals(expected, config.connectionString())
+    }
 
-        assertEquals("jdbc:postgresql://localhost:5432/lamp_control", connectionString)
+    @ParameterizedTest
+    @ValueSource(strings = ["my-db", "my_db", "mydb123"])
+    fun `DatabaseConfig supports various database names`(database: String) {
+        val config = DatabaseConfig("host", 5432, database, "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        assertNotNull(config.connectionString())
+        assertTrue(config.connectionString().endsWith("/$database"))
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [5433, 5434, 5435, 15432])
+    fun `DatabaseConfig with non-standard ports`(port: Int) {
+        val config = DatabaseConfig("localhost", port, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        assertEquals(port, config.port)
+        assertTrue(config.connectionString().contains(":$port/"))
     }
 
     @Test
@@ -94,59 +99,6 @@ class DatabaseConfigTest {
     }
 
     @Test
-    fun `DatabaseConfig with IP address host`() {
-        val config =
-            DatabaseConfig(
-                host = "10.0.0.1",
-                port = 5432,
-                database = "db",
-                user = "admin",
-                password = "secret",
-                poolMin = 1,
-                poolMax = 5,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
-            )
-
-        assertEquals("jdbc:postgresql://10.0.0.1:5432/db", config.connectionString())
-    }
-
-    @Test
-    fun `DatabaseConfig supports various database names`() {
-        val configs =
-            listOf(
-                DatabaseConfig("host", 5432, "my-db", "user", "pass", 0, 4, 3600000, 1800000, 30000),
-                DatabaseConfig("host", 5432, "my_db", "user", "pass", 0, 4, 3600000, 1800000, 30000),
-                DatabaseConfig("host", 5432, "mydb123", "user", "pass", 0, 4, 3600000, 1800000, 30000),
-            )
-
-        configs.forEach { config ->
-            assertNotNull(config.connectionString())
-        }
-    }
-
-    @Test
-    fun `DatabaseConfig pool configuration`() {
-        val config =
-            DatabaseConfig(
-                host = "localhost",
-                port = 5432,
-                database = "db",
-                user = "user",
-                password = "pass",
-                poolMin = 10,
-                poolMax = 50,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
-            )
-
-        assertEquals(10, config.poolMin)
-        assertEquals(50, config.poolMax)
-    }
-
-    @Test
     fun `connectionString format is consistent`() {
         val configs =
             listOf(
@@ -157,10 +109,10 @@ class DatabaseConfigTest {
 
         configs.forEach { config ->
             val connStr = config.connectionString()
-            assert(connStr.startsWith("jdbc:postgresql://"))
-            assert(connStr.contains(config.host))
-            assert(connStr.contains(config.port.toString()))
-            assert(connStr.contains(config.database))
+            assertTrue(connStr.startsWith("jdbc:postgresql://"))
+            assertTrue(connStr.contains(config.host))
+            assertTrue(connStr.contains(config.port.toString()))
+            assertTrue(connStr.contains(config.database))
         }
     }
 
@@ -171,7 +123,7 @@ class DatabaseConfigTest {
         val config3 = DatabaseConfig("host", 5433, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
 
         assertEquals(config1, config2)
-        assert(config1 != config3)
+        assertTrue(config1 != config3)
         assertEquals(config1.hashCode(), config2.hashCode())
     }
 
@@ -190,9 +142,9 @@ class DatabaseConfigTest {
         val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
         val string = config.toString()
 
-        assert(string.contains("host"))
-        assert(string.contains("5432"))
-        assert(string.contains("db"))
+        assertTrue(string.contains("host"))
+        assertTrue(string.contains("5432"))
+        assertTrue(string.contains("db"))
     }
 
     @Test
@@ -216,45 +168,24 @@ class DatabaseConfigTest {
     fun `fromEnv returns null when no environment variables are set`() {
         // This tests the case where DATABASE_URL, DB_NAME, DB_HOST, and DB_USER are all not set
         // In the test environment, these are typically not set by default
-        val config = DatabaseConfig.fromEnv()
+        DatabaseConfig.fromEnv()
 
         // Should return null when no PostgreSQL configuration is detected
         // This may return a config if environment variables are set, which is also valid
         // The important part is that the method doesn't throw an exception
-        assertNotNull(config != null || config == null) // Always true, but exercises the code path
     }
 
-    @Test
-    fun `connectionString handles various host formats`() {
-        val configs =
-            listOf(
-                DatabaseConfig("example.com", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000),
-                DatabaseConfig("db.internal.network", 5433, "mydb", "admin", "secret", 1, 10, 3600000, 1800000, 30000),
-                DatabaseConfig("192.168.1.100", 5434, "testdb", "test", "test", 2, 8, 3600000, 1800000, 30000),
-            )
+    @ParameterizedTest
+    @CsvSource(
+        "10, 50",
+        "0, 100",
+        "5, 5",
+    )
+    fun `DatabaseConfig pool configuration`(poolMin: Int, poolMax: Int) {
+        val config = DatabaseConfig("host", 5432, "db", "user", "pass", poolMin, poolMax, 3600000, 1800000, 30000)
 
-        configs.forEach { config ->
-            val connStr = config.connectionString()
-            assert(connStr.startsWith("jdbc:postgresql://"))
-            assert(connStr.contains(config.host))
-            assert(connStr.endsWith("/${config.database}"))
-        }
-    }
-
-    @Test
-    fun `DatabaseConfig with maximum pool size`() {
-        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 100, 3600000, 1800000, 30000)
-
-        assertEquals(100, config.poolMax)
-        assertEquals(0, config.poolMin)
-    }
-
-    @Test
-    fun `DatabaseConfig with equal min and max pool size`() {
-        val config = DatabaseConfig("host", 5432, "db", "user", "pass", 5, 5, 3600000, 1800000, 30000)
-
-        assertEquals(5, config.poolMin)
-        assertEquals(5, config.poolMax)
+        assertEquals(poolMin, config.poolMin)
+        assertEquals(poolMax, config.poolMax)
     }
 
     @Test
@@ -262,24 +193,6 @@ class DatabaseConfigTest {
         val config1 = DatabaseConfig("host", 5432, "db", "user", "pass1", 0, 4, 3600000, 1800000, 30000)
         val config2 = DatabaseConfig("host", 5432, "db", "user", "pass2", 0, 4, 3600000, 1800000, 30000)
 
-        assert(config1 != config2)
-    }
-
-    @Test
-    fun `DatabaseConfig with special characters in database name`() {
-        val config = DatabaseConfig("host", 5432, "my-special_db.123", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-
-        assertEquals("jdbc:postgresql://host:5432/my-special_db.123", config.connectionString())
-    }
-
-    @Test
-    fun `DatabaseConfig with non-standard port`() {
-        val ports = listOf(5433, 5434, 5435, 15432)
-
-        ports.forEach { port ->
-            val config = DatabaseConfig("localhost", port, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-            assertEquals(port, config.port)
-            assert(config.connectionString().contains(":$port/"))
-        }
+        assertTrue(config1 != config2)
     }
 }
