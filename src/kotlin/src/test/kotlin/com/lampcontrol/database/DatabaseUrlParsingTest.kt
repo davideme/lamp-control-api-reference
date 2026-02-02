@@ -4,6 +4,7 @@ import kotlin.test.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 
 /**
@@ -42,11 +43,8 @@ class DatabaseUrlParsingTest {
     }
 
     @ParameterizedTest
-    @CsvSource(
-        "postgresql://myuser:mypass@db.example.com:5433/production, myuser, mypass, db.example.com, 5433, production",
-        "postgres://abcdefg:hijklmnop123456789@ec2-1-2-3-4.compute-1.amazonaws.com:5432/d1a2b3c4d5e6, abcdefg, hijklmnop123456789, ec2-1-2-3-4.compute-1.amazonaws.com, 5432, d1a2b3c4d5e6",
-        "postgresql://lamp_user:secure_password_123@dpg-abc123.oregon-postgres.render.com:5432/lamp_control_db, lamp_user, secure_password_123, dpg-abc123.oregon-postgres.render.com, 5432, lamp_control_db",
-    )
+    @MethodSource("databaseUrlTestCases")
+    @Suppress("LongParameterList")
     fun `DATABASE_URL regex extracts correct components`(
         url: String,
         expectedUser: String,
@@ -254,5 +252,38 @@ class DatabaseUrlParsingTest {
         conditions.forEach { (condition, shouldBeConfigured) ->
             assertEquals(true, shouldBeConfigured, "PostgreSQL should be configured when: $condition")
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun databaseUrlTestCases() =
+            listOf(
+                arrayOf(
+                    "postgresql://myuser:mypass@db.example.com:5433/production",
+                    "myuser",
+                    "mypass",
+                    "db.example.com",
+                    "5433",
+                    "production",
+                ),
+                arrayOf(
+                    "postgres://abcdefg:hijklmnop123456789@" +
+                        "ec2-1-2-3-4.compute-1.amazonaws.com:5432/d1a2b3c4d5e6",
+                    "abcdefg",
+                    "hijklmnop123456789",
+                    "ec2-1-2-3-4.compute-1.amazonaws.com",
+                    "5432",
+                    "d1a2b3c4d5e6",
+                ),
+                arrayOf(
+                    "postgresql://lamp_user:secure_password_123@" +
+                        "dpg-abc123.oregon-postgres.render.com:5432/lamp_control_db",
+                    "lamp_user",
+                    "secure_password_123",
+                    "dpg-abc123.oregon-postgres.render.com",
+                    "5432",
+                    "lamp_control_db",
+                ),
+            )
     }
 }
