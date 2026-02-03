@@ -5,12 +5,17 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { PrismaLampRepository } from '../../src/infrastructure/repositories/PrismaLampRepository.js';
+import { PrismaLampRepository } from '../../src/infrastructure/repositories/PrismaLampRepository.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-describe('PrismaLampRepository Integration Tests', () => {
+// Skip integration tests only if explicitly disabled
+const shouldSkipIntegrationTests = process.env.SKIP_INTEGRATION_TESTS === 'true';
+
+const describeIntegration = shouldSkipIntegrationTests ? describe.skip : describe;
+
+describeIntegration('PrismaLampRepository Integration Tests', () => {
   let container: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
   let repository: PrismaLampRepository;

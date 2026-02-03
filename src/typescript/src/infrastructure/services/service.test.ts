@@ -242,6 +242,24 @@ describe('Service', () => {
       expect(mockReply.code).toHaveBeenCalledWith(404);
       expect(mockReply.send).toHaveBeenCalled();
     });
+
+    it('should rethrow non-LampNotFoundError errors', async () => {
+      // Arrange
+      const mockRequest: MockFastifyRequest<{
+        params: { lampId: string };
+        body: { status: boolean };
+      }> = {
+        params: { lampId: '1' },
+        body: { status: false },
+      };
+      const databaseError = new Error('Database connection failed');
+      mockRepository.update.mockRejectedValue(databaseError);
+
+      // Act & Assert
+      await expect(service.updateLamp(mockRequest as any, mockReply as any)).rejects.toThrow(
+        'Database connection failed',
+      );
+    });
   });
 
   describe('deleteLamp', () => {
@@ -275,6 +293,20 @@ describe('Service', () => {
       expect(mockRepository.delete).toHaveBeenCalledWith('nonexistent');
       expect(mockReply.code).toHaveBeenCalledWith(404);
       expect(mockReply.send).toHaveBeenCalled();
+    });
+
+    it('should rethrow non-LampNotFoundError errors', async () => {
+      // Arrange
+      const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
+        params: { lampId: '1' },
+      };
+      const databaseError = new Error('Database connection failed');
+      mockRepository.delete.mockRejectedValue(databaseError);
+
+      // Act & Assert
+      await expect(service.deleteLamp(mockRequest as any, mockReply as any)).rejects.toThrow(
+        'Database connection failed',
+      );
     });
   });
 });
