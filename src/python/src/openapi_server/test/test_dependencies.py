@@ -6,7 +6,6 @@ This module tests the dependency injection system for repositories and database 
 from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
 from src.openapi_server import dependencies
 from src.openapi_server.repositories.lamp_repository import InMemoryLampRepository
 from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
