@@ -64,8 +64,8 @@ async def test_get_lamp_repository_postgres():
         try:
             await repo_generator.__anext__()
         except StopAsyncIteration:
-        except StopAsyncIteration:
             # Expected when the async generator is exhausted during cleanup.
+            pass
     finally:
         # Restore original state
         dependencies.db_manager = original_db_manager
