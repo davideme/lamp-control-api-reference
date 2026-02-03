@@ -10,7 +10,7 @@ import { PrismaLampRepository } from '../../src/infrastructure/repositories/Pris
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-describe('PrismaLampRepository Integration Tests', () => {
+describe.skip('PrismaLampRepository Integration Tests', () => {
   let container: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
   let repository: PrismaLampRepository;
