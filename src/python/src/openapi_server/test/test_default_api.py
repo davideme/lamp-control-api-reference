@@ -6,6 +6,7 @@ is registered.
 
 import pytest
 from fastapi import HTTPException
+
 from src.openapi_server.apis import default_api
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
 from src.openapi_server.models.lamp_create import LampCreate
@@ -77,9 +78,7 @@ async def test_update_lamp_no_implementation(mock_repository):
 
     with pytest.raises(HTTPException) as exc_info:
         await default_api.update_lamp(
-            lampId="test-id",
-            lamp_update=lamp_update,
-            repository=mock_repository
+            lampId="test-id", lamp_update=lamp_update, repository=mock_repository
         )
 
     assert exc_info.value.status_code == 500

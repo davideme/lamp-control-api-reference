@@ -3,6 +3,8 @@
 This module tests the dependency injection system for repositories and database sessions.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from unittest.mock import patch, MagicMock
 from src.openapi_server import dependencies
@@ -112,7 +114,7 @@ def test_initialize_database_with_postgres():
         dependencies.settings = mock_settings
 
         # Mock DatabaseManager
-        with patch('src.openapi_server.dependencies.DatabaseManager') as mock_db_manager_class:
+        with patch("src.openapi_server.dependencies.DatabaseManager") as mock_db_manager_class:
             mock_instance = MagicMock()
             mock_db_manager_class.return_value = mock_instance
 
