@@ -6,6 +6,7 @@ This module tests the dependency injection system for repositories and database 
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from src.openapi_server import dependencies
 from src.openapi_server.repositories.lamp_repository import InMemoryLampRepository
 from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
@@ -63,7 +64,8 @@ async def test_get_lamp_repository_postgres():
         try:
             await repo_generator.__anext__()
         except StopAsyncIteration:
-            pass
+        except StopAsyncIteration:
+            # Expected when the async generator is exhausted during cleanup.
     finally:
         # Restore original state
         dependencies.db_manager = original_db_manager
