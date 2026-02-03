@@ -180,6 +180,11 @@ npm run test:integration
 
 **Note:** Integration tests automatically spin up a PostgreSQL container using Testcontainers, run migrations, execute tests, and tear down the container. Docker must be running for integration tests to work.
 
+Skip integration tests (e.g., when Docker is not available):
+```bash
+SKIP_INTEGRATION_TESTS=true npm test
+```
+
 ## Production
 
 ### Traditional Build & Deploy

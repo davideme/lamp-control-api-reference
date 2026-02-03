@@ -10,9 +10,8 @@ import { PrismaLampRepository } from '../../src/infrastructure/repositories/Pris
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Skip integration tests if Docker is not available or if explicitly disabled
-const shouldSkipIntegrationTests =
-  process.env.SKIP_INTEGRATION_TESTS === 'true' || process.env.CI === 'true';
+// Skip integration tests only if explicitly disabled
+const shouldSkipIntegrationTests = process.env.SKIP_INTEGRATION_TESTS === 'true';
 
 const describeIntegration = shouldSkipIntegrationTests ? describe.skip : describe;
 
