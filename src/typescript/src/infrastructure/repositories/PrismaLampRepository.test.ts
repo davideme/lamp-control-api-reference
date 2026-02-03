@@ -1,8 +1,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { PrismaClient, type Lamp as PrismaLamp } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { PrismaLampRepository } from './PrismaLampRepository.js';
-import { LampNotFoundError } from '../../domain/errors/DomainError.js';
+import { PrismaLampRepository } from './PrismaLampRepository.ts';
+import { LampNotFoundError } from '../../domain/errors/DomainError.ts';
 
 describe('PrismaLampRepository', () => {
   let mockPrisma: jest.Mocked<PrismaClient>;
