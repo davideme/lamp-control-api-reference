@@ -51,6 +51,12 @@ test-coverage coverage: build
 	rm -rf TestResults
 	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release \
 		--settings coverlet.runsettings --results-directory TestResults
+	@# Copy coverage from GUID subdirectory to stable path for extract-coverage.sh
+	@COVERAGE_FILE=$$(find TestResults -name 'coverage.cobertura.xml' -path '*/TestResults/*/coverage.cobertura.xml' | head -1); \
+	if [ -n "$$COVERAGE_FILE" ]; then \
+		cp "$$COVERAGE_FILE" TestResults/coverage.cobertura.xml; \
+		echo "Coverage report: TestResults/coverage.cobertura.xml"; \
+	fi
 
 # Format code
 format format-fix:
