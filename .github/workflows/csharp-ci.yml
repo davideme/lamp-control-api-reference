@@ -200,7 +200,8 @@ jobs:
         LINE_RATE=$(grep '<coverage' "$COVERAGE_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
         COVERAGE=$(awk "BEGIN {printf \"%.2f\", $LINE_RATE * 100}")
         echo "Coverage: ${COVERAGE}%"
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+        MEETS_THRESHOLD=$(awk -v cov="$COVERAGE" -v thresh="80" 'BEGIN {print (cov >= thresh)}')
+        if [ "$MEETS_THRESHOLD" -eq 0 ]; then
           echo "❌ Coverage ${COVERAGE}% is below the required 80%"
           exit 1
         fi

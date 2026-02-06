@@ -87,24 +87,30 @@ namespace LampControlApi.Tests.Domain
             Assert.IsFalse(entity1.Equals(entity2));
         }
 
+        /// <summary>
+        /// Test that Equals returns false when comparing with null.
+        /// </summary>
         [TestMethod]
         public void Equals_ShouldReturnFalseForNull()
         {
             // Arrange
             var entity = LampEntity.Create(true);
 
-            // Act & Assert
-            Assert.IsFalse(entity.Equals(null));
+            // Act & Assert — tests the Equals(object?) override handles null
+            Assert.IsFalse(entity.Equals((object?)null));
         }
 
+        /// <summary>
+        /// Test that Equals returns false when comparing with a different type.
+        /// </summary>
         [TestMethod]
         public void Equals_ShouldReturnFalseForDifferentType()
         {
             // Arrange
             var entity = LampEntity.Create(true);
 
-            // Act & Assert
-            Assert.IsFalse(entity.Equals("not a lamp entity"));
+            // Act & Assert — tests the Equals(object?) override handles non-LampEntity types
+            Assert.IsFalse(entity.Equals((object)"not a lamp entity"));
         }
 
         [TestMethod]
