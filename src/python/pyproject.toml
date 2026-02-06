@@ -114,6 +114,7 @@ skip_gitignore = true
 omit = [
     "src/openapi_server/main.py",
     "src/openapi_server/cli.py",
+    "src/openapi_server/test/*",
 ]
 
 [tool.pytest.ini_options]
