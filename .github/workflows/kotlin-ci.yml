@@ -2,12 +2,12 @@ name: Kotlin CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/kotlin/**'
       - '.github/workflows/kotlin-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/kotlin/**'
       - '.github/workflows/kotlin-ci.yml'

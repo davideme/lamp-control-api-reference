@@ -2,13 +2,13 @@ name: SQL CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'database/sql/**'
       - '.sqlfluff'
       - '.github/workflows/sql-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'database/sql/**'
       - '.sqlfluff'
