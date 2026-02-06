@@ -2,6 +2,7 @@ package org.openapitools.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.impl.InMemoryLampRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * Unit tests for the in-memory lamp repository implementation. These tests verify the basic CRUD
@@ -242,5 +245,136 @@ class LampRepositoryTest {
 
     // Then
     assertThat(result).isTrue();
+  }
+
+  @Test
+  void findByStatus_ShouldReturnOnlyMatchingActiveLamps() {
+    // Given
+    LampEntity onLamp = new LampEntity(true);
+    LampEntity offLamp = new LampEntity(false);
+    LampEntity deletedOnLamp = new LampEntity(true);
+    lampRepository.save(onLamp);
+    lampRepository.save(offLamp);
+    LampEntity savedDeleted = lampRepository.save(deletedOnLamp);
+    savedDeleted.setDeletedAt(OffsetDateTime.now());
+    lampRepository.save(savedDeleted);
+
+    // When
+    List<LampEntity> onLamps = lampRepository.findByStatus(true);
+
+    // Then - should exclude soft-deleted lamp
+    assertThat(onLamps).hasSize(1);
+    assertThat(onLamps.get(0).getStatus()).isTrue();
+  }
+
+  @Test
+  void findByStatus_WithFalse_ShouldReturnOffLamps() {
+    // Given
+    lampRepository.save(new LampEntity(true));
+    lampRepository.save(new LampEntity(false));
+    lampRepository.save(new LampEntity(false));
+
+    // When
+    List<LampEntity> offLamps = lampRepository.findByStatus(false);
+
+    // Then
+    assertThat(offLamps).hasSize(2);
+    assertThat(offLamps).allMatch(lamp -> !lamp.getStatus());
+  }
+
+  @Test
+  void findAllActive_ShouldExcludeSoftDeletedLamps() {
+    // Given
+    lampRepository.save(new LampEntity(true));
+    lampRepository.save(new LampEntity(false));
+    LampEntity deletedLamp = lampRepository.save(new LampEntity(true));
+    deletedLamp.setDeletedAt(OffsetDateTime.now());
+    lampRepository.save(deletedLamp);
+
+    // When
+    List<LampEntity> activeLamps = lampRepository.findAllActive();
+
+    // Then
+    assertThat(activeLamps).hasSize(2);
+    assertThat(activeLamps).allMatch(lamp -> lamp.getDeletedAt() == null);
+  }
+
+  @Test
+  void findAllActive_ShouldReturnSortedByCreatedAt() {
+    // Given
+    LampEntity lamp1 = lampRepository.save(new LampEntity(true));
+    LampEntity lamp2 = lampRepository.save(new LampEntity(false));
+
+    // When
+    List<LampEntity> activeLamps = lampRepository.findAllActive();
+
+    // Then
+    assertThat(activeLamps).hasSize(2);
+    assertThat(activeLamps.get(0).getCreatedAt())
+        .isBeforeOrEqualTo(activeLamps.get(1).getCreatedAt());
+  }
+
+  @Test
+  void countActive_ShouldExcludeSoftDeletedLamps() {
+    // Given
+    lampRepository.save(new LampEntity(true));
+    lampRepository.save(new LampEntity(false));
+    LampEntity deletedLamp = lampRepository.save(new LampEntity(true));
+    deletedLamp.setDeletedAt(OffsetDateTime.now());
+    lampRepository.save(deletedLamp);
+
+    // When
+    long activeCount = lampRepository.countActive();
+
+    // Then
+    assertThat(activeCount).isEqualTo(2);
+  }
+
+  @Test
+  void countActive_WithNoLamps_ShouldReturnZero() {
+    assertThat(lampRepository.countActive()).isZero();
+  }
+
+  @Test
+  void findAllPaged_ShouldReturnCorrectPage() {
+    // Given
+    for (int i = 0; i < 5; i++) {
+      lampRepository.save(new LampEntity(i % 2 == 0));
+    }
+
+    // When
+    Page<LampEntity> page = lampRepository.findAll(PageRequest.of(0, 3));
+
+    // Then
+    assertThat(page.getContent()).hasSize(3);
+    assertThat(page.getTotalElements()).isEqualTo(5);
+  }
+
+  @Test
+  void findAllPaged_BeyondData_ShouldReturnEmptyPage() {
+    // Given
+    lampRepository.save(new LampEntity(true));
+
+    // When
+    Page<LampEntity> page = lampRepository.findAll(PageRequest.of(5, 10));
+
+    // Then
+    assertThat(page.getContent()).isEmpty();
+    assertThat(page.getTotalElements()).isEqualTo(1);
+  }
+
+  @Test
+  void findAllPaged_SecondPage_ShouldReturnRemainder() {
+    // Given
+    for (int i = 0; i < 5; i++) {
+      lampRepository.save(new LampEntity(true));
+    }
+
+    // When
+    Page<LampEntity> page = lampRepository.findAll(PageRequest.of(1, 3));
+
+    // Then
+    assertThat(page.getContent()).hasSize(2);
+    assertThat(page.getTotalElements()).isEqualTo(5);
   }
 }

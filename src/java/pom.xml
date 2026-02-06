@@ -305,6 +305,7 @@
                     </execution>
                     <execution>
                         <id>check</id>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
