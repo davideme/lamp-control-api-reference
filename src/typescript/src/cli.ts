@@ -74,7 +74,7 @@ async function startServer(runMigrations: boolean): Promise<void> {
 /**
  * Main CLI entry point
  */
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const modeArg = args.find((arg) => arg.startsWith('--mode='));
   const mode = modeArg ? modeArg.split('=')[1] : 'serve-only';
