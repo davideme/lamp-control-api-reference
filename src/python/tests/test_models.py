@@ -264,12 +264,7 @@ class TestListLamps200ResponseModel:
 
     def test_to_dict_with_null_next_cursor(self):
         """to_dict should include nextCursor as None when explicitly set."""
-        response = ListLamps200Response(
-            data=[],
-            next_cursor=None,
-            hasMore=False,
-        )
-        # Manually set it so model_fields_set includes it
+        # Use model_validate so model_fields_set includes next_cursor
         response = ListLamps200Response.model_validate(
             {"data": [], "nextCursor": None, "hasMore": False}
         )
