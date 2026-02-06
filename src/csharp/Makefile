@@ -46,23 +46,11 @@ clean:
 test: build
 	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release
 
-# Run tests with coverage (Coverlet via XPlat Code Coverage collector)
+# Run tests with coverage (Coverlet via coverlet.runsettings)
 test-coverage coverage: build
-	@echo "Running tests with Coverlet code coverage..."
 	rm -rf TestResults
 	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release \
-		/p:CollectCoverage=false --collect:"XPlat Code Coverage" --results-directory TestResults; \
-	TEST_EXIT=$$?; \
-	COVERAGE_FILE=$$(find TestResults -name "coverage.cobertura.xml" -type f | head -1); \
-	if [ -n "$$COVERAGE_FILE" ]; then \
-		cp "$$COVERAGE_FILE" TestResults/coverage.cobertura.xml; \
-		echo "Coverage summary:"; \
-		grep -o 'line-rate="[^"]*"' TestResults/coverage.cobertura.xml | head -1 | sed 's/line-rate="//; s/"//' | awk '{printf "Line Coverage: %.1f%%\n", $$1*100}'; \
-	else \
-		echo "ERROR: Coverage file not generated"; \
-		exit 1; \
-	fi; \
-	exit $$TEST_EXIT
+		--settings coverlet.runsettings --results-directory TestResults
 
 # Format code
 format format-fix:
