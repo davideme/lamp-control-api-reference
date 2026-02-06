@@ -190,6 +190,22 @@ jobs:
           echo "Copied $COVERAGE_FILE to TestResults/coverage.cobertura.xml"
         fi
 
+    - name: Verify code coverage threshold
+      run: |
+        COVERAGE_FILE="TestResults/coverage.cobertura.xml"
+        if [ ! -f "$COVERAGE_FILE" ]; then
+          echo "❌ Coverage file not found"
+          exit 1
+        fi
+        LINE_RATE=$(grep '<coverage' "$COVERAGE_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
+        COVERAGE=$(awk "BEGIN {printf \"%.2f\", $LINE_RATE * 100}")
+        echo "Coverage: ${COVERAGE}%"
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "❌ Coverage ${COVERAGE}% is below the required 80%"
+          exit 1
+        fi
+        echo "✅ Coverage ${COVERAGE}% meets the required 80%"
+
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       if: always()

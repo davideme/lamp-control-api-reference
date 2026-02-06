@@ -128,6 +128,59 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
+        /// Test creating a lamp with null entity throws ArgumentNullException.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task CreateAsync_WithNullEntity_ShouldThrowArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _repository.CreateAsync(null!));
+        }
+
+        /// <summary>
+        /// Test updating a lamp with null entity throws ArgumentNullException.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task UpdateAsync_WithNullEntity_ShouldThrowArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _repository.UpdateAsync(null!));
+        }
+
+        /// <summary>
+        /// Test updating a non-existent lamp returns null.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task UpdateAsync_NonExistentLamp_ShouldReturnNull()
+        {
+            // Arrange
+            var nonExistentLamp = LampEntity.Create(true);
+
+            // Act
+            var result = await _repository.UpdateAsync(nonExistentLamp);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        /// <summary>
+        /// Test getting a non-existent lamp by ID returns null.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task GetByIdAsync_NonExistentLamp_ShouldReturnNull()
+        {
+            // Act
+            var result = await _repository.GetByIdAsync(Guid.NewGuid());
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        /// <summary>
         /// Test deleting a non-existent lamp.
         /// </summary>
         /// <returns>A task.</returns>

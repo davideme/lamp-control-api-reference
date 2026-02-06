@@ -88,6 +88,26 @@ namespace LampControlApi.Tests.Domain
         }
 
         [TestMethod]
+        public void Equals_ShouldReturnFalseForNull()
+        {
+            // Arrange
+            var entity = LampEntity.Create(true);
+
+            // Act & Assert
+            Assert.IsFalse(entity.Equals(null));
+        }
+
+        [TestMethod]
+        public void Equals_ShouldReturnFalseForDifferentType()
+        {
+            // Arrange
+            var entity = LampEntity.Create(true);
+
+            // Act & Assert
+            Assert.IsFalse(entity.Equals("not a lamp entity"));
+        }
+
+        [TestMethod]
         public void ToString_ShouldReturnFormattedString()
         {
             // Arrange
