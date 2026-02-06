@@ -27,23 +27,22 @@ A modern ASP.NET Core Web API for controlling smart lamps, built with .NET 8.0.
 
 2. **Install dependencies**
    ```bash
-   make install
-   # or
-   dotnet restore LampControlApi/LampControlApi.csproj
+   dotnet restore
    ```
 
 3. **Build the project**
    ```bash
-   make build
-   # or
-   dotnet build LampControlApi/LampControlApi.csproj
+   dotnet build --configuration Release
    ```
 
 4. **Run the application**
    ```bash
-   make run
-   # or
    cd LampControlApi && dotnet run
+   ```
+
+5. **Run tests with coverage**
+   ```bash
+   dotnet test --settings coverlet.runsettings --results-directory TestResults
    ```
 
 The API will be available at `https://localhost:7173` with Swagger UI at `/swagger`.
@@ -266,6 +265,7 @@ make clean
 - **`stylecop.json`** - StyleCop analyzer settings
 - **`.globalconfig`** - Global analyzer diagnostic rules
 - **`Directory.Build.props`** - Project-wide MSBuild properties
+- **`coverlet.runsettings`** - Code coverage configuration (format, exclusions, includes)
 
 ## CI/CD Pipeline
 
@@ -297,8 +297,8 @@ The project includes a comprehensive CI/CD pipeline (`.github/workflows/csharp-c
 - Verifies deployment readiness
 
 #### 4. **Code Coverage**
-- Runs tests with coverage collection
-- Generates HTML coverage reports
+- Runs tests with Coverlet via `coverlet.runsettings`
+- Generates Cobertura XML coverage reports
 - Uploads coverage artifacts
 
 #### 5. **Dependency Analysis**
@@ -327,16 +327,20 @@ The workflow generates several artifacts:
 
 ```
 src/csharp/
-├── LampControlApi/           # Main API project
-│   ├── Controllers/          # API controllers
-│   ├── Program.cs           # Application entry point
-│   ├── appsettings.json     # Configuration
-│   └── LampControlApi.csproj # Project file
-├── .editorconfig            # Code formatting rules
-├── .globalconfig            # Global analyzer settings
-├── stylecop.json           # StyleCop configuration
-├── Directory.Build.props   # MSBuild properties
-└── Makefile               # Build automation
+├── LampControlApi/              # Main API project
+│   ├── Controllers/             # API controllers
+│   ├── Program.cs               # Application entry point
+│   ├── appsettings.json         # Configuration
+│   └── LampControlApi.csproj    # Project file
+├── LampControlApi.Tests/        # Test project
+│   └── LampControlApi.Tests.csproj
+├── LampControlApi.sln           # Solution file
+├── .editorconfig                # Code formatting rules
+├── .globalconfig                # Global analyzer settings
+├── stylecop.json                # StyleCop configuration
+├── coverlet.runsettings         # Code coverage configuration
+├── Directory.Build.props        # MSBuild properties
+└── Makefile                     # Build automation (convenience wrapper)
 ```
 
 ## Configuration
