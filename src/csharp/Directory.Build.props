@@ -9,9 +9,6 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />
     
-    <!-- Code coverage -->
-    <CollectCoverage>true</CollectCoverage>
-    
     <!-- Common package versions -->
     <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
     <NetAnalyzersVersion>8.0.0</NetAnalyzersVersion>

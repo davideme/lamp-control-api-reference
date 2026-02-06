@@ -51,9 +51,9 @@ test-coverage coverage: build
 	@echo "Running tests with Coverlet code coverage..."
 	rm -rf TestResults
 	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release \
-		--collect:"XPlat Code Coverage" --results-directory TestResults || true
-	@# Coverlet collector writes coverage.cobertura.xml in a GUID subdirectory; move it up
-	@COVERAGE_FILE=$$(find TestResults -name "coverage.cobertura.xml" -type f | head -1); \
+		/p:CollectCoverage=false --collect:"XPlat Code Coverage" --results-directory TestResults; \
+	TEST_EXIT=$$?; \
+	COVERAGE_FILE=$$(find TestResults -name "coverage.cobertura.xml" -type f | head -1); \
 	if [ -n "$$COVERAGE_FILE" ]; then \
 		cp "$$COVERAGE_FILE" TestResults/coverage.cobertura.xml; \
 		echo "Coverage summary:"; \
@@ -61,7 +61,8 @@ test-coverage coverage: build
 	else \
 		echo "ERROR: Coverage file not generated"; \
 		exit 1; \
-	fi
+	fi; \
+	exit $$TEST_EXIT
 
 # Format code
 format format-fix:
