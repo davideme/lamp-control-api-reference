@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import lombok.RequiredArgsConstructor;
 import org.openapitools.api.LampsApi;
 import org.openapitools.model.Error;
 import org.openapitools.model.Lamp;
@@ -11,7 +12,6 @@ import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
 import org.openapitools.model.ListLamps200Response;
 import org.openapitools.service.LampService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,14 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class LampsController implements LampsApi {
 
   private final LampService lampService;
-
-  @Autowired
-  public LampsController(final LampService lampService) {
-    this.lampService = lampService;
-  }
 
   @Override
   public CompletableFuture<ResponseEntity<Lamp>> createLamp(final LampCreate lampCreate) {

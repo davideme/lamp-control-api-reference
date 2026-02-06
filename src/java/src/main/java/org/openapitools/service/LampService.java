@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
@@ -33,15 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class LampService {
 
   private final LampRepository repository;
   private final LampMapper mapper;
-
-  public LampService(final LampRepository repository, final LampMapper mapper) {
-    this.repository = repository;
-    this.mapper = mapper;
-  }
 
   /**
    * Create a new lamp.
