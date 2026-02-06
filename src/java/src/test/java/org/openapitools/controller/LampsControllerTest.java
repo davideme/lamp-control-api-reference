@@ -217,4 +217,44 @@ class LampsControllerTest {
 
     mockMvc.perform(asyncDispatch(result)).andExpect(status().isNotFound());
   }
+
+  @Test
+  void getLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps/{lampId}", "not-a-uuid").accept(MediaType.APPLICATION_JSON))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void updateLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    LampUpdate lampUpdate = new LampUpdate();
+    lampUpdate.setStatus(false);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                put("/v1/lamps/{lampId}", "not-a-uuid")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(lampUpdate))
+                    .accept(MediaType.APPLICATION_JSON))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void deleteLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(delete("/v1/lamps/{lampId}", "not-a-uuid"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
+  }
 }
