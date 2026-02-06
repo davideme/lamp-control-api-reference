@@ -181,6 +181,15 @@ jobs:
           --results-directory ./TestResults \
           --no-restore
 
+    - name: Copy coverage to stable path
+      if: always()
+      run: |
+        COVERAGE_FILE=$(find TestResults -name 'coverage.cobertura.xml' -path '*/TestResults/*/coverage.cobertura.xml' | head -1)
+        if [ -n "$COVERAGE_FILE" ]; then
+          cp "$COVERAGE_FILE" TestResults/coverage.cobertura.xml
+          echo "Copied $COVERAGE_FILE to TestResults/coverage.cobertura.xml"
+        fi
+
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       if: always()
