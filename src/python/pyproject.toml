@@ -115,6 +115,8 @@ omit = [
     "src/openapi_server/main.py",
     "src/openapi_server/cli.py",
     "src/openapi_server/test/*",
+    "src/openapi_server/models/*",
+    "src/openapi_server/apis/default_api_base.py",
 ]
 
 [tool.pytest.ini_options]
