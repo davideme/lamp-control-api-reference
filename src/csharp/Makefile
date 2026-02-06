@@ -25,40 +25,32 @@ help:
 # Project settings
 PROJECT_DIR = LampControlApi
 PROJECT_FILE = $(PROJECT_DIR)/LampControlApi.csproj
+TEST_PROJECT_DIR = LampControlApi.Tests
+TEST_PROJECT_FILE = $(TEST_PROJECT_DIR)/LampControlApi.Tests.csproj
+SOLUTION_FILE = LampControlApi.sln
 
 # Install/restore dependencies
 install restore:
-	dotnet restore $(PROJECT_FILE)
+	dotnet restore $(SOLUTION_FILE)
 
 # Build the application
 build: restore
-	dotnet build $(PROJECT_FILE) --no-restore --configuration Release
+	dotnet build $(SOLUTION_FILE) --no-restore --configuration Release
 
 # Clean build artifacts
 clean:
-	dotnet clean $(PROJECT_FILE)
-	rm -rf $(PROJECT_DIR)/bin $(PROJECT_DIR)/obj
+	dotnet clean $(SOLUTION_FILE)
+	rm -rf $(PROJECT_DIR)/bin $(PROJECT_DIR)/obj $(TEST_PROJECT_DIR)/bin $(TEST_PROJECT_DIR)/obj TestResults
 
 # Run tests
 test: build
-	dotnet test $(PROJECT_FILE)
+	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release
 
-# Run tests with coverage (Microsoft Method)
+# Run tests with coverage (Coverlet via coverlet.runsettings)
 test-coverage coverage: build
-	@echo "Running tests with Microsoft Code Coverage..."
-	# Clean previous coverage results
-	rm -rf TestResults coverage-report
-	# Run tests with Microsoft's built-in Code Coverage
-	dotnet test $(PROJECT_FILE) --collect:"Code Coverage" --results-directory TestResults
-	# Convert binary coverage to Cobertura XML
-	@echo "Converting coverage to XML format..."
-	dotnet-coverage merge TestResults/*/*.coverage --output TestResults/coverage.cobertura.xml --output-format cobertura
-	# Generate HTML report
-	@echo "Generating HTML coverage report..."
-	reportgenerator -reports:TestResults/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
-	@echo "Coverage report generated! Open coverage-report/index.html to view results"
-	@echo "Coverage summary:"
-	@grep -o 'line-rate="[^"]*"' TestResults/coverage.cobertura.xml | head -1 | sed 's/line-rate="//; s/"//' | awk '{printf "Line Coverage: %.1f%%\n", $$1*100}'
+	rm -rf TestResults
+	dotnet test $(TEST_PROJECT_FILE) --no-build --configuration Release \
+		--settings coverlet.runsettings --results-directory TestResults
 
 # Format code
 format format-fix:

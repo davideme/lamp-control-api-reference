@@ -173,46 +173,21 @@ jobs:
     - name: Install dependencies
       run: dotnet restore --locked-mode
     
-    - name: Install coverage tools
-      run: dotnet tool install --global dotnet-reportgenerator-globaltool
-    
     - name: Run tests with coverage
       run: |
         dotnet test \
           --configuration Release \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./coverage \
-          --logger trx \
-          --no-restore || echo "No tests found, skipping coverage"
-    
-    - name: Generate coverage report
-      run: |
-        if [ -d "./coverage" ]; then
-          reportgenerator \
-            -reports:"./coverage/**/coverage.cobertura.xml" \
-            -targetdir:"./coverage/report" \
-            -reporttypes:"Html;Cobertura"
-          echo "✅ Coverage report generated"
-        else
-          echo "⚠️ No coverage data found - tests may not exist yet"
-        fi
-    
+          --settings coverlet.runsettings \
+          --results-directory ./TestResults \
+          --no-restore
+
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
-      if: success()
+      if: always()
       with:
         name: coverage-report
-        path: src/csharp/coverage/
+        path: src/csharp/TestResults/
         retention-days: 30
-
-    - name: Commit coverage summary
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add coverage/report/Cobertura.xml || true
-        git commit -m "chore: update C# coverage summary" || exit 0
-        git push
 
   dependency-check:
     name: Dependency Analysis

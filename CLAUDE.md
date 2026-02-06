@@ -63,8 +63,8 @@ cd src/kotlin
 ./gradlew run
 
 # C# (port 8083)
-cd src/csharp
-make run
+cd src/csharp/LampControlApi
+dotnet run
 ```
 
 ### Building
@@ -86,7 +86,7 @@ cd src/java && mvn clean install
 cd src/kotlin && ./gradlew build
 
 # C#
-cd src/csharp && make build
+cd src/csharp && dotnet build --configuration Release
 ```
 
 ### Testing
@@ -113,8 +113,8 @@ cd src/kotlin && ./gradlew test                  # Run tests
 cd src/kotlin && ./gradlew test jacocoTestReport # With coverage
 
 # C#
-cd src/csharp && make test                       # Run tests
-cd src/csharp && make test-coverage              # With coverage
+cd src/csharp && dotnet test                                          # Run tests
+cd src/csharp && dotnet test --settings coverlet.runsettings          # With coverage
 ```
 
 ### Linting and Formatting
@@ -141,8 +141,8 @@ cd src/kotlin && ./gradlew ktlintFormat          # Fix
 cd src/kotlin && ./gradlew detekt                # Static analysis
 
 # C#
-cd src/csharp && make format-check               # Check
-cd src/csharp && make format                     # Fix
+cd src/csharp && dotnet format --verify-no-changes  # Check
+cd src/csharp && dotnet format                      # Fix
 ```
 
 ## Architecture
