@@ -52,12 +52,10 @@ coverage-report/
 # MSBuild Binary and Structured Log
 *.binlog
 
-# MSTest test Results
+# MSTest test Results - ignore contents but allow the coverage file for metrics
 [Tt]est[Rr]esult*/
-# Exception: Keep the main coverage file for metrics
-!TestResults/coverage.cobertura.xml
-# Don't commit any other coverage in TestResults
-TestResults/**/*
+!TestResults/
+TestResults/*
 !TestResults/coverage.cobertura.xml
 [Bb]uild[Ll]og.*
 
