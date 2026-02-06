@@ -277,6 +277,100 @@ Testcontainers requirements:
 - Docker installed and running
 - Internet connection (to pull postgres:16-alpine image on first run)
 
+## Testing & Code Coverage
+
+### Running Tests
+
+The project uses Maven profiles to separate test types:
+
+```bash
+# Run unit tests only (default profile, no Docker required)
+cd src/java
+mvn test
+
+# Run integration tests only (requires Docker for Testcontainers)
+mvn test -P integration-tests
+
+# Run performance tests only
+mvn test -P performance-tests
+
+# Run all tests (unit + integration + performance)
+mvn test -P all-tests
+```
+
+### Generating Code Coverage with JaCoCo
+
+[JaCoCo](https://www.jacoco.org/) is configured in `pom.xml` and runs automatically during the `test` phase. It generates coverage reports in HTML, XML, and CSV formats.
+
+```bash
+# Run tests and generate coverage report (single command)
+cd src/java
+mvn test jacoco:report
+```
+
+This will:
+1. Instrument the code via `jacoco:prepare-agent` (runs automatically)
+2. Execute the tests
+3. Enforce coverage thresholds (fails the build if not met)
+4. Generate the report in `target/site/jacoco/`
+
+#### Coverage Output Files
+
+| File | Path | Description |
+|------|------|-------------|
+| HTML report | `target/site/jacoco/index.html` | Interactive browsable report |
+| XML report | `target/site/jacoco/jacoco.xml` | Machine-readable (used by CI) |
+| CSV report | `target/site/jacoco/jacoco.csv` | Spreadsheet-compatible data |
+
+Open the HTML report in a browser:
+
+```bash
+open target/site/jacoco/index.html    # macOS
+xdg-open target/site/jacoco/index.html  # Linux
+```
+
+#### Coverage Thresholds
+
+The build enforces minimum coverage ratios and will **fail** if not met:
+
+| Counter | Minimum | Description |
+|---------|---------|-------------|
+| LINE | 80% | Line coverage |
+| BRANCH | 75% | Branch coverage |
+
+#### Excluded from Coverage
+
+The following packages/classes are excluded from coverage analysis (generated or configuration code):
+
+- `org.openapitools.api.**` (generated OpenAPI interfaces)
+- `org.openapitools.model.**` (generated OpenAPI models)
+- `OpenApiGeneratorApplication` (main entry point)
+- `ApplicationMode` (enum)
+- `config/FlywayConfig`, `config/DataSourceConfig`, `config/JpaConfig` (Spring config)
+
+#### Coverage with Specific Test Profiles
+
+```bash
+# Coverage for unit tests only
+mvn test jacoco:report -P unit-tests
+
+# Coverage for integration tests only (requires Docker)
+mvn test jacoco:report -P integration-tests
+
+# Coverage for all tests combined
+mvn test jacoco:report -P all-tests
+```
+
+#### CI Usage
+
+The CI workflow (`.github/workflows/java-ci.yml`) runs:
+
+```bash
+mvn test jacoco:report
+```
+
+This generates the XML report at `target/site/jacoco/jacoco.xml` which is used for coverage tracking.
+
 ### Troubleshooting
 
 **Issue**: Application fails to start with "Failed to determine a suitable driver class"
