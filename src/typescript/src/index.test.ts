@@ -37,8 +37,8 @@ describe('index', () => {
   });
 
   it('should build app and start listening on default port', async () => {
-    await import('./index.ts');
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const { startup } = await import('./index.ts');
+    await startup;
 
     expect(mockBuildApp).toHaveBeenCalled();
     expect(mockListen).toHaveBeenCalledWith({ port: 8080, host: '0.0.0.0' }, expect.any(Function));
@@ -48,8 +48,8 @@ describe('index', () => {
     process.env.PORT = '3000';
     process.env.HOST = '127.0.0.1';
 
-    await import('./index.ts');
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const { startup } = await import('./index.ts');
+    await startup;
 
     expect(mockListen).toHaveBeenCalledWith(
       { port: 3000, host: '127.0.0.1' },
@@ -62,8 +62,8 @@ describe('index', () => {
       cb(new Error('Address in use'), '');
     });
 
-    await import('./index.ts');
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const { startup } = await import('./index.ts');
+    await startup;
 
     expect(mockLog.error).toHaveBeenCalledWith(expect.any(Error));
     expect(process.exit).toHaveBeenCalledWith(1);

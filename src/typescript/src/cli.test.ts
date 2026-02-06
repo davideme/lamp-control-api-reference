@@ -54,9 +54,8 @@ describe('CLI', () => {
     it('should default to serve-only mode when no mode specified', async () => {
       process.argv = ['node', 'cli.ts'];
 
-      await import('./cli.ts');
-      // Wait for main() to execute (it's called at module level)
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(mockBuildApp).toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalledWith('Starting server without running migrations...');
@@ -66,8 +65,8 @@ describe('CLI', () => {
       process.argv = ['node', 'cli.ts', '--mode=serve'];
       process.env.DATABASE_URL = 'postgresql://localhost:5432/test';
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.warn).toHaveBeenCalledWith('Starting server with automatic migrations...');
       expect(mockExecSync).toHaveBeenCalledWith('npx prisma migrate deploy', expect.any(Object));
@@ -78,8 +77,8 @@ describe('CLI', () => {
       process.argv = ['node', 'cli.ts', '--mode=serve'];
       delete process.env.DATABASE_URL;
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.warn).toHaveBeenCalledWith('Starting server with automatic migrations...');
       expect(mockExecSync).not.toHaveBeenCalled();
@@ -90,8 +89,8 @@ describe('CLI', () => {
       process.argv = ['node', 'cli.ts', '--mode=migrate'];
       process.env.DATABASE_URL = 'postgresql://localhost:5432/test';
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.warn).toHaveBeenCalledWith('Running migrations only...');
       expect(mockExecSync).toHaveBeenCalledWith('npx prisma migrate deploy', expect.any(Object));
@@ -102,8 +101,8 @@ describe('CLI', () => {
       process.argv = ['node', 'cli.ts', '--mode=migrate'];
       delete process.env.DATABASE_URL;
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.warn).toHaveBeenCalledWith(
         'No PostgreSQL configuration found (DATABASE_URL not set), nothing to migrate',
@@ -114,8 +113,8 @@ describe('CLI', () => {
     it('should exit with error for invalid mode', async () => {
       process.argv = ['node', 'cli.ts', '--mode=invalid'];
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.error).toHaveBeenCalledWith(
         'Invalid mode: invalid. Valid modes are: serve, migrate, serve-only',
@@ -132,8 +131,8 @@ describe('CLI', () => {
         throw new Error('Migration failed');
       });
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.error).toHaveBeenCalledWith('Migration failed:', expect.any(Error));
       expect(process.exit).toHaveBeenCalledWith(1);
@@ -146,8 +145,8 @@ describe('CLI', () => {
         throw new Error('Migration failed');
       });
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(console.error).toHaveBeenCalledWith('Migration failed:', expect.any(Error));
       expect(process.exit).toHaveBeenCalledWith(1);
@@ -160,8 +159,8 @@ describe('CLI', () => {
       process.env.HOST = '127.0.0.1';
       process.argv = ['node', 'cli.ts', '--mode=serve-only'];
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(mockListen).toHaveBeenCalledWith(
         { port: 3000, host: '127.0.0.1' },
@@ -175,8 +174,8 @@ describe('CLI', () => {
         cb(new Error('Address in use'), '');
       });
 
-      await import('./cli.ts');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      const { main } = await import('./cli.ts');
+      await main();
 
       expect(mockLog.error).toHaveBeenCalledWith(expect.any(Error));
       expect(process.exit).toHaveBeenCalledWith(1);
