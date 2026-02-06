@@ -93,7 +93,7 @@ jobs:
         poetry run pytest --cov=src --cov-report=json:coverage/coverage.json --cov-fail-under=80
 
     - name: Commit coverage summary
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'

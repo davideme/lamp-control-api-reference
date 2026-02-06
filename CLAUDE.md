@@ -457,6 +457,30 @@ When adding features or fixing bugs:
 5. **Mode support**: Ensure migrate/serve-only/serve modes work correctly
 6. **Documentation**: Update language README if adding dependencies or changing setup
 
+### Before Creating a PR
+
+Always run the linter/formatter for the language(s) you changed to ensure CI will pass:
+
+```bash
+# TypeScript
+cd src/typescript && npm run lint && npm run format
+
+# Python
+cd src/python && poetry run black --check . && poetry run ruff check .
+
+# Java
+cd src/java && mvn spotless:check    # fix with: mvn spotless:apply
+
+# Kotlin
+cd src/kotlin && ./gradlew ktlintCheck  # fix with: ./gradlew ktlintFormat
+
+# Go
+cd src/go && make lint
+
+# C#
+cd src/csharp && dotnet format --verify-no-changes
+```
+
 ### Branch Naming
 
 Use pattern: `<language>-<feature>` (e.g., `typescript-graphql-support`, `go-mongodb-integration`)

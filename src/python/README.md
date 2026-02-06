@@ -284,13 +284,35 @@ If integration tests fail with Docker errors:
    docker ps
    ```
 
-2. **Check Docker permissions** (Linux):
+2. **Set `DOCKER_HOST` on macOS with Docker Desktop**:
+
+   Docker Desktop places the socket at `~/.docker/run/docker.sock` instead of the default `/var/run/docker.sock`. The Python `docker` library and Testcontainers need to know where to find it:
+
+   ```bash
+   export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"
+   ```
+
+   Add this to your shell profile (`~/.zshrc` or `~/.bashrc`) to make it permanent:
+
+   ```bash
+   echo 'export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"' >> ~/.zshrc
+   ```
+
+3. **Install `greenlet` (Python 3.13+)**:
+
+   SQLAlchemy's async support requires the `greenlet` library. It is included as a dev dependency, but if you encounter `No module named 'greenlet'` errors, install it explicitly:
+
+   ```bash
+   poetry install --with dev
+   ```
+
+4. **Check Docker permissions** (Linux):
    ```bash
    sudo usermod -aG docker $USER
    # Log out and back in
    ```
 
-3. **Increase Docker resources** (macOS/Windows):
+5. **Increase Docker resources** (macOS/Windows):
    - Open Docker Desktop
    - Go to Settings → Resources
    - Increase memory to at least 4GB
