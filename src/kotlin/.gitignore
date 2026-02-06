@@ -1,4 +1,11 @@
-build/
+build/*
+!build/reports/
+build/reports/*
+!build/reports/jacoco/
+build/reports/jacoco/*
+!build/reports/jacoco/test/
+build/reports/jacoco/test/*
+!build/reports/jacoco/test/jacocoTestReport.xml
 .gradle/
 
 # Detekt CLI and reports

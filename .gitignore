@@ -5,4 +5,11 @@
 .claude/
 !.claude/settings.json
 !.claude/hooks/
-src/kotlin/build/
+src/kotlin/build/*
+!src/kotlin/build/reports/
+src/kotlin/build/reports/*
+!src/kotlin/build/reports/jacoco/
+src/kotlin/build/reports/jacoco/*
+!src/kotlin/build/reports/jacoco/test/
+src/kotlin/build/reports/jacoco/test/*
+!src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml
