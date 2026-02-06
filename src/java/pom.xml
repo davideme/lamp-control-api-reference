@@ -281,6 +281,11 @@
                     <excludes>
                         <exclude>**/org/openapitools/api/**</exclude>
                         <exclude>**/org/openapitools/model/**</exclude>
+                        <exclude>**/OpenApiGeneratorApplication*</exclude>
+                        <exclude>**/ApplicationMode*</exclude>
+                        <exclude>**/config/FlywayConfig*</exclude>
+                        <exclude>**/config/DataSourceConfig*</exclude>
+                        <exclude>**/config/JpaConfig*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
