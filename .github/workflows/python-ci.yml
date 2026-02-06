@@ -90,7 +90,7 @@ jobs:
         MYSQL_DATABASE: lamp_test
         MONGODB_URI: mongodb://localhost:27017/lamp_test
       run: |
-        poetry run pytest --cov=src --cov-report=json:coverage/coverage.json
+        poetry run pytest --cov=src --cov-report=json:coverage/coverage.json --cov-fail-under=80
 
     - name: Commit coverage summary
       if: github.event_name == 'workflow_dispatch'
