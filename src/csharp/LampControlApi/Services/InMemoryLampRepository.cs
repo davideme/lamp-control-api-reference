@@ -2,8 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 
 namespace LampControlApi.Services
 {
@@ -25,21 +27,21 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public Task<ICollection<LampEntity>> GetAllAsync()
+        public Task<ICollection<LampEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             var lamps = _lamps.Values.ToList();
             return Task.FromResult<ICollection<LampEntity>>(lamps);
         }
 
         /// <inheritdoc/>
-        public Task<LampEntity?> GetByIdAsync(Guid id)
+        public Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             _lamps.TryGetValue(id, out var lamp);
             return Task.FromResult(lamp);
         }
 
         /// <inheritdoc/>
-        public Task<LampEntity> CreateAsync(LampEntity entity)
+        public Task<LampEntity> CreateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
             {
@@ -51,7 +53,7 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public Task<LampEntity?> UpdateAsync(LampEntity entity)
+        public Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
             {
@@ -68,7 +70,7 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public Task<bool> DeleteAsync(Guid id)
+        public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var removed = _lamps.TryRemove(id, out _);
             return Task.FromResult(removed);

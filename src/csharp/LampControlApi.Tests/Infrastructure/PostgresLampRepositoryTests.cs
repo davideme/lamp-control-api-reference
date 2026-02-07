@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 using LampControlApi.Infrastructure.Database;
 using LampControlApi.Services;
 using Microsoft.EntityFrameworkCore;
