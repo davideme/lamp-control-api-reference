@@ -287,8 +287,9 @@ namespace LampControlApi.Tests.Infrastructure
 
             while (currentDirectory != null)
             {
-                // Check if .git directory exists in current directory
-                if (Directory.Exists(Path.Combine(currentDirectory.FullName, ".git")))
+                // Check if .git exists in current directory (directory for normal repos, file for worktrees)
+                var gitPath = Path.Combine(currentDirectory.FullName, ".git");
+                if (Directory.Exists(gitPath) || File.Exists(gitPath))
                 {
                     return currentDirectory.FullName;
                 }
