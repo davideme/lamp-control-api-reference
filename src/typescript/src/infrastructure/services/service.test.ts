@@ -221,7 +221,7 @@ describe('Service', () => {
       expect(mockReply.send).toHaveBeenCalledWith(updatedLampEntity);
     });
 
-    it('should return 404 when lamp does not exist', async () => {
+    it('should propagate LampNotFoundError when lamp does not exist', async () => {
       // Arrange
       const mockRequest: MockFastifyRequest<{
         params: { lampId: string };
@@ -232,15 +232,10 @@ describe('Service', () => {
       };
       mockRepository.update.mockRejectedValue(new LampNotFoundError('nonexistent'));
 
-      // Act
-      await service.updateLamp(mockRequest as any, mockReply as any);
-
-      // Assert
-      expect(mockRepository.update).toHaveBeenCalledWith('nonexistent', {
-        status: false,
-      });
-      expect(mockReply.code).toHaveBeenCalledWith(404);
-      expect(mockReply.send).toHaveBeenCalled();
+      // Act & Assert — error handling is centralized in Fastify's error handler
+      await expect(service.updateLamp(mockRequest as any, mockReply as any)).rejects.toThrow(
+        LampNotFoundError,
+      );
     });
 
     it('should rethrow non-LampNotFoundError errors', async () => {
@@ -279,20 +274,17 @@ describe('Service', () => {
       expect(mockReply.send).toHaveBeenCalled();
     });
 
-    it('should return 404 when lamp does not exist', async () => {
+    it('should propagate LampNotFoundError when lamp does not exist', async () => {
       // Arrange
       const mockRequest: MockFastifyRequest<{ params: { lampId: string } }> = {
         params: { lampId: 'nonexistent' },
       };
       mockRepository.delete.mockRejectedValue(new LampNotFoundError('nonexistent'));
 
-      // Act
-      await service.deleteLamp(mockRequest as any, mockReply as any);
-
-      // Assert
-      expect(mockRepository.delete).toHaveBeenCalledWith('nonexistent');
-      expect(mockReply.code).toHaveBeenCalledWith(404);
-      expect(mockReply.send).toHaveBeenCalled();
+      // Act & Assert — error handling is centralized in Fastify's error handler
+      await expect(service.deleteLamp(mockRequest as any, mockReply as any)).rejects.toThrow(
+        LampNotFoundError,
+      );
     });
 
     it('should rethrow non-LampNotFoundError errors', async () => {

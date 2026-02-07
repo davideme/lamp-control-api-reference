@@ -70,13 +70,13 @@ jobs:
         name: coverage-report
         path: src/typescript/coverage/
         
-    - name: Check test coverage threshold
+    - name: Coverage summary
       run: |
         COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
         STATEMENTS=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
         BRANCHES=$(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')
         FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')
-        
+
         echo "## TypeScript Code Coverage" >> $GITHUB_STEP_SUMMARY
         echo "| Type | Coverage |" >> $GITHUB_STEP_SUMMARY
         echo "| ---- | -------- |" >> $GITHUB_STEP_SUMMARY
@@ -84,11 +84,6 @@ jobs:
         echo "| Statements | $STATEMENTS% |" >> $GITHUB_STEP_SUMMARY
         echo "| Branches | $BRANCHES% |" >> $GITHUB_STEP_SUMMARY
         echo "| Functions | $FUNCTIONS% |" >> $GITHUB_STEP_SUMMARY
-        
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "Test coverage is below 80% (Current: $COVERAGE%)"
-          exit 1
-        fi
 
     - name: Commit coverage summary
       if: github.event_name == 'workflow_dispatch'

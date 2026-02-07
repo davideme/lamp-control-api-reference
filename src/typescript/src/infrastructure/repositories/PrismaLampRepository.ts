@@ -49,44 +49,31 @@ export class PrismaLampRepository implements LampRepository {
   }
 
   async update(id: string, lampUpdate: LampEntityUpdate): Promise<LampEntity> {
-    try {
-      const lamp = await this.prisma.lamp.update({
-        where: {
-          id,
-          deletedAt: null,
-        },
-        data: {
-          isOn: lampUpdate.status,
-        },
-      });
-      return this.toEntity(lamp);
-    } catch (error) {
-      // Prisma throws PrismaClientKnownRequestError with code P2025 if record not found
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new LampNotFoundError(id);
-      }
-      // Rethrow other errors (connection issues, constraint violations, etc.)
-      throw error;
-    }
+    const lamp = await this.handleNotFound(id, () =>
+      this.prisma.lamp.update({
+        where: { id, deletedAt: null },
+        data: { isOn: lampUpdate.status },
+      }),
+    );
+    return this.toEntity(lamp);
   }
 
   async delete(id: string): Promise<void> {
+    await this.handleNotFound(id, () =>
+      this.prisma.lamp.update({
+        where: { id, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+    );
+  }
+
+  private async handleNotFound<T>(id: string, operation: () => Promise<T>): Promise<T> {
     try {
-      await this.prisma.lamp.update({
-        where: {
-          id,
-          deletedAt: null,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      });
+      return await operation();
     } catch (error) {
-      // Prisma throws PrismaClientKnownRequestError with code P2025 if record not found
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new LampNotFoundError(id);
       }
-      // Rethrow other errors (connection issues, constraint violations, etc.)
       throw error;
     }
   }
