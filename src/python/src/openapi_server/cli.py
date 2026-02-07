@@ -13,44 +13,57 @@ import sys
 from pathlib import Path
 
 import uvicorn
+from sqlalchemy.exc import SQLAlchemyError
 
 from alembic import command
 from alembic.config import Config
+from alembic.util.exc import CommandError
 from src.openapi_server.infrastructure.config import DatabaseSettings
 
 logger = logging.getLogger(__name__)
 
 
-def run_migrations_only():
-    """Run database migrations only and exit."""
-    logger.info("Running migrations only...")
+def _run_migrations(*, strict: bool = True) -> bool:
+    """Run database migrations using Alembic.
 
+    Args:
+        strict: If True, exit on missing alembic.ini. If False, log warning and skip.
+
+    Returns:
+        True if migrations ran successfully, False if skipped.
+    """
     settings = DatabaseSettings()
     if not settings.use_postgres():
         logger.warning("No PostgreSQL configuration found, nothing to migrate")
-        return
+        return False
 
-    logger.info(f"Running migrations for database: {settings.database_url}")
-
-    try:
-        # Get the alembic.ini path (relative to this file)
-        alembic_ini = Path(__file__).parent.parent.parent / "alembic.ini"
-        if not alembic_ini.exists():
+    alembic_ini = Path(__file__).parent.parent.parent / "alembic.ini"
+    if not alembic_ini.exists():
+        if strict:
             logger.error(f"alembic.ini not found at {alembic_ini}")
             sys.exit(1)
+        else:
+            logger.warning(f"alembic.ini not found at {alembic_ini}, skipping migrations")
+            return False
 
-        # Create Alembic config
+    try:
         alembic_cfg = Config(str(alembic_ini))
         alembic_cfg.set_main_option("sqlalchemy.url", settings.get_connection_string())
-
-        # Run migrations
         command.upgrade(alembic_cfg, "head")
-
         logger.info("Migrations completed successfully")
-
-    except Exception as e:
+        return True
+    except (CommandError, SQLAlchemyError) as e:
         logger.error(f"Migration failed: {e}")
         sys.exit(1)
+
+
+def run_migrations_only():
+    """Run database migrations only.
+
+    Intended for CLI use where the process exits naturally after main() finishes.
+    """
+    logger.info("Running migrations only...")
+    _run_migrations(strict=True)
 
 
 def start_server(run_migrations: bool = True, port: int | None = None):
@@ -62,20 +75,7 @@ def start_server(run_migrations: bool = True, port: int | None = None):
     """
     if run_migrations:
         logger.info("Starting server with automatic migrations...")
-        settings = DatabaseSettings()
-        if settings.use_postgres():
-            try:
-                alembic_ini = Path(__file__).parent.parent.parent / "alembic.ini"
-                if alembic_ini.exists():
-                    alembic_cfg = Config(str(alembic_ini))
-                    alembic_cfg.set_main_option("sqlalchemy.url", settings.get_connection_string())
-                    command.upgrade(alembic_cfg, "head")
-                    logger.info("Migrations completed")
-                else:
-                    logger.warning(f"alembic.ini not found at {alembic_ini}, skipping migrations")
-            except Exception as e:
-                logger.error(f"Migration failed: {e}")
-                sys.exit(1)
+        _run_migrations(strict=False)
     else:
         logger.info("Starting server without running migrations...")
 

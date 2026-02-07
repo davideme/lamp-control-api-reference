@@ -4,35 +4,25 @@ Domain entities represent the core business objects and should be separate
 from the HTTP API models to allow independent evolution.
 """
 
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 
+@dataclass(eq=False)
 class LampEntity:
     """Domain entity representing a lamp in the internal model.
 
     This is separate from the HTTP API model to allow independent evolution
     of the internal domain logic and external API contract.
+
+    Equality is based on ID and status only (timestamps are excluded).
+    Hashing is based on ID only.
     """
 
-    def __init__(
-        self,
-        id: str,
-        status: bool,
-        created_at: datetime | None = None,
-        updated_at: datetime | None = None,
-    ) -> None:
-        """Initialize a lamp entity.
-
-        Args:
-            id: Unique identifier for the lamp
-            status: Whether the lamp is on (True) or off (False)
-            created_at: When the lamp was created (defaults to now)
-            updated_at: When the lamp was last updated (defaults to now)
-        """
-        self.id = id
-        self.status = status
-        self.created_at = created_at or datetime.now(UTC)
-        self.updated_at = updated_at or datetime.now(UTC)
+    id: str
+    status: bool
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def update_status(self, status: bool) -> None:
         """Update the lamp status and timestamp.
@@ -52,10 +42,3 @@ class LampEntity:
     def __hash__(self) -> int:
         """Generate hash based on ID."""
         return hash(self.id)
-
-    def __repr__(self) -> str:
-        """String representation of the lamp entity."""
-        return (
-            f"LampEntity(id={self.id!r}, status={self.status!r}, "
-            f"created_at={self.created_at!r}, updated_at={self.updated_at!r})"
-        )
