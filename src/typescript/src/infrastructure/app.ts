@@ -7,6 +7,7 @@ import Security from './security.ts';
 import { InMemoryLampRepository } from './repositories/InMemoryLampRepository.ts';
 import { PrismaLampRepository } from './repositories/PrismaLampRepository.ts';
 import { closePrismaClient } from './database/client.ts';
+import { LampNotFoundError } from '../domain/errors/DomainError.ts';
 import Service from './services/service.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +42,14 @@ const options = {
 export async function buildApp(): Promise<import('fastify').FastifyInstance> {
   const server = fastify({
     logger: true,
+  });
+
+  // Centralized error handler — maps domain errors to HTTP responses
+  server.setErrorHandler(async (error, _request, reply) => {
+    if (error instanceof LampNotFoundError) {
+      return reply.code(404).send();
+    }
+    throw error;
   });
 
   // Health endpoint - infrastructure concern, separate from business API

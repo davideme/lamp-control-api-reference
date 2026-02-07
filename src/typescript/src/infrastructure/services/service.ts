@@ -1,37 +1,14 @@
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyReply } from 'fastify';
 import type { LampRepository } from '../../domain/repositories/LampRepository.ts';
-import type { components, operations } from '../types/api.ts';
-import { LampNotFoundError } from '../../domain/errors/DomainError.ts';
-import { LampMapper } from '../mappers/LampMapper.ts';
-
-type Lamp = components['schemas']['Lamp'];
-
-type ListLampsRequest = FastifyRequest<{
-  Querystring: { cursor?: string | null; pageSize?: number };
-}>;
-
-type ListLampsResponse = {
-  data: Lamp[];
-  nextCursor?: string | null;
-  hasMore: boolean;
-};
-
-type GetLampRequest = FastifyRequest<{
-  Params: operations['getLamp']['parameters']['path'];
-}>;
-
-type CreateLampRequest = FastifyRequest<{
-  Body: operations['createLamp']['requestBody']['content']['application/json'];
-}>;
-
-type UpdateLampRequest = FastifyRequest<{
-  Params: operations['updateLamp']['parameters']['path'];
-  Body: operations['updateLamp']['requestBody']['content']['application/json'];
-}>;
-
-type DeleteLampRequest = FastifyRequest<{
-  Params: operations['deleteLamp']['parameters']['path'];
-}>;
+import { toApiModel, toDomainEntityCreate, toDomainEntityUpdate } from '../mappers/LampMapper.ts';
+import type {
+  ListLampsRequest,
+  ListLampsResponse,
+  GetLampRequest,
+  CreateLampRequest,
+  UpdateLampRequest,
+  DeleteLampRequest,
+} from './types.ts';
 
 // service.ts
 export class Service {
@@ -46,7 +23,7 @@ export class Service {
     const lampEntities = await this.repository.findAll(pageSize);
 
     // Convert domain entities to API models
-    const lamps = lampEntities.map(LampMapper.toApiModel);
+    const lamps = lampEntities.map(toApiModel);
 
     // Simple implementation without actual cursor-based pagination
     // In a real implementation, you'd use the cursor to fetch from a specific position
@@ -68,7 +45,7 @@ export class Service {
     }
 
     // Convert domain entity to API model
-    const lamp = LampMapper.toApiModel(lampEntity);
+    const lamp = toApiModel(lampEntity);
     return reply.code(200).send(lamp);
   }
 
@@ -76,11 +53,11 @@ export class Service {
     const body = request.body;
 
     // Convert API model to domain entity
-    const lampEntityCreate = LampMapper.toDomainEntityCreate(body);
+    const lampEntityCreate = toDomainEntityCreate(body);
     const newLampEntity = await this.repository.create(lampEntityCreate);
 
     // Convert domain entity to API model
-    const newLamp = LampMapper.toApiModel(newLampEntity);
+    const newLamp = toApiModel(newLampEntity);
     return reply.code(201).send(newLamp);
   }
 
@@ -88,33 +65,19 @@ export class Service {
     const { lampId } = request.params as { lampId: string };
     const body = request.body;
 
-    try {
-      // Convert API model to domain entity
-      const lampEntityUpdate = LampMapper.toDomainEntityUpdate(body);
-      const updatedLampEntity = await this.repository.update(lampId, lampEntityUpdate);
+    // Convert API model to domain entity
+    const lampEntityUpdate = toDomainEntityUpdate(body);
+    const updatedLampEntity = await this.repository.update(lampId, lampEntityUpdate);
 
-      // Convert domain entity to API model
-      const updatedLamp = LampMapper.toApiModel(updatedLampEntity);
-      return reply.code(200).send(updatedLamp);
-    } catch (error) {
-      if (error instanceof LampNotFoundError) {
-        return reply.code(404).send();
-      }
-      throw error;
-    }
+    // Convert domain entity to API model
+    const updatedLamp = toApiModel(updatedLampEntity);
+    return reply.code(200).send(updatedLamp);
   }
 
   async deleteLamp(request: DeleteLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params as { lampId: string };
-    try {
-      await this.repository.delete(lampId);
-      return reply.code(204).send();
-    } catch (error) {
-      if (error instanceof LampNotFoundError) {
-        return reply.code(404).send();
-      }
-      throw error;
-    }
+    await this.repository.delete(lampId);
+    return reply.code(204).send();
   }
 }
 

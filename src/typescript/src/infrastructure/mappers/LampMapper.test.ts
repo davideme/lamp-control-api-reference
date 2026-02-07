@@ -1,4 +1,9 @@
-import { LampMapper } from './LampMapper.ts';
+import {
+  toApiModel,
+  toDomainEntity,
+  toDomainEntityCreate,
+  toDomainEntityUpdate,
+} from './LampMapper.ts';
 import type { LampEntity } from '../../domain/entities/LampEntity.ts';
 
 describe('LampMapper', () => {
@@ -11,7 +16,7 @@ describe('LampMapper', () => {
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
 
-      const apiModel = LampMapper.toApiModel(entity);
+      const apiModel = toApiModel(entity);
 
       expect(apiModel).toEqual({
         id: '123',
@@ -31,7 +36,7 @@ describe('LampMapper', () => {
         updatedAt: '2025-01-02T00:00:00.000Z',
       };
 
-      const entity = LampMapper.toDomainEntity(apiModel);
+      const entity = toDomainEntity(apiModel);
 
       expect(entity).toEqual({
         id: '456',
@@ -46,7 +51,7 @@ describe('LampMapper', () => {
     it('should convert API create model to domain create model', () => {
       const apiModel = { status: true };
 
-      const domainModel = LampMapper.toDomainEntityCreate(apiModel);
+      const domainModel = toDomainEntityCreate(apiModel);
 
       expect(domainModel).toEqual({ status: true });
     });
@@ -56,7 +61,7 @@ describe('LampMapper', () => {
     it('should convert API update model to domain update model', () => {
       const apiModel = { status: false };
 
-      const domainModel = LampMapper.toDomainEntityUpdate(apiModel);
+      const domainModel = toDomainEntityUpdate(apiModel);
 
       expect(domainModel).toEqual({ status: false });
     });
