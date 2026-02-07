@@ -32,7 +32,8 @@ public class LampsController implements LampsApi {
           lamp.setStatus(lampCreate.getStatus());
           final Lamp created = lampService.create(lamp);
           return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        });
+        },
+        Runnable::run);
   }
 
   @Override
@@ -42,7 +43,8 @@ public class LampsController implements LampsApi {
           final UUID lampUuid = UUID.fromString(lampId);
           lampService.delete(lampUuid);
           return ResponseEntity.noContent().<Void>build();
-        });
+        },
+        Runnable::run);
   }
 
   @Override
@@ -53,7 +55,8 @@ public class LampsController implements LampsApi {
           final Lamp lamp =
               lampService.findById(lampUuid).orElseThrow(() -> new LampNotFoundException(lampUuid));
           return ResponseEntity.ok().body(lamp);
-        });
+        },
+        Runnable::run);
   }
 
   @Override
@@ -66,7 +69,8 @@ public class LampsController implements LampsApi {
           response.setData(lamps);
           response.setHasMore(false);
           return ResponseEntity.ok().body(response);
-        });
+        },
+        Runnable::run);
   }
 
   @Override
@@ -79,6 +83,7 @@ public class LampsController implements LampsApi {
           lampData.setStatus(lampUpdate.getStatus());
           final Lamp updated = lampService.update(lampUuid, lampData);
           return ResponseEntity.ok().body(updated);
-        });
+        },
+        Runnable::run);
   }
 }
