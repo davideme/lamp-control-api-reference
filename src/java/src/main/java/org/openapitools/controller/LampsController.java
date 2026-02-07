@@ -6,7 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.api.LampsApi;
-import org.openapitools.model.Error;
+import org.openapitools.exception.LampNotFoundException;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
@@ -36,44 +36,23 @@ public class LampsController implements LampsApi {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public CompletableFuture<ResponseEntity<Void>> deleteLamp(final String lampId) {
     return CompletableFuture.supplyAsync(
         () -> {
-          try {
-            final UUID lampUuid = UUID.fromString(lampId);
-            final boolean deleted = lampService.delete(lampUuid);
-            if (deleted) {
-              return ResponseEntity.noContent().<Void>build();
-            } else {
-              return ResponseEntity.notFound().<Void>build();
-            }
-          } catch (IllegalArgumentException e) {
-            final Error error = new Error("INVALID_ARGUMENT");
-            return (ResponseEntity<Void>)
-                (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
-          }
+          final UUID lampUuid = UUID.fromString(lampId);
+          lampService.delete(lampUuid);
+          return ResponseEntity.noContent().<Void>build();
         });
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public CompletableFuture<ResponseEntity<Lamp>> getLamp(final String lampId) {
     return CompletableFuture.supplyAsync(
         () -> {
-          try {
-            final UUID lampUuid = UUID.fromString(lampId);
-            final Lamp lamp = lampService.findById(lampUuid);
-            if (lamp != null) {
-              return ResponseEntity.ok().body(lamp);
-            } else {
-              return ResponseEntity.notFound().build();
-            }
-          } catch (IllegalArgumentException e) {
-            final Error error = new Error("INVALID_ARGUMENT");
-            return (ResponseEntity<Lamp>)
-                (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
-          }
+          final UUID lampUuid = UUID.fromString(lampId);
+          final Lamp lamp =
+              lampService.findById(lampUuid).orElseThrow(() -> new LampNotFoundException(lampUuid));
+          return ResponseEntity.ok().body(lamp);
         });
   }
 
@@ -91,26 +70,15 @@ public class LampsController implements LampsApi {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public CompletableFuture<ResponseEntity<Lamp>> updateLamp(
       final String lampId, final LampUpdate lampUpdate) {
     return CompletableFuture.supplyAsync(
         () -> {
-          try {
-            final UUID lampUuid = UUID.fromString(lampId);
-            final Lamp lampData = new Lamp();
-            lampData.setStatus(lampUpdate.getStatus());
-            final Lamp updated = lampService.update(lampUuid, lampData);
-            if (updated != null) {
-              return ResponseEntity.ok().body(updated);
-            } else {
-              return ResponseEntity.notFound().build();
-            }
-          } catch (IllegalArgumentException e) {
-            final Error error = new Error("INVALID_ARGUMENT");
-            return (ResponseEntity<Lamp>)
-                (ResponseEntity<?>) ResponseEntity.badRequest().body(error);
-          }
+          final UUID lampUuid = UUID.fromString(lampId);
+          final Lamp lampData = new Lamp();
+          lampData.setStatus(lampUpdate.getStatus());
+          final Lamp updated = lampService.update(lampUuid, lampData);
+          return ResponseEntity.ok().body(updated);
         });
   }
 }
