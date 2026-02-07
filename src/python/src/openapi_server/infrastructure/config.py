@@ -1,6 +1,6 @@
 """Configuration management for the Lamp Control API."""
 
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -54,14 +54,14 @@ class DatabaseSettings(BaseSettings):
             if url.startswith("postgresql://"):
                 url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-            # asyncpg doesn't support sslmode query parameter like psycopg2
-            # Remove sslmode=disable as asyncpg defaults to no SSL verification in test environments
-            # In production, SSL should be configured via asyncpg-specific parameters
+            # asyncpg doesn't support the psycopg2-style sslmode query parameter
+            # Remove any sslmode query parameter; asyncpg defaults to no SSL verification
+            # in test environments, and in production SSL should be configured via
+            # asyncpg-specific parameters rather than sslmode
             parsed = urlparse(url)
-            params = parse_qs(parsed.query)
-            if "sslmode" in params:
-                params.pop("sslmode")
-                url = urlunparse(parsed._replace(query=urlencode(params, doseq=True)))
+            params = [(k, v) for k, v in parse_qsl(parsed.query) if k != "sslmode"]
+            if len(params) != len(parse_qsl(parsed.query)):
+                url = urlunparse(parsed._replace(query=urlencode(params)))
 
             return url
 

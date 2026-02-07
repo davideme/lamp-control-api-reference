@@ -58,7 +58,10 @@ def _run_migrations(*, strict: bool = True) -> bool:
 
 
 def run_migrations_only():
-    """Run database migrations only and exit."""
+    """Run database migrations only.
+
+    Intended for CLI use where the process exits naturally after main() finishes.
+    """
     logger.info("Running migrations only...")
     _run_migrations(strict=True)
 
