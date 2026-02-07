@@ -9,7 +9,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
+from alembic.util.exc import CommandError
 from src.openapi_server.cli import main, run_migrations_only, start_server
 
 
@@ -63,8 +65,8 @@ class TestRunMigrationsOnly:
     @patch("src.openapi_server.cli.command")
     @patch("src.openapi_server.cli.Config")
     @patch("src.openapi_server.cli.DatabaseSettings")
-    def test_exits_on_migration_error(self, mock_settings_cls, mock_config_cls, mock_command):
-        """Should sys.exit(1) when migration fails."""
+    def test_exits_on_alembic_command_error(self, mock_settings_cls, mock_config_cls, mock_command):
+        """Should sys.exit(1) when Alembic command fails."""
         mock_settings = MagicMock()
         mock_settings.use_postgres.return_value = True
         mock_settings.database_url = "postgresql://test:test@localhost/test"
@@ -74,7 +76,28 @@ class TestRunMigrationsOnly:
         mock_settings_cls.return_value = mock_settings
 
         mock_config_cls.return_value = MagicMock()
-        mock_command.upgrade.side_effect = Exception("Migration failed")
+        mock_command.upgrade.side_effect = CommandError("Migration failed")
+
+        with patch.object(Path, "exists", return_value=True):
+            with pytest.raises(SystemExit) as exc_info:
+                run_migrations_only()
+            assert exc_info.value.code == 1
+
+    @patch("src.openapi_server.cli.command")
+    @patch("src.openapi_server.cli.Config")
+    @patch("src.openapi_server.cli.DatabaseSettings")
+    def test_exits_on_sqlalchemy_error(self, mock_settings_cls, mock_config_cls, mock_command):
+        """Should sys.exit(1) when database connection fails."""
+        mock_settings = MagicMock()
+        mock_settings.use_postgres.return_value = True
+        mock_settings.database_url = "postgresql://test:test@localhost/test"
+        mock_settings.get_connection_string.return_value = (
+            "postgresql+asyncpg://test:test@localhost/test"
+        )
+        mock_settings_cls.return_value = mock_settings
+
+        mock_config_cls.return_value = MagicMock()
+        mock_command.upgrade.side_effect = SQLAlchemyError("Connection refused")
 
         with patch.object(Path, "exists", return_value=True):
             with pytest.raises(SystemExit) as exc_info:
@@ -162,7 +185,7 @@ class TestStartServer:
         mock_settings_cls.return_value = mock_settings
 
         mock_config_cls.return_value = MagicMock()
-        mock_command.upgrade.side_effect = Exception("Migration failed")
+        mock_command.upgrade.side_effect = CommandError("Migration failed")
 
         with patch.object(Path, "exists", return_value=True):
             with pytest.raises(SystemExit) as exc_info:
