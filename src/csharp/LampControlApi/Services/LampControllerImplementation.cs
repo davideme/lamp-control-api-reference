@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LampControlApi.Controllers;
 using LampControlApi.Domain.Mappers;
+using LampControlApi.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LampControlApi.Services

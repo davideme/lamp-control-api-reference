@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 using LampControlApi.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -31,32 +33,32 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ICollection<LampEntity>> GetAllAsync()
+        public async Task<ICollection<LampEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             this.logger.LogDebug("Getting all lamps from PostgreSQL database");
 
             var dbEntities = await this.context.Lamps
                 .OrderBy(l => l.CreatedAt)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return dbEntities.Select(this.MapToDomain).ToList();
         }
 
         /// <inheritdoc/>
-        public async Task<LampEntity?> GetByIdAsync(Guid id)
+        public async Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             this.logger.LogDebug("Getting lamp {LampId} from PostgreSQL database", id);
 
             var dbEntity = await this.context.Lamps
                 .AsNoTracking()
-                .FirstOrDefaultAsync(l => l.Id == id);
+                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
 
             return dbEntity != null ? this.MapToDomain(dbEntity) : null;
         }
 
         /// <inheritdoc/>
-        public async Task<LampEntity> CreateAsync(LampEntity entity)
+        public async Task<LampEntity> CreateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
             {
@@ -73,14 +75,14 @@ namespace LampControlApi.Services
             };
 
             this.context.Lamps.Add(dbEntity);
-            await this.context.SaveChangesAsync();
-            await this.context.Entry(dbEntity).ReloadAsync();
+            await this.context.SaveChangesAsync(cancellationToken);
+            await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
 
             return this.MapToDomain(dbEntity);
         }
 
         /// <inheritdoc/>
-        public async Task<LampEntity?> UpdateAsync(LampEntity entity)
+        public async Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
             {
@@ -90,7 +92,7 @@ namespace LampControlApi.Services
             this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", entity.Id);
 
             var existingEntity = await this.context.Lamps
-                .FirstOrDefaultAsync(l => l.Id == entity.Id);
+                .FirstOrDefaultAsync(l => l.Id == entity.Id, cancellationToken);
 
             if (existingEntity == null)
             {
@@ -107,22 +109,22 @@ namespace LampControlApi.Services
             // Update the tracked entity reference
             this.context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
-            await this.context.SaveChangesAsync();
+            await this.context.SaveChangesAsync(cancellationToken);
 
             // Reload to get the trigger-updated timestamp
-            await this.context.Entry(existingEntity).ReloadAsync();
+            await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
 
             return this.MapToDomain(existingEntity);
         }
 
         /// <inheritdoc/>
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             this.logger.LogDebug("Deleting lamp {LampId} from PostgreSQL database", id);
 
             var existingEntity = await this.context.Lamps
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(l => l.Id == id && l.DeletedAt == null);
+                .FirstOrDefaultAsync(l => l.Id == id && l.DeletedAt == null, cancellationToken);
 
             if (existingEntity == null)
             {
@@ -139,7 +141,7 @@ namespace LampControlApi.Services
             // Update the tracked entity reference
             this.context.Entry(existingEntity).CurrentValues.SetValues(deletedEntity);
 
-            await this.context.SaveChangesAsync();
+            await this.context.SaveChangesAsync(cancellationToken);
 
             return true;
         }

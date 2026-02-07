@@ -1,5 +1,7 @@
+using System.Threading;
 using LampControlApi.Controllers;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 using LampControlApi.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -44,7 +46,7 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var emptyLampEntities = new List<LampEntity>();
-            _mockRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(emptyLampEntities);
+            _mockRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(emptyLampEntities);
 
             // Act
             var result = await _controller.ListLampsAsync();
@@ -52,7 +54,7 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
-            _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
+            _mockRepository.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -69,7 +71,7 @@ namespace LampControlApi.Tests
                 new LampEntity(Guid.NewGuid(), false, DateTimeOffset.UtcNow.AddMinutes(-3), DateTimeOffset.UtcNow.AddMinutes(-2)),
                 new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow)
             };
-            _mockRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(expectedLampEntities);
+            _mockRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedLampEntities);
 
             // Act
             var result = await _controller.ListLampsAsync();
@@ -79,7 +81,7 @@ namespace LampControlApi.Tests
             Assert.AreEqual(expectedLampEntities.Count, result.Count);
 
             // Verify that the controller returns the correct number of lamps (they are mapped from entities to API models)
-            _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
+            _mockRepository.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -104,8 +106,8 @@ namespace LampControlApi.Tests
             var lampCreate = new LampCreate { Status = true };
             var expectedLamp = new Lamp { Id = Guid.NewGuid(), Status = true };
 
-            _mockRepository.Setup(r => r.CreateAsync(It.IsAny<LampEntity>()))
-                .ReturnsAsync((LampEntity lampEntity) =>
+            _mockRepository.Setup(r => r.CreateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((LampEntity lampEntity, CancellationToken _) =>
                 {
                     // Return a LampEntity with the expected ID to simulate repository setting ID
                     return new LampEntity(expectedLamp.Id, lampEntity.Status, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
@@ -128,7 +130,7 @@ namespace LampControlApi.Tests
             Assert.AreEqual(lampCreate.Status, result.Status);
             _mockRepository.Verify(
                 r => r.CreateAsync(It.Is<LampEntity>(l =>
-                    l.Id != Guid.Empty && l.Status == lampCreate.Status)),
+                    l.Id != Guid.Empty && l.Status == lampCreate.Status), It.IsAny<CancellationToken>()),
                 Times.Once);
         }
 
@@ -143,9 +145,9 @@ namespace LampControlApi.Tests
             var lampCreate = new LampCreate { Status = false };
             var capturedLampEntity = (LampEntity?)null;
 
-            _mockRepository.Setup(r => r.CreateAsync(It.IsAny<LampEntity>()))
-                .Callback<LampEntity>(lampEntity => capturedLampEntity = lampEntity)
-                .ReturnsAsync((LampEntity lampEntity) => lampEntity);
+            _mockRepository.Setup(r => r.CreateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>()))
+                .Callback<LampEntity, CancellationToken>((lampEntity, _) => capturedLampEntity = lampEntity)
+                .ReturnsAsync((LampEntity lampEntity, CancellationToken _) => lampEntity);
 
             // Act
             await _controller.CreateLampAsync(lampCreate);
@@ -213,7 +215,7 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync((LampEntity?)null);
+            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => _controller.GetLampAsync(lampId.ToString()));
@@ -231,7 +233,7 @@ namespace LampControlApi.Tests
             var lampId = Guid.NewGuid();
             var expectedLamp = new Lamp { Id = lampId, Status = true };
             var lampEntity = new LampEntity(lampId, true, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync(lampEntity);
+            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(lampEntity);
 
             // Act
             var actionResult = await _controller.GetLampAsync(lampId.ToString());
@@ -241,7 +243,7 @@ namespace LampControlApi.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedLamp.Id, result.Id);
             Assert.AreEqual(expectedLamp.Status, result.Status);
-            _mockRepository.Verify(r => r.GetByIdAsync(lampId), Times.Once);
+            _mockRepository.Verify(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -315,7 +317,7 @@ namespace LampControlApi.Tests
             // Arrange
             var lampId = Guid.NewGuid();
             var lampUpdate = new LampUpdate { Status = true };
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync((LampEntity?)null);
+            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => _controller.UpdateLampAsync(lampId.ToString(), lampUpdate));
@@ -335,8 +337,8 @@ namespace LampControlApi.Tests
             var lampUpdate = new LampUpdate { Status = true };
             var updatedLampEntity = new LampEntity(lampId, true, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>())).ReturnsAsync(updatedLampEntity);
+            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
+            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>())).ReturnsAsync(updatedLampEntity);
 
             // Act
             var actionResult = await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
@@ -346,8 +348,8 @@ namespace LampControlApi.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(lampId, result.Id);
             Assert.AreEqual(lampUpdate.Status, result.Status);
-            _mockRepository.Verify(r => r.GetByIdAsync(lampId), Times.Once);
-            _mockRepository.Verify(r => r.UpdateAsync(It.Is<LampEntity>(l => l.Id == lampId && l.Status == lampUpdate.Status)), Times.Once);
+            _mockRepository.Verify(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
+            _mockRepository.Verify(r => r.UpdateAsync(It.Is<LampEntity>(l => l.Id == lampId && l.Status == lampUpdate.Status), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -363,10 +365,10 @@ namespace LampControlApi.Tests
             var lampUpdate = new LampUpdate { Status = true };
             var capturedLampEntity = (LampEntity?)null;
 
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId)).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>()))
-                .Callback<LampEntity>(lampEntity => capturedLampEntity = lampEntity)
-                .ReturnsAsync((LampEntity lampEntity) => lampEntity);
+            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
+            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>()))
+                .Callback<LampEntity, CancellationToken>((lampEntity, _) => capturedLampEntity = lampEntity)
+                .ReturnsAsync((LampEntity lampEntity, CancellationToken _) => lampEntity);
 
             // Act
             await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
@@ -437,7 +439,7 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            _mockRepository.Setup(r => r.DeleteAsync(lampId)).ReturnsAsync(false);
+            _mockRepository.Setup(r => r.DeleteAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => _controller.DeleteLampAsync(lampId.ToString()));
@@ -453,14 +455,14 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            _mockRepository.Setup(r => r.DeleteAsync(lampId)).ReturnsAsync(true);
+            _mockRepository.Setup(r => r.DeleteAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
             // Act
             var actionResult = await _controller.DeleteLampAsync(lampId.ToString());
 
             // Assert - No exception should be thrown and check for NoContentResult
             Assert.IsInstanceOfType(actionResult, typeof(Microsoft.AspNetCore.Mvc.NoContentResult));
-            _mockRepository.Verify(r => r.DeleteAsync(lampId), Times.Once);
+            _mockRepository.Verify(r => r.DeleteAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

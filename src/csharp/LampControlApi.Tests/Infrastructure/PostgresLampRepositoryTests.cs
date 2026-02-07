@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 using LampControlApi.Infrastructure.Database;
 using LampControlApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -286,8 +287,9 @@ namespace LampControlApi.Tests.Infrastructure
 
             while (currentDirectory != null)
             {
-                // Check if .git directory exists in current directory
-                if (Directory.Exists(Path.Combine(currentDirectory.FullName, ".git")))
+                // Check if .git exists in current directory (directory for normal repos, file for worktrees)
+                var gitPath = Path.Combine(currentDirectory.FullName, ".git");
+                if (Directory.Exists(gitPath) || File.Exists(gitPath))
                 {
                     return currentDirectory.FullName;
                 }

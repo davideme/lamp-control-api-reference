@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using LampControlApi.Domain.Entities;
+using LampControlApi.Domain.Repositories;
 using LampControlApi.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

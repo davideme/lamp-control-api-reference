@@ -114,7 +114,7 @@ cd src/kotlin && ./gradlew test jacocoTestReport # With coverage
 
 # C#
 cd src/csharp && dotnet test                                          # Run tests
-cd src/csharp && dotnet test --settings coverlet.runsettings          # With coverage
+cd src/csharp && make test-coverage                                   # With coverage
 ```
 
 ### Linting and Formatting

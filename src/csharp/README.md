@@ -42,7 +42,7 @@ A modern ASP.NET Core Web API for controlling smart lamps, built with .NET 8.0.
 
 5. **Run tests with coverage**
    ```bash
-   dotnet test --settings coverlet.runsettings --results-directory TestResults
+   make test-coverage
    ```
 
 The API will be available at `https://localhost:7173` with Swagger UI at `/swagger`.
@@ -265,7 +265,7 @@ make clean
 - **`stylecop.json`** - StyleCop analyzer settings
 - **`.globalconfig`** - Global analyzer diagnostic rules
 - **`Directory.Build.props`** - Project-wide MSBuild properties
-- **`coverlet.runsettings`** - Code coverage configuration (format, exclusions, includes)
+- **`coverlet.msbuild`** - Code coverage via MSBuild integration with threshold enforcement
 
 ## CI/CD Pipeline
 
@@ -297,7 +297,8 @@ The project includes a comprehensive CI/CD pipeline (`.github/workflows/csharp-c
 - Verifies deployment readiness
 
 #### 4. **Code Coverage**
-- Runs tests with Coverlet via `coverlet.runsettings`
+- Runs tests with Coverlet via `coverlet.msbuild`
+- Enforces 80% line coverage threshold (fails build if below)
 - Generates Cobertura XML coverage reports
 - Uploads coverage artifacts
 
@@ -338,7 +339,6 @@ src/csharp/
 ├── .editorconfig                # Code formatting rules
 ├── .globalconfig                # Global analyzer settings
 ├── stylecop.json                # StyleCop configuration
-├── coverlet.runsettings         # Code coverage configuration
 ├── Directory.Build.props        # MSBuild properties
 └── Makefile                     # Build automation (convenience wrapper)
 ```

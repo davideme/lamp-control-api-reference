@@ -177,42 +177,23 @@ jobs:
       run: |
         dotnet test \
           --configuration Release \
-          --settings coverlet.runsettings \
-          --results-directory ./TestResults \
-          --no-restore
-
-    - name: Copy coverage to stable path
-      if: always()
-      run: |
-        COVERAGE_FILE=$(find TestResults -name 'coverage.cobertura.xml' -path '*/TestResults/*/coverage.cobertura.xml' | head -1)
-        if [ -n "$COVERAGE_FILE" ]; then
-          cp "$COVERAGE_FILE" TestResults/coverage.cobertura.xml
-          echo "Copied $COVERAGE_FILE to TestResults/coverage.cobertura.xml"
-        fi
-
-    - name: Verify code coverage threshold
-      run: |
-        COVERAGE_FILE="TestResults/coverage.cobertura.xml"
-        if [ ! -f "$COVERAGE_FILE" ]; then
-          echo "❌ Coverage file not found"
-          exit 1
-        fi
-        LINE_RATE=$(grep '<coverage' "$COVERAGE_FILE" | sed 's/.*line-rate="\([0-9.]*\)".*/\1/')
-        COVERAGE=$(awk "BEGIN {printf \"%.2f\", $LINE_RATE * 100}")
-        echo "Coverage: ${COVERAGE}%"
-        MEETS_THRESHOLD=$(awk -v cov="$COVERAGE" -v thresh="80" 'BEGIN {print (cov >= thresh)}')
-        if [ "$MEETS_THRESHOLD" -eq 0 ]; then
-          echo "❌ Coverage ${COVERAGE}% is below the required 80%"
-          exit 1
-        fi
-        echo "✅ Coverage ${COVERAGE}% meets the required 80%"
+          --no-restore \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=./TestResults/ \
+          /p:Threshold=80 \
+          /p:ThresholdType=line \
+          /p:Include="[LampControlApi]*" \
+          /p:Exclude="[*.Tests]*%2c[*]*Test*%2c[*]*.Program%2c[*]*.Startup%2c[*]*.LampControlDbContextFactory" \
+          /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute" \
+          /p:ExcludeByFile="**/obj/**%2c**/bin/**%2c**/Migrations/**%2c**/Program.cs%2c**/Extensions/MigrationRunner.cs%2c**/Extensions/WebApplicationExtensions.cs%2c**/Extensions/ServiceCollectionExtensions.cs"
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: coverage-report
-        path: src/csharp/TestResults/
+        path: src/csharp/LampControlApi.Tests/TestResults/
         retention-days: 30
 
   dependency-check:
