@@ -18,7 +18,7 @@ JAVA_DIR="src/java"
 JAVA_JACOCO_XML="$JAVA_DIR/target/site/jacoco/jacoco.xml"
 
 CSHARP_DIR="src/csharp"
-CSHARP_TESTRESULTS_DIR="$CSHARP_DIR/TestResults"
+CSHARP_TESTRESULTS_DIR="$CSHARP_DIR/LampControlApi.Tests/TestResults"
 CSHARP_COVERAGE_DIR="$CSHARP_DIR/coverage"
 CSHARP_COBERTURA_FILE="$CSHARP_TESTRESULTS_DIR/coverage.cobertura.xml"
 
