@@ -37,7 +37,7 @@ export class Service {
   }
 
   async getLamp(request: GetLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params as { lampId: string };
+    const { lampId } = request.params;
     const lampEntity = await this.repository.findById(lampId);
 
     if (!lampEntity) {
@@ -62,7 +62,7 @@ export class Service {
   }
 
   async updateLamp(request: UpdateLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params as { lampId: string };
+    const { lampId } = request.params;
     const body = request.body;
 
     // Convert API model to domain entity
@@ -75,7 +75,7 @@ export class Service {
   }
 
   async deleteLamp(request: DeleteLampRequest, reply: FastifyReply): Promise<void> {
-    const { lampId } = request.params as { lampId: string };
+    const { lampId } = request.params;
     await this.repository.delete(lampId);
     return reply.code(204).send();
   }
