@@ -170,10 +170,17 @@ func (r *PostgresLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 }
 
 // Exists checks if a lamp exists in the repository
-func (r *PostgresLampRepository) Exists(ctx context.Context, id string) bool {
+func (r *PostgresLampRepository) Exists(ctx context.Context, id string) (bool, error) {
 	_, err := r.GetByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, ErrLampNotFound) {
+			return false, nil
+		}
 
-	return err == nil
+		return false, fmt.Errorf("failed to check lamp existence: %w", err)
+	}
+
+	return true, nil
 }
 
 // convertToEntity converts a sqlc Lamp model to a domain LampEntity

@@ -308,14 +308,20 @@ func testPostgresExists(t *testing.T, repo *PostgresLampRepository) {
 	defer repo.Delete(ctx, lampEntity.ID.String())
 
 	// Test that it exists
-	exists := repo.Exists(ctx, lampEntity.ID.String())
+	exists, err := repo.Exists(ctx, lampEntity.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if !exists {
 		t.Error("Expected lamp to exist")
 	}
 
 	// Test non-existent lamp
 	nonExistentID := uuid.New().String()
-	exists = repo.Exists(ctx, nonExistentID)
+	exists, err = repo.Exists(ctx, nonExistentID)
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if exists {
 		t.Error("Expected lamp to not exist")
 	}
