@@ -58,7 +58,7 @@ test-coverage coverage: build
 		"/p:Include=[LampControlApi]*" \
 		"/p:Exclude=[*.Tests]*%2c[*]*Test*%2c[*]*.Program%2c[*]*.Startup%2c[*]*.LampControlDbContextFactory" \
 		"/p:ExcludeByAttribute=Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute" \
-		"/p:ExcludeByFile=**/obj/**%2c**/bin/**%2c**/Migrations/**%2c**/Program.cs"
+		"/p:ExcludeByFile=**/obj/**%2c**/bin/**%2c**/Migrations/**%2c**/Program.cs%2c**/Extensions/MigrationRunner.cs%2c**/Extensions/WebApplicationExtensions.cs%2c**/Extensions/ServiceCollectionExtensions.cs"
 	@echo "Coverage report: $(TEST_PROJECT_DIR)/TestResults/coverage.cobertura.xml"
 
 # Format code
