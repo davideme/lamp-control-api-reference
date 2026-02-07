@@ -30,7 +30,7 @@ namespace LampControlApi.Extensions
                 options.UseNpgsql(connectionString!);
             });
 
-            var app = builder.Build();
+            using var app = builder.Build();
             app.RunMigrations();
         }
     }

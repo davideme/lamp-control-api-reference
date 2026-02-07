@@ -1,7 +1,7 @@
 using LampControlApi.Extensions;
 
 // Parse operation mode from command line arguments
-var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode="))?.Split('=')[1] ?? "serve-only";
+var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode=", StringComparison.Ordinal))?.Split('=')[1] ?? "serve-only";
 
 // Handle migrate-only mode
 if (mode == "migrate")

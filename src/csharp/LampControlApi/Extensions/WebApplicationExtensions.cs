@@ -26,7 +26,7 @@ namespace LampControlApi.Extensions
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Migration failed: {ex.Message}");
+                    Console.WriteLine($"Migration failed: {ex}");
                     Environment.Exit(1);
                 }
             }

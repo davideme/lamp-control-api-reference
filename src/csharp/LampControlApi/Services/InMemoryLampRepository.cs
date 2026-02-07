@@ -29,6 +29,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<ICollection<LampEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var lamps = _lamps.Values.ToList();
             return Task.FromResult<ICollection<LampEntity>>(lamps);
         }
@@ -36,6 +37,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             _lamps.TryGetValue(id, out var lamp);
             return Task.FromResult(lamp);
         }
@@ -43,6 +45,8 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<LampEntity> CreateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -55,6 +59,8 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -72,6 +78,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var removed = _lamps.TryRemove(id, out _);
             return Task.FromResult(removed);
         }
