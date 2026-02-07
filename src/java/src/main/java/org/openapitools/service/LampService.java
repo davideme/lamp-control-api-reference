@@ -2,10 +2,11 @@ package org.openapitools.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.entity.LampEntity;
+import org.openapitools.exception.LampNotFoundException;
 import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
 import org.openapitools.repository.LampRepository;
@@ -57,10 +58,10 @@ public class LampService {
    * Find a lamp by its ID.
    *
    * @param id the lamp ID
-   * @return the lamp if found, null otherwise
+   * @return optional containing the lamp if found, empty otherwise
    */
-  public Lamp findById(final UUID id) {
-    return repository.findById(id).map(mapper::toModel).orElse(null);
+  public Optional<Lamp> findById(final UUID id) {
+    return repository.findById(id).map(mapper::toModel);
   }
 
   /**
@@ -75,7 +76,7 @@ public class LampService {
         PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.ASC, "createdAt"));
 
     final Page<LampEntity> page = repository.findAll(pageable);
-    return page.getContent().stream().map(mapper::toModel).collect(Collectors.toList());
+    return page.getContent().stream().map(mapper::toModel).toList();
   }
 
   /**
@@ -84,7 +85,7 @@ public class LampService {
    * @return list of all active lamps ordered by creation time
    */
   public List<Lamp> findAllActive() {
-    return repository.findAllActive().stream().map(mapper::toModel).collect(Collectors.toList());
+    return repository.findAllActive().stream().map(mapper::toModel).toList();
   }
 
   /**
@@ -94,7 +95,7 @@ public class LampService {
    * @return list of lamps with the specified status
    */
   public List<Lamp> findByStatus(final Boolean isOn) {
-    return repository.findByStatus(isOn).stream().map(mapper::toModel).collect(Collectors.toList());
+    return repository.findByStatus(isOn).stream().map(mapper::toModel).toList();
   }
 
   /**
@@ -111,7 +112,8 @@ public class LampService {
    *
    * @param id the lamp ID
    * @param lamp the updated lamp data
-   * @return the updated lamp if found, null otherwise
+   * @return the updated lamp
+   * @throws LampNotFoundException if no lamp exists with the given ID
    */
   @Transactional
   public Lamp update(final UUID id, final Lamp lamp) {
@@ -123,7 +125,7 @@ public class LampService {
               // updatedAt is automatically set by @UpdateTimestamp
               return mapper.toModel(repository.save(entity));
             })
-        .orElse(null);
+        .orElseThrow(() -> new LampNotFoundException(id));
   }
 
   /**
@@ -133,18 +135,13 @@ public class LampService {
    * LampEntity.
    *
    * @param id the lamp ID to delete
-   * @return true if the lamp was found and deleted, false otherwise
+   * @throws LampNotFoundException if no lamp exists with the given ID
    */
   @Transactional
-  public boolean delete(final UUID id) {
-    return repository
-        .findById(id)
-        .map(
-            entity -> {
-              entity.setDeletedAt(OffsetDateTime.now());
-              repository.save(entity);
-              return true;
-            })
-        .orElse(false);
+  public void delete(final UUID id) {
+    final LampEntity entity =
+        repository.findById(id).orElseThrow(() -> new LampNotFoundException(id));
+    entity.setDeletedAt(OffsetDateTime.now());
+    repository.save(entity);
   }
 }

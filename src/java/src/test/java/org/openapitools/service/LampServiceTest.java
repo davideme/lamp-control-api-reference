@@ -1,6 +1,7 @@
 package org.openapitools.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openapitools.entity.LampEntity;
+import org.openapitools.exception.LampNotFoundException;
 import org.openapitools.mapper.LampMapper;
 import org.openapitools.model.Lamp;
 import org.openapitools.repository.LampRepository;
@@ -76,26 +78,26 @@ class LampServiceTest {
     when(mapper.toModel(testEntity)).thenReturn(testLamp);
 
     // Act
-    final Lamp result = service.findById(testId);
+    final Optional<Lamp> result = service.findById(testId);
 
     // Assert
-    assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(testId);
+    assertThat(result).isPresent();
+    assertThat(result.get().getId()).isEqualTo(testId);
     verify(repository).findById(testId);
     verify(mapper).toModel(testEntity);
   }
 
   @Test
-  void shouldReturnNullWhenLampNotFound() {
+  void shouldReturnEmptyWhenLampNotFound() {
     // Arrange
     final UUID nonExistentId = UUID.randomUUID();
     when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
 
     // Act
-    final Lamp result = service.findById(nonExistentId);
+    final Optional<Lamp> result = service.findById(nonExistentId);
 
     // Assert
-    assertThat(result).isNull();
+    assertThat(result).isEmpty();
     verify(repository).findById(nonExistentId);
     verify(mapper, never()).toModel(any());
   }
@@ -190,7 +192,7 @@ class LampServiceTest {
   }
 
   @Test
-  void shouldReturnNullWhenUpdatingNonExistentLamp() {
+  void shouldThrowWhenUpdatingNonExistentLamp() {
     // Arrange
     final UUID nonExistentId = UUID.randomUUID();
     final Lamp updateData = new Lamp();
@@ -198,11 +200,9 @@ class LampServiceTest {
 
     when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-    // Act
-    final Lamp result = service.update(nonExistentId, updateData);
-
-    // Assert
-    assertThat(result).isNull();
+    // Act & Assert
+    assertThatThrownBy(() -> service.update(nonExistentId, updateData))
+        .isInstanceOf(LampNotFoundException.class);
     verify(repository).findById(nonExistentId);
     verify(repository, never()).save(any());
   }
@@ -214,25 +214,22 @@ class LampServiceTest {
     when(repository.save(testEntity)).thenReturn(testEntity);
 
     // Act
-    final boolean result = service.delete(testId);
+    service.delete(testId);
 
     // Assert
-    assertThat(result).isTrue();
     verify(repository).findById(testId);
     verify(repository).save(any(LampEntity.class));
   }
 
   @Test
-  void shouldReturnFalseWhenDeletingNonExistentLamp() {
+  void shouldThrowWhenDeletingNonExistentLamp() {
     // Arrange
     final UUID nonExistentId = UUID.randomUUID();
     when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-    // Act
-    final boolean result = service.delete(nonExistentId);
-
-    // Assert
-    assertThat(result).isFalse();
+    // Act & Assert
+    assertThatThrownBy(() -> service.delete(nonExistentId))
+        .isInstanceOf(LampNotFoundException.class);
     verify(repository).findById(nonExistentId);
     verify(repository, never()).save(any());
   }

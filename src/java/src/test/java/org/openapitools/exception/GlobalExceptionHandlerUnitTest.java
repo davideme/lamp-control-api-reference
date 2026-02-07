@@ -2,6 +2,7 @@ package org.openapitools.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openapitools.model.Error;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,16 @@ class GlobalExceptionHandlerUnitTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getError()).isEqualTo("INVALID_ARGUMENT");
+  }
+
+  @Test
+  void handleLampNotFoundException_ShouldReturnNotFound() {
+    LampNotFoundException ex = new LampNotFoundException(UUID.randomUUID());
+
+    ResponseEntity<Void> response = handler.handleLampNotFoundException(ex);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThat(response.getBody()).isNull();
   }
 
   @Test

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import org.openapitools.config.OnNoDatabaseUrlCondition;
 import org.openapitools.entity.LampEntity;
 import org.openapitools.repository.LampRepository;
@@ -129,7 +128,7 @@ public class InMemoryLampRepository implements LampRepository {
     return lamps.values().stream()
         .filter(lamp -> lamp.getDeletedAt() == null)
         .filter(lamp -> lamp.getStatus().equals(isOn))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
@@ -137,7 +136,7 @@ public class InMemoryLampRepository implements LampRepository {
     return lamps.values().stream()
         .filter(lamp -> lamp.getDeletedAt() == null)
         .sorted(Comparator.comparing(LampEntity::getCreatedAt))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override

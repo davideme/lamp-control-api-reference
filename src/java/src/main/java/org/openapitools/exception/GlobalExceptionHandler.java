@@ -71,6 +71,17 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handle lamp not found exceptions.
+   *
+   * @param ex the lamp not found exception
+   * @return 404 Not Found
+   */
+  @ExceptionHandler(LampNotFoundException.class)
+  public ResponseEntity<Void> handleLampNotFoundException(final LampNotFoundException ex) {
+    return ResponseEntity.notFound().build();
+  }
+
+  /**
    * Handle illegal argument exceptions (e.g., invalid UUID format).
    *
    * @param ex the illegal argument exception

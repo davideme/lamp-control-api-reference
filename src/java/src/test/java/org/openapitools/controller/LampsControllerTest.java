@@ -1,6 +1,7 @@
 package org.openapitools.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -8,9 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openapitools.exception.LampNotFoundException;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
@@ -65,7 +68,7 @@ class LampsControllerTest {
   @Test
   void getLamp_WithValidId_ShouldReturnLamp() throws Exception {
     // Given
-    when(lampService.findById(testLampId)).thenReturn(testLamp);
+    when(lampService.findById(testLampId)).thenReturn(Optional.of(testLamp));
 
     // When & Then
     MvcResult result =
@@ -85,7 +88,7 @@ class LampsControllerTest {
   @Test
   void getLamp_WithNonExistentId_ShouldReturn404() throws Exception {
     // Given
-    when(lampService.findById(testLampId)).thenReturn(null);
+    when(lampService.findById(testLampId)).thenReturn(Optional.empty());
 
     // When & Then
     MvcResult result =
@@ -172,7 +175,8 @@ class LampsControllerTest {
     LampUpdate lampUpdate = new LampUpdate();
     lampUpdate.setStatus(false);
 
-    when(lampService.update(any(UUID.class), any(Lamp.class))).thenReturn(null);
+    when(lampService.update(any(UUID.class), any(Lamp.class)))
+        .thenThrow(new LampNotFoundException(testLampId));
 
     // When & Then
     MvcResult result =
@@ -190,8 +194,7 @@ class LampsControllerTest {
 
   @Test
   void deleteLamp_WithValidId_ShouldDelete() throws Exception {
-    // Given
-    when(lampService.delete(testLampId)).thenReturn(true);
+    // Given — delete is void, no mock setup needed
 
     // When & Then
     MvcResult result =
@@ -206,7 +209,7 @@ class LampsControllerTest {
   @Test
   void deleteLamp_WithNonExistentId_ShouldReturn404() throws Exception {
     // Given
-    when(lampService.delete(testLampId)).thenReturn(false);
+    doThrow(new LampNotFoundException(testLampId)).when(lampService).delete(testLampId);
 
     // When & Then
     MvcResult result =
