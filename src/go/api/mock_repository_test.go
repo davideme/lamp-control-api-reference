@@ -70,11 +70,12 @@ func (mr *MockLampRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // Exists mocks base method.
-func (m *MockLampRepository) Exists(ctx context.Context, id string) bool {
+func (m *MockLampRepository) Exists(ctx context.Context, id string) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Exists", ctx, id)
 	ret0, _ := ret[0].(bool)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Exists indicates an expected call of Exists.

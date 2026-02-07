@@ -30,7 +30,7 @@ type LampRepository interface {
 	List(ctx context.Context) ([]*entities.LampEntity, error)
 
 	// Exists checks if a lamp exists in the repository
-	Exists(ctx context.Context, id string) bool
+	Exists(ctx context.Context, id string) (bool, error)
 }
 
 // InMemoryLampRepository implements LampRepository using an in-memory map
@@ -125,11 +125,11 @@ func (r *InMemoryLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 }
 
 // Exists checks if a lamp exists in the repository
-func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) bool {
+func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) (bool, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
 	_, exists := r.lamps[id]
 
-	return exists
+	return exists, nil
 }

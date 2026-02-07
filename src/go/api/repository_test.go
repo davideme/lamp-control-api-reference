@@ -217,7 +217,10 @@ func TestInMemoryLampRepository_Delete(t *testing.T) {
 	}
 
 	// Verify lamp exists
-	exists := repo.Exists(ctx, lamp.ID.String())
+	exists, err := repo.Exists(ctx, lamp.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if !exists {
 		t.Error("Lamp should exist before deletion")
 	}
@@ -229,7 +232,10 @@ func TestInMemoryLampRepository_Delete(t *testing.T) {
 	}
 
 	// Verify lamp no longer exists
-	exists = repo.Exists(ctx, lamp.ID.String())
+	exists, err = repo.Exists(ctx, lamp.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if exists {
 		t.Error("Lamp should not exist after deletion")
 	}
@@ -333,19 +339,25 @@ func TestInMemoryLampRepository_Exists(t *testing.T) {
 	}
 
 	// Test non-existent lamp
-	exists := repo.Exists(ctx, lamp.ID.String())
+	exists, err := repo.Exists(ctx, lamp.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if exists {
 		t.Error("Exists should return false for non-existent lamp")
 	}
 
 	// Create lamp
-	err := repo.Create(ctx, lamp)
+	err = repo.Create(ctx, lamp)
 	if err != nil {
 		t.Fatalf("Create failed: %v", err)
 	}
 
 	// Test existing lamp
-	exists = repo.Exists(ctx, lamp.ID.String())
+	exists, err = repo.Exists(ctx, lamp.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if !exists {
 		t.Error("Exists should return true for existing lamp")
 	}
@@ -357,7 +369,10 @@ func TestInMemoryLampRepository_Exists(t *testing.T) {
 	}
 
 	// Test deleted lamp
-	exists = repo.Exists(ctx, lamp.ID.String())
+	exists, err = repo.Exists(ctx, lamp.ID.String())
+	if err != nil {
+		t.Fatalf("Exists failed: %v", err)
+	}
 	if exists {
 		t.Error("Exists should return false for deleted lamp")
 	}
@@ -464,7 +479,11 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 
 				// Check if a specific lamp exists
 				lampId := initialLamps[j%len(initialLamps)].ID.String()
-				exists := repo.Exists(ctx, lampId)
+				exists, existsErr := repo.Exists(ctx, lampId)
+				if existsErr != nil {
+					t.Errorf("Exists failed for lamp %s: %v", lampId, existsErr)
+					return
+				}
 				if !exists {
 					t.Errorf("Expected lamp %s to exist", lampId)
 					return

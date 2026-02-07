@@ -18,6 +18,11 @@ import (
 	middleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
+// poolCloser is satisfied by pgxpool.Pool and other resources that need cleanup on shutdown.
+type poolCloser interface {
+	Close()
+}
+
 // HealthResponse represents the health check response
 type HealthResponse struct {
 	Status string `json:"status"`
@@ -70,9 +75,9 @@ func runMigrationsOnly(requireDB bool) {
 }
 
 // initializeRepository creates and initializes the lamp repository
-func initializeRepository(ctx context.Context, runMigrations bool, requireDB bool) (*api.LampAPI, interface{ Close() }) {
+func initializeRepository(ctx context.Context, runMigrations bool, requireDB bool) (*api.LampAPI, poolCloser) {
 	var lampAPI *api.LampAPI
-	var pool interface{ Close() }
+	var pool poolCloser
 	dbConfig := api.NewDatabaseConfigFromEnv()
 
 	if dbConfig != nil {
@@ -92,7 +97,7 @@ func initializeRepository(ctx context.Context, runMigrations bool, requireDB boo
 				if requireDB {
 					log.Fatal("Database migrations required but failed (--require-db flag set)")
 				}
-				log.Printf("Falling back to in-memory repository")
+				log.Printf("WARNING: Falling back to in-memory repository due to migration failure: %v", err)
 				lampAPI = api.NewLampAPI()
 
 				return lampAPI, nil
@@ -105,7 +110,7 @@ func initializeRepository(ctx context.Context, runMigrations bool, requireDB boo
 			if requireDB {
 				log.Fatal("PostgreSQL connection required but failed (--require-db flag set)")
 			}
-			log.Printf("Falling back to in-memory repository")
+			log.Printf("WARNING: Falling back to in-memory repository due to connection failure: %v", err)
 			lampAPI = api.NewLampAPI()
 		} else {
 			log.Printf("Successfully connected to PostgreSQL")

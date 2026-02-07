@@ -79,14 +79,11 @@ func TestDomainEntitySeparation(t *testing.T) {
 	// Create a domain entity
 	lampEntity := entities.NewLampEntity(true)
 
-	// Create a mapper
-	mapper := api.NewLampMapper()
-
 	// Convert entity to API model
-	apiModel := mapper.ToAPIModel(lampEntity)
+	apiModel := api.ToAPIModel(lampEntity)
 
 	// Convert API model back to entity
-	convertedEntity := mapper.ToEntity(apiModel)
+	convertedEntity := api.ToEntity(apiModel)
 
 	// Verify they have the same data
 	if lampEntity.ID != convertedEntity.ID {
