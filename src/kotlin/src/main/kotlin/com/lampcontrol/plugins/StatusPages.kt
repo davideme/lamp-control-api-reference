@@ -16,7 +16,7 @@ fun Application.configureStatusPages() {
         }
 
         exception<DomainException.InvalidId> { call, _ ->
-            call.respond(HttpStatusCode.NotFound, Error(error = "Lamp not found"))
+            call.respond(HttpStatusCode.BadRequest, Error(error = "Invalid lampId format"))
         }
 
         // Map numeric parse errors to 400 so malformed numeric query params (e.g. pageSize=null)
@@ -47,9 +47,10 @@ fun Application.configureStatusPages() {
                     Error(error = "Invalid numeric parameter"),
                 )
             } else {
-                // Fallback to the generic handler below by rethrowing so it is caught by the
-                // broader Exception mapping, which logs and returns a 500.
-                throw cause
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Error(error = "Invalid request"),
+                )
             }
         }
 

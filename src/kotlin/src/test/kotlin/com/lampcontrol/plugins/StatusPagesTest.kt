@@ -110,7 +110,7 @@ class StatusPagesTest {
         }
 
     @Test
-    fun `domain InvalidId exception returns 404`() =
+    fun `domain InvalidId exception returns 400`() =
         testApplication {
             application {
                 module()
@@ -120,7 +120,7 @@ class StatusPagesTest {
             }
 
             val res = client.get("/invalid-id")
-            assertEquals(HttpStatusCode.NotFound, res.status)
-            assertTrue(res.bodyAsText().contains("Lamp not found"))
+            assertEquals(HttpStatusCode.BadRequest, res.status)
+            assertTrue(res.bodyAsText().contains("Invalid lampId format"))
         }
 }

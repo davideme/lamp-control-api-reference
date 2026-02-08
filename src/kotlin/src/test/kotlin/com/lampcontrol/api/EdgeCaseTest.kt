@@ -91,9 +91,9 @@ class EdgeCaseTest {
                 module()
             }
 
-            // Test with special characters in path
+            // Test with special characters in path — invalid UUID format returns 400
             val response = client.get("/v1/lamps/invalid%20id%20with%20spaces")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
 
     @Test

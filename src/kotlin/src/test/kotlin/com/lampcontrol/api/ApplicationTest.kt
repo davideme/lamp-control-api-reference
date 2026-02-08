@@ -91,13 +91,26 @@ class ApplicationTest {
         }
 
     @Test
-    fun testGetNonExistentLamp() =
+    fun testGetLampWithInvalidId() =
         testApplication {
             application {
                 module()
             }
 
             client.get("/v1/lamps/non-existent-id").apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
+        }
+
+    @Test
+    fun testGetNonExistentLamp() =
+        testApplication {
+            application {
+                module()
+            }
+
+            client.get("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447").apply {
                 assertEquals(HttpStatusCode.NotFound, status)
                 assertTrue(bodyAsText().contains("Lamp not found"))
             }
@@ -140,7 +153,7 @@ class ApplicationTest {
         }
 
     @Test
-    fun testUpdateNonExistentLamp() =
+    fun testUpdateLampWithInvalidId() =
         testApplication {
             application {
                 module()
@@ -148,6 +161,23 @@ class ApplicationTest {
 
             val lampUpdate = LampUpdate(status = false)
             client.put("/v1/lamps/non-existent-id") {
+                contentType(ContentType.Application.Json)
+                setBody(json.encodeToString(lampUpdate))
+            }.apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
+        }
+
+    @Test
+    fun testUpdateNonExistentLamp() =
+        testApplication {
+            application {
+                module()
+            }
+
+            val lampUpdate = LampUpdate(status = false)
+            client.put("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447") {
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(lampUpdate))
             }.apply {
@@ -187,13 +217,26 @@ class ApplicationTest {
         }
 
     @Test
-    fun testDeleteNonExistentLamp() =
+    fun testDeleteLampWithInvalidId() =
         testApplication {
             application {
                 module()
             }
 
             client.delete("/v1/lamps/non-existent-id").apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
+        }
+
+    @Test
+    fun testDeleteNonExistentLamp() =
+        testApplication {
+            application {
+                module()
+            }
+
+            client.delete("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447").apply {
                 assertEquals(HttpStatusCode.NotFound, status)
                 assertTrue(bodyAsText().contains("Lamp not found"))
             }
