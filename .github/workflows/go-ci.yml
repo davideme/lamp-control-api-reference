@@ -87,40 +87,9 @@ jobs:
           go mod download
           go mod tidy
 
-      - name: Run tests
+      - name: Run tests and check coverage
         working-directory: src/go
-        run: go test -v -race -coverprofile=coverage.out ./...
-
-      - name: Check code coverage
-        working-directory: src/go
-        run: |
-          echo "Checking code coverage..."
-
-          # Filter out generated files and main packages from coverage
-          echo "Filtering out generated files from coverage calculation..."
-          grep -vE '(\.gen\.go:|/queries/|/main\.go:)' coverage.out > coverage.filtered.out || true
-
-          if [ -s coverage.filtered.out ]; then
-            mv coverage.filtered.out coverage.out
-          else
-            echo "⚠️  Warning: No non-generated/non-main files found"
-          fi
-
-          coverage=$(go tool cover -func=coverage.out | grep total: | \
-            awk '{print $3}' | sed 's/%//')
-          echo "Current coverage (excluding generated files): ${coverage}%"
-
-          # Check if coverage is at least 80%
-          meets_threshold=$(awk -v cov="$coverage" -v thresh="80" \
-            'BEGIN {print (cov >= thresh)}')
-
-          if [ "$meets_threshold" -eq 0 ]; then
-            echo "❌ Code coverage is ${coverage}%, below required 80%"
-            echo "Please add more tests to increase coverage."
-            exit 1
-          else
-            echo "✅ Code coverage is ${coverage}%, meets required 80%"
-          fi
+        run: make coverage-check
 
       - name: Generate coverage report
         working-directory: src/go
