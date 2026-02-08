@@ -21,9 +21,9 @@ if [ ! -f "$COVERAGE_FILE" ]; then
     exit 1
 fi
 
-# Filter out generated files from coverage (files ending with .gen.go)
-echo "Filtering out generated files from coverage calculation..."
-grep -v "\.gen\.go:" "$COVERAGE_FILE" > "${COVERAGE_FILE}.filtered" || true
+# Filter out generated files and query files from coverage
+echo "Filtering out generated files and queries from coverage calculation..."
+grep -vE '(\.gen\.go:|/queries/)' "$COVERAGE_FILE" > "${COVERAGE_FILE}.filtered" || true
 
 # Also filter out main functions/packages which are hard to unit test
 echo "Filtering out main packages from coverage calculation..."
