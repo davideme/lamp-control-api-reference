@@ -1,6 +1,7 @@
 package com.lampcontrol.service
 
 import com.lampcontrol.api.models.*
+import com.lampcontrol.domain.DomainException
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
 import kotlinx.coroutines.test.runTest
@@ -48,10 +49,27 @@ class LampServiceTest {
         }
 
     @Test
-    fun `getLampById should return null for non-existent lamp`() =
+    fun `getLampById should throw InvalidId for invalid UUID`() =
         runTest {
-            val lamp = lampService.getLampById("non-existent-id")
-            assertNull(lamp)
+            assertThrows<DomainException.InvalidId> {
+                lampService.getLampById("non-existent-id")
+            }
+        }
+
+    @Test
+    fun `getLampById should throw NotFound for non-existent lamp`() =
+        runTest {
+            assertThrows<DomainException.NotFound> {
+                lampService.getLampById("01ad9dac-6699-436d-9516-d473a6e62447")
+            }
+        }
+
+    @Test
+    fun `getLampById should throw IllegalArgumentException for blank ID`() =
+        runTest {
+            assertThrows<IllegalArgumentException> {
+                lampService.getLampById("")
+            }
         }
 
     @Test
@@ -60,17 +78,25 @@ class LampServiceTest {
             val createdLamp = lampService.createLamp(LampCreate(status = true))
             val retrievedLamp = lampService.getLampById(createdLamp.id.toString())
 
-            assertNotNull(retrievedLamp)
             assertEquals(createdLamp, retrievedLamp)
         }
 
     @Test
-    fun `updateLamp should return null for non-existent lamp`() =
+    fun `updateLamp should throw InvalidId for invalid UUID`() =
         runTest {
             val lampUpdate = LampUpdate(status = false)
-            val updatedLamp = lampService.updateLamp("non-existent-id", lampUpdate)
+            assertThrows<DomainException.InvalidId> {
+                lampService.updateLamp("non-existent-id", lampUpdate)
+            }
+        }
 
-            assertNull(updatedLamp)
+    @Test
+    fun `updateLamp should throw NotFound for non-existent lamp`() =
+        runTest {
+            val lampUpdate = LampUpdate(status = false)
+            assertThrows<DomainException.NotFound> {
+                lampService.updateLamp("01ad9dac-6699-436d-9516-d473a6e62447", lampUpdate)
+            }
         }
 
     @Test
@@ -80,16 +106,24 @@ class LampServiceTest {
             val lampUpdate = LampUpdate(status = false)
             val updatedLamp = lampService.updateLamp(createdLamp.id.toString(), lampUpdate)
 
-            assertNotNull(updatedLamp)
-            assertEquals(createdLamp.id, updatedLamp!!.id)
+            assertEquals(createdLamp.id, updatedLamp.id)
             assertEquals(false, updatedLamp.status)
         }
 
     @Test
-    fun `deleteLamp should return false for non-existent lamp`() =
+    fun `deleteLamp should throw InvalidId for invalid UUID`() =
         runTest {
-            val deleted = lampService.deleteLamp("non-existent-id")
-            assertFalse(deleted)
+            assertThrows<DomainException.InvalidId> {
+                lampService.deleteLamp("non-existent-id")
+            }
+        }
+
+    @Test
+    fun `deleteLamp should throw NotFound for non-existent lamp`() =
+        runTest {
+            assertThrows<DomainException.NotFound> {
+                lampService.deleteLamp("01ad9dac-6699-436d-9516-d473a6e62447")
+            }
         }
 
     @Test
@@ -99,15 +133,25 @@ class LampServiceTest {
             val lampId = createdLamp.id.toString()
 
             assertTrue(lampService.lampExists(lampId))
-            assertTrue(lampService.deleteLamp(lampId))
+            lampService.deleteLamp(lampId)
             assertFalse(lampService.lampExists(lampId))
-            assertNull(lampService.getLampById(lampId))
+            assertThrows<DomainException.NotFound> {
+                lampService.getLampById(lampId)
+            }
         }
 
     @Test
-    fun `lampExists should return false for non-existent lamp`() =
+    fun `lampExists should throw InvalidId for invalid UUID`() =
         runTest {
-            assertFalse(lampService.lampExists("non-existent-id"))
+            assertThrows<DomainException.InvalidId> {
+                lampService.lampExists("non-existent-id")
+            }
+        }
+
+    @Test
+    fun `lampExists should return false for non-existent valid UUID`() =
+        runTest {
+            assertFalse(lampService.lampExists("01ad9dac-6699-436d-9516-d473a6e62447"))
         }
 
     @Test

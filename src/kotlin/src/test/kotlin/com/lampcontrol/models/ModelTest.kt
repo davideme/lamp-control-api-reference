@@ -1,22 +1,14 @@
 package com.lampcontrol.models
 
 import com.lampcontrol.api.models.*
-import com.lampcontrol.serialization.UUIDSerializer
+import com.lampcontrol.testutil.TestJson
 import java.util.UUID
 import kotlin.test.*
 import kotlinx.serialization.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
 import org.junit.jupiter.api.Test
 
 class ModelTest {
-    private val json =
-        Json {
-            serializersModule =
-                SerializersModule {
-                    contextual(UUID::class, UUIDSerializer)
-                }
-        }
+    private val json = TestJson.instance
 
     @Test
     fun `test Lamp model serialization`() {

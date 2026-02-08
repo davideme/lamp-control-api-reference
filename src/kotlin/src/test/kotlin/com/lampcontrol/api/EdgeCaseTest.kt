@@ -1,6 +1,7 @@
 package com.lampcontrol.api
 
 import com.lampcontrol.module
+import com.lampcontrol.testutil.TestJson
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
@@ -10,11 +11,7 @@ import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
 
 class EdgeCaseTest {
-    private val json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+    private val json = TestJson.instance
 
     @Test
     fun `test malformed JSON request`() =
@@ -55,13 +52,13 @@ class EdgeCaseTest {
                 module()
             }
 
-            // Test XML content type (not supported) - should return 400 Bad Request for content type mismatch
+            // Test XML content type (not supported) - returns 415 Unsupported Media Type
             val response =
                 client.post("/v1/lamps") {
                     contentType(ContentType.Application.Xml)
                     setBody("<lamp><status>true</status></lamp>")
                 }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
         }
 
     @Test

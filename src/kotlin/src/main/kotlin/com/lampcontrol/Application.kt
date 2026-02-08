@@ -1,5 +1,6 @@
 package com.lampcontrol
 
+import com.lampcontrol.config.OperationMode
 import com.lampcontrol.database.*
 import com.lampcontrol.plugins.*
 import io.ktor.server.application.Application
@@ -12,15 +13,17 @@ private val logger = LoggerFactory.getLogger("Application")
 private const val DEFAULT_PORT = 8080
 
 fun main(args: Array<String>) {
-    // Parse command line arguments
-    val mode = args.find { it.startsWith("--mode=") }?.substringAfter("=") ?: "serve-only"
+    val modeStr = args.find { it.startsWith("--mode=") }?.substringAfter("=") ?: "serve-only"
+    val mode = OperationMode.fromString(modeStr)
 
     when (mode) {
-        "migrate" -> runMigrationsOnly()
-        "serve" -> startServer(runMigrations = true)
-        "serve-only" -> startServer(runMigrations = false)
-        else -> {
-            logger.error("Invalid mode: $mode. Valid modes are: serve, migrate, serve-only")
+        OperationMode.MIGRATE -> runMigrationsOnly()
+        OperationMode.SERVE -> startServer(runMigrations = true)
+        OperationMode.SERVE_ONLY -> startServer(runMigrations = false)
+        null -> {
+            logger.error(
+                "Invalid mode: $modeStr. Valid modes are: ${OperationMode.entries.joinToString { it.cliValue }}",
+            )
             exitProcess(1)
         }
     }
