@@ -1,21 +1,17 @@
 package com.lampcontrol.plugins
 
 import com.lampcontrol.module
+import com.lampcontrol.testutil.TestJson
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.testing.testApplication
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 
 class PluginsTest {
-    private val json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+    private val json = TestJson.instance
 
     @Test
     fun `test application plugins configuration`() =

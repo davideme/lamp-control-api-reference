@@ -2,6 +2,7 @@
 
 package com.lampcontrol.plugins
 
+import com.lampcontrol.domain.DomainException
 import com.lampcontrol.module
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -91,5 +92,35 @@ class StatusPagesTest {
 
             val res = client.get("/breq")
             assertEquals(HttpStatusCode.BadRequest, res.status)
+        }
+
+    @Test
+    fun `domain NotFound exception returns 404`() =
+        testApplication {
+            application {
+                module()
+                routing {
+                    get("/not-found") { throw DomainException.NotFound("test-id") }
+                }
+            }
+
+            val res = client.get("/not-found")
+            assertEquals(HttpStatusCode.NotFound, res.status)
+            assertTrue(res.bodyAsText().contains("Lamp not found"))
+        }
+
+    @Test
+    fun `domain InvalidId exception returns 400`() =
+        testApplication {
+            application {
+                module()
+                routing {
+                    get("/invalid-id") { throw DomainException.InvalidId("bad-id") }
+                }
+            }
+
+            val res = client.get("/invalid-id")
+            assertEquals(HttpStatusCode.BadRequest, res.status)
+            assertTrue(res.bodyAsText().contains("Invalid lampId format"))
         }
 }

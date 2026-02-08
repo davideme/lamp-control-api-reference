@@ -2,30 +2,17 @@ package com.lampcontrol.api
 
 import com.lampcontrol.module
 import com.lampcontrol.api.models.*
-import com.lampcontrol.serialization.UUIDSerializer
+import com.lampcontrol.testutil.TestJson
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.testing.testApplication
-import java.util.UUID
 import kotlin.test.*
 import kotlinx.serialization.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
 import org.junit.jupiter.api.Test
 
 class ApplicationTest {
-    // Configure JSON with the same settings as the application
-    private val json =
-        Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-            serializersModule =
-                SerializersModule {
-                    contextual(UUID::class, UUIDSerializer)
-                }
-        }
+    private val json = TestJson.instance
 
     @Test
     fun testHealthEndpoint() =
@@ -65,7 +52,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, status)
                 // Response should be an object with `data` array per OpenAPI
                 val respJson = bodyAsText()
-                val parsed = json.decodeFromString<com.lampcontrol.api.models.ListLamps200Response>(respJson)
+                val parsed = json.decodeFromString<ListLamps200Response>(respJson)
                 assertTrue(parsed.data.isEmpty())
             }
         }
@@ -88,10 +75,9 @@ class ApplicationTest {
             assertEquals(HttpStatusCode.Created, createResponse.status)
             val createdLampJson = createResponse.bodyAsText()
             assertNotNull(createdLampJson)
-            println("DEBUG: Created lamp response: $createdLampJson")
 
             // Use proper JSON parsing instead of string manipulation
-            val createdLamp = json.decodeFromString<com.lampcontrol.api.models.Lamp>(createdLampJson)
+            val createdLamp = json.decodeFromString<Lamp>(createdLampJson)
             assertTrue(createdLamp.status)
 
             // Get the created lamp
@@ -99,10 +85,22 @@ class ApplicationTest {
             assertEquals(HttpStatusCode.OK, getResponse.status)
 
             val retrievedLampJson = getResponse.bodyAsText()
-            println("DEBUG: Retrieved lamp response: $retrievedLampJson")
-            val retrievedLamp = json.decodeFromString<com.lampcontrol.api.models.Lamp>(retrievedLampJson)
+            val retrievedLamp = json.decodeFromString<Lamp>(retrievedLampJson)
             assertTrue(retrievedLamp.status)
             assertEquals(createdLamp.id, retrievedLamp.id)
+        }
+
+    @Test
+    fun testGetLampWithInvalidId() =
+        testApplication {
+            application {
+                module()
+            }
+
+            client.get("/v1/lamps/non-existent-id").apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
         }
 
     @Test
@@ -112,7 +110,7 @@ class ApplicationTest {
                 module()
             }
 
-            client.get("/v1/lamps/non-existent-id").apply {
+            client.get("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447").apply {
                 assertEquals(HttpStatusCode.NotFound, status)
                 assertTrue(bodyAsText().contains("Lamp not found"))
             }
@@ -137,7 +135,7 @@ class ApplicationTest {
             val createdLampJson = createResponse.bodyAsText()
 
             // Use proper JSON parsing instead of string manipulation
-            val createdLamp = json.decodeFromString<com.lampcontrol.api.models.Lamp>(createdLampJson)
+            val createdLamp = json.decodeFromString<Lamp>(createdLampJson)
 
             // Update the lamp
             val lampUpdate = LampUpdate(status = false)
@@ -149,9 +147,26 @@ class ApplicationTest {
 
             assertEquals(HttpStatusCode.OK, updateResponse.status)
             val updatedLampJson = updateResponse.bodyAsText()
-            val updatedLamp = json.decodeFromString<com.lampcontrol.api.models.Lamp>(updatedLampJson)
+            val updatedLamp = json.decodeFromString<Lamp>(updatedLampJson)
             assertEquals(false, updatedLamp.status)
             assertEquals(createdLamp.id, updatedLamp.id)
+        }
+
+    @Test
+    fun testUpdateLampWithInvalidId() =
+        testApplication {
+            application {
+                module()
+            }
+
+            val lampUpdate = LampUpdate(status = false)
+            client.put("/v1/lamps/non-existent-id") {
+                contentType(ContentType.Application.Json)
+                setBody(json.encodeToString(lampUpdate))
+            }.apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
         }
 
     @Test
@@ -162,7 +177,7 @@ class ApplicationTest {
             }
 
             val lampUpdate = LampUpdate(status = false)
-            client.put("/v1/lamps/non-existent-id") {
+            client.put("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447") {
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(lampUpdate))
             }.apply {
@@ -190,7 +205,7 @@ class ApplicationTest {
             val createdLampJson = createResponse.bodyAsText()
 
             // Use proper JSON parsing instead of string manipulation
-            val createdLamp = json.decodeFromString<com.lampcontrol.api.models.Lamp>(createdLampJson)
+            val createdLamp = json.decodeFromString<Lamp>(createdLampJson)
 
             // Delete the lamp
             val deleteResponse = client.delete("/v1/lamps/${createdLamp.id}")
@@ -202,13 +217,26 @@ class ApplicationTest {
         }
 
     @Test
-    fun testDeleteNonExistentLamp() =
+    fun testDeleteLampWithInvalidId() =
         testApplication {
             application {
                 module()
             }
 
             client.delete("/v1/lamps/non-existent-id").apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+                assertTrue(bodyAsText().contains("Invalid lampId format"))
+            }
+        }
+
+    @Test
+    fun testDeleteNonExistentLamp() =
+        testApplication {
+            application {
+                module()
+            }
+
+            client.delete("/v1/lamps/01ad9dac-6699-436d-9516-d473a6e62447").apply {
                 assertEquals(HttpStatusCode.NotFound, status)
                 assertTrue(bodyAsText().contains("Lamp not found"))
             }
