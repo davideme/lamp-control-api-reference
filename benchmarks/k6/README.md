@@ -37,12 +37,22 @@ Edit `benchmarks/k6/services.json`:
 - `dbUrl`: Cloud Run URL for DB-backed deployment (no `/v1` suffix needed)
 - `cloudRunService`: Cloud Run service name for settings updates
 - `cloudRunRegion`: region (default `us-central1`)
+- `memorySetupCommand`: optional command run before memory pass for this service
+- `dbSetupCommand`: optional command run before DB pass for this service
 - `dbSeedCommand`: optional shell command to reset+seed DB before each DB run
 
 Example `dbSeedCommand`:
 
 ```bash
 ./scripts/seed-benchmark-db.sh typescript 10000
+```
+
+If memory and DB use the same URL with an env-var mode switch, set both URLs equal and use setup commands.
+Example:
+
+```bash
+gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars STORAGE_MODE=memory
+gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars STORAGE_MODE=db
 ```
 
 ## 2) Validate or apply Cloud Run parity settings

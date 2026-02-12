@@ -184,6 +184,16 @@ function validateService(service) {
   }
 }
 
+function getPassSetupCommand(service, passName) {
+  if (passName === 'memory') {
+    return service.memorySetupCommand || '';
+  }
+  if (passName === 'db') {
+    return service.dbSetupCommand || '';
+  }
+  return '';
+}
+
 function buildK6Env({ config, service, baseUrl, mode, targetRps, duration }) {
   const env = { ...process.env };
   env.RUN_MODE = mode;
@@ -362,6 +372,11 @@ async function main() {
       const baseUrl = passName === 'memory' ? service.memoryUrl : service.dbUrl;
       if (!baseUrl) {
         throw new Error(`Missing ${passName} URL for service ${service.name}`);
+      }
+
+      const passSetupCommand = getPassSetupCommand(service, passName);
+      if (passSetupCommand) {
+        runShell(passSetupCommand);
       }
 
       const serviceRuns = [];
