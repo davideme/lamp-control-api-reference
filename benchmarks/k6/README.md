@@ -41,10 +41,10 @@ Edit `benchmarks/k6/services.json`:
 - `dbSetupCommand`: optional command run before DB pass for this service
 - `dbSeedCommand`: optional shell command to reset+seed DB before each DB run
 
-Example `dbSeedCommand`:
+`dbSeedCommand` can use a shared `BENCHMARK_DATABASE_URL` env var. The current `services.json` is already configured with:
 
 ```bash
-./scripts/seed-benchmark-db.sh typescript 10000
+psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
 ```
 
 If memory and DB use the same URL with an env-var mode switch, set both URLs equal and use setup commands.
@@ -55,7 +55,53 @@ gcloud run services update typescript-lamp-control-api --region europe-west1 --u
 gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars STORAGE_MODE=db
 ```
 
-## 2) Validate or apply Cloud Run parity settings
+Before running benchmarks, export your DB URL:
+
+```bash
+export BENCHMARK_DATABASE_URL='postgresql://<user>:<pass>@<host>:5432/<database>?sslmode=require'
+```
+
+## 2) Run from a GCP VM (recommended)
+
+Create a runner VM in the same region and install required tools:
+
+```bash
+gcloud compute instances create lamp-bench-runner \
+  --project=<YOUR_PROJECT_ID> \
+  --zone=europe-west1-b \
+  --machine-type=e2-standard-4 \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=30GB \
+  --metadata=startup-script='#!/usr/bin/env bash
+set -euxo pipefail
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y ca-certificates curl gnupg git jq postgresql-client
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+
+curl -fsSL https://dl.k6.io/key.gpg | gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" > /etc/apt/sources.list.d/k6.list
+apt-get update
+apt-get install -y k6
+
+node --version
+npm --version
+k6 version
+psql --version
+'
+```
+
+Then connect:
+
+```bash
+gcloud compute ssh lamp-bench-runner --project=<YOUR_PROJECT_ID> --zone=europe-west1-b
+```
+
+## 3) Validate or apply Cloud Run parity settings
 
 Dry run (prints commands):
 
@@ -71,7 +117,7 @@ node benchmarks/k6/configure-cloud-run.js --project <gcp-project-id> --execute
 
 Settings come from `benchmarks/k6/config.json` under `cloudRun`.
 
-## 3) Run benchmark
+## 4) Run benchmark
 
 Run both passes (`memory`,`db`) with settings from `config.json`:
 
@@ -91,7 +137,7 @@ Outputs:
 - Structured run report: `benchmarks/results/run-report.json`
 - Ranked markdown summary: `benchmarks/results/summary.md`
 
-## 4) Rebuild summary only
+## 5) Rebuild summary only
 
 ```bash
 node benchmarks/k6/generate-summary.js benchmarks/results/run-report.json benchmarks/results/summary.md
