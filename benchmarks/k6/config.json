@@ -1,0 +1,46 @@
+{
+  "basePath": "/v1",
+  "passes": ["memory", "db"],
+  "iterationsPerPass": 2,
+  "randomizeServiceOrder": true,
+  "warmup": {
+    "duration": "60s",
+    "rps": 20
+  },
+  "fixed": {
+    "duration": "180s",
+    "rps": 80
+  },
+  "stress": {
+    "stepDuration": "60s",
+    "rpsSteps": [80, 120, 160, 200]
+  },
+  "extreme": {
+    "enabled": true,
+    "duration": "60s",
+    "rps": 1000,
+    "runPerIteration": false
+  },
+  "slo": {
+    "p95Ms": 300,
+    "errorRate": 0.01
+  },
+  "workload": {
+    "listPercent": 50,
+    "getPercent": 20,
+    "createPercent": 20,
+    "updatePercent": 7,
+    "deletePercent": 3,
+    "pageSize": 25,
+    "seedFetchPages": 10,
+    "seedPageSize": 100
+  },
+  "cloudRun": {
+    "maxInstances": 1,
+    "minInstances": 1,
+    "concurrency": 80,
+    "cpu": "1",
+    "memory": "512Mi",
+    "timeout": "60s"
+  }
+}

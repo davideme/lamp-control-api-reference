@@ -1,0 +1,50 @@
+[
+  {
+    "name": "typescript",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  },
+  {
+    "name": "python",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  },
+  {
+    "name": "java",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  },
+  {
+    "name": "csharp",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  },
+  {
+    "name": "go",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  },
+  {
+    "name": "kotlin",
+    "memoryUrl": "",
+    "dbUrl": "",
+    "cloudRunService": "",
+    "cloudRunRegion": "us-central1",
+    "dbSeedCommand": ""
+  }
+]
