@@ -2,6 +2,12 @@
 
 This document summarizes how each implementation under `src/` decides whether to use PostgreSQL and which environment variable formats it expects.
 
+Synced with `main` and re-validated against current sources on 2026-02-13.
+
+## Cross-Implementation Note
+
+- `USE_POSTGRES` should not be used as a PostgreSQL mode switch. Current runtime code paths in `src/` use connection-related variables (for example `DATABASE_URL`, JDBC URL, or `ConnectionStrings__LampControl`) to decide storage backend.
+
 ## TypeScript (`src/typescript`)
 
 Source of truth:
