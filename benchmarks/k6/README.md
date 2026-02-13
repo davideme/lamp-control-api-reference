@@ -50,18 +50,24 @@ psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTA
 
 Set `dbSeedCommand` in a service entry only when that service needs a custom seed/reset flow.
 
-If memory and DB use the same URL with an env-var mode switch, set both URLs equal and use setup commands.
-Example:
+If memory and DB use the same URL, run passes sequentially and toggle env vars via setup commands.
+For this repository, DB mode is enabled by connection settings (for example `DATABASE_URL` or language-specific equivalents).
+Example (TypeScript/Go/Python/Kotlin):
 
 ```bash
-gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars STORAGE_MODE=memory
-gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars STORAGE_MODE=db
+gcloud run services update typescript-lamp-control-api --region europe-west1 --remove-env-vars DATABASE_URL
+gcloud run services update typescript-lamp-control-api --region europe-west1 --update-env-vars DATABASE_URL="$BENCHMARK_DATABASE_URL"
 ```
 
-Before running benchmarks, export your DB URL:
+Before running benchmarks, export required variables:
 
 ```bash
+export GOOGLE_CLOUD_PROJECT='<your-project-id>'
 export BENCHMARK_DATABASE_URL='postgresql://<user>:<pass>@<host>:5432/<database>?sslmode=require'
+export BENCHMARK_JDBC_DATABASE_URL='jdbc:postgresql://<host>:5432/<database>'
+export BENCHMARK_DB_USER='<db-user>'
+export BENCHMARK_DB_PASSWORD='<db-password>'
+export BENCHMARK_CSHARP_CONNECTION_STRING='Host=<host>;Port=5432;Database=<database>;Username=<db-user>;Password=<db-password>'
 ```
 
 ## 2) Run from a GCP VM (recommended)
