@@ -91,6 +91,12 @@ docker exec -i lamp-control-api-reference-postgres-1 psql -U lampuser -d lampcon
 #### Configuration
 
 The application automatically uses PostgreSQL when a connection string is configured.
+Configuration precedence is:
+1. `ConnectionStrings:LampControl` (appsettings/user-secrets/environment binding)
+2. `ConnectionStrings__LampControl` (explicit environment variable)
+3. `DATABASE_URL` (`postgresql://...` or `postgres://...` fallback)
+
+`DATABASE_URL` parsing is strict and fails fast with a clear startup error if the value is invalid or unsupported.
 
 **Option 1: appsettings.json** (Development)
 
@@ -113,7 +119,17 @@ export ConnectionStrings__LampControl="Host=db.production.com;Port=5432;Database
 dotnet run
 ```
 
-**Option 3: User Secrets** (Development)
+**Option 3: DATABASE_URL fallback** (Production/Platform-provided URLs)
+
+```bash
+# PostgreSQL URL format (supported schemes: postgresql:// and postgres://)
+export DATABASE_URL="postgresql://lampuser:lamppass@localhost:5432/lampcontrol?sslmode=disable"
+
+# Run application
+dotnet run
+```
+
+**Option 4: User Secrets** (Development)
 
 ```bash
 # Set connection string in user secrets
