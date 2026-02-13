@@ -8,7 +8,7 @@ function parseArgs(argv) {
   const args = {
     services: path.join('benchmarks', 'k6', 'services.json'),
     config: path.join('benchmarks', 'k6', 'config.json'),
-    project: process.env.GOOGLE_CLOUD_PROJECT || '',
+    project: '',
     execute: false,
   };
 
@@ -34,7 +34,7 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Usage:\n  node benchmarks/k6/configure-cloud-run.js [--project my-project] [--execute]\n\nBy default this script prints commands only. Add --execute to run them.`);
+  console.log(`Usage:\n  node benchmarks/k6/configure-cloud-run.js [--project my-project] [--execute]\n\nProject is resolved in this order: --project, cloudRun.projectId, cloudRun.projectNumber, GOOGLE_CLOUD_PROJECT.\nBy default this script prints commands only. Add --execute to run them.`);
 }
 
 function readJson(filePath) {
@@ -70,16 +70,31 @@ function validateCloudRunConfig(cloudRun) {
   }
 }
 
+function resolveProject(argsProject, cloudRun) {
+  if (argsProject && argsProject.trim()) {
+    return argsProject.trim();
+  }
+  if (cloudRun.projectId && String(cloudRun.projectId).trim()) {
+    return String(cloudRun.projectId).trim();
+  }
+  if (cloudRun.projectNumber && String(cloudRun.projectNumber).trim()) {
+    return String(cloudRun.projectNumber).trim();
+  }
+  if (process.env.GOOGLE_CLOUD_PROJECT && process.env.GOOGLE_CLOUD_PROJECT.trim()) {
+    return process.env.GOOGLE_CLOUD_PROJECT.trim();
+  }
+  throw new Error(
+    "Missing project configuration. Set cloudRun.projectId (or projectNumber) in config.json, or pass --project, or set GOOGLE_CLOUD_PROJECT."
+  );
+}
+
 function main() {
   const args = parseArgs(process.argv);
-  if (!args.project) {
-    throw new Error('Missing --project (or set GOOGLE_CLOUD_PROJECT)');
-  }
-
   const services = readJson(args.services);
   const config = readJson(args.config);
   const cloudRun = config.cloudRun || {};
   validateCloudRunConfig(cloudRun);
+  const project = resolveProject(args.project, cloudRun);
 
   for (const service of services) {
     if (!service.cloudRunService) {
@@ -94,7 +109,7 @@ function main() {
       'update',
       service.cloudRunService,
       '--project',
-      args.project,
+      project,
       '--region',
       region,
       '--max-instances',

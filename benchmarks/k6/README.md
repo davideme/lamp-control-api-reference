@@ -115,16 +115,17 @@ gcloud compute ssh lamp-bench-runner --project=<YOUR_PROJECT_ID> --zone=europe-w
 Dry run (prints commands):
 
 ```bash
-node benchmarks/k6/configure-cloud-run.js --project <gcp-project-id>
+node benchmarks/k6/configure-cloud-run.js
 ```
 
 Apply settings:
 
 ```bash
-node benchmarks/k6/configure-cloud-run.js --project <gcp-project-id> --execute
+node benchmarks/k6/configure-cloud-run.js --execute
 ```
 
 Settings come from `benchmarks/k6/config.json` under `cloudRun`.
+Project resolution order is: `--project`, `cloudRun.projectId`, `cloudRun.projectNumber`, `GOOGLE_CLOUD_PROJECT`.
 
 ## 4) Run benchmark
 
