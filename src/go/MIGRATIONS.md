@@ -123,9 +123,10 @@ A "dirty" migration means golang-migrate detected that a migration started but d
 
 ### Connection String Format
 
-golang-migrate requires PostgreSQL connection strings in URL format:
+golang-migrate requires PostgreSQL connection strings in URL format. The `database/postgres` driver used by this service registers both `postgres://...` and `postgresql://...` schemes:
 ```
 postgres://user:password@host:port/database?sslmode=disable
+postgresql://user:password@host:port/database?sslmode=disable
 ```
 
 The application automatically converts component-based connection strings to this format.
