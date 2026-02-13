@@ -83,6 +83,12 @@ function runShell(command, env) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 async function httpJson(method, url, body, authHeader) {
   const headers = { 'Content-Type': 'application/json' };
   if (authHeader) {
@@ -106,6 +112,34 @@ async function httpJson(method, url, body, authHeader) {
   }
 
   return { response, body: parsed, text };
+}
+
+async function runPrecheckWithRetry(baseUrl, basePath, authHeader, options = {}) {
+  const retries = Number.isFinite(options.retries) ? options.retries : 3;
+  const initialDelayMs = Number.isFinite(options.initialDelayMs) ? options.initialDelayMs : 1000;
+  const maxDelayMs = Number.isFinite(options.maxDelayMs) ? options.maxDelayMs : 5000;
+  let attempt = 0;
+  let delayMs = initialDelayMs;
+  let lastError = null;
+
+  while (attempt <= retries) {
+    attempt += 1;
+    try {
+      await precheckCrud(baseUrl, basePath, authHeader);
+      return;
+    } catch (error) {
+      lastError = error;
+      const message = error && error.message ? error.message : String(error);
+      if (attempt > retries) {
+        break;
+      }
+      console.warn(`[precheck] attempt ${attempt}/${retries + 1} failed: ${message}. Retrying in ${delayMs}ms...`);
+      await sleep(delayMs);
+      delayMs = Math.min(delayMs * 2, maxDelayMs);
+    }
+  }
+
+  throw lastError || new Error('Precheck failed after retries');
 }
 
 async function precheckCrud(baseUrl, basePath, authHeader) {
@@ -139,26 +173,41 @@ async function precheckCrud(baseUrl, basePath, authHeader) {
   }
 }
 
+function metricValues(metric) {
+  if (!metric) {
+    return null;
+  }
+  if (metric.values && typeof metric.values === 'object') {
+    return metric.values;
+  }
+  return metric;
+}
+
 function parseMetric(summary, name) {
   const metric = summary.metrics[name];
-  if (!metric || !metric.values) {
+  const values = metricValues(metric);
+  if (!values) {
     return null;
   }
   return {
-    avg: metric.values.avg ?? null,
-    p95: metric.values['p(95)'] ?? null,
-    p99: metric.values['p(99)'] ?? null,
-    min: metric.values.min ?? null,
-    max: metric.values.max ?? null,
+    avg: values.avg ?? null,
+    p95: values['p(95)'] ?? null,
+    p99: values['p(99)'] ?? null,
+    min: values.min ?? null,
+    max: values.max ?? null,
   };
 }
 
 function parseRate(summary, name) {
   const metric = summary.metrics[name];
-  if (!metric || !metric.values) {
+  const values = metricValues(metric);
+  if (!values) {
     return null;
   }
-  return metric.values.rate ?? null;
+  if (values.rate != null) {
+    return values.rate;
+  }
+  return values.value ?? null;
 }
 
 function median(numbers) {
@@ -244,14 +293,15 @@ function runK6Phase({ scenarioPath, outputFile, env }) {
 }
 
 function aggregatePass(serviceRuns) {
-  const fixedP95 = median(serviceRuns.map((r) => r.fixed.duration?.p95));
-  const fixedP99 = median(serviceRuns.map((r) => r.fixed.duration?.p99));
-  const fixedAvg = median(serviceRuns.map((r) => r.fixed.duration?.avg));
-  const fixedErrorRate = median(serviceRuns.map((r) => r.fixed.errorRate));
-  const maxStableRps = median(serviceRuns.map((r) => r.stress.maxStableRps));
+  const successfulRuns = serviceRuns.filter((r) => !r.failed);
+  const fixedP95 = median(successfulRuns.map((r) => r.fixed.duration?.p95));
+  const fixedP99 = median(successfulRuns.map((r) => r.fixed.duration?.p99));
+  const fixedAvg = median(successfulRuns.map((r) => r.fixed.duration?.avg));
+  const fixedErrorRate = median(successfulRuns.map((r) => r.fixed.errorRate));
+  const maxStableRps = median(successfulRuns.map((r) => r.stress.maxStableRps));
 
   let extreme = null;
-  const extremeRuns = serviceRuns.filter((r) => r.extreme);
+  const extremeRuns = successfulRuns.filter((r) => r.extreme);
   if (extremeRuns.length > 0) {
     extreme = {
       p95: median(extremeRuns.map((r) => r.extreme.duration?.p95)),
@@ -262,6 +312,8 @@ function aggregatePass(serviceRuns) {
   }
 
   return {
+    successfulIterations: successfulRuns.length,
+    failedIterations: serviceRuns.length - successfulRuns.length,
     fixed: {
       p95: fixedP95,
       p99: fixedP99,
@@ -329,122 +381,137 @@ async function main() {
       for (let iteration = 1; iteration <= Number(config.iterationsPerPass || 1); iteration += 1) {
         console.log(`\n=== ${passName.toUpperCase()} :: ${service.name} :: iteration ${iteration} ===`);
 
-        if (passName === 'db') {
-          const dbSeedCommand = getDbSeedCommand(config, service);
-          if (dbSeedCommand) {
-            runShell(dbSeedCommand, setupEnv);
+        try {
+          if (passName === 'db') {
+            const dbSeedCommand = getDbSeedCommand(config, service);
+            if (dbSeedCommand) {
+              runShell(dbSeedCommand, setupEnv);
+            }
           }
-        }
 
-        await precheckCrud(baseUrl, config.basePath, service.authHeader || '');
+          await runPrecheckWithRetry(baseUrl, config.basePath, service.authHeader || '', {
+            retries: 3,
+            initialDelayMs: 1000,
+            maxDelayMs: 5000,
+          });
 
-        const iterDir = path.join(rawRoot, passName, service.name, `iter-${iteration}`);
-        ensureDir(iterDir);
+          const iterDir = path.join(rawRoot, passName, service.name, `iter-${iteration}`);
+          ensureDir(iterDir);
 
-        const warmupFile = path.join(iterDir, 'warmup.json');
-        const warmupSummary = runK6Phase({
-          scenarioPath,
-          outputFile: warmupFile,
-          env: buildK6Env({
-            config,
-            service,
-            baseUrl,
-            mode: 'warmup',
-            targetRps: config.warmup.rps,
-            duration: config.warmup.duration,
-          }),
-        });
-
-        const fixedFile = path.join(iterDir, 'fixed.json');
-        const fixedSummary = runK6Phase({
-          scenarioPath,
-          outputFile: fixedFile,
-          env: buildK6Env({
-            config,
-            service,
-            baseUrl,
-            mode: 'fixed',
-            targetRps: config.fixed.rps,
-            duration: config.fixed.duration,
-          }),
-        });
-
-        let maxStableRps = null;
-        const stressSteps = [];
-        for (const rps of config.stress.rpsSteps) {
-          const stressFile = path.join(iterDir, `stress-${rps}.json`);
-          const stressSummary = runK6Phase({
+          const warmupFile = path.join(iterDir, 'warmup.json');
+          const warmupSummary = runK6Phase({
             scenarioPath,
-            outputFile: stressFile,
+            outputFile: warmupFile,
             env: buildK6Env({
               config,
               service,
               baseUrl,
-              mode: 'stress',
-              targetRps: rps,
-              duration: config.stress.stepDuration,
+              mode: 'warmup',
+              targetRps: config.warmup.rps,
+              duration: config.warmup.duration,
             }),
           });
 
-          const dur = parseMetric(stressSummary, 'stress_req_duration');
-          const err = parseRate(stressSummary, 'stress_error_rate') || 0;
-          const passed =
-            Number.isFinite(dur?.p95) &&
-            dur.p95 <= Number(config.slo.p95Ms) &&
-            err <= Number(config.slo.errorRate);
-
-          stressSteps.push({ rps, duration: dur, errorRate: err, passed });
-
-          if (passed) {
-            maxStableRps = rps;
-          } else {
-            break;
-          }
-        }
-
-        let extreme = null;
-        const shouldRunExtreme = Boolean(config.extreme?.enabled) &&
-          (Boolean(config.extreme.runPerIteration) || iteration === 1);
-
-        if (shouldRunExtreme) {
-          const extremeFile = path.join(iterDir, 'extreme-1000.json');
-          const extremeSummary = runK6Phase({
+          const fixedFile = path.join(iterDir, 'fixed.json');
+          const fixedSummary = runK6Phase({
             scenarioPath,
-            outputFile: extremeFile,
+            outputFile: fixedFile,
             env: buildK6Env({
               config,
               service,
               baseUrl,
-              mode: 'extreme',
-              targetRps: config.extreme.rps,
-              duration: config.extreme.duration,
+              mode: 'fixed',
+              targetRps: config.fixed.rps,
+              duration: config.fixed.duration,
             }),
           });
 
-          extreme = {
-            duration: parseMetric(extremeSummary, 'extreme_req_duration'),
-            errorRate: parseRate(extremeSummary, 'extreme_error_rate') || 0,
+          let maxStableRps = null;
+          const stressSteps = [];
+          for (const rps of config.stress.rpsSteps) {
+            const stressFile = path.join(iterDir, `stress-${rps}.json`);
+            const stressSummary = runK6Phase({
+              scenarioPath,
+              outputFile: stressFile,
+              env: buildK6Env({
+                config,
+                service,
+                baseUrl,
+                mode: 'stress',
+                targetRps: rps,
+                duration: config.stress.stepDuration,
+              }),
+            });
+
+            const dur = parseMetric(stressSummary, 'stress_req_duration');
+            const err = parseRate(stressSummary, 'stress_error_rate') || 0;
+            const passed =
+              Number.isFinite(dur?.p95) &&
+              dur.p95 <= Number(config.slo.p95Ms) &&
+              err <= Number(config.slo.errorRate);
+
+            stressSteps.push({ rps, duration: dur, errorRate: err, passed });
+
+            if (passed) {
+              maxStableRps = rps;
+            } else {
+              break;
+            }
+          }
+
+          let extreme = null;
+          const shouldRunExtreme = Boolean(config.extreme?.enabled) &&
+            (Boolean(config.extreme.runPerIteration) || iteration === 1);
+
+          if (shouldRunExtreme) {
+            const extremeFile = path.join(iterDir, 'extreme-1000.json');
+            const extremeSummary = runK6Phase({
+              scenarioPath,
+              outputFile: extremeFile,
+              env: buildK6Env({
+                config,
+                service,
+                baseUrl,
+                mode: 'extreme',
+                targetRps: config.extreme.rps,
+                duration: config.extreme.duration,
+              }),
+            });
+
+            extreme = {
+              duration: parseMetric(extremeSummary, 'extreme_req_duration'),
+              errorRate: parseRate(extremeSummary, 'extreme_error_rate') || 0,
+            };
+          }
+
+          const serviceRun = {
+            iteration,
+            failed: false,
+            warmup: {
+              duration: parseMetric(warmupSummary, 'warmup_req_duration'),
+              errorRate: parseRate(warmupSummary, 'warmup_error_rate') || 0,
+            },
+            fixed: {
+              duration: parseMetric(fixedSummary, 'fixed_req_duration'),
+              errorRate: parseRate(fixedSummary, 'fixed_error_rate') || 0,
+            },
+            stress: {
+              maxStableRps,
+              steps: stressSteps,
+            },
+            extreme,
           };
+
+          serviceRuns.push(serviceRun);
+        } catch (error) {
+          const message = error && error.message ? error.message : String(error);
+          console.warn(`[iteration failed] ${passName}/${service.name}/iter-${iteration}: ${message}. Continuing...`);
+          serviceRuns.push({
+            iteration,
+            failed: true,
+            error: message,
+          });
         }
-
-        const serviceRun = {
-          iteration,
-          warmup: {
-            duration: parseMetric(warmupSummary, 'warmup_req_duration'),
-            errorRate: parseRate(warmupSummary, 'warmup_error_rate') || 0,
-          },
-          fixed: {
-            duration: parseMetric(fixedSummary, 'fixed_req_duration'),
-            errorRate: parseRate(fixedSummary, 'fixed_error_rate') || 0,
-          },
-          stress: {
-            maxStableRps,
-            steps: stressSteps,
-          },
-          extreme,
-        };
-
-        serviceRuns.push(serviceRun);
       }
 
       report.runs[passName][service.name] = serviceRuns;
