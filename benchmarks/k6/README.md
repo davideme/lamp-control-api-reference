@@ -9,7 +9,7 @@ This directory contains a benchmark harness for comparing the six language imple
   - `db` pass (realistic signal)
 - Fixed, fairness-first Cloud Run settings for all services
 - Main ranking at fixed concurrency pressure with `concurrency=80`
-- Optional non-ranking extreme run at concurrency `1000`
+- Optional non-ranking extreme run at `1000 RPS` (disabled by default)
 - Sequential service execution (no parallel cross-service load)
 - Raw k6 result exports and generated markdown summary
 
@@ -21,6 +21,7 @@ This directory contains a benchmark harness for comparing the six language imple
 - `run-benchmarks.js`: orchestration script for full memory+db benchmark execution
 - `configure-cloud-run.js`: applies identical Cloud Run settings (dry-run by default)
 - `generate-summary.js`: regenerates `benchmarks/results/summary.md` from `run-report.json`
+- `summary.js`: shared summary rendering used by benchmark scripts
 
 ## Prerequisites
 
@@ -39,13 +40,15 @@ Edit `benchmarks/k6/services.json`:
 - `cloudRunRegion`: region (default `us-central1`)
 - `memorySetupCommand`: optional command run before memory pass for this service
 - `dbSetupCommand`: optional command run before DB pass for this service
-- `dbSeedCommand`: optional shell command to reset+seed DB before each DB run
+- `dbSeedCommand`: optional per-service override shell command to reset+seed DB before each DB run
 
-`dbSeedCommand` can use a shared `BENCHMARK_DATABASE_URL` env var. The current `services.json` is already configured with:
+Default seeding is configured once in `benchmarks/k6/config.json` as `defaultDbSeedCommand`:
 
 ```bash
 psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
 ```
+
+Set `dbSeedCommand` in a service entry only when that service needs a custom seed/reset flow.
 
 If memory and DB use the same URL with an env-var mode switch, set both URLs equal and use setup commands.
 Example:
@@ -131,6 +134,12 @@ Run only memory pass:
 node benchmarks/k6/run-benchmarks.js --passes memory
 ```
 
+Enable the extreme appendix run:
+
+```bash
+# Set benchmarks/k6/config.json -> extreme.enabled to true
+```
+
 Outputs:
 
 - Raw k6 JSON: `benchmarks/results/raw/<run-id>/...`
@@ -149,4 +158,4 @@ node benchmarks/k6/generate-summary.js benchmarks/results/run-report.json benchm
 - Concurrency is a major factor even with `max instances=1`; it controls in-container contention.
 - Use memory pass ranking to isolate runtime/framework signal.
 - Use DB pass ranking to understand production-like behavior and DB bottleneck impact.
-- Treat concurrency `1000` as saturation appendix, not primary ranking.
+- Treat extreme `1000 RPS` run as saturation appendix, not primary ranking.

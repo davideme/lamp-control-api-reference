@@ -50,6 +50,26 @@ function runCommand(command, args) {
   }
 }
 
+function validateCloudRunConfig(cloudRun) {
+  const requiredKeys = [
+    'maxInstances',
+    'minInstances',
+    'concurrency',
+    'cpu',
+    'memory',
+    'timeout',
+  ];
+
+  for (const key of requiredKeys) {
+    const value = cloudRun[key];
+    if (value === undefined || value === null || String(value).trim() === '') {
+      throw new Error(
+        `Invalid cloudRun config: '${key}' is required in config.json (cloudRun.${key})`
+      );
+    }
+  }
+}
+
 function main() {
   const args = parseArgs(process.argv);
   if (!args.project) {
@@ -59,6 +79,7 @@ function main() {
   const services = readJson(args.services);
   const config = readJson(args.config);
   const cloudRun = config.cloudRun || {};
+  validateCloudRunConfig(cloudRun);
 
   for (const service of services) {
     if (!service.cloudRunService) {

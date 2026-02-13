@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { writeSummary } = require('./summary');
 
 function parseArgs(argv) {
   const args = {
@@ -194,6 +195,16 @@ function getPassSetupCommand(service, passName) {
   return '';
 }
 
+function getDbSeedCommand(config, service) {
+  if (service.dbSeedCommand && service.dbSeedCommand.trim()) {
+    return service.dbSeedCommand;
+  }
+  if (config.defaultDbSeedCommand && config.defaultDbSeedCommand.trim()) {
+    return config.defaultDbSeedCommand;
+  }
+  return '';
+}
+
 function buildK6Env({ config, service, baseUrl, mode, targetRps, duration }) {
   const env = { ...process.env };
   env.RUN_MODE = mode;
@@ -252,85 +263,6 @@ function aggregatePass(serviceRuns) {
   };
 }
 
-function formatNumber(value, digits = 2) {
-  if (!Number.isFinite(value)) {
-    return 'n/a';
-  }
-  return value.toFixed(digits);
-}
-
-function writeSummary(report, outputFile) {
-  const lines = [];
-  lines.push('# Benchmark Summary');
-  lines.push('');
-  lines.push(`Generated: ${report.generatedAt}`);
-  lines.push('');
-
-  for (const passName of Object.keys(report.aggregated)) {
-    const rows = Object.entries(report.aggregated[passName]);
-    rows.sort((a, b) => {
-      const ap = a[1].fixed.p95;
-      const bp = b[1].fixed.p95;
-      if (!Number.isFinite(ap) && !Number.isFinite(bp)) return 0;
-      if (!Number.isFinite(ap)) return 1;
-      if (!Number.isFinite(bp)) return -1;
-      return ap - bp;
-    });
-
-    lines.push(`## ${passName === 'memory' ? 'Memory Pass Ranking' : 'DB Pass Ranking'}`);
-    lines.push('');
-    lines.push('| Rank | Service | p95 (ms) | p99 (ms) | Avg (ms) | Error Rate | Max Stable RPS |');
-    lines.push('|---|---|---:|---:|---:|---:|---:|');
-
-    rows.forEach(([serviceName, metrics], idx) => {
-      lines.push(
-        `| ${idx + 1} | ${serviceName} | ${formatNumber(metrics.fixed.p95)} | ${formatNumber(metrics.fixed.p99)} | ${formatNumber(metrics.fixed.avg)} | ${formatNumber(metrics.fixed.errorRate * 100, 3)}% | ${formatNumber(metrics.stress.maxStableRps, 0)} |`
-      );
-    });
-    lines.push('');
-  }
-
-  const memory = report.aggregated.memory || {};
-  const db = report.aggregated.db || {};
-  const services = Object.keys(memory).filter((name) => db[name]);
-
-  if (services.length > 0) {
-    lines.push('## Memory vs DB Delta');
-    lines.push('');
-    lines.push('| Service | Memory p95 (ms) | DB p95 (ms) | Delta (DB - Memory) |');
-    lines.push('|---|---:|---:|---:|');
-
-    for (const serviceName of services) {
-      const mem = memory[serviceName].fixed.p95;
-      const dbp = db[serviceName].fixed.p95;
-      const delta = Number.isFinite(mem) && Number.isFinite(dbp) ? dbp - mem : null;
-      lines.push(`| ${serviceName} | ${formatNumber(mem)} | ${formatNumber(dbp)} | ${formatNumber(delta)} |`);
-    }
-    lines.push('');
-  }
-
-  lines.push('## Extreme Concurrency Appendix (1000)');
-  lines.push('');
-  lines.push('| Pass | Service | p95 (ms) | p99 (ms) | Avg (ms) | Error Rate |');
-  lines.push('|---|---|---:|---:|---:|---:|');
-
-  for (const [passName, servicesMap] of Object.entries(report.aggregated)) {
-    for (const [serviceName, metrics] of Object.entries(servicesMap)) {
-      if (!metrics.extreme) {
-        continue;
-      }
-      lines.push(
-        `| ${passName} | ${serviceName} | ${formatNumber(metrics.extreme.p95)} | ${formatNumber(metrics.extreme.p99)} | ${formatNumber(metrics.extreme.avg)} | ${formatNumber(metrics.extreme.errorRate * 100, 3)}% |`
-      );
-    }
-  }
-
-  lines.push('');
-  lines.push('Raw per-run k6 summaries are under `benchmarks/results/raw/`.');
-
-  fs.writeFileSync(outputFile, `${lines.join('\n')}\n`, 'utf8');
-}
-
 async function main() {
   const args = parseArgs(process.argv);
 
@@ -384,8 +316,11 @@ async function main() {
       for (let iteration = 1; iteration <= Number(config.iterationsPerPass || 1); iteration += 1) {
         console.log(`\n=== ${passName.toUpperCase()} :: ${service.name} :: iteration ${iteration} ===`);
 
-        if (passName === 'db' && service.dbSeedCommand) {
-          runShell(service.dbSeedCommand);
+        if (passName === 'db') {
+          const dbSeedCommand = getDbSeedCommand(config, service);
+          if (dbSeedCommand) {
+            runShell(dbSeedCommand);
+          }
         }
 
         await precheckCrud(baseUrl, config.basePath, service.authHeader || '');
