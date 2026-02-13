@@ -1,172 +1,139 @@
-# PostgreSQL Startup Variables by Implementation
+# PostgreSQL Setup Guide (Per Language)
 
-This document summarizes how each implementation under `src/` decides whether to use PostgreSQL and which environment variable formats it expects.
+Use this as a quick reference when you want each implementation to run with PostgreSQL instead of in-memory storage.
 
-Synced with `main` and re-validated against current sources on 2026-02-13.
+## Quick Start
 
-## Cross-Implementation Note
-
-- `USE_POSTGRES` should not be used as a PostgreSQL mode switch. Current runtime code paths in `src/` use connection-related variables (for example `DATABASE_URL`, JDBC URL, or `ConnectionStrings__LampControl`) to decide storage backend.
+1. Pick the language implementation you want to run.
+2. Export the variables listed for that language.
+3. Start the app in your usual mode (`serve-only`, `serve`, or `migrate` where supported).
 
 ## TypeScript (`src/typescript`)
 
-Source of truth:
-- `src/typescript/src/infrastructure/app.ts`
-- `src/typescript/src/infrastructure/database/client.ts`
-- `src/typescript/src/cli.ts`
+Set:
 
-PostgreSQL is enabled when:
-- `DATABASE_URL` is set and non-empty.
-
-Required variables:
-- `DATABASE_URL`
-
-Expected format:
-- Prisma PostgreSQL URL, for example:
-  - `postgresql://user:password@host:5432/database`
-  - Optional query params are supported by Prisma (example: `?schema=public`).
+```bash
+export DATABASE_URL='postgresql://<user>:<password>@<host>:5432/<database>?schema=public'
+```
 
 Notes:
-- `USE_POSTGRES` is not read by runtime code in `src/typescript/src/*`.
-- If `DATABASE_URL` is missing, app uses in-memory repository.
-- In `--mode=serve` and `--mode=migrate`, migrations run only if `DATABASE_URL` is present.
+- PostgreSQL is enabled when `DATABASE_URL` is set.
+- If `DATABASE_URL` is unset, TypeScript uses in-memory storage.
 
 ## Python (`src/python`)
 
-Source of truth:
-- `src/python/src/openapi_server/infrastructure/config.py`
-- `src/python/src/openapi_server/dependencies.py`
-- `src/python/src/openapi_server/cli.py`
+Set:
 
-PostgreSQL is enabled when:
-- `DATABASE_URL` is set and not blank.
+```bash
+export DATABASE_URL='postgresql://<user>:<password>@<host>:5432/<database>'
+```
 
-Required variables:
-- `DATABASE_URL`
+Optional pool tuning:
 
-Expected format:
-- Preferred input: `postgresql://user:password@host:5432/database`
-- Runtime converts it to async driver format: `postgresql+asyncpg://...`
-- If already provided as `postgresql+asyncpg://...`, it is used directly.
-- `sslmode` query parameter is removed automatically from `DATABASE_URL`.
+```bash
+export DB_POOL_MIN_SIZE='5'
+export DB_POOL_MAX_SIZE='20'
+```
 
-Optional variables:
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-- `DB_POOL_MIN_SIZE`, `DB_POOL_MAX_SIZE`
-
-Important caveat:
-- Individual `DB_*` variables alone do **not** switch to PostgreSQL mode.
-- PostgreSQL mode switch depends specifically on `DATABASE_URL` presence.
+Notes:
+- PostgreSQL is enabled when `DATABASE_URL` is set.
+- `DB_*` variables alone do not switch Python to PostgreSQL mode.
 
 ## Java (`src/java`)
 
-Source of truth:
-- `src/java/src/main/resources/application.properties`
-- `src/java/src/main/java/org/openapitools/config/OnDatabaseUrlCondition.java`
-- `src/java/src/main/java/org/openapitools/config/DataSourceConfig.java`
+Set:
 
-PostgreSQL is enabled when:
-- `spring.datasource.url` resolves to a non-empty value.
-- Resolution order in properties:
-  - `SPRING_DATASOURCE_URL`
-  - then `DATABASE_URL`
+```bash
+export SPRING_DATASOURCE_URL='jdbc:postgresql://<host>:5432/<database>'
+export DB_USER='<user>'
+export DB_PASSWORD='<password>'
+```
 
-Required variable:
-- `SPRING_DATASOURCE_URL` or `DATABASE_URL`
+Alternative:
 
-Expected format:
-- Must be JDBC URL format:
-  - `jdbc:postgresql://host:5432/database`
+```bash
+export DATABASE_URL='jdbc:postgresql://<host>:5432/<database>'
+export DB_USER='<user>'
+export DB_PASSWORD='<password>'
+```
 
-Optional variables:
-- `DB_USER` (default: `lampuser`)
-- `DB_PASSWORD` (default: `lamppass`)
-- `DB_POOL_MAX_SIZE`, `DB_POOL_MIN_SIZE`
-- `FLYWAY_ENABLED` (used for migration behavior)
-
-Important caveat:
-- A non-JDBC URL like `postgresql://...` is not valid for `spring.datasource.url`.
+Notes:
+- URL must be JDBC format (`jdbc:postgresql://...`).
+- A plain `postgresql://...` URL will not work for Java datasource config.
 
 ## C# (`src/csharp`)
 
-Source of truth:
-- `src/csharp/LampControlApi/Extensions/ServiceCollectionExtensions.cs`
-- `src/csharp/LampControlApi/Extensions/MigrationRunner.cs`
-- `src/csharp/LampControlApi/appsettings.Development.example.json`
+Set:
 
-PostgreSQL is enabled when:
-- Connection string `ConnectionStrings:LampControl` is non-empty.
-- Resolution order:
-  - config key `ConnectionStrings:LampControl`
-  - fallback env var `ConnectionStrings__LampControl`
-
-Required variable (if using env):
-- `ConnectionStrings__LampControl`
-
-Expected format:
-- Npgsql connection string, for example:
-  - `Host=localhost;Port=5432;Database=lampcontrol;Username=lampuser;Password=lamppass`
+```bash
+export ConnectionStrings__LampControl='Host=<host>;Port=5432;Database=<database>;Username=<user>;Password=<password>'
+```
 
 Notes:
-- `DATABASE_URL` is not used by the C# implementation.
+- PostgreSQL is enabled when `ConnectionStrings__LampControl` is set.
+- `DATABASE_URL` is not used by C# runtime config.
 
 ## Go (`src/go`)
 
-Source of truth:
-- `src/go/api/config.go`
-- `src/go/cmd/lamp-control-api/main.go`
+Recommended:
 
-PostgreSQL is enabled when **any** of these is true:
-- `DATABASE_URL` is set, or
-- `DB_NAME` is set, or
-- both `DB_HOST` and `DB_USER` are set.
+```bash
+export DATABASE_URL='postgres://<user>:<password>@<host>:5432/<database>?sslmode=disable'
+```
 
-Primary variable:
-- `DATABASE_URL` (takes precedence if set)
+Alternative (component vars):
 
-Expected format:
-- Recommended: URL form, e.g. `postgres://user:password@host:5432/database?sslmode=disable`
-- Also supports pgx key-value DSN internally (built when `DATABASE_URL` is not set):
-  - `host=... port=... dbname=... user=... password=...`
+```bash
+export DB_HOST='<host>'
+export DB_PORT='5432'
+export DB_NAME='<database>'
+export DB_USER='<user>'
+export DB_PASSWORD='<password>'
+```
 
-Optional variables:
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-- `DB_POOL_MIN_SIZE`, `DB_POOL_MAX_SIZE`
+Optional pool tuning:
+
+```bash
+export DB_POOL_MIN_SIZE='0'
+export DB_POOL_MAX_SIZE='4'
+```
+
+Notes:
+- `DATABASE_URL` takes precedence over component vars.
 
 ## Kotlin (`src/kotlin`)
 
-Source of truth:
-- `src/kotlin/src/main/kotlin/com/lampcontrol/database/DatabaseFactory.kt`
-- `src/kotlin/src/main/kotlin/com/lampcontrol/Application.kt`
+Recommended:
 
-PostgreSQL is enabled when **any** of these is true:
-- `DATABASE_URL` is set, or
-- `DB_NAME` is set, or
-- both `DB_HOST` and `DB_USER` are set.
+```bash
+export DATABASE_URL='postgresql://<user>:<password>@<host>:5432/<database>'
+```
 
-Primary variable:
-- `DATABASE_URL` (preferred when available)
+Alternative (component vars):
 
-Expected `DATABASE_URL` format:
-- Strictly parsed by regex:
-  - `postgresql://user:password@host:5432/database`
-  - or `postgres://user:password@host:5432/database`
+```bash
+export DB_HOST='<host>'
+export DB_PORT='5432'
+export DB_NAME='<database>'
+export DB_USER='<user>'
+export DB_PASSWORD='<password>'
+```
 
-Important caveat:
-- Query parameters (for example `?sslmode=...`) are not handled by the current parser and can fail parsing.
+Optional pool/timeout tuning:
 
-Optional variables:
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-- `DB_POOL_MIN_SIZE`, `DB_POOL_MAX_SIZE`
-- `DB_MAX_LIFETIME_MS`, `DB_IDLE_TIMEOUT_MS`, `DB_CONNECTION_TIMEOUT_MS`
+```bash
+export DB_POOL_MIN_SIZE='0'
+export DB_POOL_MAX_SIZE='4'
+export DB_MAX_LIFETIME_MS='3600000'
+export DB_IDLE_TIMEOUT_MS='1800000'
+export DB_CONNECTION_TIMEOUT_MS='30000'
+```
 
-## Quick Reference Matrix
+Notes:
+- If you use `DATABASE_URL`, keep it in standard `postgresql://...` or `postgres://...` form.
 
-| Language | Switch to PostgreSQL | Required variable(s) | Connection string format |
-|---|---|---|---|
-| TypeScript | `DATABASE_URL` non-empty | `DATABASE_URL` | `postgresql://...` (Prisma URL) |
-| Python | `DATABASE_URL` non-empty | `DATABASE_URL` | `postgresql://...` or `postgresql+asyncpg://...` |
-| Java | `spring.datasource.url` non-empty | `SPRING_DATASOURCE_URL` or `DATABASE_URL` | `jdbc:postgresql://...` |
-| C# | `ConnectionStrings:LampControl` non-empty | `ConnectionStrings__LampControl` (env) | `Host=...;Port=...;Database=...;Username=...;Password=...` |
-| Go | `DATABASE_URL` or `DB_NAME` or (`DB_HOST`+`DB_USER`) | `DATABASE_URL` recommended | `postgres://...` recommended; key-value DSN supported |
-| Kotlin | `DATABASE_URL` or `DB_NAME` or (`DB_HOST`+`DB_USER`) | `DATABASE_URL` recommended | `postgresql://...` or `postgres://...` (strict parser) |
+## Common Gotchas
+
+- Java needs `jdbc:postgresql://...`; others usually use `postgresql://...` or `postgres://...`.
+- C# uses `ConnectionStrings__LampControl`, not `DATABASE_URL`.
+- If an app still runs in memory mode, first verify the exact variable name is exported in the same shell/session used to start the app.
