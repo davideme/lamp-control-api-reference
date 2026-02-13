@@ -22,8 +22,14 @@ import org.springframework.context.annotation.Configuration;
 @Conditional(OnDatabaseUrlCondition.class)
 public class DataSourceConfig {
 
+  @Value("${SPRING_DATASOURCE_URL:}")
+  private String springDatasourceUrl;
+
+  @Value("${DATABASE_URL:}")
+  private String databaseUrl;
+
   @Value("${spring.datasource.url}")
-  private String jdbcUrl;
+  private String fallbackJdbcUrl;
 
   @Value("${spring.datasource.username:lampuser}")
   private String username;
@@ -45,12 +51,38 @@ public class DataSourceConfig {
     HikariConfig config = new HikariConfig();
 
     // Set core JDBC properties
-    config.setJdbcUrl(jdbcUrl);
+    config.setJdbcUrl(resolveJdbcUrl());
     config.setUsername(username);
     config.setPassword(password);
     config.setDriverClassName(driverClassName);
 
     return config;
+  }
+
+  private String resolveJdbcUrl() {
+    if (isNotBlank(springDatasourceUrl)) {
+      return springDatasourceUrl;
+    }
+
+    if (isNotBlank(databaseUrl)) {
+      return normalizeDatabaseUrl(databaseUrl);
+    }
+
+    return fallbackJdbcUrl;
+  }
+
+  private String normalizeDatabaseUrl(String url) {
+    if (url.startsWith("postgresql://")) {
+      return "jdbc:" + url;
+    }
+    if (url.startsWith("postgres://")) {
+      return "jdbc:postgresql://" + url.substring("postgres://".length());
+    }
+    return url;
+  }
+
+  private boolean isNotBlank(String value) {
+    return value != null && !value.isBlank();
   }
 
   /**
