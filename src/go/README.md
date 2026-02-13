@@ -90,7 +90,7 @@ The application supports PostgreSQL storage through environment variables. If an
 
 #### Environment Variables
 
-- `DATABASE_URL` - Full PostgreSQL connection string (takes precedence over individual parameters)
+- `DATABASE_URL` - Full PostgreSQL connection string using either `postgres://...` or `postgresql://...` (takes precedence over individual parameters)
 - `DB_HOST` - PostgreSQL host (default: `localhost`)
 - `DB_PORT` - PostgreSQL port (default: `5432`)
 - `DB_NAME` - Database name (default: `postgres`)
@@ -141,6 +141,7 @@ Using DATABASE_URL:
 ```bash
 # Development only - disables SSL. For production, use sslmode=require or sslmode=verify-full
 export DATABASE_URL="postgres://lamp_user:lamp_password@localhost:5432/lamp_control?sslmode=disable"
+export DATABASE_URL="postgresql://lamp_user:lamp_password@localhost:5432/lamp_control?sslmode=disable"
 ```
 
 ### Building and Running
