@@ -62,13 +62,14 @@ gcloud run services update typescript-lamp-control-api --region europe-west1 --u
 Before running benchmarks, export required variables:
 
 ```bash
-export GOOGLE_CLOUD_PROJECT='<your-project-id>'
 export BENCHMARK_DATABASE_URL='postgresql://<user>:<pass>@<host>:5432/<database>?sslmode=require'
 export BENCHMARK_JDBC_DATABASE_URL='jdbc:postgresql://<host>:5432/<database>'
 export BENCHMARK_DB_USER='<db-user>'
 export BENCHMARK_DB_PASSWORD='<db-password>'
 export BENCHMARK_CSHARP_CONNECTION_STRING='Host=<host>;Port=5432;Database=<database>;Username=<db-user>;Password=<db-password>'
 ```
+
+`GOOGLE_CLOUD_PROJECT` is optional for `run-benchmarks.js`; if unset, it uses `cloudRun.projectId` from `benchmarks/k6/config.json`.
 
 ## 2) Run from a GCP VM (recommended)
 
@@ -139,6 +140,12 @@ Run only memory pass:
 
 ```bash
 node benchmarks/k6/run-benchmarks.js --passes memory
+```
+
+Run benchmark without running setup commands (`memorySetupCommand` / `dbSetupCommand`):
+
+```bash
+node benchmarks/k6/run-benchmarks.js --passes memory --skip-setup
 ```
 
 Enable the extreme appendix run:

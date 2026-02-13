@@ -11,6 +11,7 @@ function parseArgs(argv) {
     services: path.join('benchmarks', 'k6', 'services.json'),
     resultsDir: path.join('benchmarks', 'results'),
     passes: null,
+    skipSetup: false,
   };
 
   for (let i = 2; i < argv.length; i += 1) {
@@ -23,6 +24,8 @@ function parseArgs(argv) {
       args.resultsDir = argv[++i];
     } else if (token === '--passes') {
       args.passes = argv[++i].split(',').map((v) => v.trim()).filter(Boolean);
+    } else if (token === '--skip-setup') {
+      args.skipSetup = true;
     } else if (token === '--help' || token === '-h') {
       printHelp();
       process.exit(0);
@@ -35,7 +38,7 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Usage:\n  node benchmarks/k6/run-benchmarks.js [--config path] [--services path] [--results-dir path] [--passes memory,db]\n`);
+  console.log(`Usage:\n  node benchmarks/k6/run-benchmarks.js [--config path] [--services path] [--results-dir path] [--passes memory,db] [--skip-setup]\n`);
 }
 
 function readJson(filePath) {
@@ -205,6 +208,15 @@ function getDbSeedCommand(config, service) {
   return '';
 }
 
+function buildSetupEnv(config) {
+  const env = { ...process.env };
+  const projectId = config?.cloudRun?.projectId;
+  if ((!env.GOOGLE_CLOUD_PROJECT || !env.GOOGLE_CLOUD_PROJECT.trim()) && projectId) {
+    env.GOOGLE_CLOUD_PROJECT = String(projectId).trim();
+  }
+  return env;
+}
+
 function buildK6Env({ config, service, baseUrl, mode, targetRps, duration }) {
   const env = { ...process.env };
   env.RUN_MODE = mode;
@@ -277,6 +289,7 @@ async function main() {
   const stamp = nowStamp();
   const scenarioPath = path.join('benchmarks', 'k6', 'scenarios.js');
   const rawRoot = path.join(args.resultsDir, 'raw', stamp);
+  const setupEnv = buildSetupEnv(config);
 
   ensureDir(rawRoot);
 
@@ -307,8 +320,8 @@ async function main() {
       }
 
       const passSetupCommand = getPassSetupCommand(service, passName);
-      if (passSetupCommand) {
-        runShell(passSetupCommand);
+      if (!args.skipSetup && passSetupCommand) {
+        runShell(passSetupCommand, setupEnv);
       }
 
       const serviceRuns = [];
@@ -319,7 +332,7 @@ async function main() {
         if (passName === 'db') {
           const dbSeedCommand = getDbSeedCommand(config, service);
           if (dbSeedCommand) {
-            runShell(dbSeedCommand);
+            runShell(dbSeedCommand, setupEnv);
           }
         }
 
