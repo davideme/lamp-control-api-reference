@@ -167,7 +167,7 @@ namespace LampControlApi.Extensions
             }
 
             var username = userInfo[..separatorIndex];
-            var password = userInfo[(separatorIndex + 1)..];
+            var password = userInfo.Substring(separatorIndex + 1);
             return (Uri.UnescapeDataString(username), Uri.UnescapeDataString(password));
         }
 
@@ -196,7 +196,7 @@ namespace LampControlApi.Extensions
                 }
 
                 var rawKey = pair[..separatorIndex];
-                var rawValue = pair[(separatorIndex + 1)..];
+                var rawValue = pair.Substring(separatorIndex + 1);
                 var key = Uri.UnescapeDataString(rawKey);
                 var value = Uri.UnescapeDataString(rawValue);
 
@@ -208,7 +208,8 @@ namespace LampControlApi.Extensions
                     case "trust server certificate":
                     case "trust_server_certificate":
                     case "trustservercertificate":
-                        builder.TrustServerCertificate = ParseBoolean(value, key);
+                        // Npgsql 8+ treats this as obsolete/no-op, but keep validation for compatibility.
+                        _ = ParseBoolean(value, key);
                         break;
                     case "pooling":
                         builder.Pooling = ParseBoolean(value, key);

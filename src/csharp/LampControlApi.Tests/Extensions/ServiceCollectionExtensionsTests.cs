@@ -82,7 +82,7 @@ namespace LampControlApi.Tests.Extensions
             var configuration = BuildConfiguration();
             Environment.SetEnvironmentVariable(
                 DatabaseUrlEnvVar,
-                "postgresql://lampuser:lamppass@localhost:5432/lampcontrol?sslmode=Disable");
+                "postgresql://lampuser:lamppass@localhost:5432/lampcontrol?sslmode=Disable&trust_server_certificate=true");
 
             var result = ServiceCollectionExtensions.ResolveConnectionString(configuration);
             var parsedConnectionString = new NpgsqlConnectionStringBuilder(result);
