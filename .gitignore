@@ -13,3 +13,7 @@ src/kotlin/build/reports/jacoco/*
 !src/kotlin/build/reports/jacoco/test/
 src/kotlin/build/reports/jacoco/test/*
 !src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml
+
+# Benchmark artifacts
+benchmarks/results/raw/
+benchmarks/results/run-report.json
