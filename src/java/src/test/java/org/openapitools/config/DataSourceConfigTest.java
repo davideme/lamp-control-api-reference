@@ -10,10 +10,31 @@ import org.junit.jupiter.api.Test;
 class DataSourceConfigTest {
 
   @Test
-  void hikariConfig_ShouldReturnConfiguredHikariConfig() throws Exception {
+  void hikariConfig_ShouldUseSpringDatasourceUrlAsIs() throws Exception {
     DataSourceConfig config = new DataSourceConfig();
 
-    setField(config, "jdbcUrl", "jdbc:postgresql://localhost:5432/lamp");
+    setField(config, "springDatasourceUrl", "postgresql://localhost:5432/lamp");
+    setField(config, "databaseUrl", "postgres://ignored:5432/ignored");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "user");
+    setField(config, "password", "pass");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getJdbcUrl()).isEqualTo("postgresql://localhost:5432/lamp");
+    assertThat(result.getUsername()).isEqualTo("user");
+    assertThat(result.getPassword()).isEqualTo("pass");
+    assertThat(result.getDriverClassName()).isEqualTo("org.postgresql.Driver");
+  }
+
+  @Test
+  void hikariConfig_ShouldNormalizeDatabaseUrlPostgresqlScheme() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(config, "databaseUrl", "postgresql://localhost:5432/lamp");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
@@ -21,6 +42,54 @@ class DataSourceConfigTest {
     HikariConfig result = config.hikariConfig();
 
     assertThat(result.getJdbcUrl()).isEqualTo("jdbc:postgresql://localhost:5432/lamp");
+  }
+
+  @Test
+  void hikariConfig_ShouldNormalizeDatabaseUrlPostgresScheme() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(config, "databaseUrl", "postgres://localhost:5432/lamp");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "user");
+    setField(config, "password", "pass");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getJdbcUrl()).isEqualTo("jdbc:postgresql://localhost:5432/lamp");
+  }
+
+  @Test
+  void hikariConfig_ShouldKeepJdbcDatabaseUrlUnchanged() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(config, "databaseUrl", "jdbc:postgresql://localhost:5432/lamp");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "user");
+    setField(config, "password", "pass");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getJdbcUrl()).isEqualTo("jdbc:postgresql://localhost:5432/lamp");
+  }
+
+  @Test
+  void hikariConfig_ShouldFallbackToSpringDatasourceProperty() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(config, "databaseUrl", "");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "user");
+    setField(config, "password", "pass");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getJdbcUrl()).isEqualTo("jdbc:postgresql://localhost:5432/fallback");
     assertThat(result.getUsername()).isEqualTo("user");
     assertThat(result.getPassword()).isEqualTo("pass");
     assertThat(result.getDriverClassName()).isEqualTo("org.postgresql.Driver");

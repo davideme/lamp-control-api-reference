@@ -168,7 +168,11 @@ Configure database connection using environment variables to enable PostgreSQL m
 
 ```bash
 # Required to enable PostgreSQL mode
-export DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol
+# Accepted formats: jdbc:postgresql://..., postgresql://..., postgres://...
+export DATABASE_URL=postgresql://localhost:5432/lampcontrol
+
+# Optional override (takes precedence and is used as-is without normalization)
+# export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/lampcontrol
 
 # Database credentials
 export DB_USER=lampuser
@@ -200,7 +204,7 @@ spring.datasource.hikari.minimum-idle=5
 mvn spring-boot:run
 
 # Run with PostgreSQL (requires DATABASE_URL)
-DATABASE_URL=jdbc:postgresql://localhost:5432/lampcontrol \
+DATABASE_URL=postgresql://localhost:5432/lampcontrol \
 FLYWAY_ENABLED=true \
 DB_USER=lampuser \
 DB_PASSWORD=lamppass \
