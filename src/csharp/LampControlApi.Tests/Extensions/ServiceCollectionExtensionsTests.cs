@@ -165,7 +165,7 @@ namespace LampControlApi.Tests.Extensions
             var exception = Assert.ThrowsException<InvalidOperationException>(
                 () => ServiceCollectionExtensions.ResolveConnectionString(configuration));
 
-            StringAssert.Contains(exception.Message, "Host is required");
+            StringAssert.Contains(exception.Message, "Invalid DATABASE_URL value");
         }
 
         [TestMethod]
@@ -240,13 +240,13 @@ namespace LampControlApi.Tests.Extensions
         {
             public string ApplicationName { get; set; } = "LampControlApi.Tests";
 
-            public IFileProvider ContentRootFileProvider { get; set; } = NullFileProvider.Instance;
+            public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
 
             public string ContentRootPath { get; set; } = Environment.CurrentDirectory;
 
             public string EnvironmentName { get; set; } = "Production";
 
-            public IFileProvider WebRootFileProvider { get; set; } = NullFileProvider.Instance;
+            public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
 
             public string WebRootPath { get; set; } = Environment.CurrentDirectory;
         }
