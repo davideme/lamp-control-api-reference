@@ -103,8 +103,6 @@ By default, the application uses an in-memory repository. This is suitable for d
 
 ```bash
 npm run dev
-# or
-USE_POSTGRES=false npm run dev
 ```
 
 ### PostgreSQL with Prisma ORM
@@ -127,7 +125,7 @@ For production deployments or when you need persistent storage:
 
 3. **Run the application with PostgreSQL:**
    ```bash
-   USE_POSTGRES=true npm run dev
+   DATABASE_URL="postgresql://lampuser:lamppass@localhost:5432/lampcontrol?schema=public" npm run dev
    ```
 
 4. **(Optional) Open Prisma Studio to view/edit data:**
@@ -147,9 +145,6 @@ DATABASE_URL="postgresql://lampuser:lamppass@localhost:5432/lampcontrol?schema=p
 # Application
 PORT=8080
 NODE_ENV=development
-
-# Storage Backend Selection
-USE_POSTGRES=true  # Set to 'true' to use PostgreSQL, 'false' or unset for in-memory
 ```
 
 ### Prisma Commands
