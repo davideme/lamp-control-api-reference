@@ -140,7 +140,10 @@ export DB_PASSWORD=lamp_password
 Using DATABASE_URL:
 ```bash
 # Development only - disables SSL. For production, use sslmode=require or sslmode=verify-full
+# Choose one of the following equivalent URL schemes:
+# Option 1: postgres scheme
 export DATABASE_URL="postgres://lamp_user:lamp_password@localhost:5432/lamp_control?sslmode=disable"
+# Option 2: postgresql scheme
 export DATABASE_URL="postgresql://lamp_user:lamp_password@localhost:5432/lamp_control?sslmode=disable"
 ```
 
