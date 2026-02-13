@@ -16,6 +16,7 @@ This directory contains a benchmark harness for comparing the six language imple
 ## Files
 
 - `config.json`: benchmark parameters and Cloud Run parity settings
+- `config.fast.json`: shorter benchmark profile for quicker p95-focused comparisons
 - `services.json`: service URLs and per-service DB seed/reset hooks
 - `scenarios.js`: k6 workload script (read-heavy CRUD mix)
 - `run-benchmarks.js`: orchestration script for full memory+db benchmark execution
@@ -136,6 +137,12 @@ Run both passes (`memory`,`db`) with settings from `config.json`:
 node benchmarks/k6/run-benchmarks.js
 ```
 
+Run both passes with the faster profile:
+
+```bash
+node benchmarks/k6/run-benchmarks.js --config benchmarks/k6/config.fast.json
+```
+
 Run only memory pass:
 
 ```bash
@@ -177,3 +184,4 @@ node benchmarks/k6/generate-summary.js benchmarks/results/run-report.json benchm
 - Use memory pass ranking to isolate runtime/framework signal.
 - Use DB pass ranking to understand production-like behavior and DB bottleneck impact.
 - Treat extreme `1000 RPS` run as saturation appendix, not primary ranking.
+- Use `config.fast.json` for iterative checks and `config.json` for final publication-quality runs.
