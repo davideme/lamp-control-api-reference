@@ -68,6 +68,22 @@ function validateCloudRunConfig(cloudRun) {
       );
     }
   }
+
+  const startupProbe = cloudRun.startupProbe || {};
+  const requiredStartupProbeKeys = [
+    'timeoutSeconds',
+    'periodSeconds',
+    'failureThreshold',
+    'tcpPort',
+  ];
+  for (const key of requiredStartupProbeKeys) {
+    const value = startupProbe[key];
+    if (value === undefined || value === null || String(value).trim() === '') {
+      throw new Error(
+        `Invalid cloudRun config: 'startupProbe.${key}' is required in config.json`
+      );
+    }
+  }
 }
 
 function resolveProject(argsProject, cloudRun) {
@@ -94,6 +110,7 @@ function main() {
   const config = readJson(args.config);
   const cloudRun = config.cloudRun || {};
   validateCloudRunConfig(cloudRun);
+  const startupProbe = cloudRun.startupProbe;
   const project = resolveProject(args.project, cloudRun);
 
   for (const service of services) {
@@ -125,6 +142,8 @@ function main() {
       '--timeout',
       String(cloudRun.timeout),
       '--cpu-throttling',
+      '--startup-probe',
+      `timeoutSeconds=${startupProbe.timeoutSeconds},periodSeconds=${startupProbe.periodSeconds},failureThreshold=${startupProbe.failureThreshold},tcpSocket.port=${startupProbe.tcpPort}`,
     ];
 
     if (!args.execute) {

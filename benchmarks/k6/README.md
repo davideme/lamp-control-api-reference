@@ -128,6 +128,16 @@ node benchmarks/k6/configure-cloud-run.js --execute
 
 Settings come from `benchmarks/k6/config.json` under `cloudRun`.
 Project resolution order is: `--project`, `cloudRun.projectId`, `cloudRun.projectNumber`, `GOOGLE_CLOUD_PROJECT`.
+Startup probe applied to all services:
+
+```yaml
+startupProbe:
+  timeoutSeconds: 1
+  periodSeconds: 10
+  failureThreshold: 3
+  tcpSocket:
+    port: 8080
+```
 
 ## 4) Run benchmark
 

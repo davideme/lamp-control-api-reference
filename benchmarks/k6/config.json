@@ -44,6 +44,12 @@
     "concurrency": 80,
     "cpu": "1",
     "memory": "512Mi",
-    "timeout": "60s"
+    "timeout": "60s",
+    "startupProbe": {
+      "timeoutSeconds": 1,
+      "periodSeconds": 10,
+      "failureThreshold": 3,
+      "tcpPort": 8080
+    }
   }
 }
