@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
-import { Rate, Trend } from 'k6/metrics';
+import { sleep } from 'k6';
+import { Gauge, Rate, Trend } from 'k6/metrics';
 
 const RUN_MODE = (__ENV.RUN_MODE || 'fixed').trim();
 const BASE_URL = (__ENV.BASE_URL || '').replace(/\/$/, '');
@@ -11,6 +12,10 @@ const PAGE_SIZE = Number(__ENV.PAGE_SIZE || 25);
 const SEED_FETCH_PAGES = Number(__ENV.SEED_FETCH_PAGES || 10);
 const SEED_PAGE_SIZE = Number(__ENV.SEED_PAGE_SIZE || 100);
 const AUTH_HEADER = __ENV.AUTH_HEADER || '';
+const COLD_START_ENDPOINT = __ENV.COLD_START_ENDPOINT || '/lamps?pageSize=1';
+const COLD_START_SUCCESS_STATUS = Number(__ENV.COLD_START_SUCCESS_STATUS || 200);
+const COLD_START_MAX_WAIT_SECONDS = Number(__ENV.COLD_START_MAX_WAIT_SECONDS || 60);
+const COLD_START_PROBE_INTERVAL_MS = Number(__ENV.COLD_START_PROBE_INTERVAL_MS || 500);
 
 const LIST_WEIGHT = Number(__ENV.LIST_WEIGHT || 50);
 const GET_WEIGHT = Number(__ENV.GET_WEIGHT || 20);
@@ -29,20 +34,32 @@ if (!BASE_URL) {
 
 const requestDuration = new Trend(`${RUN_MODE}_req_duration`, true);
 const errorRate = new Rate(`${RUN_MODE}_error_rate`);
+const coldStartReadyMs = new Trend('cold_start_ready_ms', true);
+const coldStartAttempts = new Gauge('cold_start_attempts');
+const coldStartFirstSuccessStatus = new Gauge('cold_start_first_success_status');
 
 export const options = {
   discardResponseBodies: false,
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
-  scenarios: {
-    main: {
-      executor: 'constant-arrival-rate',
-      rate: TARGET_RPS,
-      timeUnit: '1s',
-      duration: DURATION,
-      preAllocatedVUs: PRE_ALLOCATED_VUS,
-      maxVUs: MAX_VUS,
+  scenarios: RUN_MODE === 'cold_start'
+    ? {
+      main: {
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: `${Math.max(10, COLD_START_MAX_WAIT_SECONDS + 10)}s`,
+      },
+    }
+    : {
+      main: {
+        executor: 'constant-arrival-rate',
+        rate: TARGET_RPS,
+        timeUnit: '1s',
+        duration: DURATION,
+        preAllocatedVUs: PRE_ALLOCATED_VUS,
+        maxVUs: MAX_VUS,
+      },
     },
-  },
 };
 
 const headers = {
@@ -208,6 +225,10 @@ function pickOperation() {
 }
 
 export function setup() {
+  if (RUN_MODE === 'cold_start') {
+    return { seedIds: [] };
+  }
+
   const seedIds = [];
   let cursor = null;
 
@@ -246,7 +267,40 @@ export function setup() {
   return { seedIds };
 }
 
+function runColdStartProbe() {
+  const startedAtMs = Date.now();
+  const deadlineMs = startedAtMs + Math.max(1000, COLD_START_MAX_WAIT_SECONDS * 1000);
+  let attempts = 0;
+
+  while (Date.now() <= deadlineMs) {
+    const response = http.get(url(COLD_START_ENDPOINT), { headers });
+    attempts += 1;
+
+    const ok = response.status === COLD_START_SUCCESS_STATUS;
+    requestDuration.add(response.timings.duration);
+    errorRate.add(!ok);
+
+    if (ok) {
+      const readyMs = Date.now() - startedAtMs;
+      coldStartReadyMs.add(readyMs);
+      coldStartAttempts.add(attempts);
+      coldStartFirstSuccessStatus.add(response.status);
+      return;
+    }
+
+    sleep(Math.max(10, COLD_START_PROBE_INTERVAL_MS) / 1000);
+  }
+
+  coldStartAttempts.add(attempts);
+  coldStartFirstSuccessStatus.add(0);
+}
+
 export default function (data) {
+  if (RUN_MODE === 'cold_start') {
+    runColdStartProbe();
+    return;
+  }
+
   const operation = pickOperation();
 
   if (operation === 'list') {

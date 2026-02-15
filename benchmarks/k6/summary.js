@@ -59,6 +59,22 @@ function writeSummary(report, outputFile) {
     lines.push('');
   }
 
+  lines.push('## Cold Start Appendix');
+  lines.push('');
+  lines.push('| Pass | Service | Ready Time (ms) | Attempts | Error Rate | Samples (ok/failed) |');
+  lines.push('|---|---|---:|---:|---:|---:|');
+  for (const [passName, servicesMap] of Object.entries(report.aggregated || {})) {
+    for (const [serviceName, metrics] of Object.entries(servicesMap || {})) {
+      const cold = metrics.coldStart || {};
+      const okSamples = Number.isFinite(cold.successfulColdSamples) ? cold.successfulColdSamples : 0;
+      const failedSamples = Number.isFinite(cold.failedColdSamples) ? cold.failedColdSamples : 0;
+      lines.push(
+        `| ${passName} | ${serviceName} | ${formatNumber(cold.readyMs)} | ${formatNumber(cold.attempts, 0)} | ${formatNumber((cold.errorRate ?? NaN) * 100, 3)}% | ${okSamples}/${failedSamples} |`
+      );
+    }
+  }
+  lines.push('');
+
   const extremeRps = report.config?.extreme?.rps;
   const extremeLabel = Number.isFinite(extremeRps)
     ? `Extreme Load Appendix (${extremeRps} RPS)`

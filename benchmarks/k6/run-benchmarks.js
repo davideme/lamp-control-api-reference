@@ -210,6 +210,24 @@ function parseRate(summary, name) {
   return values.value ?? null;
 }
 
+function parseScalar(summary, name) {
+  const metric = summary.metrics[name];
+  const values = metricValues(metric);
+  if (!values) {
+    return null;
+  }
+  if (Number.isFinite(values.value)) {
+    return values.value;
+  }
+  if (Number.isFinite(values.avg)) {
+    return values.avg;
+  }
+  if (Number.isFinite(values.max)) {
+    return values.max;
+  }
+  return null;
+}
+
 function median(numbers) {
   const vals = numbers.filter((n) => Number.isFinite(n)).slice().sort((a, b) => a - b);
   if (vals.length === 0) {
@@ -281,6 +299,10 @@ function buildK6Env({ config, service, baseUrl, mode, targetRps, duration }) {
   env.CREATE_WEIGHT = String(config.workload.createPercent);
   env.UPDATE_WEIGHT = String(config.workload.updatePercent);
   env.DELETE_WEIGHT = String(config.workload.deletePercent);
+  env.COLD_START_MAX_WAIT_SECONDS = String(config.coldStart?.maxWaitSeconds ?? 60);
+  env.COLD_START_PROBE_INTERVAL_MS = String(config.coldStart?.probeIntervalMs ?? 500);
+  env.COLD_START_ENDPOINT = String(config.coldStart?.endpoint || '/lamps?pageSize=1');
+  env.COLD_START_SUCCESS_STATUS = String(config.coldStart?.successStatus ?? 200);
   if (service.authHeader) {
     env.AUTH_HEADER = service.authHeader;
   }
@@ -311,9 +333,24 @@ function aggregatePass(serviceRuns) {
     };
   }
 
+  const coldSuccessfulRuns = successfulRuns.filter((r) =>
+    r.coldStart &&
+    !r.coldStart.failed &&
+    Number.isFinite(r.coldStart.readyMs)
+  );
+  const coldFailedRuns = successfulRuns.filter((r) => r.coldStart && r.coldStart.failed);
+  const coldStart = {
+    readyMs: median(coldSuccessfulRuns.map((r) => r.coldStart.readyMs)),
+    attempts: median(coldSuccessfulRuns.map((r) => r.coldStart.attempts)),
+    errorRate: median(coldSuccessfulRuns.map((r) => r.coldStart.errorRate)),
+    successfulColdSamples: coldSuccessfulRuns.length,
+    failedColdSamples: coldFailedRuns.length,
+  };
+
   return {
     successfulIterations: successfulRuns.length,
     failedIterations: serviceRuns.length - successfulRuns.length,
+    coldStart,
     fixed: {
       p95: fixedP95,
       p99: fixedP99,
@@ -380,6 +417,8 @@ async function main() {
 
       for (let iteration = 1; iteration <= Number(config.iterationsPerPass || 1); iteration += 1) {
         console.log(`\n=== ${passName.toUpperCase()} :: ${service.name} :: iteration ${iteration} ===`);
+        const iterDir = path.join(rawRoot, passName, service.name, `iter-${iteration}`);
+        ensureDir(iterDir);
 
         try {
           if (passName === 'db') {
@@ -389,14 +428,54 @@ async function main() {
             }
           }
 
-          await runPrecheckWithRetry(baseUrl, config.basePath, service.authHeader || '', {
-            retries: 3,
-            initialDelayMs: 1000,
-            maxDelayMs: 5000,
-          });
+          let coldStart = null;
+          const shouldRunColdStart = Boolean(config.coldStart?.enabled) &&
+            (Boolean(config.coldStart.runPerIteration) || iteration === 1);
 
-          const iterDir = path.join(rawRoot, passName, service.name, `iter-${iteration}`);
-          ensureDir(iterDir);
+          if (shouldRunColdStart) {
+            const cooldownSeconds = Number(config.coldStart?.cooldownSeconds || 0);
+            if (cooldownSeconds > 0) {
+              console.log(`Waiting ${cooldownSeconds}s cooldown before cold-start probe...`);
+              await sleep(cooldownSeconds * 1000);
+            }
+
+            const coldStartFile = path.join(iterDir, 'cold-start.json');
+            const coldStartSummary = runK6Phase({
+              scenarioPath,
+              outputFile: coldStartFile,
+              env: buildK6Env({
+                config,
+                service,
+                baseUrl,
+                mode: 'cold_start',
+                targetRps: 1,
+                duration: `${Number(config.coldStart?.maxWaitSeconds || 60)}s`,
+              }),
+            });
+
+            const readyMetric = parseMetric(coldStartSummary, 'cold_start_ready_ms');
+            const readyMs = readyMetric?.avg ?? null;
+            coldStart = {
+              readyMs,
+              attempts: parseScalar(coldStartSummary, 'cold_start_attempts'),
+              firstSuccessStatus: parseScalar(coldStartSummary, 'cold_start_first_success_status'),
+              errorRate: parseRate(coldStartSummary, 'cold_start_error_rate') || 0,
+              duration: parseMetric(coldStartSummary, 'cold_start_req_duration'),
+              failed: !Number.isFinite(readyMs),
+            };
+
+            if (coldStart.failed) {
+              console.warn(
+                `[cold-start] ${passName}/${service.name}/iter-${iteration}: no successful response within max wait`,
+              );
+            }
+          }
+
+          await runPrecheckWithRetry(baseUrl, config.basePath, service.authHeader || '', {
+            retries: 6,
+            initialDelayMs: 1000,
+            maxDelayMs: 10000,
+          });
 
           const warmupFile = path.join(iterDir, 'warmup.json');
           const warmupSummary = runK6Phase({
@@ -487,6 +566,7 @@ async function main() {
           const serviceRun = {
             iteration,
             failed: false,
+            coldStart,
             warmup: {
               duration: parseMetric(warmupSummary, 'warmup_req_duration'),
               errorRate: parseRate(warmupSummary, 'warmup_error_rate') || 0,
@@ -510,6 +590,7 @@ async function main() {
             iteration,
             failed: true,
             error: message,
+            coldStart: null,
           });
         }
       }

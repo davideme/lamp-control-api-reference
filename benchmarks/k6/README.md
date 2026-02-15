@@ -9,6 +9,7 @@ This directory contains a benchmark harness for comparing the six language imple
   - `db` pass (realistic signal)
 - Fixed, fairness-first Cloud Run settings for all services
 - Main ranking at fixed concurrency pressure with `concurrency=80`
+- Separate cold-start appendix (not used in primary ranking)
 - Optional non-ranking extreme run at `1000 RPS` (disabled by default)
 - Sequential service execution (no parallel cross-service load)
 - Raw k6 result exports and generated markdown summary
@@ -139,6 +140,8 @@ startupProbe:
     port: 8080
 ```
 
+For meaningful cold-start sampling, keep `cloudRun.minInstances=0`.
+
 ## 4) Run benchmark
 
 Run both passes (`memory`,`db`) with settings from `config.json`:
@@ -177,8 +180,17 @@ Fast profile on macOS:
 caffeinate -i node benchmarks/k6/run-benchmarks.js --config benchmarks/k6/config.fast.json
 ```
 
+Disable cold-start appendix for quick local iterations:
+
+```bash
+node benchmarks/k6/run-benchmarks.js --config benchmarks/k6/config.fast.json
+# then set coldStart.enabled=false in the selected config
+```
+
 Runtime behavior:
-- Precheck CRUD uses retry with exponential backoff (up to 4 attempts total).
+- Cold-start probe runs before warmup/fixed/stress and is reported separately.
+- Cold-start probe waits optional cooldown (`coldStart.cooldownSeconds`) to improve scale-to-zero likelihood.
+- Precheck CRUD uses retry with exponential backoff (up to 7 attempts total).
 - If an iteration still fails (precheck, k6, or setup error), the runner logs the error, records the failed iteration in `run-report.json`, and continues with the next iteration/service.
 
 Enable the extreme appendix run:
@@ -192,6 +204,7 @@ Outputs:
 - Raw k6 JSON: `benchmarks/results/raw/<run-id>/...`
 - Structured run report: `benchmarks/results/run-report.json`
 - Ranked markdown summary: `benchmarks/results/summary.md`
+- Cold-start artifact per sampled iteration: `benchmarks/results/raw/<run-id>/<pass>/<service>/iter-*/cold-start.json`
 
 ## 5) Rebuild summary only
 

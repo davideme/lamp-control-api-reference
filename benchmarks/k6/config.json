@@ -21,6 +21,15 @@
     "rps": 1000,
     "runPerIteration": false
   },
+  "coldStart": {
+    "enabled": true,
+    "runPerIteration": false,
+    "cooldownSeconds": 900,
+    "maxWaitSeconds": 60,
+    "probeIntervalMs": 500,
+    "endpoint": "/lamps?pageSize=1",
+    "successStatus": 200
+  },
   "slo": {
     "p95Ms": 300,
     "errorRate": 0.01
