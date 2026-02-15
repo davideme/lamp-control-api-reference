@@ -40,7 +40,7 @@
     "projectId": "lamp-control-469416",
     "projectNumber": "827868544165",
     "maxInstances": 1,
-    "minInstances": 1,
+    "minInstances": 0,
     "concurrency": 80,
     "cpu": "1",
     "memory": "512Mi",
