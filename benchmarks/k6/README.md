@@ -165,6 +165,18 @@ Run benchmark without running setup commands (`memorySetupCommand` / `dbSetupCom
 node benchmarks/k6/run-benchmarks.js --passes memory --skip-setup
 ```
 
+Run from macOS without sleep interruptions:
+
+```bash
+caffeinate -i node benchmarks/k6/run-benchmarks.js
+```
+
+Fast profile on macOS:
+
+```bash
+caffeinate -i node benchmarks/k6/run-benchmarks.js --config benchmarks/k6/config.fast.json
+```
+
 Runtime behavior:
 - Precheck CRUD uses retry with exponential backoff (up to 4 attempts total).
 - If an iteration still fails (precheck, k6, or setup error), the runner logs the error, records the failed iteration in `run-report.json`, and continues with the next iteration/service.
