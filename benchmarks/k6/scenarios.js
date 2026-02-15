@@ -62,9 +62,7 @@ export const options = {
     },
 };
 
-const headers = {
-  'Content-Type': 'application/json',
-};
+const headers = {};
 
 if (AUTH_HEADER) {
   headers.Authorization = AUTH_HEADER;
@@ -90,7 +88,11 @@ function track(resp, ok) {
 }
 
 function req(method, endpoint, body, expectedStatuses) {
-  const response = http.request(method, url(endpoint), body, { headers });
+  const requestHeaders = { ...headers };
+  if (body !== undefined && body !== null) {
+    requestHeaders['Content-Type'] = 'application/json';
+  }
+  const response = http.request(method, url(endpoint), body, { headers: requestHeaders });
   const ok = check(response, {
     [`${method} ${endpoint} status`]: (r) => expectedStatuses.includes(r.status),
   });
