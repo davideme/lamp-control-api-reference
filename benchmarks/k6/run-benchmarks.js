@@ -90,9 +90,12 @@ function sleep(ms) {
 }
 
 async function httpJson(method, url, body, authHeader) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {};
   if (authHeader) {
     headers.Authorization = authHeader;
+  }
+  if (body !== undefined && body !== null) {
+    headers['Content-Type'] = 'application/json';
   }
 
   const response = await fetch(url, {
