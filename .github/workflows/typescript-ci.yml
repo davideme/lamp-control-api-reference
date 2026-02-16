@@ -49,14 +49,9 @@ jobs:
     - name: Type Check
       run: npm run typecheck
       
-    - name: Lint & Format Check
+    - name: Lint Check
       id: lint
-      run: npm run lint -- --fix
-
-    - uses: reviewdog/action-suggester@v1
-      with:
-        tool_name: npm run lint -- --fix
-        fail_level: error
+      run: npm run lint
 
     - name: Build
       run: npm run build
