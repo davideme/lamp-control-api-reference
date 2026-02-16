@@ -1,5 +1,7 @@
 """Unit tests for the InMemoryLampRepository class."""
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 
 from src.openapi_server.entities.lamp_entity import LampEntity
@@ -110,3 +112,53 @@ class TestInMemoryLampRepository:
         with pytest.raises(LampNotFoundError) as exc_info:
             await repository.delete("nonexistent-id")
         assert str(exc_info.value) == "Lamp with ID nonexistent-id not found"
+
+    async def test_list_paginated_returns_bounded_window(self, repository):
+        """Test list_paginated returns an offset/limit window."""
+        # Arrange
+        first = LampEntity(id="lamp-a", status=True)
+        second = LampEntity(id="lamp-b", status=False)
+        third = LampEntity(id="lamp-c", status=True)
+        await repository.create(first)
+        await repository.create(second)
+        await repository.create(third)
+
+        # Act
+        lamps = await repository.list_paginated(offset=1, limit=1)
+
+        # Assert
+        assert len(lamps) == 1
+        assert lamps[0].id == "lamp-b"
+
+    async def test_list_paginated_with_large_offset_returns_empty(self, repository):
+        """Test list_paginated returns empty list when offset exceeds dataset size."""
+        # Arrange
+        await repository.create(LampEntity(id="lamp-a", status=True))
+
+        # Act
+        lamps = await repository.list_paginated(offset=10, limit=5)
+
+        # Assert
+        assert lamps == []
+
+    async def test_list_paginated_uses_deterministic_ordering(self, repository):
+        """Test list_paginated ordering by created_at then id."""
+        # Arrange
+        same_time = datetime.now(UTC)
+        lamp_c = LampEntity(id="lamp-c", status=True, created_at=same_time, updated_at=same_time)
+        lamp_a = LampEntity(id="lamp-a", status=False, created_at=same_time, updated_at=same_time)
+        lamp_b = LampEntity(
+            id="lamp-b",
+            status=True,
+            created_at=same_time + timedelta(seconds=1),
+            updated_at=same_time + timedelta(seconds=1),
+        )
+        await repository.create(lamp_c)
+        await repository.create(lamp_a)
+        await repository.create(lamp_b)
+
+        # Act
+        lamps = await repository.list_paginated(offset=0, limit=3)
+
+        # Assert
+        assert [lamp.id for lamp in lamps] == ["lamp-a", "lamp-c", "lamp-b"]

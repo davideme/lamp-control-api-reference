@@ -1,6 +1,6 @@
 """Unit tests for the DefaultApiImpl class."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
@@ -19,7 +19,7 @@ def mock_lamp_repository():
     """Fixture that provides a mocked LampRepository."""
     mock = AsyncMock()
     mock.get.return_value = None
-    mock.list.return_value = []
+    mock.list_paginated.return_value = []
     return mock
 
 
@@ -102,22 +102,88 @@ class TestDefaultApiImpl:
         mock_lamp_repository.get.assert_called_once_with("nonexistent-id")
 
     @pytest.mark.asyncio
-    async def test_list_lamps(self, api_impl, mock_lamp_repository, sample_lamp_entity):
-        """Test listing all lamps."""
+    async def test_list_lamps_respects_page_size_and_cursor(
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
+    ):
+        """Test listing lamps with bounded pagination."""
         # Arrange
-        expected_lamp_entities = [sample_lamp_entity]
-        mock_lamp_repository.list.return_value = expected_lamp_entities
+        second_entity = LampEntity(
+            id="test-lamp-2",
+            status=False,
+            created_at=sample_lamp_entity.created_at + timedelta(seconds=1),
+            updated_at=sample_lamp_entity.updated_at + timedelta(seconds=1),
+        )
+        extra_entity = LampEntity(
+            id="test-lamp-3",
+            status=True,
+            created_at=sample_lamp_entity.created_at + timedelta(seconds=2),
+            updated_at=sample_lamp_entity.updated_at + timedelta(seconds=2),
+        )
+        mock_lamp_repository.list_paginated.return_value = [
+            sample_lamp_entity,
+            second_entity,
+            extra_entity,
+        ]
 
         # Act
-        result = await api_impl.list_lamps(cursor=None, page_size=None)
+        result = await api_impl.list_lamps(cursor="10", page_size=2)
+
+        # Assert
+        assert len(result.data) == 2
+        assert result.data[0].id == sample_lamp_entity.id
+        assert result.data[1].id == second_entity.id
+        assert result.has_more is True
+        assert result.next_cursor == "12"
+        mock_lamp_repository.list_paginated.assert_called_once_with(offset=10, limit=3)
+
+    @pytest.mark.asyncio
+    async def test_list_lamps_terminal_page(self, api_impl, mock_lamp_repository, sample_lamp_entity):
+        """Test listing lamps on terminal page."""
+        # Arrange
+        mock_lamp_repository.list_paginated.return_value = [sample_lamp_entity]
+
+        # Act
+        result = await api_impl.list_lamps(cursor="5", page_size=2)
 
         # Assert
         assert len(result.data) == 1
         assert result.data[0].id == sample_lamp_entity.id
-        assert result.data[0].status == sample_lamp_entity.status
         assert result.has_more is False
         assert result.next_cursor is None
-        mock_lamp_repository.list.assert_called_once()
+        mock_lamp_repository.list_paginated.assert_called_once_with(offset=5, limit=3)
+
+    @pytest.mark.asyncio
+    async def test_list_lamps_invalid_cursor_defaults_to_zero(
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
+    ):
+        """Test invalid cursor fallback behavior."""
+        # Arrange
+        mock_lamp_repository.list_paginated.return_value = [sample_lamp_entity]
+
+        # Act
+        result = await api_impl.list_lamps(cursor="bad-cursor", page_size=1)
+
+        # Assert
+        assert len(result.data) == 1
+        assert result.data[0].id == sample_lamp_entity.id
+        mock_lamp_repository.list_paginated.assert_called_once_with(offset=0, limit=2)
+
+    @pytest.mark.asyncio
+    async def test_list_lamps_negative_cursor_defaults_to_zero(
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
+    ):
+        """Test negative cursor fallback behavior."""
+        # Arrange
+        mock_lamp_repository.list_paginated.return_value = []
+
+        # Act
+        result = await api_impl.list_lamps(cursor="-7", page_size=None)
+
+        # Assert
+        assert result.data == []
+        assert result.has_more is False
+        assert result.next_cursor is None
+        mock_lamp_repository.list_paginated.assert_called_once_with(offset=0, limit=26)
 
     @pytest.mark.asyncio
     async def test_update_lamp_success(self, api_impl, mock_lamp_repository, sample_lamp_entity):
