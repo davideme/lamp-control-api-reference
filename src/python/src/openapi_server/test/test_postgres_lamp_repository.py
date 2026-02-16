@@ -242,8 +242,12 @@ class TestPostgresLampRepository:
         """Test list_paginated ordering is created_at then id."""
         # Arrange
         created_at = datetime.now(UTC)
-        lamp_a = LampEntity(id=str(uuid4()), status=True, created_at=created_at, updated_at=created_at)
-        lamp_b = LampEntity(id=str(uuid4()), status=False, created_at=created_at, updated_at=created_at)
+        lamp_a = LampEntity(
+            id=str(uuid4()), status=True, created_at=created_at, updated_at=created_at
+        )
+        lamp_b = LampEntity(
+            id=str(uuid4()), status=False, created_at=created_at, updated_at=created_at
+        )
         await repository.create(lamp_b)
         await repository.create(lamp_a)
 

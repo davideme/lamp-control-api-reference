@@ -137,7 +137,9 @@ class TestDefaultApiImpl:
         mock_lamp_repository.list_paginated.assert_called_once_with(offset=10, limit=3)
 
     @pytest.mark.asyncio
-    async def test_list_lamps_terminal_page(self, api_impl, mock_lamp_repository, sample_lamp_entity):
+    async def test_list_lamps_terminal_page(
+        self, api_impl, mock_lamp_repository, sample_lamp_entity
+    ):
         """Test listing lamps on terminal page."""
         # Arrange
         mock_lamp_repository.list_paginated.return_value = [sample_lamp_entity]
