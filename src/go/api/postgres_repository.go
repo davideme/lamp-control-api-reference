@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
@@ -151,13 +150,17 @@ func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int
 	if limit <= 0 {
 		return []*entities.LampEntity{}, nil
 	}
-	if offset > math.MaxInt32 || limit > math.MaxInt32 {
+	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
+	offset32 := int32(offset)
+	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
+	limit32 := int32(limit)
+	if int(offset32) != offset || int(limit32) != limit {
 		return nil, fmt.Errorf("pagination parameters exceed supported range")
 	}
 
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  limit32,
+		Offset: offset32,
 	})
 
 	if err != nil {

@@ -47,8 +47,9 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 
 	offset := 0
 	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
-		parsedOffset, err := strconv.Atoi(*request.Params.Cursor)
-		if err != nil || parsedOffset < 0 {
+		parsedOffset, parseErr := strconv.Atoi(*request.Params.Cursor)
+		if parseErr != nil || parsedOffset < 0 {
+			//nolint:nilerr // Strict handler uses typed 400 response with nil Go error.
 			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
 		}
 		offset = parsedOffset
