@@ -1,6 +1,8 @@
 package org.openapitools.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,7 +40,33 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LampService {
 
-  public record PagedLampsResult(List<Lamp> data, boolean hasMore, Optional<String> nextCursor) {}
+  public static final class PagedLampsResult {
+    private final List<Lamp> data;
+    private final boolean hasMore;
+    private final Optional<String> nextCursor;
+
+    public PagedLampsResult(
+        final List<Lamp> data, final boolean hasMore, final Optional<String> nextCursor) {
+      this.data = List.copyOf(data);
+      this.hasMore = hasMore;
+      this.nextCursor = nextCursor;
+    }
+
+    @SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Returns a defensive copy of immutable snapshot data")
+    public List<Lamp> data() {
+      return new ArrayList<>(data);
+    }
+
+    public boolean hasMore() {
+      return hasMore;
+    }
+
+    public Optional<String> nextCursor() {
+      return nextCursor;
+    }
+  }
 
   private final LampRepository repository;
   private final LampMapper mapper;
