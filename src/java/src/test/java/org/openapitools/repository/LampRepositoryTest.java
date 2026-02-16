@@ -341,6 +341,9 @@ class LampRepositoryTest {
     for (int i = 0; i < 5; i++) {
       lampRepository.save(new LampEntity(i % 2 == 0));
     }
+    LampEntity deletedLamp = lampRepository.save(new LampEntity(true));
+    deletedLamp.setDeletedAt(OffsetDateTime.now());
+    lampRepository.save(deletedLamp);
 
     // When
     Page<LampEntity> page = lampRepository.findAll(PageRequest.of(0, 3));
@@ -348,6 +351,7 @@ class LampRepositoryTest {
     // Then
     assertThat(page.getContent()).hasSize(3);
     assertThat(page.getTotalElements()).isEqualTo(5);
+    assertThat(page.getContent()).allMatch(lamp -> lamp.getDeletedAt() == null);
   }
 
   @Test
@@ -376,5 +380,33 @@ class LampRepositoryTest {
     // Then
     assertThat(page.getContent()).hasSize(2);
     assertThat(page.getTotalElements()).isEqualTo(5);
+  }
+
+  @Test
+  void findAllPaged_ShouldReturnDeterministicOrderByCreatedAtThenId() {
+    // Given
+    final OffsetDateTime baseTime = OffsetDateTime.now();
+    final LampEntity firstByIdAtSameTime =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000001"), true);
+    firstByIdAtSameTime.setCreatedAt(baseTime.minusMinutes(2));
+    lampRepository.save(firstByIdAtSameTime);
+
+    final LampEntity secondByIdAtSameTime =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000002"), true);
+    secondByIdAtSameTime.setCreatedAt(baseTime.minusMinutes(2));
+    lampRepository.save(secondByIdAtSameTime);
+
+    final LampEntity latest =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000003"), true);
+    latest.setCreatedAt(baseTime.minusMinutes(1));
+    lampRepository.save(latest);
+
+    // When
+    final Page<LampEntity> page = lampRepository.findAll(PageRequest.of(0, 3));
+
+    // Then
+    assertThat(page.getContent())
+        .extracting(LampEntity::getId)
+        .containsExactly(firstByIdAtSameTime.getId(), secondByIdAtSameTime.getId(), latest.getId());
   }
 }

@@ -1,13 +1,14 @@
 package org.openapitools.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,15 +45,17 @@ class LampsControllerTest {
   }
 
   @Test
-  void listLamps_ShouldReturnAllLamps() throws Exception {
+  void listLamps_ShouldReturnBoundedPageWithNextCursor() throws Exception {
     // Given
-    List<Lamp> lamps = Arrays.asList(testLamp);
-    when(lampService.findAllActive()).thenReturn(lamps);
+    final Lamp secondLamp = new Lamp(UUID.randomUUID(), false);
+    final List<Lamp> lamps = List.of(testLamp, secondLamp);
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(lamps, true, Optional.of("2")));
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/v1/lamps").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps").param("pageSize", "2").accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -62,7 +65,50 @@ class LampsControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.data[0].id").value(testLampId.toString()))
-        .andExpect(jsonPath("$.data[0].status").value(true));
+        .andExpect(jsonPath("$.data[0].status").value(true))
+        .andExpect(jsonPath("$.hasMore").value(true))
+        .andExpect(jsonPath("$.nextCursor").value("2"));
+    verify(lampService).findAllActivePage(0, 2);
+  }
+
+  @Test
+  void listLamps_TerminalPage_ShouldOmitNextCursor() throws Exception {
+    // Given
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(List.of(testLamp), false, Optional.empty()));
+
+    // When & Then
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps").param("cursor", "4").param("pageSize", "2"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc
+        .perform(asyncDispatch(result))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.data[0].id").value(testLampId.toString()))
+        .andExpect(jsonPath("$.hasMore").value(false))
+        .andExpect(jsonPath("$.nextCursor").doesNotExist());
+    verify(lampService).findAllActivePage(4, 2);
+  }
+
+  @Test
+  void listLamps_InvalidCursor_ShouldFallbackToFirstPage() throws Exception {
+    // Given
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(List.of(testLamp), false, Optional.empty()));
+
+    // When & Then
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps").param("cursor", "abc").param("pageSize", "2"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isOk());
+    verify(lampService).findAllActivePage(0, 2);
   }
 
   @Test
