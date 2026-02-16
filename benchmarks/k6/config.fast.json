@@ -31,7 +31,7 @@
   "coldStart": {
     "enabled": true,
     "runPerIteration": false,
-    "cooldownSeconds": 900,
+    "cooldownSeconds": 0,
     "maxWaitSeconds": 60,
     "probeIntervalMs": 500,
     "endpoint": "/lamps?pageSize=1",
