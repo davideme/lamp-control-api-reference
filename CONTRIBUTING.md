@@ -72,6 +72,40 @@ Each language implementation should follow the same Git workflow:
 - Generate code quality and test coverage badges for each implementation
 - Establish quality gates that block merging if standards aren't met
 
+### Local Pre-commit Hooks
+
+To catch formatting and lint issues before push/PR, this repository uses a local `pre-commit` setup aligned with CI quality checks.
+
+**One-time setup:**
+
+```bash
+pre-commit install
+```
+
+**Run manually for all files:**
+
+```bash
+pre-commit run --all-files
+```
+
+**Behavior:**
+
+- Hooks run only for staged files in affected language/database paths.
+- Hooks apply auto-fixes when possible.
+- If files are auto-fixed, they are re-staged and the commit is blocked once so you can review and re-run commit.
+- If lint/static-analysis issues remain, commit is blocked with actionable output.
+
+**Important:**
+
+- Local pre-commit hooks are fast-fail guardrails, not a replacement for CI.
+- CI workflows remain the source of truth for merge gating.
+
+**Troubleshooting:**
+
+- Ensure language toolchains are installed for touched paths (`npm`, `poetry`, `go`, `mvn`, `dotnet`, `gradle`, `sqlfluff`).
+- If a hook fails after auto-fix, inspect staged changes and run commit again.
+- Use `pre-commit run --all-files` to reproduce full local checks.
+
 ### Test Automation
 
 **Guidelines:**
