@@ -11,6 +11,11 @@ import java.util.UUID
 interface LampRepository {
     suspend fun getAllLamps(): List<LampEntity>
 
+    suspend fun getLampsPage(
+        offset: Int,
+        limit: Int,
+    ): List<LampEntity>
+
     suspend fun getLampById(id: UUID): LampEntity?
 
     suspend fun createLamp(entity: LampEntity): LampEntity

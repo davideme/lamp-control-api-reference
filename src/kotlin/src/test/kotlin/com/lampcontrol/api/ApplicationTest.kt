@@ -58,6 +58,68 @@ class ApplicationTest {
         }
 
     @Test
+    fun testListLampsPaginationFlow() =
+        testApplication {
+            application {
+                module()
+            }
+
+            repeat(30) { idx ->
+                client.post("/v1/lamps") {
+                    contentType(ContentType.Application.Json)
+                    setBody(json.encodeToString(LampCreate(status = idx % 2 == 0)))
+                }.apply {
+                    assertEquals(HttpStatusCode.Created, status)
+                }
+            }
+
+            val firstPageResponse = client.get("/v1/lamps?pageSize=25")
+            assertEquals(HttpStatusCode.OK, firstPageResponse.status)
+            val firstPage = json.decodeFromString<ListLamps200Response>(firstPageResponse.bodyAsText())
+            assertEquals(25, firstPage.data.size)
+            assertTrue(firstPage.hasMore)
+            assertNotNull(firstPage.nextCursor)
+
+            val seenIds = firstPage.data.map { it.id }.toMutableSet()
+            var cursor = firstPage.nextCursor
+            var terminalPage: ListLamps200Response? = null
+            var hops = 0
+
+            while (cursor != null && hops < 20) {
+                val pageResponse = client.get("/v1/lamps?cursor=$cursor&pageSize=25")
+                assertEquals(HttpStatusCode.OK, pageResponse.status)
+                val page = json.decodeFromString<ListLamps200Response>(pageResponse.bodyAsText())
+                assertTrue(page.data.size <= 25)
+                val pageIds = page.data.map { it.id }.toSet()
+                assertTrue(seenIds.intersect(pageIds).isEmpty())
+                seenIds.addAll(pageIds)
+                if (!page.hasMore) {
+                    terminalPage = page
+                    cursor = null
+                } else {
+                    cursor = page.nextCursor
+                }
+                hops++
+            }
+
+            assertNotNull(terminalPage)
+            assertFalse(terminalPage!!.hasMore)
+            assertNull(terminalPage!!.nextCursor)
+        }
+
+    @Test
+    fun testListLampsInvalidPageSize() =
+        testApplication {
+            application {
+                module()
+            }
+
+            client.get("/v1/lamps?pageSize=101").apply {
+                assertEquals(HttpStatusCode.BadRequest, status)
+            }
+        }
+
+    @Test
     fun testCreateAndGetLamp() =
         testApplication {
             application {

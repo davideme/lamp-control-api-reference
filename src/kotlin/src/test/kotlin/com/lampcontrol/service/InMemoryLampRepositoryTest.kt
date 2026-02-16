@@ -4,6 +4,8 @@ import com.lampcontrol.entity.LampEntity
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.util.UUID
 
 class InMemoryLampRepositoryTest {
     private val repo = InMemoryLampRepository()
@@ -36,5 +38,25 @@ class InMemoryLampRepositoryTest {
             assertTrue(repo.deleteLamp(created.id))
             assertFalse(repo.lampExists(created.id))
             assertNull(repo.getLampById(created.id))
+        }
+
+    @Test
+    fun `getLampsPage should return bounded deterministic slices`() =
+        runTest {
+            val t1 = Instant.parse("2026-01-01T00:00:00Z")
+            val t2 = Instant.parse("2026-01-01T00:00:01Z")
+            val idA = UUID.fromString("00000000-0000-0000-0000-000000000001")
+            val idB = UUID.fromString("00000000-0000-0000-0000-000000000002")
+            val idC = UUID.fromString("00000000-0000-0000-0000-000000000003")
+
+            repo.createLamp(LampEntity(id = idB, status = true, createdAt = t1, updatedAt = t1))
+            repo.createLamp(LampEntity(id = idA, status = false, createdAt = t1, updatedAt = t1))
+            repo.createLamp(LampEntity(id = idC, status = true, createdAt = t2, updatedAt = t2))
+
+            val page = repo.getLampsPage(offset = 0, limit = 2)
+            assertEquals(listOf(idA, idB), page.map { it.id })
+
+            val next = repo.getLampsPage(offset = 2, limit = 2)
+            assertEquals(listOf(idC), next.map { it.id })
         }
 }

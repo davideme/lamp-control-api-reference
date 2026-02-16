@@ -20,6 +20,20 @@ class InMemoryLampRepository : LampRepository {
         return lamps.values.toList()
     }
 
+    override suspend fun getLampsPage(
+        offset: Int,
+        limit: Int,
+    ): List<LampEntity> {
+        val ordered =
+            lamps.values.sortedWith(
+                compareBy<LampEntity>({ it.createdAt }, { it.id }),
+            )
+        val start = offset.coerceAtLeast(0)
+        if (start >= ordered.size) return emptyList()
+        val end = (start + limit).coerceAtMost(ordered.size)
+        return ordered.subList(start, end)
+    }
+
     /**
      * Get a lamp by ID
      */
