@@ -45,6 +45,7 @@ func TestV1PrefixRouting(t *testing.T) {
 		path           string
 		body           string
 		expectedStatus int
+		setup          func(*testing.T, string)
 	}{
 		{
 			name:           "health check without v1 prefix",
@@ -57,6 +58,43 @@ func TestV1PrefixRouting(t *testing.T) {
 			method:         "GET",
 			path:           "/v1/lamps",
 			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "list lamps rejects invalid cursor",
+			method:         "GET",
+			path:           "/v1/lamps?cursor=abc&pageSize=10",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "list lamps bounded by pageSize",
+			method:         "GET",
+			path:           "/v1/lamps?pageSize=1",
+			expectedStatus: http.StatusOK,
+			setup: func(t *testing.T, baseURL string) {
+				t.Helper()
+				for i := 0; i < 2; i++ {
+					req, err := http.NewRequestWithContext(
+						context.Background(),
+						http.MethodPost,
+						baseURL+"/v1/lamps",
+						strings.NewReader(`{"status": true}`),
+					)
+					if err != nil {
+						t.Fatalf("Failed to create setup request: %v", err)
+					}
+					req.Header.Set("Content-Type", "application/json")
+
+					resp, err := (&http.Client{}).Do(req)
+					if err != nil {
+						t.Fatalf("Failed to seed lamp: %v", err)
+					}
+					resp.Body.Close()
+
+					if resp.StatusCode != http.StatusCreated {
+						t.Fatalf("Expected 201 from setup create, got %d", resp.StatusCode)
+					}
+				}
+			},
 		},
 		{
 			name:           "create lamp with v1 prefix",
@@ -75,6 +113,10 @@ func TestV1PrefixRouting(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup(t, ts.URL)
+			}
+
 			var req *http.Request
 			var err error
 
@@ -115,6 +157,15 @@ func TestV1PrefixRouting(t *testing.T) {
 				var result map[string]interface{}
 				if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 					t.Errorf("Failed to decode response: %v", err)
+				}
+				if tt.name == "list lamps bounded by pageSize" {
+					data, ok := result["data"].([]interface{})
+					if !ok {
+						t.Fatalf("Expected data array in list response")
+					}
+					if len(data) != 1 {
+						t.Fatalf("Expected 1 lamp in response for pageSize=1, got %d", len(data))
+					}
 				}
 			}
 		})

@@ -87,7 +87,7 @@ func TestInMemoryLampRepository_Create_Multiple(t *testing.T) {
 	}
 
 	// Verify both lamps exist
-	lamps, err := repo.List(ctx)
+	lamps, err := repo.List(ctx, 0, 1000)
 	if err != nil {
 		t.Fatalf("List failed: %v", err)
 	}
@@ -256,7 +256,7 @@ func TestInMemoryLampRepository_List(t *testing.T) {
 	ctx := context.Background()
 
 	// Test empty repository
-	lamps, err := repo.List(ctx)
+	lamps, err := repo.List(ctx, 0, 1000)
 	if err != nil {
 		t.Fatalf("List failed on empty repository: %v", err)
 	}
@@ -301,7 +301,7 @@ func TestInMemoryLampRepository_List(t *testing.T) {
 	}
 
 	// Test list with multiple lamps
-	lamps, err = repo.List(ctx)
+	lamps, err = repo.List(ctx, 0, 1000)
 	if err != nil {
 		t.Fatalf("List failed: %v", err)
 	}
@@ -324,6 +324,71 @@ func TestInMemoryLampRepository_List(t *testing.T) {
 	}
 	if !lampIds[lamp3.ID] {
 		t.Error("lamp3 not found in list")
+	}
+}
+
+func TestInMemoryLampRepository_List_PaginationOrder(t *testing.T) {
+	repo := NewInMemoryLampRepository()
+	ctx := context.Background()
+
+	sharedTime := time.Now()
+	lampA := &entities.LampEntity{
+		ID:        uuid.MustParse("00000000-0000-0000-0000-00000000000a"),
+		Status:    true,
+		CreatedAt: sharedTime,
+		UpdatedAt: sharedTime,
+	}
+	lampB := &entities.LampEntity{
+		ID:        uuid.MustParse("00000000-0000-0000-0000-00000000000b"),
+		Status:    false,
+		CreatedAt: sharedTime,
+		UpdatedAt: sharedTime,
+	}
+	lampC := &entities.LampEntity{
+		ID:        uuid.MustParse("00000000-0000-0000-0000-00000000000c"),
+		Status:    true,
+		CreatedAt: sharedTime,
+		UpdatedAt: sharedTime,
+	}
+
+	if err := repo.Create(ctx, lampC); err != nil {
+		t.Fatalf("Create lampC failed: %v", err)
+	}
+	if err := repo.Create(ctx, lampA); err != nil {
+		t.Fatalf("Create lampA failed: %v", err)
+	}
+	if err := repo.Create(ctx, lampB); err != nil {
+		t.Fatalf("Create lampB failed: %v", err)
+	}
+
+	firstPage, err := repo.List(ctx, 0, 2)
+	if err != nil {
+		t.Fatalf("List first page failed: %v", err)
+	}
+	if len(firstPage) != 2 {
+		t.Fatalf("Expected 2 lamps on first page, got %d", len(firstPage))
+	}
+	if firstPage[0].ID != lampA.ID || firstPage[1].ID != lampB.ID {
+		t.Fatalf("Unexpected first page order: %s, %s", firstPage[0].ID, firstPage[1].ID)
+	}
+
+	secondPage, err := repo.List(ctx, 2, 2)
+	if err != nil {
+		t.Fatalf("List second page failed: %v", err)
+	}
+	if len(secondPage) != 1 {
+		t.Fatalf("Expected 1 lamp on second page, got %d", len(secondPage))
+	}
+	if secondPage[0].ID != lampC.ID {
+		t.Fatalf("Unexpected second page lamp: %s", secondPage[0].ID)
+	}
+
+	emptyPage, err := repo.List(ctx, 10, 2)
+	if err != nil {
+		t.Fatalf("List empty page failed: %v", err)
+	}
+	if len(emptyPage) != 0 {
+		t.Fatalf("Expected empty page, got %d lamps", len(emptyPage))
 	}
 }
 
@@ -425,7 +490,7 @@ func TestInMemoryLampRepository_ConcurrentAccess(t *testing.T) {
 	wg.Wait()
 
 	// Verify final count
-	lamps, err := repo.List(ctx)
+	lamps, err := repo.List(ctx, 0, numGoroutines*numOperationsPerGoroutine)
 	if err != nil {
 		t.Fatalf("List failed after concurrent access: %v", err)
 	}
@@ -466,7 +531,7 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 
 			for j := 0; j < 10; j++ {
 				// Random read operations
-				lamps, err := repo.List(ctx)
+				lamps, err := repo.List(ctx, 0, 1000)
 				if err != nil {
 					t.Errorf("Concurrent list failed: %v", err)
 					return
@@ -558,7 +623,7 @@ func TestInMemoryLampRepository_ContextHandling(t *testing.T) {
 
 	// Repository operations should still work with canceled context
 	// since the implementation doesn't check for cancellation
-	lamps, err := repo.List(cancelCtx)
+	lamps, err := repo.List(cancelCtx, 0, 1000)
 	if err != nil {
 		t.Fatalf("List with canceled context failed: %v", err)
 	}

@@ -130,7 +130,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 					{ID: uuid.New(), Status: true},
 					{ID: uuid.New(), Status: false},
 				}
-				m.EXPECT().List(gomock.Any()).Return(lamps, nil)
+				m.EXPECT().List(gomock.Any(), 0, 26).Return(lamps, nil)
 			},
 			expectError: false,
 			expectResponse: func(resp ListLampsResponseObject) bool {
@@ -144,7 +144,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 		{
 			name: "successful list with empty result",
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().List(gomock.Any()).Return([]*entities.LampEntity{}, nil)
+				m.EXPECT().List(gomock.Any(), 0, 26).Return([]*entities.LampEntity{}, nil)
 			},
 			expectError: false,
 			expectResponse: func(resp ListLampsResponseObject) bool {
@@ -158,7 +158,7 @@ func TestLampAPI_ListLamps_WithMock(t *testing.T) {
 		{
 			name: "repository error",
 			setupMock: func(m *MockLampRepository) {
-				m.EXPECT().List(gomock.Any()).Return(nil, errors.New("database error"))
+				m.EXPECT().List(gomock.Any(), 0, 26).Return(nil, errors.New("database error"))
 			},
 			expectError: true,
 			expectResponse: func(resp ListLampsResponseObject) bool {
