@@ -130,7 +130,7 @@ const listLamps = `-- name: ListLamps :many
 SELECT id, is_on, created_at, updated_at, deleted_at
 FROM lamps
 WHERE deleted_at IS NULL
-ORDER BY created_at ASC
+ORDER BY created_at ASC, id ASC
 LIMIT $1 OFFSET $2
 `
 

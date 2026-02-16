@@ -142,15 +142,25 @@ func (r *PostgresLampRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// List returns all lamps in the repository
-func (r *PostgresLampRepository) List(ctx context.Context) ([]*entities.LampEntity, error) {
-	// For simplicity, list all lamps without pagination
-	// In production, you'd want to use proper pagination
-	const defaultLimit = 1000 // Reasonable default limit to prevent unbounded queries
+// List returns lamps in the repository with pagination.
+func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error) {
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		return []*entities.LampEntity{}, nil
+	}
+	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
+	offset32 := int32(offset)
+	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
+	limit32 := int32(limit)
+	if int(offset32) != offset || int(limit32) != limit {
+		return nil, fmt.Errorf("%w: offset=%d limit=%d", ErrInvalidPagination, offset, limit)
+	}
 
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
-		Limit:  defaultLimit,
-		Offset: 0,
+		Limit:  limit32,
+		Offset: offset32,
 	})
 
 	if err != nil {

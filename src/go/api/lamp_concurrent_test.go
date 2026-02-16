@@ -81,20 +81,38 @@ func TestLampAPI_ConcurrentAccess(t *testing.T) {
 	wg.Wait()
 
 	// Verify that we have the expected number of lamps by listing them
-	listResp, err := api.ListLamps(context.Background(), ListLampsRequestObject{})
-	if err != nil {
-		t.Fatalf("ListLamps failed: %v", err)
-	}
+	totalLamps := 0
+	cursor := ""
+	pageSize := 100
+	for {
+		params := ListLampsParams{PageSize: &pageSize}
+		if cursor != "" {
+			params.Cursor = &cursor
+		}
 
-	listResult, ok := listResp.(ListLamps200JSONResponse)
-	if !ok {
-		t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
+		listResp, err := api.ListLamps(context.Background(), ListLampsRequestObject{Params: params})
+		if err != nil {
+			t.Fatalf("ListLamps failed: %v", err)
+		}
+
+		listResult, ok := listResp.(ListLamps200JSONResponse)
+		if !ok {
+			t.Fatalf("Expected ListLamps200JSONResponse, got %T", listResp)
+		}
+		totalLamps += len(listResult.Data)
+		if !listResult.HasMore {
+			break
+		}
+		if listResult.NextCursor == nil {
+			t.Fatalf("Expected nextCursor when hasMore=true")
+		}
+		cursor = *listResult.NextCursor
 	}
 
 	expectedLamps := numGoroutines * numOperationsPerGoroutine
-	if len(listResult.Data) != expectedLamps {
-		t.Errorf("Expected %d lamps, got %d", expectedLamps, len(listResult.Data))
+	if totalLamps != expectedLamps {
+		t.Errorf("Expected %d lamps, got %d", expectedLamps, totalLamps)
 	}
 
-	t.Logf("Successfully created and accessed %d lamps concurrently", len(listResult.Data))
+	t.Logf("Successfully created and accessed %d lamps concurrently", totalLamps)
 }

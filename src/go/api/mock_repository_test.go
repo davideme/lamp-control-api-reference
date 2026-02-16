@@ -100,18 +100,18 @@ func (mr *MockLampRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockLampRepository) List(ctx context.Context) ([]*entities.LampEntity, error) {
+func (m *MockLampRepository) List(ctx context.Context, offset, limit int) ([]*entities.LampEntity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx)
+	ret := m.ctrl.Call(m, "List", ctx, offset, limit)
 	ret0, _ := ret[0].([]*entities.LampEntity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockLampRepositoryMockRecorder) List(ctx any) *gomock.Call {
+func (mr *MockLampRepositoryMockRecorder) List(ctx, offset, limit any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockLampRepository)(nil).List), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockLampRepository)(nil).List), ctx, offset, limit)
 }
 
 // Update mocks base method.

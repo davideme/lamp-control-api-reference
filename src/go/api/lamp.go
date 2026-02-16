@@ -4,7 +4,9 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
+	"strconv"
 )
 
 type LampAPI struct {
@@ -29,9 +31,43 @@ func NewLampAPIWithRepository(repo LampRepository) *LampAPI {
 // List all lamps
 // (GET /lamps)
 func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject) (ListLampsResponseObject, error) {
-	lampEntities, err := l.repository.List(ctx)
+	const (
+		defaultPageSize = 25
+		minPageSize     = 1
+		maxPageSize     = 100
+	)
+
+	pageSize := defaultPageSize
+	if request.Params.PageSize != nil {
+		pageSize = *request.Params.PageSize
+	}
+
+	if pageSize < minPageSize || pageSize > maxPageSize {
+		return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+	}
+
+	offset := 0
+	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
+		parsedOffset, parseErr := strconv.Atoi(*request.Params.Cursor)
+		if parseErr != nil || parsedOffset < 0 || parsedOffset > math.MaxInt32 {
+			//nolint:nilerr // Strict handler uses typed 400 response with nil Go error.
+			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+		}
+		offset = parsedOffset
+	}
+
+	lampEntities, err := l.repository.List(ctx, offset, pageSize+1)
 	if err != nil {
+		if errors.Is(err, ErrInvalidPagination) {
+			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+		}
+
 		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError, Err: err}
+	}
+
+	hasMore := len(lampEntities) > pageSize
+	if hasMore {
+		lampEntities = lampEntities[:pageSize]
 	}
 
 	// Convert domain entities to API models
@@ -40,12 +76,16 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 		lamps[i] = ToAPIModel(entity)
 	}
 
-	// For simplicity, we're returning all lamps without actual pagination
-	// In a real implementation, you would implement cursor-based pagination
+	var nextCursor *string
+	if hasMore {
+		cursor := strconv.Itoa(offset + pageSize)
+		nextCursor = &cursor
+	}
+
 	return ListLamps200JSONResponse{
 		Data:       lamps,
-		HasMore:    false, // No more pages for now
-		NextCursor: nil,   // No next cursor since we're showing all
+		HasMore:    hasMore,
+		NextCursor: nextCursor,
 	}, nil
 }
 

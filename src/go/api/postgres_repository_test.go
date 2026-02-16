@@ -222,7 +222,7 @@ func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
 	ctx := context.Background()
 
 	// Get initial count
-	initialLamps, err := repo.List(ctx)
+	initialLamps, err := repo.List(ctx, 0, 1000)
 	if err != nil {
 		t.Fatalf("Failed to list lamps: %v", err)
 	}
@@ -252,13 +252,30 @@ func testPostgresList(t *testing.T, repo *PostgresLampRepository) {
 	defer repo.Delete(ctx, lamp3.ID.String())
 
 	// List all lamps
-	lamps, err := repo.List(ctx)
+	lamps, err := repo.List(ctx, 0, 1000)
 	if err != nil {
 		t.Fatalf("Failed to list lamps: %v", err)
 	}
 
 	if len(lamps) != initialCount+3 {
 		t.Errorf("Expected %d lamps, got %d", initialCount+3, len(lamps))
+	}
+
+	// Test pagination semantics for DB mode.
+	paginated, err := repo.List(ctx, initialCount, 2)
+	if err != nil {
+		t.Fatalf("Failed to list paginated lamps: %v", err)
+	}
+	if len(paginated) != 2 {
+		t.Fatalf("Expected 2 lamps on paginated DB list, got %d", len(paginated))
+	}
+
+	lastPage, err := repo.List(ctx, initialCount+2, 2)
+	if err != nil {
+		t.Fatalf("Failed to list DB last page: %v", err)
+	}
+	if len(lastPage) != 1 {
+		t.Fatalf("Expected 1 lamp on DB last page, got %d", len(lastPage))
 	}
 }
 

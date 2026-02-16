@@ -4,6 +4,7 @@ package api
 import (
 	"context"
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
@@ -11,6 +12,9 @@ import (
 
 // ErrLampNotFound is returned when a lamp is not found in the repository
 var ErrLampNotFound = errors.New("lamp not found")
+
+// ErrInvalidPagination is returned when pagination arguments are invalid.
+var ErrInvalidPagination = errors.New("invalid pagination parameters")
 
 // LampRepository defines the interface for lamp data operations
 type LampRepository interface {
@@ -26,8 +30,8 @@ type LampRepository interface {
 	// Delete removes a lamp from the repository
 	Delete(ctx context.Context, id string) error
 
-	// List returns all lamps in the repository
-	List(ctx context.Context) ([]*entities.LampEntity, error)
+	// List returns lamps in the repository with pagination.
+	List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error)
 
 	// Exists checks if a lamp exists in the repository
 	Exists(ctx context.Context, id string) (bool, error)
@@ -105,11 +109,16 @@ func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// List returns all lamps in the repository
-func (r *InMemoryLampRepository) List(ctx context.Context) ([]*entities.LampEntity, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
+// List returns lamps in the repository with pagination.
+func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error) {
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		return []*entities.LampEntity{}, nil
+	}
 
+	r.mutex.RLock()
 	lampEntities := make([]*entities.LampEntity, 0, len(r.lamps))
 	for _, lampEntity := range r.lamps {
 		// Return a copy to avoid race conditions when the entity is modified
@@ -120,8 +129,36 @@ func (r *InMemoryLampRepository) List(ctx context.Context) ([]*entities.LampEnti
 			UpdatedAt: lampEntity.UpdatedAt,
 		})
 	}
+	r.mutex.RUnlock()
 
-	return lampEntities, nil
+	sort.Slice(lampEntities, func(i, j int) bool {
+		if lampEntities[i].CreatedAt.Equal(lampEntities[j].CreatedAt) {
+			idI := lampEntities[i].ID
+			idJ := lampEntities[j].ID
+			for k := range idI {
+				if idI[k] == idJ[k] {
+					continue
+				}
+
+				return idI[k] < idJ[k]
+			}
+
+			return false
+		}
+
+		return lampEntities[i].CreatedAt.Before(lampEntities[j].CreatedAt)
+	})
+
+	if offset >= len(lampEntities) {
+		return []*entities.LampEntity{}, nil
+	}
+
+	end := offset + limit
+	if end > len(lampEntities) {
+		end = len(lampEntities)
+	}
+
+	return lampEntities[offset:end], nil
 }
 
 // Exists checks if a lamp exists in the repository
