@@ -40,36 +40,36 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LampService {
 
+  private final LampRepository repository;
+  private final LampMapper mapper;
+
   public static final class PagedLampsResult {
-    private final List<Lamp> data;
-    private final boolean hasMore;
-    private final Optional<String> nextCursor;
+    private final List<Lamp> pagedData;
+    private final boolean hasMoreFlag;
+    private final Optional<String> nextCursorValue;
 
     public PagedLampsResult(
         final List<Lamp> data, final boolean hasMore, final Optional<String> nextCursor) {
-      this.data = List.copyOf(data);
-      this.hasMore = hasMore;
-      this.nextCursor = nextCursor;
+      this.pagedData = List.copyOf(data);
+      this.hasMoreFlag = hasMore;
+      this.nextCursorValue = nextCursor;
     }
 
     @SuppressFBWarnings(
         value = "EI_EXPOSE_REP",
         justification = "Returns a defensive copy of immutable snapshot data")
     public List<Lamp> data() {
-      return new ArrayList<>(data);
+      return new ArrayList<>(pagedData);
     }
 
     public boolean hasMore() {
-      return hasMore;
+      return hasMoreFlag;
     }
 
     public Optional<String> nextCursor() {
-      return nextCursor;
+      return nextCursorValue;
     }
   }
-
-  private final LampRepository repository;
-  private final LampMapper mapper;
 
   /**
    * Create a new lamp.
