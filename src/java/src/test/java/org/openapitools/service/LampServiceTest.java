@@ -22,6 +22,7 @@ import org.openapitools.repository.LampRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * Unit tests for LampService. These tests use mocked dependencies to test the service layer in
@@ -134,6 +135,68 @@ class LampServiceTest {
     assertThat(result).hasSize(1);
     assertThat(result.get(0).getId()).isEqualTo(testId);
     verify(repository).findAllActive();
+  }
+
+  @Test
+  void shouldFindActivePageWithHasMoreAndNextCursor() {
+    // Arrange
+    final UUID secondId = UUID.randomUUID();
+    final LampEntity secondEntity = new LampEntity(secondId, false);
+    final Lamp secondLamp = new Lamp(secondId, false);
+
+    final Page<LampEntity> page = new PageImpl<>(List.of(testEntity, secondEntity));
+    when(repository.findAll(any(Pageable.class))).thenReturn(page);
+    when(repository.countActive()).thenReturn(5L);
+    when(mapper.toModel(testEntity)).thenReturn(testLamp);
+    when(mapper.toModel(secondEntity)).thenReturn(secondLamp);
+
+    // Act
+    final LampService.PagedLampsResult result = service.findAllActivePage(2, 2);
+
+    // Assert
+    assertThat(result.data()).hasSize(2);
+    assertThat(result.hasMore()).isTrue();
+    assertThat(result.nextCursor()).contains("4");
+
+    final var pageableCaptor = org.mockito.ArgumentCaptor.forClass(Pageable.class);
+    verify(repository).findAll(pageableCaptor.capture());
+    final Pageable captured = pageableCaptor.getValue();
+    assertThat(captured.getOffset()).isEqualTo(2);
+    assertThat(captured.getPageSize()).isEqualTo(2);
+    assertThat(captured.getSort())
+        .isEqualTo(Sort.by(Sort.Order.asc("createdAt"), Sort.Order.asc("id")));
+  }
+
+  @Test
+  void shouldFindActivePageTerminalWithoutNextCursor() {
+    // Arrange
+    final Page<LampEntity> page = new PageImpl<>(List.of(testEntity));
+    when(repository.findAll(any(Pageable.class))).thenReturn(page);
+    when(repository.countActive()).thenReturn(5L);
+    when(mapper.toModel(testEntity)).thenReturn(testLamp);
+
+    // Act
+    final LampService.PagedLampsResult result = service.findAllActivePage(4, 2);
+
+    // Assert
+    assertThat(result.data()).hasSize(1);
+    assertThat(result.hasMore()).isFalse();
+    assertThat(result.nextCursor()).isEmpty();
+  }
+
+  @Test
+  void shouldFallbackToDefaultPageSizeWhenInvalidPageSizeProvided() {
+    // Arrange
+    when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+    when(repository.countActive()).thenReturn(0L);
+
+    // Act
+    service.findAllActivePage(0, 0);
+
+    // Assert
+    final var pageableCaptor = org.mockito.ArgumentCaptor.forClass(Pageable.class);
+    verify(repository).findAll(pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(25);
   }
 
   @Test

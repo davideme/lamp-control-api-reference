@@ -1,6 +1,5 @@
 package org.openapitools.controller;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -64,13 +63,30 @@ public class LampsController implements LampsApi {
       final Optional<String> cursor, final Optional<Integer> pageSize) {
     return CompletableFuture.supplyAsync(
         () -> {
-          final List<Lamp> lamps = lampService.findAllActive();
+          final int offset = parseCursor(cursor);
+          final int limit = pageSize.orElse(25);
+          final LampService.PagedLampsResult pagedResult =
+              lampService.findAllActivePage(offset, limit);
           final ListLamps200Response response = new ListLamps200Response();
-          response.setData(lamps);
-          response.setHasMore(false);
+          response.setData(pagedResult.data());
+          response.setHasMore(pagedResult.hasMore());
+          pagedResult.nextCursor().ifPresent(response::nextCursor);
           return ResponseEntity.ok().body(response);
         },
         Runnable::run);
+  }
+
+  private int parseCursor(final Optional<String> cursor) {
+    if (cursor.isEmpty() || cursor.get().isBlank()) {
+      return 0;
+    }
+
+    try {
+      final int parsed = Integer.parseInt(cursor.get());
+      return Math.max(parsed, 0);
+    } catch (final NumberFormatException ignored) {
+      return 0;
+    }
   }
 
   @Override

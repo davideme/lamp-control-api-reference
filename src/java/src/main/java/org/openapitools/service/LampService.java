@@ -1,6 +1,8 @@
 package org.openapitools.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +42,34 @@ public class LampService {
 
   private final LampRepository repository;
   private final LampMapper mapper;
+
+  public static final class PagedLampsResult {
+    private final List<Lamp> pagedData;
+    private final boolean hasMoreFlag;
+    private final Optional<String> nextCursorValue;
+
+    public PagedLampsResult(
+        final List<Lamp> data, final boolean hasMore, final Optional<String> nextCursor) {
+      this.pagedData = List.copyOf(data);
+      this.hasMoreFlag = hasMore;
+      this.nextCursorValue = nextCursor;
+    }
+
+    @SuppressFBWarnings(
+        value = "EI_EXPOSE_REP",
+        justification = "Returns a defensive copy of immutable snapshot data")
+    public List<Lamp> data() {
+      return new ArrayList<>(pagedData);
+    }
+
+    public boolean hasMore() {
+      return hasMoreFlag;
+    }
+
+    public Optional<String> nextCursor() {
+      return nextCursorValue;
+    }
+  }
 
   /**
    * Create a new lamp.
@@ -86,6 +116,30 @@ public class LampService {
    */
   public List<Lamp> findAllActive() {
     return repository.findAllActive().stream().map(mapper::toModel).toList();
+  }
+
+  /**
+   * Find a page of active lamps using offset-based cursor pagination.
+   *
+   * @param offset starting position in the active lamp list (0-based)
+   * @param pageSize maximum number of lamps to return
+   * @return paged lamps and pagination metadata
+   */
+  public PagedLampsResult findAllActivePage(final int offset, final int pageSize) {
+    final int safeOffset = Math.max(offset, 0);
+    final int safePageSize = pageSize > 0 ? pageSize : 25;
+    final Pageable pageable =
+        new OffsetBasedPageRequest(
+            safeOffset, safePageSize, Sort.by(Sort.Order.asc("createdAt"), Sort.Order.asc("id")));
+
+    final Page<LampEntity> page = repository.findAll(pageable);
+    final List<Lamp> data = page.getContent().stream().map(mapper::toModel).toList();
+    final long totalActive = repository.countActive();
+    final boolean hasMore = safeOffset + data.size() < totalActive;
+    final Optional<String> nextCursor =
+        hasMore ? Optional.of(Integer.toString(safeOffset + data.size())) : Optional.empty();
+
+    return new PagedLampsResult(data, hasMore, nextCursor);
   }
 
   /**
@@ -143,5 +197,65 @@ public class LampService {
         repository.findById(id).orElseThrow(() -> new LampNotFoundException(id));
     entity.setDeletedAt(OffsetDateTime.now());
     repository.save(entity);
+  }
+
+  private static final class OffsetBasedPageRequest implements Pageable {
+    private final int offset;
+    private final int pageSize;
+    private final Sort sort;
+
+    private OffsetBasedPageRequest(final int offset, final int pageSize, final Sort sort) {
+      this.offset = offset;
+      this.pageSize = pageSize;
+      this.sort = sort;
+    }
+
+    @Override
+    public int getPageNumber() {
+      return offset / pageSize;
+    }
+
+    @Override
+    public int getPageSize() {
+      return pageSize;
+    }
+
+    @Override
+    public long getOffset() {
+      return offset;
+    }
+
+    @Override
+    public Sort getSort() {
+      return sort;
+    }
+
+    @Override
+    public Pageable next() {
+      return new OffsetBasedPageRequest(offset + pageSize, pageSize, sort);
+    }
+
+    @Override
+    public Pageable previousOrFirst() {
+      if (offset < pageSize) {
+        return first();
+      }
+      return new OffsetBasedPageRequest(offset - pageSize, pageSize, sort);
+    }
+
+    @Override
+    public Pageable first() {
+      return new OffsetBasedPageRequest(0, pageSize, sort);
+    }
+
+    @Override
+    public Pageable withPage(final int pageNumber) {
+      return new OffsetBasedPageRequest(pageNumber * pageSize, pageSize, sort);
+    }
+
+    @Override
+    public boolean hasPrevious() {
+      return offset > 0;
+    }
   }
 }

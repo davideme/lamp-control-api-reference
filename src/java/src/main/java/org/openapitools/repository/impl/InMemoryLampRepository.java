@@ -37,7 +37,11 @@ public class InMemoryLampRepository implements LampRepository {
 
   @Override
   public Page<LampEntity> findAll(final Pageable pageable) {
-    final List<LampEntity> allLamps = new ArrayList<>(lamps.values());
+    final List<LampEntity> allLamps =
+        lamps.values().stream()
+            .filter(lamp -> lamp.getDeletedAt() == null)
+            .sorted(Comparator.comparing(LampEntity::getCreatedAt).thenComparing(LampEntity::getId))
+            .toList();
     final int start = (int) pageable.getOffset();
     final int end = Math.min(start + pageable.getPageSize(), allLamps.size());
 
