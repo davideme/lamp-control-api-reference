@@ -10,7 +10,7 @@ require_cmd poetry
 
 py_files=()
 for file in "$@"; do
-  if [[ "$file" == src/python/*.py ]]; then
+  if [[ "$file" =~ ^src/python/.*\.py$ ]]; then
     py_files+=("${file#src/python/}")
   fi
 done

@@ -90,7 +90,7 @@ pre-commit run --all-files
 
 **Behavior:**
 
-- Hooks run only for staged files in affected language/database paths.
+- Hooks are triggered only for staged files in affected language/database paths; some toolchains run project-wide checks once triggered.
 - Hooks apply auto-fixes when possible.
 - If files are auto-fixed, they are re-staged and the commit is blocked once so you can review and re-run commit.
 - If lint/static-analysis issues remain, commit is blocked with actionable output.

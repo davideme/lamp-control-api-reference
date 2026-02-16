@@ -10,7 +10,7 @@ require_cmd sqlfluff
 
 sql_files=()
 for file in "$@"; do
-  if [[ "$file" == database/sql/postgresql/*.sql ]]; then
+  if [[ "$file" =~ ^database/sql/postgresql/.*\.sql$ ]]; then
     sql_files+=("$file")
   fi
 done

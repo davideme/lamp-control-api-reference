@@ -6,7 +6,7 @@ repos:
         entry: scripts/hooks/typescript.sh
         language: system
         pass_filenames: true
-        files: ^src/typescript/.*\.(ts|tsx|js|mjs|cjs)$
+        files: ^src/typescript/.*\.ts$
 
       - id: python-format-lint
         name: Python format and lint

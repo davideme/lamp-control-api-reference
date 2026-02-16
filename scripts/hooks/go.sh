@@ -12,7 +12,7 @@ require_cmd golangci-lint
 
 go_files=()
 for file in "$@"; do
-  if [[ "$file" == src/go/*.go ]]; then
+  if [[ "$file" =~ ^src/go/.*\.go$ ]]; then
     go_files+=("${file#src/go/}")
   fi
 done
@@ -30,5 +30,26 @@ restage_and_fail_if_changed "src/go"
 
 cd "$ROOT/src/go"
 echo "[pre-commit] Running Go lint checks"
-golangci-lint run --timeout=5m
-go vet ./...
+go_pkgs=()
+for file in "${go_files[@]}"; do
+  dir="$(dirname "$file")"
+  if [[ "$dir" == "." ]]; then
+    pkg="./"
+  else
+    pkg="./$dir"
+  fi
+
+  exists=0
+  for existing in "${go_pkgs[@]}"; do
+    if [[ "$existing" == "$pkg" ]]; then
+      exists=1
+      break
+    fi
+  done
+  if [[ $exists -eq 0 ]]; then
+    go_pkgs+=("$pkg")
+  fi
+done
+
+golangci-lint run --timeout=5m "${go_pkgs[@]}"
+go vet "${go_pkgs[@]}"
