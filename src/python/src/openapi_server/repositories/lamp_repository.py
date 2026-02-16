@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """Repository for managing lamp data with in-memory storage.
 
 This module provides the in-memory implementation of the lamp repository.
 The repository interface is async to maintain compatibility with the
 PostgreSQL repository implementation.
 """
+
+from __future__ import annotations
 
 from src.openapi_server.entities.lamp_entity import LampEntity
 
