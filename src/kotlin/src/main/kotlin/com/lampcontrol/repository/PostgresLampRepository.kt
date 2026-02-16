@@ -27,6 +27,20 @@ class PostgresLampRepository : LampRepository {
                 .map { rowToEntity(it) }
         }
 
+    override suspend fun getLampsPage(
+        offset: Int,
+        limit: Int,
+    ): List<LampEntity> =
+        dbQuery {
+            LampsTable
+                .selectAll()
+                .where { LampsTable.deletedAt.isNull() }
+                .orderBy(LampsTable.createdAt to SortOrder.ASC, LampsTable.id to SortOrder.ASC)
+                .limit(limit)
+                .offset(offset.toLong())
+                .map { rowToEntity(it) }
+        }
+
     override suspend fun getLampById(id: UUID): LampEntity? =
         dbQuery {
             LampsTable

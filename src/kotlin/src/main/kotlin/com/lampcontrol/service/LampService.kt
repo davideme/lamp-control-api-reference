@@ -25,6 +25,27 @@ class LampService(
     }
 
     /**
+     * Get a bounded page of lamps.
+     */
+    suspend fun getLampsPage(
+        cursor: String?,
+        pageSize: Int,
+    ): ListLamps200Response {
+        val offset = parseCursorOrDefault(cursor)
+        val fetched = lampRepository.getLampsPage(offset = offset, limit = pageSize + 1)
+        val hasMore = fetched.size > pageSize
+        val pageEntities = if (hasMore) fetched.take(pageSize) else fetched
+        val pageModels = pageEntities.map { lampMapper.toApiModel(it) }
+        val nextCursor = if (hasMore) (offset + pageSize).toString() else null
+
+        return ListLamps200Response(
+            data = pageModels,
+            hasMore = hasMore,
+            nextCursor = nextCursor,
+        )
+    }
+
+    /**
      * Get a lamp by string ID and return as API model
      * @throws DomainException.InvalidId if the ID is not a valid UUID
      * @throws DomainException.NotFound if no lamp exists with the given ID
@@ -96,5 +117,10 @@ class LampService(
     private fun parseUuid(lampId: String): UUID {
         require(lampId.isNotBlank()) { "Lamp ID must not be blank" }
         return lampId.toUuidOrNull() ?: throw DomainException.InvalidId(lampId)
+    }
+
+    private fun parseCursorOrDefault(cursor: String?): Int {
+        val parsed = cursor?.toIntOrNull() ?: return 0
+        return if (parsed < 0) 0 else parsed
     }
 }

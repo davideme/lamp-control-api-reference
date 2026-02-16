@@ -49,6 +49,41 @@ class LampServiceTest {
         }
 
     @Test
+    fun `getLampsPage should honor page size and expose next cursor`() =
+        runTest {
+            repeat(3) { idx ->
+                lampService.createLamp(LampCreate(status = idx % 2 == 0))
+            }
+
+            val page1 = lampService.getLampsPage(cursor = null, pageSize = 2)
+            assertEquals(2, page1.data.size)
+            assertTrue(page1.hasMore)
+            assertEquals("2", page1.nextCursor)
+
+            val page2 = lampService.getLampsPage(cursor = page1.nextCursor, pageSize = 2)
+            assertEquals(1, page2.data.size)
+            assertFalse(page2.hasMore)
+            assertNull(page2.nextCursor)
+        }
+
+    @Test
+    fun `getLampsPage should fallback to first page for invalid and negative cursor`() =
+        runTest {
+            repeat(3) {
+                lampService.createLamp(LampCreate(status = true))
+            }
+
+            val invalid = lampService.getLampsPage(cursor = "bad-cursor", pageSize = 2)
+            val negative = lampService.getLampsPage(cursor = "-5", pageSize = 2)
+            val baseline = lampService.getLampsPage(cursor = null, pageSize = 2)
+
+            assertEquals(baseline.data.map { it.id }, invalid.data.map { it.id })
+            assertEquals(baseline.data.map { it.id }, negative.data.map { it.id })
+            assertEquals(baseline.nextCursor, invalid.nextCursor)
+            assertEquals(baseline.nextCursor, negative.nextCursor)
+        }
+
+    @Test
     fun `getLampById should throw InvalidId for invalid UUID`() =
         runTest {
             assertThrows<DomainException.InvalidId> {

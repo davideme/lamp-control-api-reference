@@ -53,13 +53,8 @@ fun Route.DefaultApi(lampService: LampService) {
             return@get
         }
 
-        val lamps = lampService.getAllLamps()
-        val response =
-            ListLamps200Response(
-                data = lamps,
-                hasMore = false,
-                nextCursor = null,
-            )
+        val normalizedPageSize = pageSize ?: 25
+        val response = lampService.getLampsPage(cursor = it.cursor, pageSize = normalizedPageSize)
         call.respond(HttpStatusCode.OK, response)
     }
 

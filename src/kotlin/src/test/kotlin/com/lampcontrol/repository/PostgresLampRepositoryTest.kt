@@ -148,6 +148,31 @@ class PostgresLampRepositoryTest {
         }
 
     @Test
+    fun `getLampsPage returns ordered bounded rows and excludes soft-deleted lamps`() =
+        runBlocking {
+            val t1 = Instant.parse("2026-01-01T00:00:00Z")
+            val t2 = Instant.parse("2026-01-01T00:00:01Z")
+            val t3 = Instant.parse("2026-01-01T00:00:02Z")
+
+            val idA = UUID.fromString("00000000-0000-0000-0000-000000000001")
+            val idB = UUID.fromString("00000000-0000-0000-0000-000000000002")
+            val idC = UUID.fromString("00000000-0000-0000-0000-000000000003")
+            val idD = UUID.fromString("00000000-0000-0000-0000-000000000004")
+
+            repository.createLamp(LampEntity(id = idB, status = true, createdAt = t1, updatedAt = t1))
+            repository.createLamp(LampEntity(id = idA, status = true, createdAt = t1, updatedAt = t1))
+            repository.createLamp(LampEntity(id = idC, status = true, createdAt = t2, updatedAt = t2))
+            repository.createLamp(LampEntity(id = idD, status = true, createdAt = t3, updatedAt = t3))
+            repository.deleteLamp(idC)
+
+            val firstWindow = repository.getLampsPage(offset = 0, limit = 3)
+            assertEquals(listOf(idA, idB, idD), firstWindow.map { it.id })
+
+            val secondWindow = repository.getLampsPage(offset = 2, limit = 2)
+            assertEquals(listOf(idD), secondWindow.map { it.id })
+        }
+
+    @Test
     fun `updateLamp updates status and timestamp`() =
         runBlocking {
             val entity = LampEntity.create(status = true)
