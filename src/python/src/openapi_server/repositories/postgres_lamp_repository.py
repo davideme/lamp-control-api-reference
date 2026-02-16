@@ -7,6 +7,8 @@ using SQLAlchemy 2.0 with async support. It includes:
 - Automatic timestamp handling via database triggers
 """
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -81,12 +83,32 @@ class PostgresLampRepository:
         """List all active lamps (excluding soft-deleted ones).
 
         Returns:
-            A list of all active lamp entities, ordered by creation time.
+            A list of all active lamp entities, ordered by created_at then id.
         """
-        stmt = (
-            select(LampModel).where(LampModel.deleted_at.is_(None)).order_by(LampModel.created_at)
-        )
+        stmt = self._base_list_query()
 
+        result = await self._session.execute(stmt)
+        db_lamps = result.scalars().all()
+
+        return [self._to_entity(lamp) for lamp in db_lamps]
+
+    async def list_paginated(self, offset: int, limit: int) -> list[LampEntity]:
+        """List active lamps with bounded pagination.
+
+        Ordering is deterministic: created_at ascending, then id ascending.
+
+        Args:
+            offset: Number of records to skip from the ordered active set.
+            limit: Maximum number of records to return.
+
+        Returns:
+            A bounded list of active lamp entities.
+        """
+        safe_offset = max(0, offset)
+        if limit <= 0:
+            return []
+
+        stmt = self._base_list_query().offset(safe_offset).limit(limit)
         result = await self._session.execute(stmt)
         db_lamps = result.scalars().all()
 
@@ -149,6 +171,15 @@ class PostgresLampRepository:
         db_lamp.deleted_at = datetime.now(UTC)
 
         await self._session.commit()
+
+    @staticmethod
+    def _base_list_query():
+        """Build the base query used by list operations."""
+        return (
+            select(LampModel)
+            .where(LampModel.deleted_at.is_(None))
+            .order_by(LampModel.created_at, LampModel.id)
+        )
 
     @staticmethod
     def _to_entity(model: LampModel) -> LampEntity:

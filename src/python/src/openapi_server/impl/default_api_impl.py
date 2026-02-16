@@ -94,23 +94,49 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         """List lamps with pagination.
 
         Args:
-            cursor: Cursor for pagination (currently ignored for simplicity).
-            page_size: Maximum number of items to return (currently ignored for simplicity).
+            cursor: Cursor for pagination represented as a stringified offset.
+            page_size: Maximum number of items to return.
 
         Returns:
             A paginated response containing lamps.
         """
-        # For simplicity, we'll return all lamps and ignore pagination for now
-        all_lamp_entities = await self.repository.list()
+        start_offset = self._parse_cursor(cursor)
+        safe_page_size = self._normalize_page_size(page_size)
+
+        entities = await self.repository.list_paginated(
+            offset=start_offset,
+            limit=safe_page_size + 1,
+        )
+        has_more = len(entities) > safe_page_size
+        page_entities = entities[:safe_page_size]
+        next_cursor = str(start_offset + safe_page_size) if has_more else None
 
         # Convert domain entities to API models
-        all_lamps = [LampMapper.to_api_model(entity) for entity in all_lamp_entities]
+        lamps = [LampMapper.to_api_model(entity) for entity in page_entities]
 
         return ListLamps200Response(
-            data=all_lamps,
-            next_cursor=None,  # No next page in this simple implementation
-            has_more=False,  # No more items available
+            data=lamps,
+            next_cursor=next_cursor,
+            has_more=has_more,
         )
+
+    @staticmethod
+    def _parse_cursor(cursor: str | None) -> int:
+        """Parse a cursor value into a non-negative offset."""
+        if cursor is None:
+            return 0
+
+        try:
+            return max(0, int(cursor))
+        except (TypeError, ValueError):
+            return 0
+
+    @staticmethod
+    def _normalize_page_size(page_size: int | None) -> int:
+        """Normalize page size with a defensive default."""
+        if page_size is None or page_size <= 0:
+            return 25
+        return page_size
 
     async def update_lamp(self, lamp_id: str, lamp_update: LampUpdate) -> Lamp:
         """Update a lamp's status.

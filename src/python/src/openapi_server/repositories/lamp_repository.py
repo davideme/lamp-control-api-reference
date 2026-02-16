@@ -5,6 +5,8 @@ The repository interface is async to maintain compatibility with the
 PostgreSQL repository implementation.
 """
 
+from __future__ import annotations
+
 from src.openapi_server.entities.lamp_entity import LampEntity
 
 
@@ -61,9 +63,27 @@ class InMemoryLampRepository:
         """List all lamps.
 
         Returns:
-            A list of all lamp entities.
+            A list of all lamp entities ordered by created_at then id.
         """
-        return list(self._lamps.values())
+        return self._sorted_lamps()
+
+    async def list_paginated(self, offset: int, limit: int) -> list[LampEntity]:
+        """List lamps using a bounded window for cursor pagination.
+
+        Ordering is deterministic and mirrors the PostgreSQL repository:
+        created_at ascending, then id ascending.
+
+        Args:
+            offset: Number of records to skip from the start of the ordered set.
+            limit: Maximum number of records to return.
+
+        Returns:
+            A bounded list of lamp entities for the requested window.
+        """
+        safe_offset = max(0, offset)
+        if limit <= 0:
+            return []
+        return self._sorted_lamps()[safe_offset : safe_offset + limit]
 
     async def update(self, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp.
@@ -94,3 +114,7 @@ class InMemoryLampRepository:
         if lamp_id not in self._lamps:
             raise LampNotFoundError(lamp_id)
         del self._lamps[lamp_id]
+
+    def _sorted_lamps(self) -> list[LampEntity]:
+        """Return lamps in deterministic pagination order."""
+        return sorted(self._lamps.values(), key=lambda lamp: (lamp.created_at, lamp.id))
