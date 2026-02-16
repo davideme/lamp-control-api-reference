@@ -186,6 +186,7 @@ func TestLampAPI_ListLamps_InvalidPaginationParams(t *testing.T) {
 	}{
 		{name: "invalid cursor", params: ListLampsParams{Cursor: strPtr("abc"), PageSize: intPtr(10)}},
 		{name: "negative cursor", params: ListLampsParams{Cursor: strPtr("-1"), PageSize: intPtr(10)}},
+		{name: "cursor out of int32 range", params: ListLampsParams{Cursor: strPtr("2147483648"), PageSize: intPtr(10)}},
 		{name: "pageSize too small", params: ListLampsParams{PageSize: intPtr(0)}},
 		{name: "pageSize too large", params: ListLampsParams{PageSize: intPtr(101)}},
 	}

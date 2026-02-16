@@ -7,13 +7,16 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api"
 	"github.com/go-chi/chi/v5"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
-func TestV1PrefixRouting(t *testing.T) {
+func newV1TestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+
 	// Set up the router exactly as main does
 	swagger, err := api.GetSwagger()
 	if err != nil {
@@ -35,17 +38,18 @@ func TestV1PrefixRouting(t *testing.T) {
 		api.HandlerFromMux(lamp, apiRouter)
 	})
 
-	// Create test server
-	ts := httptest.NewServer(r)
-	defer ts.Close()
+	return httptest.NewServer(r)
+}
 
+func TestV1PrefixRouting(t *testing.T) {
 	tests := []struct {
 		name           string
 		method         string
 		path           string
 		body           string
 		expectedStatus int
-		setup          func(*testing.T, string)
+		setup          func(*testing.T, *http.Client, string)
+		assertJSON     func(*testing.T, map[string]interface{})
 	}{
 		{
 			name:           "health check without v1 prefix",
@@ -70,8 +74,9 @@ func TestV1PrefixRouting(t *testing.T) {
 			method:         "GET",
 			path:           "/v1/lamps?pageSize=1",
 			expectedStatus: http.StatusOK,
-			setup: func(t *testing.T, baseURL string) {
+			setup: func(t *testing.T, client *http.Client, baseURL string) {
 				t.Helper()
+
 				for i := 0; i < 2; i++ {
 					req, err := http.NewRequestWithContext(
 						context.Background(),
@@ -84,7 +89,7 @@ func TestV1PrefixRouting(t *testing.T) {
 					}
 					req.Header.Set("Content-Type", "application/json")
 
-					resp, err := (&http.Client{}).Do(req)
+					resp, err := client.Do(req)
 					if err != nil {
 						t.Fatalf("Failed to seed lamp: %v", err)
 					}
@@ -93,6 +98,16 @@ func TestV1PrefixRouting(t *testing.T) {
 					if resp.StatusCode != http.StatusCreated {
 						t.Fatalf("Expected 201 from setup create, got %d", resp.StatusCode)
 					}
+				}
+			},
+			assertJSON: func(t *testing.T, result map[string]interface{}) {
+				t.Helper()
+				data, ok := result["data"].([]interface{})
+				if !ok {
+					t.Fatalf("Expected data array in list response")
+				}
+				if len(data) != 1 {
+					t.Fatalf("Expected 1 lamp in response for pageSize=1, got %d", len(data))
 				}
 			},
 		},
@@ -113,8 +128,13 @@ func TestV1PrefixRouting(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ts := newV1TestServer(t)
+			defer ts.Close()
+
+			client := &http.Client{Timeout: 5 * time.Second}
+
 			if tt.setup != nil {
-				tt.setup(t, ts.URL)
+				tt.setup(t, client, ts.URL)
 			}
 
 			var req *http.Request
@@ -141,7 +161,6 @@ func TestV1PrefixRouting(t *testing.T) {
 				t.Fatalf("Failed to create request: %v", err)
 			}
 
-			client := &http.Client{}
 			resp, err := client.Do(req)
 			if err != nil {
 				t.Fatalf("Failed to make request: %v", err)
@@ -158,14 +177,8 @@ func TestV1PrefixRouting(t *testing.T) {
 				if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 					t.Errorf("Failed to decode response: %v", err)
 				}
-				if tt.name == "list lamps bounded by pageSize" {
-					data, ok := result["data"].([]interface{})
-					if !ok {
-						t.Fatalf("Expected data array in list response")
-					}
-					if len(data) != 1 {
-						t.Fatalf("Expected 1 lamp in response for pageSize=1, got %d", len(data))
-					}
+				if tt.assertJSON != nil {
+					tt.assertJSON(t, result)
 				}
 			}
 		})

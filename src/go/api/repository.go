@@ -13,6 +13,9 @@ import (
 // ErrLampNotFound is returned when a lamp is not found in the repository
 var ErrLampNotFound = errors.New("lamp not found")
 
+// ErrInvalidPagination is returned when pagination arguments are invalid.
+var ErrInvalidPagination = errors.New("invalid pagination parameters")
+
 // LampRepository defines the interface for lamp data operations
 type LampRepository interface {
 	// Create adds a new lamp to the repository
@@ -108,9 +111,6 @@ func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
 
 // List returns lamps in the repository with pagination.
 func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
 	if offset < 0 {
 		offset = 0
 	}
@@ -118,6 +118,7 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 		return []*entities.LampEntity{}, nil
 	}
 
+	r.mutex.RLock()
 	lampEntities := make([]*entities.LampEntity, 0, len(r.lamps))
 	for _, lampEntity := range r.lamps {
 		// Return a copy to avoid race conditions when the entity is modified
@@ -128,10 +129,21 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 			UpdatedAt: lampEntity.UpdatedAt,
 		})
 	}
+	r.mutex.RUnlock()
 
 	sort.Slice(lampEntities, func(i, j int) bool {
 		if lampEntities[i].CreatedAt.Equal(lampEntities[j].CreatedAt) {
-			return lampEntities[i].ID.String() < lampEntities[j].ID.String()
+			idI := lampEntities[i].ID
+			idJ := lampEntities[j].ID
+			for k := range idI {
+				if idI[k] == idJ[k] {
+					continue
+				}
+
+				return idI[k] < idJ[k]
+			}
+
+			return false
 		}
 
 		return lampEntities[i].CreatedAt.Before(lampEntities[j].CreatedAt)

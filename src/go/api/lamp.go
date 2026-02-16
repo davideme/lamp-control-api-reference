@@ -4,6 +4,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 )
@@ -48,7 +49,7 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 	offset := 0
 	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
 		parsedOffset, parseErr := strconv.Atoi(*request.Params.Cursor)
-		if parseErr != nil || parsedOffset < 0 {
+		if parseErr != nil || parsedOffset < 0 || parsedOffset > math.MaxInt32 {
 			//nolint:nilerr // Strict handler uses typed 400 response with nil Go error.
 			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
 		}
@@ -57,6 +58,10 @@ func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject)
 
 	lampEntities, err := l.repository.List(ctx, offset, pageSize+1)
 	if err != nil {
+		if errors.Is(err, ErrInvalidPagination) {
+			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+		}
+
 		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError, Err: err}
 	}
 

@@ -155,7 +155,7 @@ func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int
 	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
 	limit32 := int32(limit)
 	if int(offset32) != offset || int(limit32) != limit {
-		return nil, fmt.Errorf("pagination parameters exceed supported range")
+		return nil, fmt.Errorf("%w: offset=%d limit=%d", ErrInvalidPagination, offset, limit)
 	}
 
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
