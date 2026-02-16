@@ -11,6 +11,7 @@ from uuid import uuid4
 
 import psycopg2
 import pytest
+from docker.errors import DockerException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from testcontainers.postgres import PostgresContainer
@@ -31,32 +32,37 @@ def event_loop():
 @pytest.fixture(scope="module")
 def postgres_container():
     """Start a PostgreSQL container for all tests in this module."""
-    with PostgresContainer("postgres:16-alpine", driver="psycopg2") as postgres:
-        # Apply the schema
-        # Path from: src/python/src/openapi_server/test/test_postgres_lamp_repository.py
-        # Go up to repository root: parents[5] gets us to lamp-control-api-reference/
-        schema_path = Path(__file__).parents[5] / "database" / "sql" / "postgresql" / "schema.sql"
+    try:
+        with PostgresContainer("postgres:16-alpine", driver="psycopg2") as postgres:
+            # Apply the schema
+            # Path from: src/python/src/openapi_server/test/test_postgres_lamp_repository.py
+            # Go up to repository root: parents[5] gets us to lamp-control-api-reference/
+            schema_path = (
+                Path(__file__).parents[5] / "database" / "sql" / "postgresql" / "schema.sql"
+            )
 
-        # Read and execute the schema
-        with open(schema_path) as f:
-            schema_sql = f.read()
+            # Read and execute the schema
+            with open(schema_path) as f:
+                schema_sql = f.read()
 
-        # Get a connection and execute the schema
-        # Use individual connection parameters instead of URL
-        conn = psycopg2.connect(
-            host=postgres.get_container_host_ip(),
-            port=postgres.get_exposed_port(5432),
-            user=postgres.username,
-            password=postgres.password,
-            dbname=postgres.dbname,
-        )
-        cur = conn.cursor()
-        cur.execute(schema_sql)
-        conn.commit()
-        cur.close()
-        conn.close()
+            # Get a connection and execute the schema
+            # Use individual connection parameters instead of URL
+            conn = psycopg2.connect(
+                host=postgres.get_container_host_ip(),
+                port=postgres.get_exposed_port(5432),
+                user=postgres.username,
+                password=postgres.password,
+                dbname=postgres.dbname,
+            )
+            cur = conn.cursor()
+            cur.execute(schema_sql)
+            conn.commit()
+            cur.close()
+            conn.close()
 
-        yield postgres
+            yield postgres
+    except DockerException as err:
+        pytest.skip(f"Docker unavailable for PostgreSQL integration tests: {err}")
 
 
 @pytest.fixture(scope="module")

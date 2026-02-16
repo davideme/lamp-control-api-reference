@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Repository for managing lamp data with in-memory storage.
 
 This module provides the in-memory implementation of the lamp repository.

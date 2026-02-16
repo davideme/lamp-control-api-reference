@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """PostgreSQL implementation of the lamp repository.
 
 This module provides the PostgreSQL-backed implementation of the lamp repository
