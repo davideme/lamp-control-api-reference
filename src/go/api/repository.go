@@ -122,6 +122,7 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 			return true
 		}
 		lampRefs = append(lampRefs, lampRef{id: id, entity: lampEntity})
+
 		return true
 	})
 
