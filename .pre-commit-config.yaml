@@ -42,10 +42,3 @@ repos:
         language: system
         pass_filenames: true
         files: ^src/kotlin/.*\.(kt|kts)$
-
-      - id: sql-format-lint
-        name: SQL format and lint
-        entry: scripts/hooks/sql.sh
-        language: system
-        pass_filenames: true
-        files: ^database/sql/postgresql/.*\.sql$

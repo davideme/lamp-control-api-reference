@@ -40,12 +40,14 @@ for file in "${go_files[@]}"; do
   fi
 
   exists=0
-  for existing in "${go_pkgs[@]}"; do
-    if [[ "$existing" == "$pkg" ]]; then
-      exists=1
-      break
-    fi
-  done
+  if [[ ${#go_pkgs[@]} -gt 0 ]]; then
+    for existing in "${go_pkgs[@]}"; do
+      if [[ "$existing" == "$pkg" ]]; then
+        exists=1
+        break
+      fi
+    done
+  fi
   if [[ $exists -eq 0 ]]; then
     go_pkgs+=("$pkg")
   fi
