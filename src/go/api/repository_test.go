@@ -18,11 +18,12 @@ func TestNewInMemoryLampRepository(t *testing.T) {
 		t.Fatal("NewInMemoryLampRepository should not return nil")
 	}
 
-	if repo.lamps == nil {
-		t.Error("Repository lamps map should be initialized")
-	}
-
-	if len(repo.lamps) != 0 {
+	count := 0
+	repo.lamps.Range(func(_, _ any) bool {
+		count++
+		return true
+	})
+	if count != 0 {
 		t.Error("Repository should start empty")
 	}
 }
@@ -630,5 +631,142 @@ func TestInMemoryLampRepository_ContextHandling(t *testing.T) {
 
 	if len(lamps) != 1 {
 		t.Errorf("Expected 1 lamp, got %d", len(lamps))
+	}
+}
+
+func TestInMemoryLampRepository_ConcurrentDeleteAndList(t *testing.T) {
+	repo := NewInMemoryLampRepository()
+	ctx := context.Background()
+	baseTime := time.Now()
+	ids := make([]string, 0, 200)
+
+	for i := 0; i < 200; i++ {
+		id := uuid.New()
+		ids = append(ids, id.String())
+		lamp := &entities.LampEntity{
+			ID:        id,
+			Status:    i%2 == 0,
+			CreatedAt: baseTime.Add(time.Duration(i) * time.Millisecond),
+			UpdatedAt: baseTime.Add(time.Duration(i) * time.Millisecond),
+		}
+
+		if err := repo.Create(ctx, lamp); err != nil {
+			t.Fatalf("failed to seed lamp %d: %v", i, err)
+		}
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 100; i++ {
+			_, err := repo.List(ctx, 0, 50)
+			if err != nil {
+				t.Errorf("concurrent list failed: %v", err)
+				return
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 50; i++ {
+			if err := repo.Delete(ctx, ids[i]); err != nil {
+				t.Errorf("concurrent delete failed: %v", err)
+				return
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	remaining, err := repo.List(ctx, 0, 1000)
+	if err != nil {
+		t.Fatalf("final list failed: %v", err)
+	}
+
+	if len(remaining) != 150 {
+		t.Fatalf("expected 150 lamps remaining, got %d", len(remaining))
+	}
+
+	seen := make(map[uuid.UUID]struct{}, len(remaining))
+	for i, lamp := range remaining {
+		if _, exists := seen[lamp.ID]; exists {
+			t.Fatalf("duplicate lamp returned in final list: %s", lamp.ID)
+		}
+		seen[lamp.ID] = struct{}{}
+
+		if i == 0 {
+			continue
+		}
+
+		prev := remaining[i-1]
+		if lamp.CreatedAt.Before(prev.CreatedAt) {
+			t.Fatalf("list order regression at index %d: createdAt decreased", i)
+		}
+
+		if lamp.CreatedAt.Equal(prev.CreatedAt) {
+			for k := range lamp.ID {
+				if lamp.ID[k] == prev.ID[k] {
+					continue
+				}
+				if lamp.ID[k] < prev.ID[k] {
+					t.Fatalf("list tie-break order regression at index %d", i)
+				}
+				break
+			}
+		}
+	}
+}
+
+func TestInMemoryLampRepository_UpdateDoesNotResurrectDeletedLamp(t *testing.T) {
+	repo := NewInMemoryLampRepository()
+	ctx := context.Background()
+
+	for i := 0; i < 200; i++ {
+		lamp := &entities.LampEntity{
+			ID:        uuid.New(),
+			Status:    true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		if err := repo.Create(ctx, lamp); err != nil {
+			t.Fatalf("create failed at iteration %d: %v", i, err)
+		}
+
+		updated := &entities.LampEntity{
+			ID:        lamp.ID,
+			Status:    false,
+			CreatedAt: lamp.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+
+		start := make(chan struct{})
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		go func() {
+			defer wg.Done()
+			<-start
+			_ = repo.Update(ctx, updated)
+		}()
+
+		go func() {
+			defer wg.Done()
+			<-start
+			_ = repo.Delete(ctx, lamp.ID.String())
+		}()
+
+		close(start)
+		wg.Wait()
+
+		exists, err := repo.Exists(ctx, lamp.ID.String())
+		if err != nil {
+			t.Fatalf("exists failed at iteration %d: %v", i, err)
+		}
+		if exists {
+			t.Fatalf("lamp resurrected after concurrent update/delete at iteration %d", i)
+		}
 	}
 }

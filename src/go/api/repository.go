@@ -37,37 +37,31 @@ type LampRepository interface {
 	Exists(ctx context.Context, id string) (bool, error)
 }
 
-// InMemoryLampRepository implements LampRepository using an in-memory map
+// InMemoryLampRepository implements LampRepository using a sync.Map-based in-memory store.
 type InMemoryLampRepository struct {
-	lamps map[string]*entities.LampEntity
-	mutex sync.RWMutex
+	lamps sync.Map
 }
 
 // NewInMemoryLampRepository creates a new in-memory lamp repository
 func NewInMemoryLampRepository() *InMemoryLampRepository {
-	return &InMemoryLampRepository{
-		lamps: make(map[string]*entities.LampEntity),
-		mutex: sync.RWMutex{},
-	}
+	return &InMemoryLampRepository{}
 }
 
 // Create adds a new lamp to the repository
 func (r *InMemoryLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	r.lamps[lampEntity.ID.String()] = lampEntity
+	r.lamps.Store(lampEntity.ID.String(), lampEntity)
 
 	return nil
 }
 
 // GetByID retrieves a lamp by its ID
 func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entities.LampEntity, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	lampEntity, exists := r.lamps[id]
+	value, exists := r.lamps.Load(id)
 	if !exists {
+		return nil, ErrLampNotFound
+	}
+	lampEntity, ok := value.(*entities.LampEntity)
+	if !ok {
 		return nil, ErrLampNotFound
 	}
 
@@ -82,29 +76,26 @@ func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entit
 
 // Update modifies an existing lamp in the repository
 func (r *InMemoryLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	id := lampEntity.ID.String()
-	if _, exists := r.lamps[id]; !exists {
-		return ErrLampNotFound
+
+	for {
+		current, exists := r.lamps.Load(id)
+		if !exists {
+			return ErrLampNotFound
+		}
+
+		if r.lamps.CompareAndSwap(id, current, lampEntity) {
+			return nil
+		}
 	}
-
-	r.lamps[id] = lampEntity
-
-	return nil
 }
 
 // Delete removes a lamp from the repository
 func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if _, exists := r.lamps[id]; !exists {
+	_, loaded := r.lamps.LoadAndDelete(id)
+	if !loaded {
 		return ErrLampNotFound
 	}
-
-	delete(r.lamps, id)
 
 	return nil
 }
@@ -118,23 +109,25 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 		return []*entities.LampEntity{}, nil
 	}
 
-	r.mutex.RLock()
-	lampEntities := make([]*entities.LampEntity, 0, len(r.lamps))
-	for _, lampEntity := range r.lamps {
-		// Return a copy to avoid race conditions when the entity is modified
-		lampEntities = append(lampEntities, &entities.LampEntity{
-			ID:        lampEntity.ID,
-			Status:    lampEntity.Status,
-			CreatedAt: lampEntity.CreatedAt,
-			UpdatedAt: lampEntity.UpdatedAt,
-		})
+	type lampRef struct {
+		entity *entities.LampEntity
 	}
-	r.mutex.RUnlock()
 
-	sort.Slice(lampEntities, func(i, j int) bool {
-		if lampEntities[i].CreatedAt.Equal(lampEntities[j].CreatedAt) {
-			idI := lampEntities[i].ID
-			idJ := lampEntities[j].ID
+	lampRefs := make([]lampRef, 0)
+	r.lamps.Range(func(_, value any) bool {
+		lampEntity, ok := value.(*entities.LampEntity)
+		if !ok || lampEntity == nil {
+			return true
+		}
+		lampRefs = append(lampRefs, lampRef{entity: lampEntity})
+
+		return true
+	})
+
+	sort.Slice(lampRefs, func(i, j int) bool {
+		if lampRefs[i].entity.CreatedAt.Equal(lampRefs[j].entity.CreatedAt) {
+			idI := lampRefs[i].entity.ID
+			idJ := lampRefs[j].entity.ID
 			for k := range idI {
 				if idI[k] == idJ[k] {
 					continue
@@ -146,27 +139,35 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 			return false
 		}
 
-		return lampEntities[i].CreatedAt.Before(lampEntities[j].CreatedAt)
+		return lampRefs[i].entity.CreatedAt.Before(lampRefs[j].entity.CreatedAt)
 	})
 
-	if offset >= len(lampEntities) {
+	if offset >= len(lampRefs) {
 		return []*entities.LampEntity{}, nil
 	}
 
 	end := offset + limit
-	if end > len(lampEntities) {
-		end = len(lampEntities)
+	if end > len(lampRefs) {
+		end = len(lampRefs)
 	}
 
-	return lampEntities[offset:end], nil
+	page := make([]*entities.LampEntity, 0, end-offset)
+	for i := offset; i < end; i++ {
+		lampEntity := lampRefs[i].entity
+		page = append(page, &entities.LampEntity{
+			ID:        lampEntity.ID,
+			Status:    lampEntity.Status,
+			CreatedAt: lampEntity.CreatedAt,
+			UpdatedAt: lampEntity.UpdatedAt,
+		})
+	}
+
+	return page, nil
 }
 
 // Exists checks if a lamp exists in the repository
 func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) (bool, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	_, exists := r.lamps[id]
+	_, exists := r.lamps.Load(id)
 
 	return exists, nil
 }
