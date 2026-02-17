@@ -719,3 +719,54 @@ func TestInMemoryLampRepository_ConcurrentDeleteAndList(t *testing.T) {
 		}
 	}
 }
+
+func TestInMemoryLampRepository_UpdateDoesNotResurrectDeletedLamp(t *testing.T) {
+	repo := NewInMemoryLampRepository()
+	ctx := context.Background()
+
+	for i := 0; i < 200; i++ {
+		lamp := &entities.LampEntity{
+			ID:        uuid.New(),
+			Status:    true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		if err := repo.Create(ctx, lamp); err != nil {
+			t.Fatalf("create failed at iteration %d: %v", i, err)
+		}
+
+		updated := &entities.LampEntity{
+			ID:        lamp.ID,
+			Status:    false,
+			CreatedAt: lamp.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+
+		start := make(chan struct{})
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		go func() {
+			defer wg.Done()
+			<-start
+			_ = repo.Update(ctx, updated)
+		}()
+
+		go func() {
+			defer wg.Done()
+			<-start
+			_ = repo.Delete(ctx, lamp.ID.String())
+		}()
+
+		close(start)
+		wg.Wait()
+
+		exists, err := repo.Exists(ctx, lamp.ID.String())
+		if err != nil {
+			t.Fatalf("exists failed at iteration %d: %v", i, err)
+		}
+		if exists {
+			t.Fatalf("lamp resurrected after concurrent update/delete at iteration %d", i)
+		}
+	}
+}

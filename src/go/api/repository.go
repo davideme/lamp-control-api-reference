@@ -5,9 +5,9 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"sync"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
-	"sync"
 )
 
 // ErrLampNotFound is returned when a lamp is not found in the repository
@@ -37,7 +37,7 @@ type LampRepository interface {
 	Exists(ctx context.Context, id string) (bool, error)
 }
 
-// InMemoryLampRepository implements LampRepository using an in-memory map
+// InMemoryLampRepository implements LampRepository using a sync.Map-based in-memory store.
 type InMemoryLampRepository struct {
 	lamps sync.Map
 }
@@ -77,22 +77,25 @@ func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entit
 // Update modifies an existing lamp in the repository
 func (r *InMemoryLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
 	id := lampEntity.ID.String()
-	if _, exists := r.lamps.Load(id); !exists {
-		return ErrLampNotFound
+
+	for {
+		current, exists := r.lamps.Load(id)
+		if !exists {
+			return ErrLampNotFound
+		}
+
+		if r.lamps.CompareAndSwap(id, current, lampEntity) {
+			return nil
+		}
 	}
-
-	r.lamps.Store(id, lampEntity)
-
-	return nil
 }
 
 // Delete removes a lamp from the repository
 func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
-	if _, exists := r.lamps.Load(id); !exists {
+	_, loaded := r.lamps.LoadAndDelete(id)
+	if !loaded {
 		return ErrLampNotFound
 	}
-
-	r.lamps.Delete(id)
 
 	return nil
 }
@@ -107,21 +110,16 @@ func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int
 	}
 
 	type lampRef struct {
-		id     string
 		entity *entities.LampEntity
 	}
 
 	lampRefs := make([]lampRef, 0)
-	r.lamps.Range(func(key, value any) bool {
-		id, ok := key.(string)
-		if !ok {
-			return true
-		}
+	r.lamps.Range(func(_, value any) bool {
 		lampEntity, ok := value.(*entities.LampEntity)
 		if !ok || lampEntity == nil {
 			return true
 		}
-		lampRefs = append(lampRefs, lampRef{id: id, entity: lampEntity})
+		lampRefs = append(lampRefs, lampRef{entity: lampEntity})
 
 		return true
 	})
