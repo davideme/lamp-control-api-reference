@@ -4,19 +4,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.openapitools.entity.LampEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * In-memory repository interface for Lamp entities. This interface defines the contract for lamp
- * data operations without being tied to any specific persistence mechanism.
+ * Repository interface for Lamp entities. This interface defines the contract for lamp data
+ * operations without being tied to any specific persistence mechanism.
+ *
+ * <p>This interface declares both standard CRUD operations and domain-specific query methods. The
+ * JPA implementation (JpaLampRepository) will inherit most CRUD methods from JpaRepository and only
+ * needs to implement the custom domain methods.
  */
 public interface LampRepository {
 
   /**
-   * Find all lamp entities.
+   * Save a lamp entity (create or update).
    *
-   * @return list of all lamp entities
+   * @param entity the lamp entity to save
+   * @return the saved lamp entity
    */
-  List<LampEntity> findAll();
+  LampEntity save(LampEntity entity);
 
   /**
    * Find a lamp entity by its ID.
@@ -27,12 +34,19 @@ public interface LampRepository {
   Optional<LampEntity> findById(UUID lampId);
 
   /**
-   * Save a lamp entity (create or update).
+   * Find all lamp entities with pagination support.
    *
-   * @param entity the lamp entity to save
-   * @return the saved lamp entity
+   * @param pageable pagination information
+   * @return page of lamp entities
    */
-  LampEntity save(LampEntity entity);
+  Page<LampEntity> findAll(Pageable pageable);
+
+  /**
+   * Find all lamp entities.
+   *
+   * @return list of all lamp entities
+   */
+  List<LampEntity> findAll();
 
   /**
    * Check if a lamp entity exists by ID.
@@ -49,7 +63,13 @@ public interface LampRepository {
    */
   void deleteById(UUID lampId);
 
-  /** Delete all lamp entities. */
+  /**
+   * Delete all lamp entities.
+   *
+   * @deprecated Since 1.0.0. This bulk-delete operation is unsafe for production usage and is
+   *     intended primarily for testing scenarios.
+   */
+  @Deprecated
   void deleteAll();
 
   /**
@@ -58,4 +78,26 @@ public interface LampRepository {
    * @return the count of entities
    */
   long count();
+
+  /**
+   * Find all lamps with the specified on/off status.
+   *
+   * @param isOn the status to filter by (true for on, false for off)
+   * @return list of lamps with the specified status
+   */
+  List<LampEntity> findByStatus(Boolean isOn);
+
+  /**
+   * Find all active (non-deleted) lamps ordered by creation time.
+   *
+   * @return list of all active lamps ordered by creation time ascending
+   */
+  List<LampEntity> findAllActive();
+
+  /**
+   * Count all active (non-deleted) lamps.
+   *
+   * @return count of active lamps
+   */
+  long countActive();
 }

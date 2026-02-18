@@ -2,7 +2,7 @@ package com.lampcontrol.plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.cors.routing.CORS
 
 fun Application.configureHTTP() {
     install(CORS) {
@@ -12,6 +12,6 @@ fun Application.configureHTTP() {
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+        anyHost() // FIXME: Don't do this in production if possible. Try to limit it.
     }
 }

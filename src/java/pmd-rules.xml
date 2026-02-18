@@ -2,39 +2,63 @@
 <ruleset name="Custom PMD Rules"
          xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
                              https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-    
+
     <description>Custom PMD ruleset for the project</description>
-    
-    <!-- Include all bestpractices rules -->
-    <rule ref="category/java/bestpractices.xml" />
-    
-    <!-- Include all codestyle rules except AtLeastOneConstructor and ShortVariable for entities -->
+
+    <!-- Include all bestpractices rules with exclusions -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- UseVarargs not suitable for main-style methods that receive String[] args -->
+        <exclude name="UseVarargs" />
+    </rule>
+
+    <!-- Include all codestyle rules except AtLeastOneConstructor, ShortVariable, and OnlyOneReturn -->
     <rule ref="category/java/codestyle.xml">
         <exclude name="AtLeastOneConstructor" />
         <exclude name="ShortVariable" />
+        <exclude name="OnlyOneReturn" />
+        <!-- LocalVariableCouldBeFinal is too noisy for minimal benefit -->
+        <exclude name="LocalVariableCouldBeFinal" />
+        <!-- MethodArgumentCouldBeFinal is too noisy for minimal benefit -->
+        <exclude name="MethodArgumentCouldBeFinal" />
+        <!-- LongVariable is too strict for descriptive names -->
+        <exclude name="LongVariable" />
+        <!-- FieldNamingConventions conflicts with common logger naming -->
+        <exclude name="FieldNamingConventions" />
     </rule>
-    
+
     <!-- Re-include ShortVariable but with longer minimum length -->
     <rule ref="category/java/codestyle.xml/ShortVariable">
         <properties>
             <property name="minimum" value="2" />
         </properties>
     </rule>
-    
-    <!-- Include all design rules except DataClass -->
+
+    <!-- Include all design rules except DataClass, TooManyMethods -->
     <rule ref="category/java/design.xml">
         <exclude name="DataClass" />
+        <exclude name="TooManyMethods" />
+        <!-- UseUtilityClass not suitable for CLI entry point classes -->
+        <exclude name="UseUtilityClass" />
+        <!-- LawOfDemeter is too strict for enum access patterns -->
+        <exclude name="LawOfDemeter" />
+        <!-- AvoidCatchingGenericException is sometimes needed for CLI error handling -->
+        <exclude name="AvoidCatchingGenericException" />
     </rule>
-    
-    <!-- Include all errorprone rules -->
-    <rule ref="category/java/errorprone.xml" />
-    
+
+    <!-- Include all errorprone rules with exclusions -->
+    <rule ref="category/java/errorprone.xml">
+        <!-- DoNotTerminateVM is appropriate for CLI applications -->
+        <exclude name="DoNotTerminateVM" />
+        <!-- CloseResource handled via try-with-resources or explicit close -->
+        <exclude name="CloseResource" />
+    </rule>
+
     <!-- Include all performance rules -->
     <rule ref="category/java/performance.xml" />
-    
+
     <!-- Include all security rules -->
     <rule ref="category/java/security.xml" />
-    
+
 </ruleset>

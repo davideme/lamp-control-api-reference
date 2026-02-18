@@ -4,10 +4,9 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
+	"strconv"
 )
 
 type LampAPI struct {
@@ -32,17 +31,61 @@ func NewLampAPIWithRepository(repo LampRepository) *LampAPI {
 // List all lamps
 // (GET /lamps)
 func (l *LampAPI) ListLamps(ctx context.Context, request ListLampsRequestObject) (ListLampsResponseObject, error) {
-	lamps, err := l.repository.List(ctx)
-	if err != nil {
-		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError}
+	const (
+		defaultPageSize = 25
+		minPageSize     = 1
+		maxPageSize     = 100
+	)
+
+	pageSize := defaultPageSize
+	if request.Params.PageSize != nil {
+		pageSize = *request.Params.PageSize
 	}
 
-	// For simplicity, we're returning all lamps without actual pagination
-	// In a real implementation, you would implement cursor-based pagination
+	if pageSize < minPageSize || pageSize > maxPageSize {
+		return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+	}
+
+	offset := 0
+	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
+		parsedOffset, parseErr := strconv.Atoi(*request.Params.Cursor)
+		if parseErr != nil || parsedOffset < 0 || parsedOffset > math.MaxInt32 {
+			//nolint:nilerr // Strict handler uses typed 400 response with nil Go error.
+			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+		}
+		offset = parsedOffset
+	}
+
+	lampEntities, err := l.repository.List(ctx, offset, pageSize+1)
+	if err != nil {
+		if errors.Is(err, ErrInvalidPagination) {
+			return ListLamps400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
+		}
+
+		return nil, &APIError{Message: "Failed to retrieve lamps", StatusCode: http.StatusInternalServerError, Err: err}
+	}
+
+	hasMore := len(lampEntities) > pageSize
+	if hasMore {
+		lampEntities = lampEntities[:pageSize]
+	}
+
+	// Convert domain entities to API models
+	lamps := make([]Lamp, len(lampEntities))
+	for i, entity := range lampEntities {
+		lamps[i] = ToAPIModel(entity)
+	}
+
+	var nextCursor *string
+	if hasMore {
+		cursor := strconv.Itoa(offset + pageSize)
+		nextCursor = &cursor
+	}
+
 	return ListLamps200JSONResponse{
 		Data:       lamps,
-		HasMore:    false, // No more pages for now
-		NextCursor: nil,   // No next cursor since we're showing all
+		HasMore:    hasMore,
+		NextCursor: nextCursor,
 	}, nil
 }
 
@@ -53,21 +96,16 @@ func (l *LampAPI) CreateLamp(ctx context.Context, request CreateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Generate a new UUID for the lamp
-	lampID := uuid.New()
-	now := time.Now()
+	// Create domain entity from API model
+	lampEntity := CreateEntityFromAPICreate(*request.Body)
 
-	lamp := Lamp{
-		Id:        lampID,
-		Status:    request.Body.Status,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-
-	err := l.repository.Create(ctx, lamp)
+	err := l.repository.Create(ctx, lampEntity)
 	if err != nil {
-		return nil, &APIError{Message: "Failed to create lamp", StatusCode: http.StatusInternalServerError}
+		return nil, &APIError{Message: "Failed to create lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
+
+	// Convert domain entity back to API model
+	lamp := ToAPIModel(lampEntity)
 
 	return CreateLamp201JSONResponse(lamp), nil
 }
@@ -81,7 +119,7 @@ func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObjec
 			return DeleteLamp404Response{}, nil
 		}
 
-		return nil, &APIError{Message: "Failed to delete lamp", StatusCode: http.StatusInternalServerError}
+		return nil, &APIError{Message: "Failed to delete lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
 	return DeleteLamp204Response{}, nil
@@ -90,14 +128,17 @@ func (l *LampAPI) DeleteLamp(ctx context.Context, request DeleteLampRequestObjec
 // Get a specific lamp
 // (GET /lamps/{lampId})
 func (l *LampAPI) GetLamp(ctx context.Context, request GetLampRequestObject) (GetLampResponseObject, error) {
-	lamp, err := l.repository.GetByID(ctx, request.LampId)
+	lampEntity, err := l.repository.GetByID(ctx, request.LampId)
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
 			return GetLamp404Response{}, nil
 		}
 
-		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
+		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
+
+	// Convert domain entity to API model
+	lamp := ToAPIModel(lampEntity)
 
 	return GetLamp200JSONResponse(lamp), nil
 }
@@ -109,28 +150,26 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Get the existing lamp to ensure it exists and get its ID and CreatedAt
-	existingLamp, err := l.repository.GetByID(ctx, request.LampId)
+	// Get the existing lamp entity to ensure it exists
+	existingEntity, err := l.repository.GetByID(ctx, request.LampId)
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
 			return UpdateLamp404Response{}, nil
 		}
 
-		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError}
+		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	// Update the lamp status while preserving CreatedAt and updating UpdatedAt
-	updatedLamp := Lamp{
-		Id:        existingLamp.Id,
-		Status:    request.Body.Status,
-		CreatedAt: existingLamp.CreatedAt, // Preserve original creation time
-		UpdatedAt: time.Now(),             // Update modification time
-	}
+	// Update the domain entity using the mapper
+	updatedEntity := UpdateEntityFromAPIUpdate(existingEntity, *request.Body)
 
-	err = l.repository.Update(ctx, updatedLamp)
+	err = l.repository.Update(ctx, updatedEntity)
 	if err != nil {
-		return nil, &APIError{Message: "Failed to update lamp", StatusCode: http.StatusInternalServerError}
+		return nil, &APIError{Message: "Failed to update lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
+
+	// Convert domain entity back to API model
+	updatedLamp := ToAPIModel(updatedEntity)
 
 	return UpdateLamp200JSONResponse(updatedLamp), nil
 }
@@ -139,8 +178,14 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 type APIError struct {
 	Message    string
 	StatusCode int
+	Err        error
 }
 
 func (e *APIError) Error() string {
 	return e.Message
+}
+
+// Unwrap returns the underlying error for use with errors.Is and errors.As.
+func (e *APIError) Unwrap() error {
+	return e.Err
 }

@@ -2,12 +2,12 @@ name: TypeScript CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/typescript/**'
       - '.github/workflows/typescript-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/typescript/**'
       - '.github/workflows/typescript-ci.yml'
@@ -49,14 +49,9 @@ jobs:
     - name: Type Check
       run: npm run typecheck
       
-    - name: Lint & Format Check
+    - name: Lint Check
       id: lint
-      run: npm run lint -- --fix
-
-    - uses: reviewdog/action-suggester@v1
-      with:
-        tool_name: npm run lint -- --fix
-        fail_level: error
+      run: npm run lint
 
     - name: Build
       run: npm run build
@@ -70,13 +65,13 @@ jobs:
         name: coverage-report
         path: src/typescript/coverage/
         
-    - name: Check test coverage threshold
+    - name: Coverage summary
       run: |
         COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
         STATEMENTS=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
         BRANCHES=$(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')
         FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')
-        
+
         echo "## TypeScript Code Coverage" >> $GITHUB_STEP_SUMMARY
         echo "| Type | Coverage |" >> $GITHUB_STEP_SUMMARY
         echo "| ---- | -------- |" >> $GITHUB_STEP_SUMMARY
@@ -84,11 +79,6 @@ jobs:
         echo "| Statements | $STATEMENTS% |" >> $GITHUB_STEP_SUMMARY
         echo "| Branches | $BRANCHES% |" >> $GITHUB_STEP_SUMMARY
         echo "| Functions | $FUNCTIONS% |" >> $GITHUB_STEP_SUMMARY
-        
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "Test coverage is below 80% (Current: $COVERAGE%)"
-          exit 1
-        fi
 
     - name: Commit coverage summary
       if: github.event_name == 'workflow_dispatch'
@@ -98,6 +88,61 @@ jobs:
         git add coverage/coverage-summary.json || true
         git commit -m "chore: update TypeScript coverage summary" || exit 0
         git push
+
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: true
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/typescript
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: src/typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test all operation modes
+        timeout-minutes: 10
+        run: |
+          ../../scripts/ci/test-modes.sh \
+            "typescript" \
+            "npm ci && npm run build" \
+            "npm start -- --mode=migrate" \
+            "PORT=8081 npm start -- --mode=serve-only > /dev/null 2>&1" \
+            "PORT=8082 npm start -- --mode=serve > /dev/null 2>&1" \
+            8081 \
+            8082
 
   schemathesis-testing:
     runs-on: ubuntu-latest

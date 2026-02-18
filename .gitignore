@@ -1,2 +1,19 @@
 .hypothesis/
 *.pid
+
+# AI tooling configuration
+.claude/
+!.claude/settings.json
+!.claude/hooks/
+src/kotlin/build/*
+!src/kotlin/build/reports/
+src/kotlin/build/reports/*
+!src/kotlin/build/reports/jacoco/
+src/kotlin/build/reports/jacoco/*
+!src/kotlin/build/reports/jacoco/test/
+src/kotlin/build/reports/jacoco/test/*
+!src/kotlin/build/reports/jacoco/test/jacocoTestReport.xml
+
+# Benchmark artifacts
+benchmarks/results/raw/
+benchmarks/results/run-report.json

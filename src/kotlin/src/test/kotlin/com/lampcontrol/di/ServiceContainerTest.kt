@@ -1,8 +1,7 @@
 package com.lampcontrol.di
 
+import kotlin.test.*
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNotNull
-import kotlin.test.assertSame
 
 class ServiceContainerTest {
     @Test

@@ -1,0 +1,64 @@
+{
+  "basePath": "/v1",
+  "passes": ["memory", "db"],
+  "iterationsPerPass": 2,
+  "randomizeServiceOrder": true,
+  "warmup": {
+    "duration": "60s",
+    "rps": 20
+  },
+  "fixed": {
+    "duration": "180s",
+    "rps": 80
+  },
+  "stress": {
+    "stepDuration": "60s",
+    "rpsSteps": [80, 120, 160, 200]
+  },
+  "extreme": {
+    "enabled": false,
+    "duration": "60s",
+    "rps": 1000,
+    "runPerIteration": false
+  },
+  "coldStart": {
+    "enabled": true,
+    "runPerIteration": false,
+    "cooldownSeconds": 900,
+    "maxWaitSeconds": 60,
+    "probeIntervalMs": 500,
+    "endpoint": "/lamps?pageSize=1",
+    "successStatus": 200
+  },
+  "slo": {
+    "p95Ms": 300,
+    "errorRate": 0.01
+  },
+  "workload": {
+    "listPercent": 50,
+    "getPercent": 20,
+    "createPercent": 20,
+    "updatePercent": 7,
+    "deletePercent": 3,
+    "pageSize": 25,
+    "seedFetchPages": 10,
+    "seedPageSize": 100
+  },
+  "defaultDbSeedCommand": "psql \"$BENCHMARK_DATABASE_URL\" -v ON_ERROR_STOP=1 -c \"TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;\"",
+  "cloudRun": {
+    "projectId": "lamp-control-469416",
+    "projectNumber": "827868544165",
+    "maxInstances": 1,
+    "minInstances": 0,
+    "concurrency": 80,
+    "cpu": "1",
+    "memory": "512Mi",
+    "timeout": "60s",
+    "startupProbe": {
+      "timeoutSeconds": 1,
+      "periodSeconds": 10,
+      "failureThreshold": 3,
+      "tcpPort": 8080
+    }
+  }
+}

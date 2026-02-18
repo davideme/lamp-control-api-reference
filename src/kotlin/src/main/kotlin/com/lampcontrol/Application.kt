@@ -1,12 +1,74 @@
 package com.lampcontrol
 
+import com.lampcontrol.config.OperationMode
+import com.lampcontrol.database.*
 import com.lampcontrol.plugins.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.application.Application
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import kotlin.system.exitProcess
+import org.slf4j.LoggerFactory
 
-fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+private val logger = LoggerFactory.getLogger("Application")
+private const val DEFAULT_PORT = 8080
+
+fun main(args: Array<String>) {
+    val modeStr = args.find { it.startsWith("--mode=") }?.substringAfter("=") ?: "serve-only"
+    val mode = OperationMode.fromString(modeStr)
+
+    when (mode) {
+        OperationMode.MIGRATE -> runMigrationsOnly()
+        OperationMode.SERVE -> startServer(runMigrations = true)
+        OperationMode.SERVE_ONLY -> startServer(runMigrations = false)
+        null -> {
+            logger.error(
+                "Invalid mode: $modeStr. Valid modes are: ${OperationMode.entries.joinToString { it.cliValue }}",
+            )
+            exitProcess(1)
+        }
+    }
+}
+
+/**
+ * Run database migrations only and exit
+ */
+fun runMigrationsOnly() {
+    logger.info("Running migrations only...")
+    val config = DatabaseConfig.fromEnv()
+
+    if (config == null) {
+        logger.warn("No PostgreSQL configuration found, nothing to migrate")
+        return
+    }
+
+    logger.info("Running migrations for database: ${config.host}:${config.port}/${config.database}")
+
+    val success = FlywayConfig.runMigrations(config)
+    if (!success) {
+        logger.error("Migrations failed")
+        exitProcess(1)
+    }
+
+    logger.info("Migrations completed successfully")
+}
+
+/**
+ * Start the server with optional migrations
+ */
+fun startServer(runMigrations: Boolean) {
+    if (runMigrations) {
+        logger.info("Starting server with automatic migrations...")
+    } else {
+        logger.info("Starting server without running migrations...")
+        // Set system property to skip migrations in DatabaseFactory
+        System.setProperty("skip.migrations", "true")
+    }
+
+    val port = System.getenv("KTOR_PORT")?.toIntOrNull()
+        ?: System.getenv("PORT")?.toIntOrNull()
+        ?: DEFAULT_PORT
+
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 

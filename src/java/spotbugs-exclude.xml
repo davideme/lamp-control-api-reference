@@ -42,6 +42,20 @@
         <Method name="&lt;init&gt;" />
     </Match>
 
+    <!-- Exclude EI_EXPOSE_REP2 for Spring dependency injection in services -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="~.*\.service\..*" />
+        <Method name="&lt;init&gt;" />
+    </Match>
+
+    <!-- PagedLampsResult returns a defensive copy; SpotBugs still flags EI_EXPOSE_REP on accessor -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP" />
+        <Class name="org.openapitools.service.LampService$PagedLampsResult" />
+        <Method name="data" />
+    </Match>
+
     <!-- Suppress clone-without-super for our custom DateFormat which intentionally reinitializes internal state -->
     <Match>
         <Bug pattern="CN_IDIOM_NO_SUPER_CALL" />

@@ -2,12 +2,12 @@ name: Kotlin CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/kotlin/**'
       - '.github/workflows/kotlin-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/kotlin/**'
       - '.github/workflows/kotlin-ci.yml'
@@ -42,21 +42,8 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    - name: Make gradlew executable
-      run: chmod +x gradlew
-
-    - name: Validate Gradle wrapper
-      uses: gradle/actions/wrapper-validation@v3
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Compile Kotlin code
       run: ./gradlew compileKotlin compileTestKotlin
@@ -125,18 +112,8 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Run ktlint formatting check
       run: ./gradlew ktlintCheck
@@ -145,10 +122,6 @@ jobs:
     - name: Run detekt analysis
       run: ./gradlew detekt
       continue-on-error: true
-
-    - name: Generate ktlint report
-      run: ./gradlew ktlintFormat
-      if: always()
 
     - name: Generate detekt report
       run: ./gradlew detekt
@@ -162,6 +135,65 @@ jobs:
         path: |
           src/kotlin/build/reports/ktlint/
           src/kotlin/build/reports/detekt/
+
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: true  # Re-enabled after fixing detekt violations (issue #275)
+
+    strategy:
+      matrix:
+        java-version: ['21']
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/kotlin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Test all operation modes
+        timeout-minutes: 10
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        run: |
+          ../../scripts/ci/test-modes.sh \
+            "kotlin" \
+            "./gradlew build --no-daemon" \
+            "./gradlew run --args='--mode=migrate' --no-daemon" \
+            "KTOR_PORT=8081 ./gradlew run --args='--mode=serve-only' --no-daemon > /dev/null 2>&1" \
+            "KTOR_PORT=8082 ./gradlew run --args='--mode=serve' --no-daemon > /dev/null 2>&1" \
+            8081 \
+            8082
 
   schemathesis-testing:
     name: Schemathesis API Testing
@@ -184,18 +216,8 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
     
     - name: Build application
       run: ./gradlew build --no-daemon

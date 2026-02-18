@@ -1,0 +1,21 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "api/queries"
+    # NOTE: Path is relative to src/go. Run `sqlc` from src/go or adjust the working directory accordingly.
+
+    schema: "../../database/sql/postgresql"
+    gen:
+      go:
+        package: "queries"
+        out: "api/queries"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        emit_prepared_queries: false
+        emit_pointers_for_null_types: true
+        emit_result_struct_pointers: false
+        emit_params_struct_pointers: false
+        emit_methods_with_db_argument: false
+        emit_enum_valid_method: true
+        emit_all_enum_values: true

@@ -134,3 +134,6 @@ dist
 # Coverage output
 coverage/*
 !coverage/coverage-summary.json
+
+# Build-time OpenAPI spec copy
+openapi/

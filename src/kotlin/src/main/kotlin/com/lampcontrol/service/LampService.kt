@@ -1,73 +1,126 @@
 package com.lampcontrol.service
 
-import com.lampcontrol.api.models.Lamp
-import com.lampcontrol.api.models.LampCreate
-import com.lampcontrol.api.models.LampUpdate
+import com.lampcontrol.api.models.*
+import com.lampcontrol.domain.DomainException
+import com.lampcontrol.entity.LampEntity
+import com.lampcontrol.extensions.toUuidOrNull
+import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.time.Instant
+import java.util.UUID
 
 /**
- * In-memory repository implementation for managing lamp operations.
+ * Service layer that handles business logic and coordinates between API and domain layers.
+ * Uses mappers to maintain separation between API models and domain entities.
  */
-class InMemoryLampRepository : LampRepository {
-    // In-memory storage for lamps - using string keys for simplicity
-    private val lamps = ConcurrentHashMap<String, Lamp>()
-    
+class LampService(
+    private val lampRepository: LampRepository,
+    private val lampMapper: LampMapper,
+) {
     /**
-     * Get all lamps
+     * Get all lamps as API models
      */
-    override fun getAllLamps(): List<Lamp> {
-        return lamps.values.toList()
+    suspend fun getAllLamps(): List<Lamp> {
+        return lampRepository.getAllLamps()
+            .map { lampMapper.toApiModel(it) }
     }
-    
+
     /**
-     * Get a lamp by ID
+     * Get a bounded page of lamps.
      */
-    override fun getLampById(id: String): Lamp? {
-        return lamps[id]
-    }
-    
-    /**
-     * Create a new lamp
-     */
-    override fun createLamp(lampCreate: LampCreate): Lamp {
-        val uuid = UUID.randomUUID()
-        val now = Instant.now().toString()
-        val lamp = Lamp(
-            id = uuid,
-            status = lampCreate.status,
-            createdAt = now,
-            updatedAt = now
+    suspend fun getLampsPage(
+        cursor: String?,
+        pageSize: Int,
+    ): ListLamps200Response {
+        val offset = parseCursorOrDefault(cursor)
+        val fetched = lampRepository.getLampsPage(offset = offset, limit = pageSize + 1)
+        val hasMore = fetched.size > pageSize
+        val pageEntities = if (hasMore) fetched.take(pageSize) else fetched
+        val pageModels = pageEntities.map { lampMapper.toApiModel(it) }
+        val nextCursor = if (hasMore) (offset + pageSize).toString() else null
+
+        return ListLamps200Response(
+            data = pageModels,
+            hasMore = hasMore,
+            nextCursor = nextCursor,
         )
-        // Store using string representation of UUID for consistent lookup
-        lamps[uuid.toString()] = lamp
-        return lamp
     }
-    
+
     /**
-     * Update an existing lamp
+     * Get a lamp by string ID and return as API model
+     * @throws DomainException.InvalidId if the ID is not a valid UUID
+     * @throws DomainException.NotFound if no lamp exists with the given ID
      */
-    override fun updateLamp(id: String, lampUpdate: LampUpdate): Lamp? {
-        val existingLamp = lamps[id] ?: return null
-    val now = Instant.now().toString()
-    val updatedLamp = existingLamp.copy(status = lampUpdate.status, updatedAt = now)
-        lamps[id] = updatedLamp
-        return updatedLamp
+    suspend fun getLampById(lampId: String): Lamp {
+        val entity = findLampEntity(lampId)
+        return lampMapper.toApiModel(entity)
     }
-    
+
     /**
-     * Delete a lamp by ID
+     * Create a new lamp from API model
      */
-    override fun deleteLamp(id: String): Boolean {
-        return lamps.remove(id) != null
+    suspend fun createLamp(lampCreate: LampCreate): Lamp {
+        val domainEntity = lampMapper.toDomainEntityCreate(lampCreate)
+        val savedEntity = lampRepository.createLamp(domainEntity)
+        return lampMapper.toApiModel(savedEntity)
     }
-    
+
     /**
-     * Check if a lamp exists
+     * Update a lamp by string ID with API update model
+     * @throws DomainException.InvalidId if the ID is not a valid UUID
+     * @throws DomainException.NotFound if no lamp exists with the given ID
      */
-    override fun lampExists(id: String): Boolean {
-        return lamps.containsKey(id)
+    suspend fun updateLamp(
+        lampId: String,
+        lampUpdate: LampUpdate,
+    ): Lamp {
+        val existingEntity = findLampEntity(lampId)
+        val updatedEntity = lampMapper.updateDomainEntity(existingEntity, lampUpdate)
+        val savedEntity = lampRepository.updateLamp(updatedEntity) ?: throw DomainException.NotFound(lampId)
+        return lampMapper.toApiModel(savedEntity)
+    }
+
+    /**
+     * Delete a lamp by string ID
+     * @throws DomainException.InvalidId if the ID is not a valid UUID
+     * @throws DomainException.NotFound if no lamp exists with the given ID
+     */
+    suspend fun deleteLamp(lampId: String) {
+        val uuid = parseUuid(lampId)
+        val deleted = lampRepository.deleteLamp(uuid)
+        if (!deleted) throw DomainException.NotFound(lampId)
+    }
+
+    /**
+     * Check if a lamp exists by string ID
+     * @throws DomainException.InvalidId if the ID is not a valid UUID
+     */
+    suspend fun lampExists(lampId: String): Boolean {
+        val uuid = parseUuid(lampId)
+        return lampRepository.lampExists(uuid)
+    }
+
+    /**
+     * Parses and validates a lamp ID string, then retrieves the corresponding entity.
+     * @throws DomainException.InvalidId if the ID is not a valid UUID
+     * @throws DomainException.NotFound if no lamp exists with the given ID
+     */
+    private suspend fun findLampEntity(lampId: String): LampEntity {
+        val uuid = parseUuid(lampId)
+        return lampRepository.getLampById(uuid) ?: throw DomainException.NotFound(lampId)
+    }
+
+    /**
+     * Parses a string lamp ID into a UUID.
+     * @throws IllegalArgumentException if the ID is blank
+     * @throws DomainException.InvalidId if the ID is not a valid UUID format
+     */
+    private fun parseUuid(lampId: String): UUID {
+        require(lampId.isNotBlank()) { "Lamp ID must not be blank" }
+        return lampId.toUuidOrNull() ?: throw DomainException.InvalidId(lampId)
+    }
+
+    private fun parseCursorOrDefault(cursor: String?): Int {
+        val parsed = cursor?.toIntOrNull() ?: return 0
+        return if (parsed < 0) 0 else parsed
     }
 }

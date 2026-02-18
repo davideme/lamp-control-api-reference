@@ -18,13 +18,9 @@ JAVA_DIR="src/java"
 JAVA_JACOCO_XML="$JAVA_DIR/target/site/jacoco/jacoco.xml"
 
 CSHARP_DIR="src/csharp"
-CSHARP_TESTRESULTS_DIR="$CSHARP_DIR/TestResults"
+CSHARP_TESTRESULTS_DIR="$CSHARP_DIR/LampControlApi.Tests/TestResults"
 CSHARP_COVERAGE_DIR="$CSHARP_DIR/coverage"
 CSHARP_COBERTURA_FILE="$CSHARP_TESTRESULTS_DIR/coverage.cobertura.xml"
-
-PHP_DIR="src/php/lamp-control-api"
-PHP_CLOVER_XML="$PHP_DIR/coverage.xml"
-PHP_ALT_CLOVER_XML="$PHP_DIR/coverage/clover.xml"
 
 GO_DIR="src/go"
 GO_COVERAGE_OUT="$GO_DIR/coverage.out"
@@ -158,31 +154,6 @@ fi
 
 echo "C# coverage: $CS_COVERAGE"
 
-# PHP coverage
-echo "Checking PHP coverage..."
-PHP_COVERAGE="N/A"
-
-# Try to find PHP coverage XML files
-if [ -f "$PHP_CLOVER_XML" ]; then
-  # Extract line coverage from Clover XML - get total statements and covered statements
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
-  
-  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
-  fi
-elif [ -f "$PHP_ALT_CLOVER_XML" ]; then
-  # Try alternative location
-  PHP_TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/statements="\([0-9]*\)"/\1/')
-  PHP_COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$PHP_ALT_CLOVER_XML" | head -1 | sed 's/coveredstatements="\([0-9]*\)"/\1/')
-  
-  if [[ "$PHP_TOTAL_STATEMENTS" =~ ^[0-9]+$ && "$PHP_COVERED_STATEMENTS" =~ ^[0-9]+$ && "$PHP_TOTAL_STATEMENTS" -gt 0 ]]; then
-    PHP_COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($PHP_COVERED_STATEMENTS/$PHP_TOTAL_STATEMENTS)*100}")
-  fi
-fi
-
-echo "PHP coverage: $PHP_COVERAGE"
-
 # Go coverage
 echo "Checking Go coverage..."
 if [ -f "$GO_COVERAGE_OUT" ]; then
@@ -233,11 +204,6 @@ else
 fi
 echo "Kotlin coverage: $KOTLIN_COVERAGE"
 
-# Ruby coverage (placeholder for future implementation)
-echo "Checking Ruby coverage..."
-RUBY_COVERAGE="N/A"
-echo "Ruby coverage: $RUBY_COVERAGE"
-
 echo "Coverage extraction completed!"
 
 # Output coverage values for capture
@@ -245,7 +211,5 @@ echo "TS_COVERAGE=$TS_COVERAGE"
 echo "PY_COVERAGE=$PY_COVERAGE"
 echo "JAVA_COVERAGE=$JAVA_COVERAGE"
 echo "CS_COVERAGE=$CS_COVERAGE"
-echo "PHP_COVERAGE=$PHP_COVERAGE"
 echo "GO_COVERAGE=$GO_COVERAGE"
 echo "KOTLIN_COVERAGE=$KOTLIN_COVERAGE"
-echo "RUBY_COVERAGE=$RUBY_COVERAGE"

@@ -2,12 +2,12 @@ name: Java CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/java/**'
       - '.github/workflows/java-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/java/**'
       - '.github/workflows/java-ci.yml'
@@ -78,6 +78,60 @@ jobs:
         git add target/site/jacoco/jacoco.xml || true
         git commit -m "chore: update Java coverage summary" || exit 0
         git push
+
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+
+    strategy:
+      matrix:
+        java-version: ['21']
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/java
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: 'src/java/pom.xml'
+
+      - name: Test all operation modes
+        env:
+          SPRING_DATASOURCE_USERNAME: test
+          SPRING_DATASOURCE_PASSWORD: test
+        run: |
+          ../../scripts/ci/test-modes.sh \
+            "java" \
+            "mvn clean package -DskipTests" \
+            "java -jar target/openapi-spring-1.0.0.jar --mode=migrate" \
+            "java -jar target/openapi-spring-1.0.0.jar --mode=serve-only --server.port=8081" \
+            "java -jar target/openapi-spring-1.0.0.jar --mode=serve --server.port=8082" \
+            8081 \
+            8082
 
   schemathesis-testing:
     name: Schemathesis API Testing

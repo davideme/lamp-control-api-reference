@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LampControlApi.Controllers;
+using LampControlApi.Domain.Mappers;
+using LampControlApi.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LampControlApi.Services
 {
     /// <summary>
     /// Implementation of the IController interface.
+    /// Uses mappers to maintain separation between domain entities and API models.
     /// </summary>
     public class LampControllerImplementation : IController
     {
@@ -44,13 +47,14 @@ namespace LampControlApi.Services
                 start = Math.Max(0, parsed);
             }
 
-            var all = (await _lampRepository.GetAllAsync())
+            var entities = await _lampRepository.GetAllAsync();
+            var lamps = entities.Select(LampMapper.ToApiModel)
                 .OrderByDescending(l => l.UpdatedAt)
                 .ThenByDescending(l => l.Id)
                 .ToList();
 
-            var page = all.Skip(start).Take(pageSize).ToList();
-            var hasMore = start + pageSize < all.Count;
+            var page = lamps.Skip(start).Take(pageSize).ToList();
+            var hasMore = start + pageSize < lamps.Count;
             var nextCursor = hasMore ? (start + pageSize).ToString() : string.Empty;
 
             var response = new Response
@@ -94,18 +98,14 @@ namespace LampControlApi.Services
                 throw new ArgumentNullException(nameof(body));
             }
 
-            var lamp = new Lamp
-            {
-                Id = Guid.NewGuid(),
-                Status = body.Status
-            };
-
-            var created = await _lampRepository.CreateAsync(lamp);
+            var entity = LampMapper.ToDomainEntityCreate(body);
+            var created = await _lampRepository.CreateAsync(entity);
+            var apiModel = LampMapper.ToApiModel(created);
 
             // Return 201 Created with a Location header pointing to the GetLamp route.
             // Use CreatedAtAction semantics so the generated controller's URL helper can
             // resolve the action name and produce the correct Location value.
-            return new CreatedAtActionResult("GetLamp", null, new { lampId = created.Id }, created);
+            return new CreatedAtActionResult("GetLamp", null, new { lampId = created.Id }, apiModel);
         }
 
         /// <summary>
@@ -125,13 +125,14 @@ namespace LampControlApi.Services
                 throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
-            var lamp = await _lampRepository.GetByIdAsync(id);
-            if (lamp == null)
+            var entity = await _lampRepository.GetByIdAsync(id);
+            if (entity == null)
             {
                 throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");
             }
 
-            return new ActionResult<Lamp>(lamp);
+            var apiModel = LampMapper.ToApiModel(entity);
+            return new ActionResult<Lamp>(apiModel);
         }
 
         /// <summary>
@@ -157,16 +158,17 @@ namespace LampControlApi.Services
                 throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
-            var existingLamp = await _lampRepository.GetByIdAsync(id);
-            if (existingLamp == null)
+            var existingEntity = await _lampRepository.GetByIdAsync(id);
+            if (existingEntity == null)
             {
                 throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");
             }
 
-            existingLamp.Status = body.Status;
-            var updatedLamp = await _lampRepository.UpdateAsync(existingLamp);
+            var updatedEntity = LampMapper.UpdateDomainEntity(existingEntity, body);
+            var updated = await _lampRepository.UpdateAsync(updatedEntity);
+            var apiModel = LampMapper.ToApiModel(updated!); // We know it exists since we just checked.
 
-            return new ActionResult<Lamp>(updatedLamp!); // We know it exists since we just checked.
+            return new ActionResult<Lamp>(apiModel);
         }
 
         /// <summary>

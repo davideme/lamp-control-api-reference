@@ -13,11 +13,16 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-package-mode = false
+package-mode = true
+packages = [{include = "openapi_server", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+pydantic-settings = "^2.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -26,6 +31,9 @@ pytest-cov = "^6.1.1"
 black = "^24.1.0"
 ruff = "^0.2.0"
 mypy = "^1.15.0"
+testcontainers = {extras = ["postgres"], version = "^4.10.0"}
+psycopg2-binary = "^2.9.10"
+greenlet = "^3.3.1"
 
 [tool.black]
 line-length = 100
@@ -70,6 +78,7 @@ lint.exclude = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/{tests,test}/*" = ["PLR2004"]
+"src/openapi_server/dependencies.py" = ["PLW0603"]  # Global statement used intentionally for singleton pattern
 
 [tool.mypy]
 python_version = "3.12"
@@ -83,8 +92,13 @@ exclude = [
     'src/openapi_server/models/lamp_update\.py',
     'src/openapi_server/models/lamp_create\.py',
     'src/openapi_server/models/lamp\.py',
+    'src/openapi_server/models/error\.py',
+    'src/openapi_server/models/list_lamps200_response\.py',
+    'src/openapi_server/mappers/lamp_mapper\.py',
     'src/openapi_server/apis/default_api_base\.py',
     'src/openapi_server/apis/default_api\.py',
+    'src/openapi_server/main\.py',
+    'src/openapi_server/impl/default_api_impl\.py',
     'tests/',
 ]
 
@@ -96,8 +110,18 @@ skip = [
 ]
 skip_gitignore = true
 
+[tool.coverage.run]
+omit = [
+    "src/openapi_server/main.py",
+    "src/openapi_server/cli.py",
+    "src/openapi_server/test/*",
+    "src/openapi_server/models/*",
+    "src/openapi_server/apis/default_api_base.py",
+]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --cov=src --cov-report=term-missing"
+addopts = "-ra -q --cov=src --cov-report=term-missing --cov-report=json:coverage/coverage.json --cov-fail-under=80"
 python_files = ["test_*.py", "*_test.py"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

@@ -1,44 +1,29 @@
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LampRepository } from '../../domain/repositories/LampRepository';
-import { components, operations } from '../types/api';
-import { LampNotFoundError } from '../../domain/errors/DomainError';
-
-type Lamp = components['schemas']['Lamp'];
-
-type ListLampsRequest = FastifyRequest<{
-  Querystring: { cursor?: string | null; pageSize?: number };
-}>;
-
-type ListLampsResponse = {
-  data: Lamp[];
-  nextCursor?: string | null;
-  hasMore: boolean;
-};
-
-type GetLampRequest = FastifyRequest<{
-  Params: operations['getLamp']['parameters']['path'];
-}>;
-
-type CreateLampRequest = FastifyRequest<{
-  Body: operations['createLamp']['requestBody']['content']['application/json'];
-}>;
-
-type UpdateLampRequest = FastifyRequest<{
-  Params: operations['updateLamp']['parameters']['path'];
-  Body: operations['updateLamp']['requestBody']['content']['application/json'];
-}>;
-
-type DeleteLampRequest = FastifyRequest<{
-  Params: operations['deleteLamp']['parameters']['path'];
-}>;
+import type { FastifyReply } from 'fastify';
+import type { LampRepository } from '../../domain/repositories/LampRepository.ts';
+import { toApiModel, toDomainEntityCreate, toDomainEntityUpdate } from '../mappers/LampMapper.ts';
+import type {
+  ListLampsRequest,
+  ListLampsResponse,
+  GetLampRequest,
+  CreateLampRequest,
+  UpdateLampRequest,
+  DeleteLampRequest,
+} from './types.ts';
 
 // service.ts
 export class Service {
-  constructor(private readonly repository: LampRepository) {}
+  private readonly repository: LampRepository;
+
+  constructor(repository: LampRepository) {
+    this.repository = repository;
+  }
 
   async listLamps(request: ListLampsRequest, reply: FastifyReply): Promise<void> {
     const { pageSize = 25 } = request.query;
-    const lamps = await this.repository.findAll(pageSize);
+    const lampEntities = await this.repository.findAll(pageSize);
+
+    // Convert domain entities to API models
+    const lamps = lampEntities.map(toApiModel);
 
     // Simple implementation without actual cursor-based pagination
     // In a real implementation, you'd use the cursor to fetch from a specific position
@@ -53,46 +38,46 @@ export class Service {
 
   async getLamp(request: GetLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
-    const lamp = await this.repository.findById(lampId);
+    const lampEntity = await this.repository.findById(lampId);
 
-    if (!lamp) {
+    if (!lampEntity) {
       return reply.code(404).send();
     }
 
+    // Convert domain entity to API model
+    const lamp = toApiModel(lampEntity);
     return reply.code(200).send(lamp);
   }
 
   async createLamp(request: CreateLampRequest, reply: FastifyReply): Promise<void> {
     const body = request.body;
-    const newLamp = await this.repository.create({ status: body.status });
+
+    // Convert API model to domain entity
+    const lampEntityCreate = toDomainEntityCreate(body);
+    const newLampEntity = await this.repository.create(lampEntityCreate);
+
+    // Convert domain entity to API model
+    const newLamp = toApiModel(newLampEntity);
     return reply.code(201).send(newLamp);
   }
 
   async updateLamp(request: UpdateLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
     const body = request.body;
-    try {
-      const updatedLamp = await this.repository.update(lampId, { status: body.status });
-      return reply.code(200).send(updatedLamp);
-    } catch (error) {
-      if (error instanceof LampNotFoundError) {
-        return reply.code(404).send();
-      }
-      throw error;
-    }
+
+    // Convert API model to domain entity
+    const lampEntityUpdate = toDomainEntityUpdate(body);
+    const updatedLampEntity = await this.repository.update(lampId, lampEntityUpdate);
+
+    // Convert domain entity to API model
+    const updatedLamp = toApiModel(updatedLampEntity);
+    return reply.code(200).send(updatedLamp);
   }
 
   async deleteLamp(request: DeleteLampRequest, reply: FastifyReply): Promise<void> {
     const { lampId } = request.params;
-    try {
-      await this.repository.delete(lampId);
-      return reply.code(204).send();
-    } catch (error) {
-      if (error instanceof LampNotFoundError) {
-        return reply.code(404).send();
-      }
-      throw error;
-    }
+    await this.repository.delete(lampId);
+    return reply.code(204).send();
   }
 }
 

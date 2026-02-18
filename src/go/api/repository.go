@@ -4,118 +4,170 @@ package api
 import (
 	"context"
 	"errors"
+	"sort"
 	"sync"
+
+	"github.com/davideme/lamp-control-api-reference/api/entities"
 )
 
 // ErrLampNotFound is returned when a lamp is not found in the repository
 var ErrLampNotFound = errors.New("lamp not found")
 
+// ErrInvalidPagination is returned when pagination arguments are invalid.
+var ErrInvalidPagination = errors.New("invalid pagination parameters")
+
 // LampRepository defines the interface for lamp data operations
 type LampRepository interface {
 	// Create adds a new lamp to the repository
-	Create(ctx context.Context, lamp Lamp) error
+	Create(ctx context.Context, lampEntity *entities.LampEntity) error
 
 	// GetByID retrieves a lamp by its ID
-	GetByID(ctx context.Context, id string) (Lamp, error)
+	GetByID(ctx context.Context, id string) (*entities.LampEntity, error)
 
 	// Update modifies an existing lamp in the repository
-	Update(ctx context.Context, lamp Lamp) error
+	Update(ctx context.Context, lampEntity *entities.LampEntity) error
 
 	// Delete removes a lamp from the repository
 	Delete(ctx context.Context, id string) error
 
-	// List returns all lamps in the repository
-	List(ctx context.Context) ([]Lamp, error)
+	// List returns lamps in the repository with pagination.
+	List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error)
 
 	// Exists checks if a lamp exists in the repository
-	Exists(ctx context.Context, id string) bool
+	Exists(ctx context.Context, id string) (bool, error)
 }
 
-// InMemoryLampRepository implements LampRepository using an in-memory map
+// InMemoryLampRepository implements LampRepository using a sync.Map-based in-memory store.
 type InMemoryLampRepository struct {
-	lamps map[string]Lamp
-	mutex sync.RWMutex
+	lamps sync.Map
 }
 
 // NewInMemoryLampRepository creates a new in-memory lamp repository
 func NewInMemoryLampRepository() *InMemoryLampRepository {
-	return &InMemoryLampRepository{
-		lamps: make(map[string]Lamp),
-		mutex: sync.RWMutex{},
-	}
+	return &InMemoryLampRepository{}
 }
 
 // Create adds a new lamp to the repository
-func (r *InMemoryLampRepository) Create(ctx context.Context, lamp Lamp) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	r.lamps[lamp.Id.String()] = lamp
+func (r *InMemoryLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
+	r.lamps.Store(lampEntity.ID.String(), lampEntity)
 
 	return nil
 }
 
 // GetByID retrieves a lamp by its ID
-func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (Lamp, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	lamp, exists := r.lamps[id]
+func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entities.LampEntity, error) {
+	value, exists := r.lamps.Load(id)
 	if !exists {
-		return Lamp{}, ErrLampNotFound
+		return nil, ErrLampNotFound
+	}
+	lampEntity, ok := value.(*entities.LampEntity)
+	if !ok {
+		return nil, ErrLampNotFound
 	}
 
-	return lamp, nil
+	// Return a copy to avoid race conditions when the entity is modified
+	return &entities.LampEntity{
+		ID:        lampEntity.ID,
+		Status:    lampEntity.Status,
+		CreatedAt: lampEntity.CreatedAt,
+		UpdatedAt: lampEntity.UpdatedAt,
+	}, nil
 }
 
 // Update modifies an existing lamp in the repository
-func (r *InMemoryLampRepository) Update(ctx context.Context, lamp Lamp) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+func (r *InMemoryLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
+	id := lampEntity.ID.String()
 
-	id := lamp.Id.String()
-	if _, exists := r.lamps[id]; !exists {
-		return ErrLampNotFound
+	for {
+		current, exists := r.lamps.Load(id)
+		if !exists {
+			return ErrLampNotFound
+		}
+
+		if r.lamps.CompareAndSwap(id, current, lampEntity) {
+			return nil
+		}
 	}
-
-	r.lamps[id] = lamp
-
-	return nil
 }
 
 // Delete removes a lamp from the repository
 func (r *InMemoryLampRepository) Delete(ctx context.Context, id string) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if _, exists := r.lamps[id]; !exists {
+	_, loaded := r.lamps.LoadAndDelete(id)
+	if !loaded {
 		return ErrLampNotFound
 	}
-
-	delete(r.lamps, id)
 
 	return nil
 }
 
-// List returns all lamps in the repository
-func (r *InMemoryLampRepository) List(ctx context.Context) ([]Lamp, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	lamps := make([]Lamp, 0, len(r.lamps))
-	for _, lamp := range r.lamps {
-		lamps = append(lamps, lamp)
+// List returns lamps in the repository with pagination.
+func (r *InMemoryLampRepository) List(ctx context.Context, offset int, limit int) ([]*entities.LampEntity, error) {
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		return []*entities.LampEntity{}, nil
 	}
 
-	return lamps, nil
+	type lampRef struct {
+		entity *entities.LampEntity
+	}
+
+	lampRefs := make([]lampRef, 0)
+	r.lamps.Range(func(_, value any) bool {
+		lampEntity, ok := value.(*entities.LampEntity)
+		if !ok || lampEntity == nil {
+			return true
+		}
+		lampRefs = append(lampRefs, lampRef{entity: lampEntity})
+
+		return true
+	})
+
+	sort.Slice(lampRefs, func(i, j int) bool {
+		if lampRefs[i].entity.CreatedAt.Equal(lampRefs[j].entity.CreatedAt) {
+			idI := lampRefs[i].entity.ID
+			idJ := lampRefs[j].entity.ID
+			for k := range idI {
+				if idI[k] == idJ[k] {
+					continue
+				}
+
+				return idI[k] < idJ[k]
+			}
+
+			return false
+		}
+
+		return lampRefs[i].entity.CreatedAt.Before(lampRefs[j].entity.CreatedAt)
+	})
+
+	if offset >= len(lampRefs) {
+		return []*entities.LampEntity{}, nil
+	}
+
+	end := offset + limit
+	if end > len(lampRefs) {
+		end = len(lampRefs)
+	}
+
+	page := make([]*entities.LampEntity, 0, end-offset)
+	for i := offset; i < end; i++ {
+		lampEntity := lampRefs[i].entity
+		page = append(page, &entities.LampEntity{
+			ID:        lampEntity.ID,
+			Status:    lampEntity.Status,
+			CreatedAt: lampEntity.CreatedAt,
+			UpdatedAt: lampEntity.UpdatedAt,
+		})
+	}
+
+	return page, nil
 }
 
 // Exists checks if a lamp exists in the repository
-func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) bool {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
+func (r *InMemoryLampRepository) Exists(ctx context.Context, id string) (bool, error) {
+	_, exists := r.lamps.Load(id)
 
-	_, exists := r.lamps[id]
-
-	return exists
+	return exists, nil
 }

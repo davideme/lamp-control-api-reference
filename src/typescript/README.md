@@ -39,12 +39,16 @@ src/
 - **Language**: TypeScript 5.x
 - **API Frameworks**:
   - REST: Fastify with OpenAPI 3.0
-- **Testing**: Jest with Supertest
+- **Database**:
+  - In-memory (default, for development and testing)
+  - PostgreSQL with Prisma ORM (optional, for production)
+- **Testing**: Jest with Supertest, Testcontainers for integration tests
 
 ## Prerequisites
 
 - Node.js >= 22
 - npm >= 10
+- Docker (optional, for PostgreSQL or integration tests)
 
 ## Installation
 
@@ -59,18 +63,102 @@ src/
    npm install
    ```
 
+3. (Optional) Set up environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env to configure database connection
+   ```
+
 ## Development
 
-Start the development server with hot reloading:
+### Traditional TypeScript Development
+Start the development server with hot reloading using tsx:
 ```bash
 npm run dev
 ```
 
-The server will be available at `http://localhost:3000`.
+### Node.js Type Stripping (Node.js 22.6.0+)
+Run TypeScript files directly with Node.js native type stripping:
+```bash
+npm run dev:native
+```
+
+The server will be available at `http://localhost:8080`.
+
+### Type Stripping Benefits
+- **No compilation step**: Run TypeScript files directly
+- **Faster startup**: Eliminates build overhead
+- **Native Node.js support**: Leverages built-in TypeScript processing
+- **Simplified debugging**: Direct execution without source maps
+
+For more details, see [ADR 007: Node.js Type Stripping Compatibility](docs/adr/007-nodejs-type-stripping-compatibility.md).
+
+## Database Configuration
+
+The application supports two storage backends:
+
+### In-Memory Storage (Default)
+
+By default, the application uses an in-memory repository. This is suitable for development, testing, and demo purposes. No configuration required.
+
+```bash
+npm run dev
+```
+
+### PostgreSQL with Prisma ORM
+
+For production deployments or when you need persistent storage:
+
+1. **Ensure PostgreSQL database is running with the required schema.**
+
+   For local development with Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+   The database schema is managed externally (see `database/sql/postgresql/schema.sql` in the repository root).
+
+2. **Generate Prisma Client:**
+   ```bash
+   npx prisma generate
+   ```
+
+3. **Run the application with PostgreSQL:**
+   ```bash
+   DATABASE_URL="postgresql://lampuser:lamppass@localhost:5432/lampcontrol?schema=public" npm run dev
+   ```
+
+4. **(Optional) Open Prisma Studio to view/edit data:**
+   ```bash
+   npx prisma studio
+   # Opens at http://localhost:5555
+   ```
+
+### Environment Variables
+
+Configure these in your `.env` file:
+
+```bash
+# Database
+DATABASE_URL="postgresql://lampuser:lamppass@localhost:5432/lampcontrol?schema=public"
+
+# Application
+PORT=8080
+NODE_ENV=development
+```
+
+### Prisma Commands
+
+- `npm run prisma:generate` - Generate Prisma Client from schema
+- `npm run prisma:studio` - Open Prisma Studio GUI for database inspection
+
+**Note:** Database migrations are managed externally. The Prisma schema in this codebase (`prisma/schema.prisma`) reflects the database structure defined in `database/sql/postgresql/schema.sql` at the repository root.
+
+For more details, see [ADR 008: PostgreSQL Storage with Prisma](docs/adr/008-postgresql-storage.md).
 
 ## Testing
 
-Run the test suite:
+Run the test suite (unit tests with in-memory storage):
 ```bash
 npm test
 ```
@@ -79,6 +167,35 @@ Run tests with coverage:
 ```bash
 npm run test:coverage
 ```
+
+Run integration tests with Testcontainers (requires Docker):
+```bash
+npm run test:integration
+```
+
+**Note:** Integration tests automatically spin up a PostgreSQL container using Testcontainers, run migrations, execute tests, and tear down the container. Docker must be running for integration tests to work.
+
+Skip integration tests (e.g., when Docker is not available):
+```bash
+SKIP_INTEGRATION_TESTS=true npm test
+```
+
+## Production
+
+### Traditional Build & Deploy
+Build and run the compiled JavaScript:
+```bash
+npm run build
+npm start
+```
+
+### Native Type Stripping (Node.js 22.6.0+)
+Run TypeScript directly in production:
+```bash
+npm run start:native
+```
+
+This eliminates the build step entirely while maintaining production performance.
 
 ## API Documentation
 

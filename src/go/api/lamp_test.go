@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+func strPtr(s string) *string { return &s }
+func intPtr(i int) *int       { return &i }
+
 func TestLampAPI_CreateLamp(t *testing.T) {
 	api := NewLampAPI()
 
@@ -84,6 +87,125 @@ func TestLampAPI_ListLamps(t *testing.T) {
 
 	if len(listResp.Data) != 1 {
 		t.Errorf("Expected 1 lamp, got %d lamps", len(listResp.Data))
+	}
+}
+
+func TestLampAPI_ListLamps_DefaultPageSize(t *testing.T) {
+	api := NewLampAPI()
+
+	for i := 0; i < 30; i++ {
+		_, err := api.CreateLamp(context.Background(), CreateLampRequestObject{
+			Body: &LampCreate{Status: i%2 == 0},
+		})
+		if err != nil {
+			t.Fatalf("CreateLamp failed: %v", err)
+		}
+	}
+
+	resp, err := api.ListLamps(context.Background(), ListLampsRequestObject{})
+	if err != nil {
+		t.Fatalf("ListLamps failed: %v", err)
+	}
+	listResp, ok := resp.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", resp)
+	}
+
+	if len(listResp.Data) != 25 {
+		t.Fatalf("Expected default page size of 25, got %d", len(listResp.Data))
+	}
+	if !listResp.HasMore {
+		t.Fatalf("Expected hasMore=true when more lamps are available")
+	}
+	if listResp.NextCursor == nil || *listResp.NextCursor != "25" {
+		t.Fatalf("Expected nextCursor=25, got %v", listResp.NextCursor)
+	}
+}
+
+func TestLampAPI_ListLamps_PaginationProgression(t *testing.T) {
+	api := NewLampAPI()
+
+	for i := 0; i < 3; i++ {
+		_, err := api.CreateLamp(context.Background(), CreateLampRequestObject{
+			Body: &LampCreate{Status: true},
+		})
+		if err != nil {
+			t.Fatalf("CreateLamp failed: %v", err)
+		}
+	}
+
+	firstRespRaw, err := api.ListLamps(context.Background(), ListLampsRequestObject{
+		Params: ListLampsParams{PageSize: intPtr(2)},
+	})
+	if err != nil {
+		t.Fatalf("ListLamps first page failed: %v", err)
+	}
+	firstResp, ok := firstRespRaw.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", firstRespRaw)
+	}
+
+	if len(firstResp.Data) != 2 {
+		t.Fatalf("Expected first page size 2, got %d", len(firstResp.Data))
+	}
+	if !firstResp.HasMore {
+		t.Fatalf("Expected hasMore=true on first page")
+	}
+	if firstResp.NextCursor == nil || *firstResp.NextCursor != "2" {
+		t.Fatalf("Expected nextCursor=2, got %v", firstResp.NextCursor)
+	}
+
+	secondRespRaw, err := api.ListLamps(context.Background(), ListLampsRequestObject{
+		Params: ListLampsParams{Cursor: strPtr("2"), PageSize: intPtr(2)},
+	})
+	if err != nil {
+		t.Fatalf("ListLamps second page failed: %v", err)
+	}
+	secondResp, ok := secondRespRaw.(ListLamps200JSONResponse)
+	if !ok {
+		t.Fatalf("Expected ListLamps200JSONResponse, got %T", secondRespRaw)
+	}
+
+	if len(secondResp.Data) != 1 {
+		t.Fatalf("Expected second page size 1, got %d", len(secondResp.Data))
+	}
+	if secondResp.HasMore {
+		t.Fatalf("Expected hasMore=false on terminal page")
+	}
+	if secondResp.NextCursor != nil {
+		t.Fatalf("Expected nil nextCursor on terminal page, got %v", secondResp.NextCursor)
+	}
+}
+
+func TestLampAPI_ListLamps_InvalidPaginationParams(t *testing.T) {
+	api := NewLampAPI()
+
+	tests := []struct {
+		name   string
+		params ListLampsParams
+	}{
+		{name: "invalid cursor", params: ListLampsParams{Cursor: strPtr("abc"), PageSize: intPtr(10)}},
+		{name: "negative cursor", params: ListLampsParams{Cursor: strPtr("-1"), PageSize: intPtr(10)}},
+		{name: "cursor out of int32 range", params: ListLampsParams{Cursor: strPtr("2147483648"), PageSize: intPtr(10)}},
+		{name: "pageSize too small", params: ListLampsParams{PageSize: intPtr(0)}},
+		{name: "pageSize too large", params: ListLampsParams{PageSize: intPtr(101)}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := api.ListLamps(context.Background(), ListLampsRequestObject{Params: tt.params})
+			if err != nil {
+				t.Fatalf("Expected nil error for validation response, got %v", err)
+			}
+
+			invalidResp, ok := resp.(ListLamps400JSONResponse)
+			if !ok {
+				t.Fatalf("Expected ListLamps400JSONResponse, got %T", resp)
+			}
+			if invalidResp.Error == "" {
+				t.Fatalf("Expected non-empty error code in response")
+			}
+		})
 	}
 }
 

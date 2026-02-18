@@ -1,7 +1,11 @@
-import { buildApp } from './infrastructure/app';
+import { buildApp } from './infrastructure/app.ts';
+import type { FastifyInstance } from 'fastify';
 
-buildApp().then((server) => {
-  server.listen({ port: 8080 }, (err, address) => {
+const PORT = parseInt(process.env.PORT || '8080', 10);
+const HOST = process.env.HOST || '0.0.0.0';
+
+export const startup = buildApp().then((server: FastifyInstance) => {
+  server.listen({ port: PORT, host: HOST }, (err: Error | null, address: string) => {
     if (err) {
       server.log.error(err);
       process.exit(1);

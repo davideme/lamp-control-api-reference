@@ -11,14 +11,35 @@ plugins {
     kotlin("plugin.serialization") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     jacoco
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClass.set("com.lampcontrol.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("kotlin-server")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    manifest {
+        attributes["Main-Class"] = "com.lampcontrol.ApplicationKt"
+    }
+}
+
+// Ensure the fat JAR is built as part of the standard assemble/build lifecycle
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
+}
+
+// Configure run task to pass environment variables to the application
+tasks.named<JavaExec>("run") {
+    // Pass all environment variables to the application
+    environment(System.getenv() as Map<String, Any>)
 }
 
 repositories {
@@ -43,15 +64,37 @@ dependencies {
     implementation("io.ktor:ktor-server-call-id")
     implementation("io.ktor:ktor-server-status-pages")
 
+    // Exposed ORM for PostgreSQL
+    implementation("org.jetbrains.exposed:exposed-core:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.55.0")
+    implementation("org.postgresql:postgresql:42.7.4")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+
+    // Flyway for database migrations
+    implementation("org.flywaydb:flyway-core:10.21.0")
+    implementation("org.flywaydb:flyway-database-postgresql:10.21.0")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("io.ktor:ktor-client-content-negotiation")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("org.testcontainers:postgresql:1.21.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.junit-pioneer:junit-pioneer:2.3.0")
 }
 
 tasks.test {
     useJUnitPlatform()
     ignoreFailures = true
+
+    // Allow JUnit Pioneer to modify environment variables via reflection
+    jvmArgs(
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    )
 }
 
 tasks.jacocoTestReport {
@@ -61,6 +104,18 @@ tasks.jacocoTestReport {
         html.required.set(true)
         csv.required.set(false)
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/com/lampcontrol/Application*",
+                    "**/com/lampcontrol/api/AppMain*",
+                    "**/com/lampcontrol/api/Configuration*",
+                    "**/com/lampcontrol/api/Paths*"
+                )
+            }
+        })
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -71,6 +126,18 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/com/lampcontrol/Application*",
+                    "**/com/lampcontrol/api/AppMain*",
+                    "**/com/lampcontrol/api/Configuration*",
+                    "**/com/lampcontrol/api/Paths*"
+                )
+            }
+        })
+    )
 }
 
 tasks.test {
@@ -91,5 +158,6 @@ ktlint {
 detekt {
     toolVersion = "1.23.4"
     buildUponDefaultConfig = true
-    ignoreFailures = true
+    config.setFrom("$projectDir/detekt.yml")
+    ignoreFailures = false
 }

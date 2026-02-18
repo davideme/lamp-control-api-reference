@@ -1,0 +1,137 @@
+"""Command-line interface for Lamp Control API.
+
+This module provides CLI commands for running the application in different modes:
+- serve-only: Start server without running migrations (default)
+- serve: Run migrations and start the server
+- migrate: Run migrations only
+"""
+
+import argparse
+import logging
+import os
+import sys
+from pathlib import Path
+
+import uvicorn
+from sqlalchemy.exc import SQLAlchemyError
+
+from alembic import command
+from alembic.config import Config
+from alembic.util.exc import CommandError
+from src.openapi_server.infrastructure.config import DatabaseSettings
+
+logger = logging.getLogger(__name__)
+
+
+def _run_migrations(*, strict: bool = True) -> bool:
+    """Run database migrations using Alembic.
+
+    Args:
+        strict: If True, exit on missing alembic.ini. If False, log warning and skip.
+
+    Returns:
+        True if migrations ran successfully, False if skipped.
+    """
+    settings = DatabaseSettings()
+    if not settings.use_postgres():
+        logger.warning("No PostgreSQL configuration found, nothing to migrate")
+        return False
+
+    alembic_ini = Path(__file__).parent.parent.parent / "alembic.ini"
+    if not alembic_ini.exists():
+        if strict:
+            logger.error(f"alembic.ini not found at {alembic_ini}")
+            sys.exit(1)
+        else:
+            logger.warning(f"alembic.ini not found at {alembic_ini}, skipping migrations")
+            return False
+
+    try:
+        alembic_cfg = Config(str(alembic_ini))
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.get_connection_string())
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Migrations completed successfully")
+        return True
+    except (CommandError, SQLAlchemyError) as e:
+        logger.error(f"Migration failed: {e}")
+        sys.exit(1)
+
+
+def run_migrations_only():
+    """Run database migrations only.
+
+    Intended for CLI use where the process exits naturally after main() finishes.
+    """
+    logger.info("Running migrations only...")
+    _run_migrations(strict=True)
+
+
+def start_server(run_migrations: bool = True, port: int | None = None):
+    """Start the FastAPI server.
+
+    Args:
+        run_migrations: Whether to run migrations before starting the server
+        port: Port to run the server on (overrides PORT env var)
+    """
+    if run_migrations:
+        logger.info("Starting server with automatic migrations...")
+        _run_migrations(strict=False)
+    else:
+        logger.info("Starting server without running migrations...")
+
+    # Resolve port: CLI argument > PORT env var > default (8080)
+    server_port = port if port is not None else int(os.getenv("PORT", "8080"))
+
+    # Start uvicorn server
+    uvicorn.run(
+        "src.openapi_server.main:app",
+        host="0.0.0.0",
+        port=server_port,
+        log_level="info",
+    )
+
+
+def main():
+    """Main CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description="Lamp Control API - FastAPI application for controlling lamps"
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["serve", "migrate", "serve-only"],
+        default="serve-only",
+        help="Operation mode: serve-only (default, start server without migrations), "
+        "serve (migrate and start server), migrate (run migrations only)",
+    )
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Logging level (default: INFO)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Port to run the server on (default: PORT env var or 8080)",
+    )
+
+    args = parser.parse_args()
+
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, args.log_level),
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    # Execute based on mode
+    if args.mode == "migrate":
+        run_migrations_only()
+    elif args.mode == "serve":
+        start_server(run_migrations=True, port=args.port)
+    elif args.mode == "serve-only":
+        start_server(run_migrations=False, port=args.port)
+
+
+if __name__ == "__main__":
+    main()

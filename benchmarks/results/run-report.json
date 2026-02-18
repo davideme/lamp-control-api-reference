@@ -1,0 +1,1317 @@
+{
+  "generatedAt": "2026-02-16T07:12:16.258Z",
+  "runId": "2026-02-16T07-12-16-151Z",
+  "config": {
+    "basePath": "/v1",
+    "passes": [
+      "memory",
+      "db"
+    ],
+    "iterationsPerPass": 3,
+    "randomizeServiceOrder": true,
+    "warmup": {
+      "duration": "30s",
+      "rps": 20
+    },
+    "fixed": {
+      "duration": "90s",
+      "rps": 80
+    },
+    "stress": {
+      "stepDuration": "45s",
+      "rpsSteps": [
+        80,
+        120,
+        160
+      ]
+    },
+    "extreme": {
+      "enabled": false,
+      "duration": "60s",
+      "rps": 1000,
+      "runPerIteration": false
+    },
+    "coldStart": {
+      "enabled": true,
+      "runPerIteration": false,
+      "cooldownSeconds": 0,
+      "maxWaitSeconds": 60,
+      "probeIntervalMs": 500,
+      "endpoint": "/lamps?pageSize=1",
+      "successStatus": 200
+    },
+    "slo": {
+      "p95Ms": 300,
+      "errorRate": 0.01
+    },
+    "workload": {
+      "listPercent": 50,
+      "getPercent": 20,
+      "createPercent": 20,
+      "updatePercent": 7,
+      "deletePercent": 3,
+      "pageSize": 25,
+      "seedFetchPages": 10,
+      "seedPageSize": 100
+    },
+    "defaultDbSeedCommand": "psql \"$BENCHMARK_DATABASE_URL\" -v ON_ERROR_STOP=1 -c \"TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;\"",
+    "cloudRun": {
+      "projectId": "lamp-control-469416",
+      "projectNumber": "827868544165",
+      "maxInstances": 1,
+      "minInstances": 0,
+      "concurrency": 80,
+      "cpu": "1",
+      "memory": "512Mi",
+      "timeout": "60s",
+      "startupProbe": {
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "failureThreshold": 3,
+        "tcpPort": 8080
+      }
+    }
+  },
+  "passes": [
+    "memory"
+  ],
+  "rawRoot": "benchmarks/results/raw/2026-02-16T07-12-16-151Z",
+  "runs": {
+    "memory": {
+      "go": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 502,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 413.145,
+              "p95": 413.145,
+              "p99": 413.145,
+              "min": 413.145,
+              "max": 413.145
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 44.840128526645756,
+              "p95": 128.51419999999985,
+              "p99": 165.53634,
+              "min": 28.374,
+              "max": 308.734
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 43.70459009133681,
+              "p95": 69.01424999999999,
+              "p99": 81.18074999999999,
+              "min": 26.615,
+              "max": 120.822
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 120,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 55.114324786324836,
+                  "p95": 102.0509,
+                  "p99": 108.34219999999999,
+                  "min": 26.841,
+                  "max": 159.05
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 62.15169191176483,
+                  "p95": 119.235,
+                  "p99": 134.79431,
+                  "min": 26.917,
+                  "max": 185.528
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 1306.6246195912602,
+                  "p95": 5987.5998999999965,
+                  "p99": 12414.981039999999,
+                  "min": 27.945,
+                  "max": 23421.67
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 74.54052545155996,
+              "p95": 144.485,
+              "p99": 151.27392,
+              "min": 28.004,
+              "max": 224.476
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 72.28106335592713,
+              "p95": 155.2818,
+              "p99": 180.79500000000002,
+              "min": 26.61,
+              "max": 282.526
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 80,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 108.06303387496553,
+                  "p95": 240.367,
+                  "p99": 329.23529999999994,
+                  "min": 27.306,
+                  "max": 928.357
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 4628.094465302284,
+                  "p95": 18982.056999999997,
+                  "p99": 25437.178,
+                  "min": 30.789,
+                  "max": 32817.978
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 81.55018842975203,
+              "p95": 174.28,
+              "p99": 187.174,
+              "min": 27.214,
+              "max": 219.554
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 2557.120145373177,
+              "p95": 11963.061699999998,
+              "p99": 21340.154079999997,
+              "min": 30.538,
+              "max": 37164.38
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 3712.862522981367,
+                  "p95": 13945.6873,
+                  "p99": 23170.544269999995,
+                  "min": 31.135,
+                  "max": 34537.654
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ],
+      "python": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 284,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 38.949,
+              "p95": 38.949,
+              "p99": 38.949,
+              "min": 38.949,
+              "max": 38.949
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 35.69219900497514,
+              "p95": 40.9713,
+              "p99": 54.57606,
+              "min": 29.885,
+              "max": 68.566
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 47.03005027004561,
+              "p95": 78.384,
+              "p99": 97.8988,
+              "min": 27.351,
+              "max": 153.299
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 80,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 64.17393082457102,
+                  "p95": 118.91329999999999,
+                  "p99": 143.29434,
+                  "min": 27.477,
+                  "max": 192.776
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 4190.1798284528395,
+                  "p95": 6668.6598,
+                  "p99": 6921.78368,
+                  "min": 30.719,
+                  "max": 7694.846
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 71.03603119868637,
+              "p95": 144.0896,
+              "p99": 179.58259999999999,
+              "min": 27.56,
+              "max": 202.761
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 4573.094971711707,
+              "p95": 6308.7937999999995,
+              "p99": 6429.67366,
+              "min": 29.17,
+              "max": 6607.093
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 5318.854369721116,
+                  "p95": 7411.09215,
+                  "p99": 7592.56073,
+                  "min": 29.134,
+                  "max": 7815.264
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 89.65459308072498,
+              "p95": 198.6494,
+              "p99": 215.99193999999997,
+              "min": 29.31,
+              "max": 239.391
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 7188.225752145383,
+              "p95": 9033.9123,
+              "p99": 9241.4014,
+              "min": 28.573,
+              "max": 9469.116
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 7473.408632413099,
+                  "p95": 9695.97825,
+                  "p99": 9896.3409,
+                  "min": 29.069,
+                  "max": 10050.548
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ],
+      "csharp": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 11722,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 11462.846,
+              "p95": 11462.846,
+              "p99": 11462.846,
+              "min": 11462.846,
+              "max": 11462.846
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 34.73893929712458,
+              "p95": 40.915749999999996,
+              "p99": 54.58424999999999,
+              "min": 29.341,
+              "max": 64.604
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 33.76505477936091,
+              "p95": 39.79819999999999,
+              "p99": 55.953039999999994,
+              "min": 27.88,
+              "max": 287.285
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 33.82976436464092,
+                  "p95": 39.70979999999998,
+                  "p99": 54.567899999999995,
+                  "min": 28.179,
+                  "max": 87.099
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 33.70479009174317,
+                  "p95": 40.42615,
+                  "p99": 55.803459999999994,
+                  "min": 27.409,
+                  "max": 95.813
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 34.275002622860356,
+                  "p95": 41.67409999999999,
+                  "p99": 57.83655,
+                  "min": 27.255,
+                  "max": 129.893
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 34.9799290429043,
+              "p95": 39.51625,
+              "p99": 56.5662,
+              "min": 29.662,
+              "max": 69.153
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 34.411109651548664,
+              "p95": 41.65029999999998,
+              "p99": 56.16054999999999,
+              "min": 27.814,
+              "max": 94.296
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 35.08804407713494,
+                  "p95": 43.30949999999999,
+                  "p99": 56.340529999999966,
+                  "min": 27.022,
+                  "max": 87.991
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 35.20198859035706,
+                  "p95": 44.38945,
+                  "p99": 58.600049999999996,
+                  "min": 27.324,
+                  "max": 118.647
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 35.34869477024976,
+                  "p95": 44.965199999999996,
+                  "p99": 59.8995,
+                  "min": 27.429,
+                  "max": 115.805
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 36.439286184210495,
+              "p95": 45.41434999999999,
+              "p99": 56.072239999999994,
+              "min": 29.987,
+              "max": 67.855
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 35.3685734459365,
+              "p95": 44.9214,
+              "p99": 60.007400000000004,
+              "min": 27.063,
+              "max": 124.008
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 35.40819856985711,
+                  "p95": 44.79799999999999,
+                  "p99": 56.99029999999999,
+                  "min": 27.65,
+                  "max": 82.932
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 35.59343158861349,
+                  "p95": 45.0676,
+                  "p99": 58.90828,
+                  "min": 27.236,
+                  "max": 328.611
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 36.878381510057885,
+                  "p95": 50.901399999999995,
+                  "p99": 69.24750999999999,
+                  "min": 27.102,
+                  "max": 310.204
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ],
+      "typescript": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 11545,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 11294.628,
+              "p95": 11294.628,
+              "p99": 11294.628,
+              "min": 11294.628,
+              "max": 11294.628
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 33.41065127388533,
+              "p95": 38.044399999999996,
+              "p99": 50.27683,
+              "min": 29.123,
+              "max": 60.983
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 32.921018700651054,
+              "p95": 38.767999999999994,
+              "p99": 55.51485999999997,
+              "min": 27.351,
+              "max": 115.22
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 33.000252068394886,
+                  "p95": 38.492749999999994,
+                  "p99": 55.95149999999997,
+                  "min": 27.711,
+                  "max": 316.029
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 32.37101048179474,
+                  "p95": 38.68059999999999,
+                  "p99": 54.12952,
+                  "min": 26.904,
+                  "max": 97.935
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 32.70986216887411,
+                  "p95": 39.780549999999984,
+                  "p99": 54.84700999999998,
+                  "min": 26.997,
+                  "max": 142.736
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 33.51246699669967,
+              "p95": 38.8895,
+              "p99": 56.70034999999999,
+              "min": 28.818,
+              "max": 74.667
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 32.899541015355034,
+              "p95": 38.773999999999994,
+              "p99": 54.32156,
+              "min": 26.848,
+              "max": 118.845
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 32.84994828060524,
+                  "p95": 38.8488,
+                  "p99": 52.704719999999995,
+                  "min": 26.525,
+                  "max": 92.937
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 33.00936119786881,
+                  "p95": 42.28849999999999,
+                  "p99": 58.087059999999994,
+                  "min": 26.195,
+                  "max": 179.647
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 32.55161627746311,
+                  "p95": 38.71679999999999,
+                  "p99": 53.956399999999995,
+                  "min": 26.825,
+                  "max": 327.977
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 33.79019834710742,
+              "p95": 40.47459999999999,
+              "p99": 59.10644,
+              "min": 29.185,
+              "max": 87.419
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 32.9677760697964,
+              "p95": 38.607,
+              "p99": 53.72999999999996,
+              "min": 26.932,
+              "max": 181.467
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 160,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 33.0025934308585,
+                  "p95": 38.813199999999995,
+                  "p99": 56.55634,
+                  "min": 27.494,
+                  "max": 185.469
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 32.52977453678219,
+                  "p95": 38.148999999999994,
+                  "p99": 50.247,
+                  "min": 26.775,
+                  "max": 273.949
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 32.495066996835874,
+                  "p95": 37.834799999999994,
+                  "p99": 47.06479999999999,
+                  "min": 26.943,
+                  "max": 120.773
+                },
+                "errorRate": 0,
+                "passed": true
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ],
+      "java": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 11734,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 11483.861,
+              "p95": 11483.861,
+              "p99": 11483.861,
+              "min": 11483.861,
+              "max": 11483.861
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 37.57371879936808,
+              "p95": 42.763,
+              "p99": 56.233759999999975,
+              "min": 31.81,
+              "max": 96.622
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 46.92490896513564,
+              "p95": 74.27890000000001,
+              "p99": 89.698,
+              "min": 28.458,
+              "max": 205.751
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 120,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 56.71327082184216,
+                  "p95": 103.83624999999999,
+                  "p99": 115.60075,
+                  "min": 28.758,
+                  "max": 221.315
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 62.57625713233931,
+                  "p95": 120.50299999999999,
+                  "p99": 137.45644000000001,
+                  "min": 27.801,
+                  "max": 296.574
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 2258.109456864214,
+                  "p95": 6223.5606,
+                  "p99": 6546.0672,
+                  "min": 29.649,
+                  "max": 6674.868
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 73.42325082508259,
+              "p95": 145.13400000000001,
+              "p99": 163.26144999999997,
+              "min": 29.397,
+              "max": 281.992
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 77.69334986149592,
+              "p95": 166.75924999999995,
+              "p99": 270.0820299999999,
+              "min": 27.975,
+              "max": 421.283
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 176.3403732413792,
+                  "p95": 345.29519999999997,
+                  "p99": 416.47855999999996,
+                  "min": 29.462,
+                  "max": 837.125
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 81.9647317880794,
+              "p95": 166.7634,
+              "p99": 180.04455,
+              "min": 29.198,
+              "max": 206.761
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 1875.6026737847717,
+              "p95": 4019.4338,
+              "p99": 4258.44074,
+              "min": 29.275,
+              "max": 4574.815
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 2955.4716632533623,
+                  "p95": 5833.6227,
+                  "p99": 6115.50644,
+                  "min": 31.042,
+                  "max": 6339.438
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ],
+      "kotlin": [
+        {
+          "iteration": 1,
+          "failed": false,
+          "coldStart": {
+            "readyMs": 11692,
+            "attempts": 1,
+            "firstSuccessStatus": 200,
+            "errorRate": 0,
+            "duration": {
+              "avg": 11444.466,
+              "p95": 11444.466,
+              "p99": 11444.466,
+              "min": 11444.466,
+              "max": 11444.466
+            },
+            "failed": false
+          },
+          "warmup": {
+            "duration": {
+              "avg": 42.573597774244796,
+              "p95": 56.035399999999996,
+              "p99": 67.94756,
+              "min": 32.117,
+              "max": 96.679
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 50.568970040038586,
+              "p95": 83.74829999999999,
+              "p99": 102.14369999999998,
+              "min": 27.901,
+              "max": 230.827
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": 120,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 63.57584742495177,
+                  "p95": 123.903,
+                  "p99": 141.1509,
+                  "min": 29.241,
+                  "max": 204.45
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 120,
+                "duration": {
+                  "avg": 100.66481958478776,
+                  "p95": 236.80179999999996,
+                  "p99": 378.11683999999997,
+                  "min": 29.396,
+                  "max": 778.054
+                },
+                "errorRate": 0,
+                "passed": true
+              },
+              {
+                "rps": 160,
+                "duration": {
+                  "avg": 4643.655725618644,
+                  "p95": 17095.524999999983,
+                  "p99": 25818.554249999997,
+                  "min": 29.609,
+                  "max": 33627.294
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 2,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 84.84882615894037,
+              "p95": 176.49155,
+              "p99": 187.35654,
+              "min": 29.593,
+              "max": 259.492
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 1355.9989095258206,
+              "p95": 6704.489599999999,
+              "p99": 13765.576739999997,
+              "min": 29.753,
+              "max": 31257.116
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 3098.9580663234365,
+                  "p95": 13948.242499999998,
+                  "p99": 26070.14075999999,
+                  "min": 33.282,
+                  "max": 36890.555
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        },
+        {
+          "iteration": 3,
+          "failed": false,
+          "coldStart": null,
+          "warmup": {
+            "duration": {
+              "avg": 95.56943092105263,
+              "p95": 209.55999999999997,
+              "p99": 250.29339,
+              "min": 29.207,
+              "max": 546.461
+            },
+            "errorRate": 0
+          },
+          "fixed": {
+            "duration": {
+              "avg": 4995.646678342199,
+              "p95": 13398.8624,
+              "p99": 21873.50788,
+              "min": 32.989,
+              "max": 34150.006
+            },
+            "errorRate": 0
+          },
+          "stress": {
+            "maxStableRps": null,
+            "steps": [
+              {
+                "rps": 80,
+                "duration": {
+                  "avg": 5283.670458399361,
+                  "p95": 17761.094149999994,
+                  "p99": 25371.95952,
+                  "min": 30.666,
+                  "max": 32624.148
+                },
+                "errorRate": 0,
+                "passed": false
+              }
+            ]
+          },
+          "extreme": null
+        }
+      ]
+    }
+  },
+  "aggregated": {
+    "memory": {
+      "go": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 502,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 155.2818,
+          "p99": 180.79500000000002,
+          "avg": 72.28106335592713,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 100
+        },
+        "extreme": null
+      },
+      "python": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 284,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 6308.7937999999995,
+          "p99": 6429.67366,
+          "avg": 4573.094971711707,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 80
+        },
+        "extreme": null
+      },
+      "csharp": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 11722,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 41.65029999999998,
+          "p99": 56.16054999999999,
+          "avg": 34.411109651548664,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 160
+        },
+        "extreme": null
+      },
+      "typescript": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 11545,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 38.767999999999994,
+          "p99": 54.32156,
+          "avg": 32.921018700651054,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 160
+        },
+        "extreme": null
+      },
+      "java": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 11734,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 166.75924999999995,
+          "p99": 270.0820299999999,
+          "avg": 77.69334986149592,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 120
+        },
+        "extreme": null
+      },
+      "kotlin": {
+        "successfulIterations": 3,
+        "failedIterations": 0,
+        "coldStart": {
+          "readyMs": 11692,
+          "attempts": 1,
+          "errorRate": 0,
+          "successfulColdSamples": 1,
+          "failedColdSamples": 0
+        },
+        "fixed": {
+          "p95": 6704.489599999999,
+          "p99": 13765.576739999997,
+          "avg": 1355.9989095258206,
+          "errorRate": 0
+        },
+        "stress": {
+          "maxStableRps": 120
+        },
+        "extreme": null
+      }
+    }
+  }
+}

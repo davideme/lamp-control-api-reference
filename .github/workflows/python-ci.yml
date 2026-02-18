@@ -2,12 +2,12 @@ name: Python CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/python/**'
       - '.github/workflows/python-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'release-*' ]
     paths:
       - 'src/python/**'
       - '.github/workflows/python-ci.yml'
@@ -29,47 +29,18 @@ jobs:
       matrix:
         python-version: ['3.12']
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: lamp_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: mysql
-          MYSQL_DATABASE: lamp_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install poetry
+      run: pipx install poetry
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+        cache: 'poetry'
+        cache-dependency-path: 'src/python/poetry.lock'
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -87,16 +58,6 @@ jobs:
 
     - name: Install dependencies
       run: poetry install --no-interaction --no-root
-
-    - name: Auto-format code
-      run: |
-        poetry run black .
-        poetry run ruff check . --fix
-
-    - uses: reviewdog/action-suggester@v1
-      with:
-        tool_name: black and ruff
-        # fail_level: error      
 
     - name: Run code quality checks
       run: |
@@ -119,16 +80,86 @@ jobs:
         MYSQL_DATABASE: lamp_test
         MONGODB_URI: mongodb://localhost:27017/lamp_test
       run: |
-        poetry run pytest --cov=src --cov-report=json:coverage/coverage.json
+        poetry run pytest --cov=src --cov-report=json:coverage/coverage.json --cov-fail-under=80
 
     - name: Commit coverage summary
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add coverage/coverage.json || true
         git commit -m "chore: update Python coverage summary" || exit 0
         git push
+
+  mode-testing:
+    name: Mode Testing
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lampcontrol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/python
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+          cache-dependency-path: 'src/python/poetry.lock'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.1.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: src/python/.venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('src/python/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Test all operation modes
+        run: |
+          ../../scripts/ci/test-modes.sh \
+            "python" \
+            "poetry install --no-interaction" \
+            "poetry run python -m src.openapi_server.cli --mode=migrate" \
+            "poetry run python -m src.openapi_server.cli --mode=serve-only --port=8000" \
+            "poetry run python -m src.openapi_server.cli --mode=serve --port=8001" \
+            8000 \
+            8001
 
   schemathesis-testing:
     name: Schemathesis API Testing
@@ -145,11 +176,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install poetry
+      run: pipx install poetry
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+        cache: 'poetry'
+        cache-dependency-path: 'src/python/poetry.lock'
 
     - name: Install Poetry
       uses: snok/install-poetry@v1

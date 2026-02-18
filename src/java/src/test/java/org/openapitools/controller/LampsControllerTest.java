@@ -1,23 +1,24 @@
 package org.openapitools.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openapitools.entity.LampEntity;
-import org.openapitools.mapper.LampMapper;
+import org.openapitools.exception.LampNotFoundException;
 import org.openapitools.model.Lamp;
 import org.openapitools.model.LampCreate;
 import org.openapitools.model.LampUpdate;
-import org.openapitools.repository.LampRepository;
+import org.openapitools.service.LampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,34 +31,31 @@ class LampsControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean private LampRepository lampRepository;
-
-  @MockBean private LampMapper lampMapper;
+  @MockBean private LampService lampService;
 
   @Autowired private ObjectMapper objectMapper;
 
   private UUID testLampId;
   private Lamp testLamp;
-  private LampEntity testLampEntity;
 
   @BeforeEach
   void setUp() {
     testLampId = UUID.randomUUID();
     testLamp = new Lamp(testLampId, true);
-    testLampEntity = new LampEntity(testLampId, true);
   }
 
   @Test
-  void listLamps_ShouldReturnAllLamps() throws Exception {
+  void listLamps_ShouldReturnBoundedPageWithNextCursor() throws Exception {
     // Given
-    List<LampEntity> entities = Arrays.asList(testLampEntity);
-    when(lampRepository.findAll()).thenReturn(entities);
-    when(lampMapper.toModel(testLampEntity)).thenReturn(testLamp);
+    final Lamp secondLamp = new Lamp(UUID.randomUUID(), false);
+    final List<Lamp> lamps = List.of(testLamp, secondLamp);
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(lamps, true, Optional.of("2")));
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps").param("pageSize", "2").accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -67,19 +65,61 @@ class LampsControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.data[0].id").value(testLampId.toString()))
-        .andExpect(jsonPath("$.data[0].status").value(true));
+        .andExpect(jsonPath("$.data[0].status").value(true))
+        .andExpect(jsonPath("$.hasMore").value(true))
+        .andExpect(jsonPath("$.nextCursor").value("2"));
+    verify(lampService).findAllActivePage(0, 2);
+  }
+
+  @Test
+  void listLamps_TerminalPage_ShouldOmitNextCursor() throws Exception {
+    // Given
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(List.of(testLamp), false, Optional.empty()));
+
+    // When & Then
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps").param("cursor", "4").param("pageSize", "2"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc
+        .perform(asyncDispatch(result))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.data[0].id").value(testLampId.toString()))
+        .andExpect(jsonPath("$.hasMore").value(false))
+        .andExpect(jsonPath("$.nextCursor").doesNotExist());
+    verify(lampService).findAllActivePage(4, 2);
+  }
+
+  @Test
+  void listLamps_InvalidCursor_ShouldFallbackToFirstPage() throws Exception {
+    // Given
+    when(lampService.findAllActivePage(anyInt(), anyInt()))
+        .thenReturn(new LampService.PagedLampsResult(List.of(testLamp), false, Optional.empty()));
+
+    // When & Then
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps").param("cursor", "abc").param("pageSize", "2"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isOk());
+    verify(lampService).findAllActivePage(0, 2);
   }
 
   @Test
   void getLamp_WithValidId_ShouldReturnLamp() throws Exception {
     // Given
-    when(lampRepository.findById(testLampId)).thenReturn(Optional.of(testLampEntity));
-    when(lampMapper.toModel(testLampEntity)).thenReturn(testLamp);
+    when(lampService.findById(testLampId)).thenReturn(Optional.of(testLamp));
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -94,12 +134,12 @@ class LampsControllerTest {
   @Test
   void getLamp_WithNonExistentId_ShouldReturn404() throws Exception {
     // Given
-    when(lampRepository.findById(testLampId)).thenReturn(Optional.empty());
+    when(lampService.findById(testLampId)).thenReturn(Optional.empty());
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(get("/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/lamps/{lampId}", testLampId).accept(MediaType.APPLICATION_JSON))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -112,15 +152,13 @@ class LampsControllerTest {
     LampCreate lampCreate = new LampCreate();
     lampCreate.setStatus(true);
 
-    when(lampMapper.toEntity(true)).thenReturn(testLampEntity);
-    when(lampRepository.save(any(LampEntity.class))).thenReturn(testLampEntity);
-    when(lampMapper.toModel(testLampEntity)).thenReturn(testLamp);
+    when(lampService.create(any(Lamp.class))).thenReturn(testLamp);
 
     // When & Then
     MvcResult result =
         mockMvc
             .perform(
-                post("/lamps")
+                post("/v1/lamps")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampCreate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -142,7 +180,7 @@ class LampsControllerTest {
     // When & Then
     mockMvc
         .perform(
-            post("/lamps")
+            post("/v1/lamps")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}")
                 .accept(MediaType.APPLICATION_JSON))
@@ -154,18 +192,15 @@ class LampsControllerTest {
     // Given
     LampUpdate lampUpdate = new LampUpdate();
     lampUpdate.setStatus(false);
-    LampEntity updatedEntity = new LampEntity(testLampId, false);
     Lamp updatedLamp = new Lamp(testLampId, false);
 
-    when(lampRepository.findById(testLampId)).thenReturn(Optional.of(testLampEntity));
-    when(lampRepository.save(any(LampEntity.class))).thenReturn(updatedEntity);
-    when(lampMapper.toModel(updatedEntity)).thenReturn(updatedLamp);
+    when(lampService.update(any(UUID.class), any(Lamp.class))).thenReturn(updatedLamp);
 
     // When & Then
     MvcResult result =
         mockMvc
             .perform(
-                put("/lamps/{lampId}", testLampId)
+                put("/v1/lamps/{lampId}", testLampId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampUpdate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -186,13 +221,14 @@ class LampsControllerTest {
     LampUpdate lampUpdate = new LampUpdate();
     lampUpdate.setStatus(false);
 
-    when(lampRepository.findById(testLampId)).thenReturn(Optional.empty());
+    when(lampService.update(any(UUID.class), any(Lamp.class)))
+        .thenThrow(new LampNotFoundException(testLampId));
 
     // When & Then
     MvcResult result =
         mockMvc
             .perform(
-                put("/lamps/{lampId}", testLampId)
+                put("/v1/lamps/{lampId}", testLampId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(lampUpdate))
                     .accept(MediaType.APPLICATION_JSON))
@@ -204,13 +240,12 @@ class LampsControllerTest {
 
   @Test
   void deleteLamp_WithValidId_ShouldDelete() throws Exception {
-    // Given
-    when(lampRepository.existsById(testLampId)).thenReturn(true);
+    // Given — delete is void, no mock setup needed
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(delete("/lamps/{lampId}", testLampId))
+            .perform(delete("/v1/lamps/{lampId}", testLampId))
             .andExpect(request().asyncStarted())
             .andReturn();
 
@@ -220,15 +255,55 @@ class LampsControllerTest {
   @Test
   void deleteLamp_WithNonExistentId_ShouldReturn404() throws Exception {
     // Given
-    when(lampRepository.existsById(testLampId)).thenReturn(false);
+    doThrow(new LampNotFoundException(testLampId)).when(lampService).delete(testLampId);
 
     // When & Then
     MvcResult result =
         mockMvc
-            .perform(delete("/lamps/{lampId}", testLampId))
+            .perform(delete("/v1/lamps/{lampId}", testLampId))
             .andExpect(request().asyncStarted())
             .andReturn();
 
     mockMvc.perform(asyncDispatch(result)).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(get("/v1/lamps/{lampId}", "not-a-uuid").accept(MediaType.APPLICATION_JSON))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void updateLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    LampUpdate lampUpdate = new LampUpdate();
+    lampUpdate.setStatus(false);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                put("/v1/lamps/{lampId}", "not-a-uuid")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(lampUpdate))
+                    .accept(MediaType.APPLICATION_JSON))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void deleteLamp_WithInvalidUuid_ShouldReturn400() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(delete("/v1/lamps/{lampId}", "not-a-uuid"))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
+    mockMvc.perform(asyncDispatch(result)).andExpect(status().isBadRequest());
   }
 }

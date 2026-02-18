@@ -1,15 +1,15 @@
+@file:Suppress("WildcardImport", "FunctionNaming", "MagicNumber")
+
 package com.lampcontrol.api
 
 // Use this file to hold package-level internal functions that return receiver object passed to the `install` method.
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.config.*
-import io.ktor.util.*
-import java.time.Duration
-import java.util.concurrent.TimeUnit
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.hsts.*
-
+import io.ktor.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Application block for [HSTS] configuration.
@@ -59,5 +59,5 @@ fun applicationAuthProvider(config: ApplicationConfig): OAuthServerSettings =
         requestMethod = HttpMethod.Get,
         clientId = config.property("auth.oauth.petstore_auth.clientId").getString(),
         clientSecret = config.property("auth.oauth.petstore_auth.clientSecret").getString(),
-        defaultScopes = listOf("write:pets", "read:pets")
+        defaultScopes = listOf("write:pets", "read:pets"),
     )

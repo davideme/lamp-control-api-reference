@@ -1,39 +1,39 @@
-using LampControlApi.Controllers;
-using LampControlApi.Middleware;
-using LampControlApi.Services;
+using LampControlApi.Extensions;
+
+// Parse operation mode from command line arguments
+var mode = args.FirstOrDefault(arg => arg.StartsWith("--mode=", StringComparison.Ordinal))?.Split('=')[1] ?? "serve-only";
+
+// Handle migrate-only mode
+if (mode == "migrate")
+{
+    MigrationRunner.RunMigrationsOnly(args);
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
+// Configure Kestrel to use PORT environment variable if set (required for Cloud Run)
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
-// Register our services
-builder.Services.AddSingleton<ILampRepository, InMemoryLampRepository>();
-builder.Services.AddScoped<IController, LampControllerImplementation>();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+var usePostgres = builder.Services.AddLampControlServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Run migrations if in 'serve' mode and PostgreSQL is configured
+if (mode == "serve" && usePostgres)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.RunMigrations();
+}
+else if (mode == "serve-only")
+{
+    Console.WriteLine("Starting server without running migrations...");
 }
 
-// Add exception handling middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-app.UseHttpsRedirection();
-
-// Health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-
-// Map controllers
-app.MapControllers();
+app.ConfigurePipeline();
 
 app.Run();
 

@@ -1,6 +1,13 @@
-"""Repository for managing lamp data."""
+"""Repository for managing lamp data with in-memory storage.
 
-from src.openapi_server.models.lamp import Lamp
+This module provides the in-memory implementation of the lamp repository.
+The repository interface is async to maintain compatibility with the
+PostgreSQL repository implementation.
+"""
+
+from __future__ import annotations
+
+from src.openapi_server.entities.lamp_entity import LampEntity
 
 
 class LampNotFoundError(Exception):
@@ -16,62 +23,86 @@ class LampNotFoundError(Exception):
         super().__init__(f"Lamp with ID {lamp_id} not found")
 
 
-class LampRepository:
-    """Repository for managing lamp data with in-memory storage."""
+class InMemoryLampRepository:
+    """Repository for managing lamp data with in-memory storage.
+
+    This implementation uses an in-memory dictionary for storage and is
+    suitable for development and testing. All methods are async to maintain
+    compatibility with the PostgreSQL repository implementation, even though
+    the operations are synchronous.
+    """
 
     def __init__(self) -> None:
         """Initialize the repository with an empty lamp store."""
-        self._lamps: dict[str, Lamp] = {}
+        self._lamps: dict[str, LampEntity] = {}
 
-    def create(self, lamp: Lamp) -> Lamp:
+    async def create(self, lamp_entity: LampEntity) -> LampEntity:
         """Create a new lamp.
 
         Args:
-            lamp: The lamp to create.
+            lamp_entity: The lamp entity to create.
 
         Returns:
-            The created lamp.
+            The created lamp entity.
         """
-        self._lamps[lamp.id] = lamp
-        return lamp
+        self._lamps[lamp_entity.id] = lamp_entity
+        return lamp_entity
 
-    def get(self, lamp_id: str) -> Lamp | None:
+    async def get(self, lamp_id: str) -> LampEntity | None:
         """Get a specific lamp.
 
         Args:
             lamp_id: The ID of the lamp to get.
 
         Returns:
-            The requested lamp, or None if not found.
+            The requested lamp entity, or None if not found.
         """
         return self._lamps.get(lamp_id)
 
-    def list(self) -> list[Lamp]:
+    async def list(self) -> list[LampEntity]:
         """List all lamps.
 
         Returns:
-            A list of all lamps.
+            A list of all lamp entities ordered by created_at then id.
         """
-        return list(self._lamps.values())
+        return self._sorted_lamps()
 
-    def update(self, lamp: Lamp) -> Lamp:
+    async def list_paginated(self, offset: int, limit: int) -> list[LampEntity]:
+        """List lamps using a bounded window for cursor pagination.
+
+        Ordering is deterministic and mirrors the PostgreSQL repository:
+        created_at ascending, then id ascending.
+
+        Args:
+            offset: Number of records to skip from the start of the ordered set.
+            limit: Maximum number of records to return.
+
+        Returns:
+            A bounded list of lamp entities for the requested window.
+        """
+        safe_offset = max(0, offset)
+        if limit <= 0:
+            return []
+        return self._sorted_lamps()[safe_offset : safe_offset + limit]
+
+    async def update(self, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp.
 
         Args:
-            lamp: The lamp to update.
+            lamp_entity: The lamp entity to update.
 
         Returns:
-            The updated lamp.
+            The updated lamp entity.
 
         Raises:
             LampNotFoundError: If the lamp is not found.
         """
-        if lamp.id not in self._lamps:
-            raise LampNotFoundError(lamp.id)
-        self._lamps[lamp.id] = lamp
-        return lamp
+        if lamp_entity.id not in self._lamps:
+            raise LampNotFoundError(lamp_entity.id)
+        self._lamps[lamp_entity.id] = lamp_entity
+        return lamp_entity
 
-    def delete(self, lamp_id: str) -> None:
+    async def delete(self, lamp_id: str) -> None:
         """Delete a lamp.
 
         Args:
@@ -83,3 +114,7 @@ class LampRepository:
         if lamp_id not in self._lamps:
             raise LampNotFoundError(lamp_id)
         del self._lamps[lamp_id]
+
+    def _sorted_lamps(self) -> list[LampEntity]:
+        """Return lamps in deterministic pagination order."""
+        return sorted(self._lamps.values(), key=lambda lamp: (lamp.created_at, lamp.id))

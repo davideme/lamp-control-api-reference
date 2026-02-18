@@ -1,0 +1,44 @@
+repos:
+  - repo: local
+    hooks:
+      - id: typescript-format-lint
+        name: TypeScript format and lint
+        entry: scripts/hooks/typescript.sh
+        language: system
+        pass_filenames: true
+        files: ^src/typescript/.*\.ts$
+
+      - id: python-format-lint
+        name: Python format and lint
+        entry: scripts/hooks/python.sh
+        language: system
+        pass_filenames: true
+        files: ^src/python/.*\.py$
+
+      - id: go-format-lint
+        name: Go format and lint
+        entry: scripts/hooks/go.sh
+        language: system
+        pass_filenames: true
+        files: ^src/go/.*\.go$
+
+      - id: java-format-lint
+        name: Java format and lint
+        entry: scripts/hooks/java.sh
+        language: system
+        pass_filenames: true
+        files: ^src/java/.*\.java$
+
+      - id: csharp-format-lint
+        name: C# format and lint
+        entry: scripts/hooks/csharp.sh
+        language: system
+        pass_filenames: true
+        files: ^src/csharp/.*\.(cs|csproj|sln|props|targets|editorconfig)$
+
+      - id: kotlin-format-lint
+        name: Kotlin format and lint
+        entry: scripts/hooks/kotlin.sh
+        language: system
+        pass_filenames: true
+        files: ^src/kotlin/.*\.(kt|kts)$
