@@ -2,6 +2,22 @@ import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient | undefined;
 
+/**
+ * Normalizes PostgreSQL connection URLs with empty host for Prisma compatibility.
+ *
+ * Cloud SQL Unix socket URLs can use:
+ *   postgresql://user:pass@/db?host=/cloudsql/INSTANCE_CONNECTION_NAME
+ * Prisma rejects URLs whose authority has an empty host.
+ *
+ * This rewrites empty-host URLs to use `localhost` in the authority while
+ * preserving the Unix socket path in the `host` query parameter.
+ *
+ * The credentials regex intentionally excludes raw '/', '?' and '#' characters.
+ * Credentials should be URL-encoded (for example `%2F`), which is supported.
+ *
+ * @param databaseUrl The database URL to normalize.
+ * @returns The normalized URL, or the original URL when no rewrite is needed.
+ */
 function normalizeDatabaseUrl(databaseUrl: string): string {
   const hasHostQueryParam = /(?:\?|&)host=/.test(databaseUrl);
   if (!hasHostQueryParam) {
@@ -9,13 +25,21 @@ function normalizeDatabaseUrl(databaseUrl: string): string {
   }
 
   const withCredentialsPattern = /^(postgres(?:ql)?:\/\/[^/?#]*@)\/(.+)$/i;
-  if (withCredentialsPattern.test(databaseUrl)) {
-    return databaseUrl.replace(withCredentialsPattern, '$1localhost/$2');
+  const normalizedWithCredentials = databaseUrl.replace(
+    withCredentialsPattern,
+    '$1localhost/$2',
+  );
+  if (normalizedWithCredentials !== databaseUrl) {
+    return normalizedWithCredentials;
   }
 
   const withoutCredentialsPattern = /^(postgres(?:ql)?:\/\/)\/(.+)$/i;
-  if (withoutCredentialsPattern.test(databaseUrl)) {
-    return databaseUrl.replace(withoutCredentialsPattern, '$1localhost/$2');
+  const normalizedWithoutCredentials = databaseUrl.replace(
+    withoutCredentialsPattern,
+    '$1localhost/$2',
+  );
+  if (normalizedWithoutCredentials !== databaseUrl) {
+    return normalizedWithoutCredentials;
   }
 
   return databaseUrl;
