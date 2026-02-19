@@ -234,8 +234,9 @@ namespace LampControlApi.Extensions
                 return int.TryParse(portPart, out var port) && port > 0 ? (host, port) : (host, null);
             }
 
+            var firstColonIndex = hostAndPort.IndexOf(':');
             var lastColonIndex = hostAndPort.LastIndexOf(':');
-            if (lastColonIndex <= 0 || lastColonIndex == hostAndPort.Length - 1 || hostAndPort.Count(c => c == ':') > 1)
+            if (lastColonIndex <= 0 || lastColonIndex == hostAndPort.Length - 1 || firstColonIndex != lastColonIndex)
             {
                 return (hostAndPort, null);
             }
