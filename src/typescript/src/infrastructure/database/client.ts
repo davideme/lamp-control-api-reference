@@ -2,6 +2,25 @@ import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient | undefined;
 
+function normalizeDatabaseUrl(databaseUrl: string): string {
+  const hasHostQueryParam = /(?:\?|&)host=/.test(databaseUrl);
+  if (!hasHostQueryParam) {
+    return databaseUrl;
+  }
+
+  const withCredentialsPattern = /^(postgres(?:ql)?:\/\/[^/?#]*@)\/(.+)$/i;
+  if (withCredentialsPattern.test(databaseUrl)) {
+    return databaseUrl.replace(withCredentialsPattern, '$1localhost/$2');
+  }
+
+  const withoutCredentialsPattern = /^(postgres(?:ql)?:\/\/)\/(.+)$/i;
+  if (withoutCredentialsPattern.test(databaseUrl)) {
+    return databaseUrl.replace(withoutCredentialsPattern, '$1localhost/$2');
+  }
+
+  return databaseUrl;
+}
+
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
     if (!process.env.DATABASE_URL) {
@@ -9,11 +28,12 @@ export function getPrismaClient(): PrismaClient {
         'DATABASE_URL environment variable is not set. Cannot initialize Prisma Client.',
       );
     }
+    const databaseUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
     prisma = new PrismaClient({
       log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
       datasources: {
         db: {
-          url: process.env.DATABASE_URL,
+          url: databaseUrl,
         },
       },
     });
