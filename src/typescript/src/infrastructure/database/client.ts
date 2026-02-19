@@ -25,10 +25,7 @@ function normalizeDatabaseUrl(databaseUrl: string): string {
   }
 
   const withCredentialsPattern = /^(postgres(?:ql)?:\/\/[^/?#]*@)\/(.+)$/i;
-  const normalizedWithCredentials = databaseUrl.replace(
-    withCredentialsPattern,
-    '$1localhost/$2',
-  );
+  const normalizedWithCredentials = databaseUrl.replace(withCredentialsPattern, '$1localhost/$2');
   if (normalizedWithCredentials !== databaseUrl) {
     return normalizedWithCredentials;
   }
