@@ -127,6 +127,40 @@ namespace LampControlApi.Tests.Extensions
         }
 
         [TestMethod]
+        public void ResolveConnectionString_ShouldSupportCloudSqlUnixSocketUrl()
+        {
+            var configuration = BuildConfiguration();
+            Environment.SetEnvironmentVariable(
+                DatabaseUrlEnvVar,
+                "postgresql://postgres:safe%7Dtest%7Bpass@/lamp-control?host=/cloudsql/project-id:region-id:instance-id&connect_timeout=5");
+
+            var result = ServiceCollectionExtensions.ResolveConnectionString(configuration);
+            var parsedConnectionString = new NpgsqlConnectionStringBuilder(result);
+
+            Assert.AreEqual("/cloudsql/project-id:region-id:instance-id", parsedConnectionString.Host);
+            Assert.AreEqual(5432, parsedConnectionString.Port);
+            Assert.AreEqual("lamp-control", parsedConnectionString.Database);
+            Assert.AreEqual("postgres", parsedConnectionString.Username);
+            Assert.AreEqual("safe}test{pass", parsedConnectionString.Password);
+            Assert.AreEqual(5, parsedConnectionString.Timeout);
+        }
+
+        [TestMethod]
+        public void ResolveConnectionString_ShouldAllowHostAndPortFromQueryString()
+        {
+            var configuration = BuildConfiguration();
+            Environment.SetEnvironmentVariable(
+                DatabaseUrlEnvVar,
+                "postgresql://lampuser:lamppass@ignored-host:5432/lampcontrol?host=db.internal&port=5434");
+
+            var result = ServiceCollectionExtensions.ResolveConnectionString(configuration);
+            var parsedConnectionString = new NpgsqlConnectionStringBuilder(result);
+
+            Assert.AreEqual("db.internal", parsedConnectionString.Host);
+            Assert.AreEqual(5434, parsedConnectionString.Port);
+        }
+
+        [TestMethod]
         public void ResolveConnectionString_ShouldThrowWhenDatabaseUrlHasUnsupportedQueryParameter()
         {
             var configuration = BuildConfiguration();
