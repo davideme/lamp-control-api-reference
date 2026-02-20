@@ -1,2 +1,2 @@
-FROM gcr.io/buildpacks/gcp/run
+FROM gcr.io/buildpacks/google-22/run
 USER root
