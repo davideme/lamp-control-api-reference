@@ -56,15 +56,14 @@ class DatabaseSettings(BaseSettings):
 
             # Normalize URL query parameters for asyncpg compatibility.
             # - Remove psycopg2-style sslmode
-            # - Map connect_timeout (common in DATABASE_URL) to asyncpg's timeout
+            # - Remove timeout parameters and pass them via connect_args
             parsed = urlparse(url)
             raw_params = parse_qsl(parsed.query)
             params: list[tuple[str, str]] = []
             for key, value in raw_params:
                 if key == "sslmode":
                     continue
-                if key == "connect_timeout":
-                    params.append(("timeout", value))
+                if key in {"connect_timeout", "timeout"}:
                     continue
                 params.append((key, value))
 
@@ -78,3 +77,25 @@ class DatabaseSettings(BaseSettings):
             f"postgresql+asyncpg://{self.db_user}:{self.db_password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
+
+    def get_connect_timeout(self) -> float | None:
+        """Get asyncpg connect timeout parsed from DATABASE_URL query params.
+
+        Returns:
+            Timeout in seconds if provided and valid, otherwise None.
+        """
+        if not self.database_url:
+            return None
+
+        parsed = urlparse(self.database_url)
+        query = dict(parse_qsl(parsed.query))
+        timeout_value = query.get("connect_timeout") or query.get("timeout")
+        if timeout_value is None:
+            return None
+
+        try:
+            timeout = float(timeout_value)
+        except ValueError:
+            return None
+
+        return timeout if timeout > 0 else None
