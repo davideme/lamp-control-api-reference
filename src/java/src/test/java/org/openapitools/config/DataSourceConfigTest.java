@@ -19,6 +19,8 @@ class DataSourceConfigTest {
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
 
     HikariConfig result = config.hikariConfig();
 
@@ -38,6 +40,8 @@ class DataSourceConfigTest {
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
 
     HikariConfig result = config.hikariConfig();
 
@@ -54,10 +58,69 @@ class DataSourceConfigTest {
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
 
     HikariConfig result = config.hikariConfig();
 
     assertThat(result.getJdbcUrl()).isEqualTo("jdbc:postgresql://localhost:5432/lamp");
+  }
+
+  @Test
+  void hikariConfig_ShouldNormalizeCloudSqlSocketStyleDatabaseUrl() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(
+        config,
+        "databaseUrl",
+        "postgresql://postgres:redacted-password@/lamp-control?"
+            + "host=/cloudsql/project-id:region:instance-id&connect_timeout=5");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "ignored");
+    setField(config, "password", "ignored");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getJdbcUrl())
+        .isEqualTo(
+            "jdbc:postgresql://localhost/lamp-control"
+                + "?host=/cloudsql/project-id:region:instance-id"
+                + "&connect_timeout=5"
+                + "&user=postgres"
+                + "&password=redacted-password");
+    assertThat(result.getDataSourceProperties())
+        .containsEntry("socketFactory", "com.google.cloud.sql.postgres.SocketFactory")
+        .containsEntry("unixSocketPath", "/cloudsql/project-id:region:instance-id")
+        .doesNotContainKey("cloudSqlRefreshStrategy");
+  }
+
+  @Test
+  void hikariConfig_ShouldSetCloudSqlRefreshStrategyOnCloudRunInSocketMode() throws Exception {
+    DataSourceConfig config = new DataSourceConfig();
+
+    setField(config, "springDatasourceUrl", "");
+    setField(
+        config,
+        "databaseUrl",
+        "postgresql://postgres:redacted-password@/lamp-control?"
+            + "host=/cloudsql/project-id:region:instance-id&connect_timeout=5");
+    setField(config, "fallbackJdbcUrl", "jdbc:postgresql://localhost:5432/fallback");
+    setField(config, "username", "ignored");
+    setField(config, "password", "ignored");
+    setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "lamp-control-service");
+    setField(config, "cloudRunRevision", "");
+
+    HikariConfig result = config.hikariConfig();
+
+    assertThat(result.getDataSourceProperties())
+        .containsEntry("socketFactory", "com.google.cloud.sql.postgres.SocketFactory")
+        .containsEntry("unixSocketPath", "/cloudsql/project-id:region:instance-id")
+        .containsEntry("cloudSqlRefreshStrategy", "lazy");
   }
 
   @Test
@@ -70,6 +133,8 @@ class DataSourceConfigTest {
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
 
     HikariConfig result = config.hikariConfig();
 
@@ -86,6 +151,8 @@ class DataSourceConfigTest {
     setField(config, "username", "user");
     setField(config, "password", "pass");
     setField(config, "driverClassName", "org.postgresql.Driver");
+    setField(config, "cloudRunService", "");
+    setField(config, "cloudRunRevision", "");
 
     HikariConfig result = config.hikariConfig();
 

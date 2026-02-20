@@ -30,6 +30,10 @@ class DatabaseManager:
                      and pool settings.
         """
         self.settings = settings
+        connect_args: dict[str, float] = {}
+        connect_timeout = settings.get_connect_timeout()
+        if connect_timeout is not None:
+            connect_args["timeout"] = connect_timeout
 
         # Create async engine with connection pooling
         self.engine = create_async_engine(
@@ -39,6 +43,7 @@ class DatabaseManager:
             max_overflow=settings.db_pool_max_size - settings.db_pool_min_size,
             pool_recycle=3600,  # Recycle connections after 1 hour
             echo=False,  # Set to True for SQL query logging during development
+            connect_args=connect_args,
         )
 
         # Create session factory
