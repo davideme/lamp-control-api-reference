@@ -9,6 +9,12 @@ import kotlin.test.*
  * These tests exercise the actual environment variable parsing code paths.
  */
 class DatabaseConfigEnvironmentVariableTest {
+    companion object {
+        private const val CLOUD_SQL_SOCKET_DATABASE_URL =
+            "postgresql://postgres:A3tN1%7DgX%7B5%7Be9ZaL@/lamp-control" +
+                "?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5"
+    }
+
     @Test
     @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://testuser:testpass@localhost:5432/testdb")
     fun `fromEnv parses DATABASE_URL correctly`() {
@@ -224,7 +230,7 @@ class DatabaseConfigEnvironmentVariableTest {
     @Test
     @SetEnvironmentVariable(
         key = "DATABASE_URL",
-        value = "postgresql://postgres:A3tN1%7DgX%7B5%7Be9ZaL@/lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+        value = CLOUD_SQL_SOCKET_DATABASE_URL,
     )
     fun `fromEnv parses Cloud SQL Unix socket DATABASE_URL`() {
         val config = DatabaseConfig.fromEnv()
