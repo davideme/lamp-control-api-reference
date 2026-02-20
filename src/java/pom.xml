@@ -23,10 +23,12 @@
         <!-- Lombok Version (override Spring Boot BOM for Java 21 compatibility) -->
         <lombok.version>1.18.38</lombok.version>
 
+        <!-- Database / Runtime Dependencies Versions -->
+        <cloud.sql.jdbc.socket.factory.version>1.28.0</cloud.sql.jdbc.socket.factory.version>
+
         <!-- Test Dependencies Versions -->
         <testcontainers.version>1.19.3</testcontainers.version>
         <jacoco.version>0.8.10</jacoco.version>
-        <cloud.sql.jdbc.socket.factory.version>1.28.0</cloud.sql.jdbc.socket.factory.version>
     </properties>
     
     <!-- Test Execution Profiles -->
