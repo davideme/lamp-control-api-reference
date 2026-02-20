@@ -206,10 +206,23 @@ public class DataSourceConfig {
 
     config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.postgres.SocketFactory");
     config.addDataSourceProperty("unixSocketPath", instanceUnixSocket);
+    String cloudSqlInstance = extractCloudSqlInstance(instanceUnixSocket);
+    if (isNotBlank(cloudSqlInstance)) {
+      config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstance);
+    }
 
     if (isCloudRun()) {
       config.addDataSourceProperty("cloudSqlRefreshStrategy", "lazy");
     }
+  }
+
+  private String extractCloudSqlInstance(String unixSocketPath) {
+    final String prefix = "/cloudsql/";
+    if (!isNotBlank(unixSocketPath) || !unixSocketPath.startsWith(prefix)) {
+      return null;
+    }
+    String instanceConnectionName = unixSocketPath.substring(prefix.length());
+    return isNotBlank(instanceConnectionName) ? instanceConnectionName : null;
   }
 
   private String extractUnixSocketPath(String jdbcUrl) {
