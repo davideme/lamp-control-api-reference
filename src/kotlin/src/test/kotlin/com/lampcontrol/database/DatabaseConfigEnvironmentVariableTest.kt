@@ -1,14 +1,20 @@
 package com.lampcontrol.database
 
-import kotlin.test.*
 import org.junit.jupiter.api.Test
 import org.junitpioneer.jupiter.*
+import kotlin.test.*
 
 /**
  * Tests for DatabaseConfig.fromEnv() using JUnit Pioneer to set environment variables.
  * These tests exercise the actual environment variable parsing code paths.
  */
 class DatabaseConfigEnvironmentVariableTest {
+    companion object {
+        private const val CLOUD_SQL_SOCKET_DATABASE_URL =
+            "postgresql://postgres:A3tN1%7DgX%7B5%7Be9ZaL@/lamp-control" +
+                "?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5"
+    }
+
     @Test
     @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://testuser:testpass@localhost:5432/testdb")
     fun `fromEnv parses DATABASE_URL correctly`() {
@@ -219,6 +225,54 @@ class DatabaseConfigEnvironmentVariableTest {
 
         assertNotNull(config)
         assertEquals("user.name", config.user)
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = CLOUD_SQL_SOCKET_DATABASE_URL,
+    )
+    fun `fromEnv parses Cloud SQL Unix socket DATABASE_URL`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("postgres", config.user)
+        assertEquals("A3tN1}gX{5{e9ZaL", config.password)
+        assertEquals("/cloudsql/lamp-control-469416:europe-west1:lamp-control-db", config.host)
+        assertEquals(5432, config.port)
+        assertEquals("lamp-control", config.database)
+        assertEquals(
+            "jdbc:postgresql://localhost/lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+            config.connectionString(),
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = "postgresql://postgres:secret@/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
+    )
+    fun `fromEnv parses unixSocketPath query parameter`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("/cloudsql/project:region:instance", config.host)
+        assertEquals(
+            "jdbc:postgresql://localhost/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
+            config.connectionString(),
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = "postgresql://user:my%21pass%3A123@db.example.com:5432/app",
+    )
+    fun `fromEnv decodes percent encoded password`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("my!pass:123", config.password)
     }
 
     @Test
