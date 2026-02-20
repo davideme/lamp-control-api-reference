@@ -36,8 +36,8 @@ COMMENT ON TABLE lamps IS 'Stores lamp entities and their current status';
 COMMENT ON COLUMN lamps.id IS 'Unique identifier for the lamp';
 COMMENT ON COLUMN lamps.is_on IS 'Current status of the lamp (true = ON, false = OFF)';
 COMMENT ON COLUMN lamps.created_at IS 'Timestamp when the lamp was created';
-COMMENT ON COLUMN lamps.updated_at IS 'Timestamp when the lamp was last updated by trigger';
-COMMENT ON COLUMN lamps.deleted_at IS 'Timestamp when the lamp was soft deleted (NULL if active)';
+COMMENT ON COLUMN lamps.updated_at IS 'Last update timestamp (managed by trigger)';
+COMMENT ON COLUMN lamps.deleted_at IS 'Soft-delete timestamp; NULL means active';
 
 -- Indexes
 --
