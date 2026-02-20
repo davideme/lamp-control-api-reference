@@ -14,7 +14,6 @@ enum class OperationMode(val cliValue: String) {
     ;
 
     companion object {
-        fun fromString(value: String): OperationMode? =
-            entries.find { it.cliValue == value }
+        fun fromString(value: String): OperationMode? = entries.find { it.cliValue == value }
     }
 }

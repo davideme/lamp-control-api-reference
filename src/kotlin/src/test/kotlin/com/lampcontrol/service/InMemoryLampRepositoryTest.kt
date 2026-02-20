@@ -1,11 +1,11 @@
 package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
-import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.util.UUID
+import kotlin.test.*
 
 class InMemoryLampRepositoryTest {
     private val repo = InMemoryLampRepository()

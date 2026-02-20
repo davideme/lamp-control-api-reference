@@ -10,9 +10,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.*
 import io.ktor.server.testing.testApplication
-import kotlin.test.*
 import kotlinx.serialization.SerializationException
 import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 class StatusPagesTest {
     @Test

@@ -1,9 +1,9 @@
 package com.lampcontrol.database
 
-import kotlin.test.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import kotlin.test.*
 
 class DatabaseConfigTest {
     @ParameterizedTest
@@ -13,7 +13,12 @@ class DatabaseConfigTest {
         "192.168.1.100, 5433, testdb, jdbc:postgresql://192.168.1.100:5433/testdb",
         "10.0.0.1, 5432, db, jdbc:postgresql://10.0.0.1:5432/db",
     )
-    fun `connectionString builds correct JDBC URL`(host: String, port: Int, database: String, expected: String) {
+    fun `connectionString builds correct JDBC URL`(
+        host: String,
+        port: Int,
+        database: String,
+        expected: String,
+    ) {
         val config =
             DatabaseConfig(
                 host = host,

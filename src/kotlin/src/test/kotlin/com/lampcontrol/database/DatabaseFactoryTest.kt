@@ -1,7 +1,7 @@
 package com.lampcontrol.database
 
-import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
+import kotlin.test.assertNotNull
 
 class DatabaseFactoryTest {
     @Test

@@ -1,6 +1,6 @@
 
-val kotlin_version: String by project
-val logback_version: String by project
+val kotlinVersion: String = project.property("kotlin_version").toString()
+val logbackVersion: String = project.property("logback_version").toString()
 
 group = "org.openapitools"
 version = "1.0.0"
@@ -28,6 +28,7 @@ tasks.shadowJar {
     archiveVersion.set("")
     manifest {
         attributes["Main-Class"] = "com.lampcontrol.ApplicationKt"
+        attributes["Multi-Release"] = "true"
     }
 }
 
@@ -48,7 +49,7 @@ repositories {
 
 dependencies {
     implementation(platform("io.ktor:ktor-bom:3.0.2"))
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("io.ktor:ktor-server-auth")
     implementation("io.ktor:ktor-server-auto-head-response")
     implementation("io.ktor:ktor-server-default-headers")
@@ -77,7 +78,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:10.21.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.21.0")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("io.ktor:ktor-client-content-negotiation")
@@ -106,16 +107,18 @@ tasks.jacocoTestReport {
         csv.required.set(false)
     }
     classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
-                exclude(
-                    "**/com/lampcontrol/Application*",
-                    "**/com/lampcontrol/api/AppMain*",
-                    "**/com/lampcontrol/api/Configuration*",
-                    "**/com/lampcontrol/api/Paths*"
-                )
-            }
-        })
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                        "**/com/lampcontrol/Application*",
+                        "**/com/lampcontrol/api/AppMain*",
+                        "**/com/lampcontrol/api/Configuration*",
+                        "**/com/lampcontrol/api/Paths*",
+                    )
+                }
+            },
+        ),
     )
 }
 
@@ -128,16 +131,18 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
-                exclude(
-                    "**/com/lampcontrol/Application*",
-                    "**/com/lampcontrol/api/AppMain*",
-                    "**/com/lampcontrol/api/Configuration*",
-                    "**/com/lampcontrol/api/Paths*"
-                )
-            }
-        })
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                        "**/com/lampcontrol/Application*",
+                        "**/com/lampcontrol/api/AppMain*",
+                        "**/com/lampcontrol/api/Configuration*",
+                        "**/com/lampcontrol/api/Paths*",
+                    )
+                }
+            },
+        ),
     )
 }
 

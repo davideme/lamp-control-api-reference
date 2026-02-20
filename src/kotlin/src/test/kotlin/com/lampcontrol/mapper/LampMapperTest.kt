@@ -2,10 +2,10 @@ package com.lampcontrol.mapper
 
 import com.lampcontrol.api.models.*
 import com.lampcontrol.entity.LampEntity
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.util.UUID
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 class LampMapperTest {
     private val mapper = LampMapper()

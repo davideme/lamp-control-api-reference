@@ -9,8 +9,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.*
 import io.ktor.server.testing.testApplication
-import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class ApiKeyAuthTest {
     @Test
