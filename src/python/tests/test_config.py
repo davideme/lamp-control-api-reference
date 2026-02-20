@@ -77,9 +77,7 @@ class TestDatabaseSettings:
     def test_get_connection_string_maps_connect_timeout_and_removes_sslmode(self):
         """Should normalize connect_timeout and remove sslmode together."""
         settings = DatabaseSettings(
-            database_url=(
-                "postgresql://user:pass@localhost/db?sslmode=disable&connect_timeout=5"
-            )
+            database_url="postgresql://user:pass@localhost/db?sslmode=disable&connect_timeout=5"
         )
         result = settings.get_connection_string()
         assert "sslmode" not in result
