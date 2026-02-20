@@ -75,7 +75,7 @@ object DatabaseFactory {
         }
 
         hikariConfig.addDataSourceProperty("socketFactory", CLOUD_SQL_SOCKET_FACTORY)
-        hikariConfig.addDataSourceProperty("unixSocketPath", config.host)
+        hikariConfig.addDataSourceProperty("ipTypes", "PUBLIC,PRIVATE")
         val cloudSqlInstance = extractCloudSqlInstance(config.host)
         if (cloudSqlInstance != null) {
             hikariConfig.addDataSourceProperty("cloudSqlInstance", cloudSqlInstance)

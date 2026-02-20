@@ -205,7 +205,7 @@ public class DataSourceConfig {
     }
 
     config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.postgres.SocketFactory");
-    config.addDataSourceProperty("unixSocketPath", instanceUnixSocket);
+    config.addDataSourceProperty("ipTypes", "PUBLIC,PRIVATE");
     String cloudSqlInstance = extractCloudSqlInstance(instanceUnixSocket);
     if (isNotBlank(cloudSqlInstance)) {
       config.addDataSourceProperty("cloudSqlInstance", cloudSqlInstance);
