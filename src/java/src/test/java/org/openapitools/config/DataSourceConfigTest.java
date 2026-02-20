@@ -95,6 +95,7 @@ class DataSourceConfigTest {
     assertThat(result.getDataSourceProperties())
         .containsEntry("socketFactory", "com.google.cloud.sql.postgres.SocketFactory")
         .containsEntry("unixSocketPath", "/cloudsql/project-id:region:instance-id")
+        .containsEntry("cloudSqlInstance", "project-id:region:instance-id")
         .doesNotContainKey("cloudSqlRefreshStrategy");
   }
 
@@ -120,6 +121,7 @@ class DataSourceConfigTest {
     assertThat(result.getDataSourceProperties())
         .containsEntry("socketFactory", "com.google.cloud.sql.postgres.SocketFactory")
         .containsEntry("unixSocketPath", "/cloudsql/project-id:region:instance-id")
+        .containsEntry("cloudSqlInstance", "project-id:region:instance-id")
         .containsEntry("cloudSqlRefreshStrategy", "lazy");
   }
 

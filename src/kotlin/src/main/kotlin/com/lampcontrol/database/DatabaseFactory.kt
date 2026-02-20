@@ -76,12 +76,21 @@ object DatabaseFactory {
 
         hikariConfig.addDataSourceProperty("socketFactory", CLOUD_SQL_SOCKET_FACTORY)
         hikariConfig.addDataSourceProperty("unixSocketPath", config.host)
+        val cloudSqlInstance = extractCloudSqlInstance(config.host)
+        if (cloudSqlInstance != null) {
+            hikariConfig.addDataSourceProperty("cloudSqlInstance", cloudSqlInstance)
+        }
 
         val cloudRunService = System.getenv("K_SERVICE")
         val cloudRunRevision = System.getenv("K_REVISION")
         if (!cloudRunService.isNullOrBlank() || !cloudRunRevision.isNullOrBlank()) {
             hikariConfig.addDataSourceProperty("cloudSqlRefreshStrategy", "lazy")
         }
+    }
+
+    private fun extractCloudSqlInstance(unixSocketPath: String): String? {
+        val instance = unixSocketPath.removePrefix(CLOUD_SQL_PATH_PREFIX)
+        return instance.takeIf { it.isNotBlank() }
     }
 }
 
