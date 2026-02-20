@@ -1,10 +1,13 @@
 package com.lampcontrol.database
 
 import com.zaxxer.hikari.*
-import java.sql.Connection
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
+import java.sql.Connection
 
 /**
  * Factory for database connection management using HikariCP and Exposed
@@ -75,6 +78,7 @@ data class DatabaseConfig(
     val maxLifetimeMs: Long,
     val idleTimeoutMs: Long,
     val connectionTimeoutMs: Long,
+    val jdbcUrlOverride: String? = null,
 ) {
     companion object {
         /**
@@ -126,20 +130,94 @@ data class DatabaseConfig(
          * Parse DATABASE_URL format: postgresql://user:password@host:port/database
          */
         private fun parseDatabaseUrl(url: String): DatabaseConfig {
-            val regex = Regex("""postgres(?:ql)?://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)""")
-            val match =
-                regex.matchEntire(url)
-                    ?: throw IllegalArgumentException(
+            val schemeMatch = Regex("""^(postgres(?:ql)?)://""", RegexOption.IGNORE_CASE).find(url)
+            val scheme = schemeMatch?.groupValues?.get(1)?.lowercase()
+            val schemePrefixLength = schemeMatch?.value?.length ?: 0
+            if (scheme != "postgresql" && scheme != "postgres") {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'.",
+                )
+            }
+
+            val rawWithoutScheme = url.substring(schemePrefixLength)
+            val atIndex = rawWithoutScheme.indexOf('@')
+            if (atIndex <= 0) {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'.",
+                )
+            }
+
+            val rawUserInfo = rawWithoutScheme.substring(0, atIndex)
+            val userInfoParts = rawUserInfo.split(":", limit = 2)
+            if (userInfoParts.size != 2 || userInfoParts[0].isBlank()) {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'.",
+                )
+            }
+            val user = URLDecoder.decode(userInfoParts[0], StandardCharsets.UTF_8)
+            val password = URLDecoder.decode(userInfoParts[1], StandardCharsets.UTF_8)
+
+            val authorityAndPath = rawWithoutScheme.substring(atIndex + 1)
+            val slashIndex = authorityAndPath.indexOf('/')
+            if (slashIndex < 0) {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'.",
+                )
+            }
+
+            val authority = authorityAndPath.substring(0, slashIndex)
+            val pathAndQuery = authorityAndPath.substring(slashIndex)
+            val uri =
+                try {
+                    URI("$scheme://$authority$pathAndQuery")
+                } catch (_: Exception) {
+                    throw IllegalArgumentException(
                         "Invalid DATABASE_URL value: '$url'. Expected format like " +
                             "'postgresql://user:password@host:5432/database' or " +
                             "'postgres://user:password@host:5432/database'.",
                     )
+                }
 
-            val (user, password, host, port, database) = match.destructured
+            val rawPath = uri.rawPath.orEmpty().removePrefix("/")
+            if (rawPath.isBlank()) {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected format like " +
+                        "'postgresql://user:password@host:5432/database' or " +
+                        "'postgres://user:password@host:5432/database'.",
+                )
+            }
+            val database = URLDecoder.decode(rawPath, StandardCharsets.UTF_8)
+
+            val queryParams = parseQueryParams(uri.rawQuery)
+            val socketHost = queryParams["host"]
+            val authorityHost =
+                uri.host ?: authority.takeIf { it.isNotBlank() }?.substringBefore(":")?.removePrefix("[")?.removeSuffix("]")
+            val host = authorityHost ?: socketHost
+            if (host.isNullOrBlank()) {
+                throw IllegalArgumentException(
+                    "Invalid DATABASE_URL value: '$url'. Expected a host in authority " +
+                        "or a 'host=' query parameter for Unix socket connections.",
+                )
+            }
+            val port = if (uri.port > 0) uri.port else 5432
+            val jdbcUrl =
+                if (uri.host != null) {
+                    "jdbc:postgresql://${uri.host}:$port/$database${formatRawQuery(uri.rawQuery)}"
+                } else {
+                    "jdbc:postgresql:///$database${formatRawQuery(uri.rawQuery)}"
+                }
 
             return DatabaseConfig(
                 host = host,
-                port = port.toInt(),
+                port = port,
                 database = database,
                 user = user,
                 password = password,
@@ -148,7 +226,31 @@ data class DatabaseConfig(
                 maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: 3600000, // 1 hour
                 idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: 1800000, // 30 minutes
                 connectionTimeoutMs = System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: 30000, // 30 seconds
+                jdbcUrlOverride = jdbcUrl,
             )
+        }
+
+        private fun parseQueryParams(rawQuery: String?): Map<String, String> {
+            if (rawQuery.isNullOrBlank()) {
+                return emptyMap()
+            }
+
+            return rawQuery
+                .split("&")
+                .mapNotNull { token ->
+                    if (token.isBlank()) {
+                        null
+                    } else {
+                        val parts = token.split("=", limit = 2)
+                        val key = URLDecoder.decode(parts[0], StandardCharsets.UTF_8)
+                        val value = URLDecoder.decode(parts.getOrElse(1) { "" }, StandardCharsets.UTF_8)
+                        key to value
+                    }
+                }.toMap()
+        }
+
+        private fun formatRawQuery(rawQuery: String?): String {
+            return if (rawQuery.isNullOrBlank()) "" else "?$rawQuery"
         }
     }
 
@@ -156,6 +258,6 @@ data class DatabaseConfig(
      * Build JDBC connection string from configuration
      */
     fun connectionString(): String {
-        return "jdbc:postgresql://$host:$port/$database"
+        return jdbcUrlOverride ?: "jdbc:postgresql://$host:$port/$database"
     }
 }
