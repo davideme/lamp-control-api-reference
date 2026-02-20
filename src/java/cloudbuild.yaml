@@ -1,10 +1,25 @@
 steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - src/java/run.Dockerfile
+      - -t
+      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/java-run:latest
+      - src/java
+    id: BuildRunImage
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/java-run:latest
+    id: PushRunImage
   - name: gcr.io/k8s-skaffold/pack
     args:
       - build
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
       - '--builder=gcr.io/buildpacks/builder:latest'
+      - '--run-image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/java-run:latest'
       - '--network=cloudbuild'
       - '--path=src/java'
     id: Buildpack
