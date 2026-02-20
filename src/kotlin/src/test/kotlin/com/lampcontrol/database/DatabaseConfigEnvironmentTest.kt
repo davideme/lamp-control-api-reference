@@ -1,7 +1,7 @@
 package com.lampcontrol.database
 
-import kotlin.test.*
 import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 /**
  * Tests for DatabaseConfig that exercise parsing and validation logic.

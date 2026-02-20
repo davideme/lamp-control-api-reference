@@ -1,9 +1,9 @@
 package com.lampcontrol.testutil
 
 import com.lampcontrol.serialization.UUIDSerializer
-import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import java.util.UUID
 
 /**
  * Shared JSON configuration for tests, matching the production serialization settings.

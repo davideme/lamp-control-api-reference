@@ -6,9 +6,9 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.testing.testApplication
-import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class PluginsTest {
     private val json = TestJson.instance

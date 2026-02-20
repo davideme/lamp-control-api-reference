@@ -2,10 +2,10 @@ package com.lampcontrol.models
 
 import com.lampcontrol.api.models.*
 import com.lampcontrol.testutil.TestJson
-import java.util.UUID
-import kotlin.test.*
 import kotlinx.serialization.*
 import org.junit.jupiter.api.Test
+import java.util.UUID
+import kotlin.test.*
 
 class ModelTest {
     private val json = TestJson.instance

@@ -4,9 +4,9 @@ import com.lampcontrol.serialization.UUIDSerializer
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import java.util.UUID
 
 fun Application.configureSerialization() {
     install(ContentNegotiation) {

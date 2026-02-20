@@ -66,7 +66,10 @@ object DatabaseFactory {
         return database
     }
 
-    private fun configureCloudSqlProperties(hikariConfig: HikariConfig, config: DatabaseConfig) {
+    private fun configureCloudSqlProperties(
+        hikariConfig: HikariConfig,
+        config: DatabaseConfig,
+    ) {
         if (!config.host.startsWith(CLOUD_SQL_PATH_PREFIX)) {
             return
         }
@@ -215,7 +218,10 @@ data class DatabaseConfig(
             )
         }
 
-        private fun parseCredentials(rawUserInfo: String, url: String): Pair<String, String> {
+        private fun parseCredentials(
+            rawUserInfo: String,
+            url: String,
+        ): Pair<String, String> {
             val userInfoParts = rawUserInfo.split(":", limit = 2)
             if (userInfoParts.size != 2 || userInfoParts[0].isBlank()) {
                 invalidDatabaseUrl(url)
@@ -225,7 +231,12 @@ data class DatabaseConfig(
                 URLDecoder.decode(userInfoParts[1], StandardCharsets.UTF_8)
         }
 
-        private fun parseUri(scheme: String, authority: String, pathAndQuery: String, url: String): URI {
+        private fun parseUri(
+            scheme: String,
+            authority: String,
+            pathAndQuery: String,
+            url: String,
+        ): URI {
             return try {
                 URI("$scheme://$authority$pathAndQuery")
             } catch (_: Exception) {
@@ -233,7 +244,10 @@ data class DatabaseConfig(
             }
         }
 
-        private fun parseDatabaseName(uri: URI, url: String): String {
+        private fun parseDatabaseName(
+            uri: URI,
+            url: String,
+        ): String {
             val rawPath = uri.rawPath.orEmpty().removePrefix("/")
             if (rawPath.isBlank()) {
                 invalidDatabaseUrl(url)
@@ -241,7 +255,11 @@ data class DatabaseConfig(
             return URLDecoder.decode(rawPath, StandardCharsets.UTF_8)
         }
 
-        private fun resolveHost(uri: URI, authority: String, url: String): String {
+        private fun resolveHost(
+            uri: URI,
+            authority: String,
+            url: String,
+        ): String {
             val queryParams = parseQueryParams(uri.rawQuery)
             val socketHost = queryParams["host"] ?: queryParams["unixSocketPath"]
             val authorityHost =
@@ -254,7 +272,11 @@ data class DatabaseConfig(
                 )
         }
 
-        private fun buildJdbcUrl(uri: URI, port: Int, database: String): String {
+        private fun buildJdbcUrl(
+            uri: URI,
+            port: Int,
+            database: String,
+        ): String {
             val querySuffix = uri.rawQuery?.takeIf { it.isNotBlank() }?.let { "?$it" }.orEmpty()
             return if (uri.host != null) {
                 "jdbc:postgresql://${uri.host}:$port/$database$querySuffix"
@@ -289,7 +311,6 @@ data class DatabaseConfig(
                     }
                 }.toMap()
         }
-
     }
 
     /**

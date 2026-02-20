@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport", "FunctionNaming", "MagicNumber")
+@file:Suppress("WildcardImport", "FunctionNaming", "MagicNumber", "ktlint:standard:function-naming")
 
 package com.lampcontrol.api
 
