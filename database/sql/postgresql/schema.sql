@@ -6,7 +6,7 @@
 --   - Removed uuid-ossp extension; gen_random_uuid() is built-in since PostgreSQL 13
 --   - Replaced three single-column full indexes with two optimized partial indexes
 --     matching actual query patterns (WHERE deleted_at IS NULL ORDER BY created_at, id)
---   - Normalized trigger function name to lowercase
+--   - Updated object formatting to match SQLFluff conventions
 --
 -- PostgreSQL 18 note: uuidv7() is available natively for time-ordered UUIDs,
 -- which improve B-tree index locality at scale. Adopting it requires application-layer
@@ -24,7 +24,7 @@
 -- Lamps table
 -- gen_random_uuid() generates a UUIDv4; no extension required on PostgreSQL 13+.
 CREATE TABLE IF NOT EXISTS lamps (
-    id          UUID                     PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID                     PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
     is_on       BOOLEAN                  NOT NULL DEFAULT FALSE,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,8 +36,8 @@ COMMENT ON TABLE lamps IS 'Stores lamp entities and their current status';
 COMMENT ON COLUMN lamps.id IS 'Unique identifier for the lamp';
 COMMENT ON COLUMN lamps.is_on IS 'Current status of the lamp (true = ON, false = OFF)';
 COMMENT ON COLUMN lamps.created_at IS 'Timestamp when the lamp was created';
-COMMENT ON COLUMN lamps.updated_at IS 'Timestamp when the lamp was last updated (managed by trigger)';
-COMMENT ON COLUMN lamps.deleted_at IS 'Timestamp when the lamp was soft deleted, NULL if active';
+COMMENT ON COLUMN lamps.updated_at IS 'Timestamp when the lamp was last updated by trigger';
+COMMENT ON COLUMN lamps.deleted_at IS 'Timestamp when the lamp was soft deleted (NULL if active)';
 
 -- Indexes
 --
@@ -47,15 +47,15 @@ COMMENT ON COLUMN lamps.deleted_at IS 'Timestamp when the lamp was soft deleted,
 -- Partial index stores only active (non-deleted) rows, reducing size and
 -- improving cache locality compared to a full index.
 CREATE INDEX IF NOT EXISTS idx_lamps_active_created_at_id
-    ON lamps (created_at ASC, id ASC)
-    WHERE deleted_at IS NULL;
+ON lamps (created_at ASC, id ASC)
+WHERE deleted_at IS NULL;
 
 -- Covers status filter queries among active lamps:
 --   WHERE is_on = $1 AND deleted_at IS NULL
 -- Partial index on active rows only improves selectivity vs. a full boolean index.
 CREATE INDEX IF NOT EXISTS idx_lamps_active_is_on
-    ON lamps (is_on)
-    WHERE deleted_at IS NULL;
+ON lamps (is_on)
+WHERE deleted_at IS NULL;
 
 -- Note: a dedicated index on deleted_at is intentionally omitted.
 -- The pattern WHERE id = $1 AND deleted_at IS NULL is served by the PK index
@@ -65,7 +65,7 @@ CREATE INDEX IF NOT EXISTS idx_lamps_active_is_on
 -- Trigger: automatically maintain updated_at on every UPDATE.
 -- CURRENT_TIMESTAMP returns transaction start time, ensuring consistent
 -- timestamps for all rows modified within the same transaction.
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION UPDATE_UPDATED_AT_COLUMN()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -74,6 +74,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_lamps_updated_at
-    BEFORE UPDATE ON lamps
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+BEFORE UPDATE ON lamps
+FOR EACH ROW
+EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
