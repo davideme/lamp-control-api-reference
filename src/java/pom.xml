@@ -26,6 +26,7 @@
         <!-- Test Dependencies Versions -->
         <testcontainers.version>1.19.3</testcontainers.version>
         <jacoco.version>0.8.10</jacoco.version>
+        <cloud.sql.jdbc.socket.factory.version>1.28.0</cloud.sql.jdbc.socket.factory.version>
     </properties>
     
     <!-- Test Execution Profiles -->
@@ -416,6 +417,13 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Cloud SQL JDBC socket factory required by DataSourceConfig socketFactory property -->
+        <dependency>
+            <groupId>com.google.cloud.sql</groupId>
+            <artifactId>postgres-socket-factory</artifactId>
+            <version>${cloud.sql.jdbc.socket.factory.version}</version>
             <scope>runtime</scope>
         </dependency>
         <!-- HikariCP Connection Pool (included in spring-boot-starter-data-jpa) -->
