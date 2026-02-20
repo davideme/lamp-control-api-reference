@@ -242,7 +242,23 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals(5432, config.port)
         assertEquals("lamp-control", config.database)
         assertEquals(
-            "jdbc:postgresql:///lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+            "jdbc:postgresql://localhost/lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+            config.connectionString(),
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = "postgresql://postgres:secret@/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
+    )
+    fun `fromEnv parses unixSocketPath query parameter`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("/cloudsql/project:region:instance", config.host)
+        assertEquals(
+            "jdbc:postgresql://localhost/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
             config.connectionString(),
         )
     }

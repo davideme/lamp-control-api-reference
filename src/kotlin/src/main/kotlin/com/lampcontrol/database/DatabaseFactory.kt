@@ -14,6 +14,8 @@ import java.sql.Connection
  */
 object DatabaseFactory {
     private val logger = LoggerFactory.getLogger(DatabaseFactory::class.java)
+    private const val CLOUD_SQL_PATH_PREFIX = "/cloudsql/"
+    private const val CLOUD_SQL_SOCKET_FACTORY = "com.google.cloud.sql.postgres.SocketFactory"
 
     /**
      * Initialize database connection from environment variables.
@@ -51,6 +53,7 @@ object DatabaseFactory {
                 connectionTimeout = config.connectionTimeoutMs
                 isAutoCommit = false
                 transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+                configureCloudSqlProperties(this, config)
                 validate()
             }
 
@@ -61,6 +64,21 @@ object DatabaseFactory {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_REPEATABLE_READ
 
         return database
+    }
+
+    private fun configureCloudSqlProperties(hikariConfig: HikariConfig, config: DatabaseConfig) {
+        if (!config.host.startsWith(CLOUD_SQL_PATH_PREFIX)) {
+            return
+        }
+
+        hikariConfig.addDataSourceProperty("socketFactory", CLOUD_SQL_SOCKET_FACTORY)
+        hikariConfig.addDataSourceProperty("unixSocketPath", config.host)
+
+        val cloudRunService = System.getenv("K_SERVICE")
+        val cloudRunRevision = System.getenv("K_REVISION")
+        if (!cloudRunService.isNullOrBlank() || !cloudRunRevision.isNullOrBlank()) {
+            hikariConfig.addDataSourceProperty("cloudSqlRefreshStrategy", "lazy")
+        }
     }
 }
 
@@ -225,14 +243,14 @@ data class DatabaseConfig(
 
         private fun resolveHost(uri: URI, authority: String, url: String): String {
             val queryParams = parseQueryParams(uri.rawQuery)
-            val socketHost = queryParams["host"]
+            val socketHost = queryParams["host"] ?: queryParams["unixSocketPath"]
             val authorityHost =
                 uri.host ?: authority.takeIf { it.isNotBlank() }?.substringBefore(":")?.removePrefix("[")?.removeSuffix("]")
             return authorityHost
                 ?: socketHost
                 ?: throw IllegalArgumentException(
                     "Invalid DATABASE_URL value: '$url'. Expected a host in authority " +
-                        "or a 'host=' query parameter for Unix socket connections.",
+                        "or a 'host='/'unixSocketPath=' query parameter for Unix socket connections.",
                 )
         }
 
@@ -241,7 +259,7 @@ data class DatabaseConfig(
             return if (uri.host != null) {
                 "jdbc:postgresql://${uri.host}:$port/$database$querySuffix"
             } else {
-                "jdbc:postgresql:///$database$querySuffix"
+                "jdbc:postgresql://localhost/$database$querySuffix"
             }
         }
 
