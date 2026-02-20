@@ -65,6 +65,25 @@ class TestDatabaseSettings:
         assert "sslmode" not in result
         assert "timeout=30" in result
 
+    def test_get_connection_string_maps_connect_timeout_to_timeout(self):
+        """Should map connect_timeout to asyncpg's timeout parameter."""
+        settings = DatabaseSettings(
+            database_url="postgresql://user:pass@localhost/db?connect_timeout=10"
+        )
+        result = settings.get_connection_string()
+        assert "connect_timeout" not in result
+        assert "timeout=10" in result
+
+    def test_get_connection_string_maps_connect_timeout_and_removes_sslmode(self):
+        """Should normalize connect_timeout and remove sslmode together."""
+        settings = DatabaseSettings(
+            database_url="postgresql://user:pass@localhost/db?sslmode=disable&connect_timeout=5"
+        )
+        result = settings.get_connection_string()
+        assert "sslmode" not in result
+        assert "connect_timeout" not in result
+        assert "timeout=5" in result
+
     def test_get_connection_string_fallback_to_individual_params(self):
         """Should build connection string from individual params when no database_url."""
         settings = DatabaseSettings(

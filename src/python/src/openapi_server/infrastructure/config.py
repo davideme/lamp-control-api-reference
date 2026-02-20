@@ -54,13 +54,21 @@ class DatabaseSettings(BaseSettings):
             if url.startswith("postgresql://"):
                 url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-            # asyncpg doesn't support the psycopg2-style sslmode query parameter
-            # Remove any sslmode query parameter; asyncpg defaults to no SSL verification
-            # in test environments, and in production SSL should be configured via
-            # asyncpg-specific parameters rather than sslmode
+            # Normalize URL query parameters for asyncpg compatibility.
+            # - Remove psycopg2-style sslmode
+            # - Map connect_timeout (common in DATABASE_URL) to asyncpg's timeout
             parsed = urlparse(url)
-            params = [(k, v) for k, v in parse_qsl(parsed.query) if k != "sslmode"]
-            if len(params) != len(parse_qsl(parsed.query)):
+            raw_params = parse_qsl(parsed.query)
+            params: list[tuple[str, str]] = []
+            for key, value in raw_params:
+                if key == "sslmode":
+                    continue
+                if key == "connect_timeout":
+                    params.append(("timeout", value))
+                    continue
+                params.append((key, value))
+
+            if params != raw_params:
                 url = urlunparse(parsed._replace(query=urlencode(params)))
 
             return url
