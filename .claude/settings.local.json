@@ -69,7 +69,8 @@
       "Bash(ruff check:*)",
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git check-ignore:*)"
     ]
   }
 }

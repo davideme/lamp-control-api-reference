@@ -5,8 +5,8 @@
     "dbUrl": "https://typescript-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "typescript-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update typescript-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars DATABASE_URL",
-    "dbSetupCommand": "gcloud run services update typescript-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars DATABASE_URL=\"$BENCHMARK_DATABASE_URL\"",
+    "memorySetupCommand": "gcloud run services update typescript-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update typescript-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
@@ -15,8 +15,8 @@
     "dbUrl": "https://python-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "python-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update python-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars DATABASE_URL",
-    "dbSetupCommand": "gcloud run services update python-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars DATABASE_URL=\"$BENCHMARK_DATABASE_URL\"",
+    "memorySetupCommand": "gcloud run services update python-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update python-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
@@ -25,8 +25,8 @@
     "dbUrl": "https://java-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "java-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update java-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars DATABASE_URL",
-    "dbSetupCommand": "gcloud run services update java-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars SPRING_DATASOURCE_URL=\"$BENCHMARK_JDBC_DATABASE_URL\" --update-env-vars DB_USER=\"$BENCHMARK_DB_USER\" --update-env-vars DB_PASSWORD=\"$BENCHMARK_DB_PASSWORD\"",
+    "memorySetupCommand": "gcloud run services update java-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update java-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
@@ -35,8 +35,8 @@
     "dbUrl": "https://csharp-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "csharp-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars ConnectionStrings__LampControl",
-    "dbSetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars ConnectionStrings__LampControl=\"$BENCHMARK_CSHARP_CONNECTION_STRING\"",
+    "memorySetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets ConnectionStrings__LampControl",
+    "dbSetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets ConnectionStrings__LampControl=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
@@ -45,8 +45,8 @@
     "dbUrl": "https://go-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "go-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update go-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars DATABASE_URL",
-    "dbSetupCommand": "gcloud run services update go-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars DATABASE_URL=\"$BENCHMARK_DATABASE_URL\"",
+    "memorySetupCommand": "gcloud run services update go-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update go-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
@@ -55,8 +55,8 @@
     "dbUrl": "https://kotlin-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "kotlin-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update kotlin-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-env-vars DATABASE_URL",
-    "dbSetupCommand": "gcloud run services update kotlin-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-env-vars DATABASE_URL=\"$BENCHMARK_DATABASE_URL\"",
+    "memorySetupCommand": "gcloud run services update kotlin-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update kotlin-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   }
 ]
