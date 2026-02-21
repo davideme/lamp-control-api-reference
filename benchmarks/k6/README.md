@@ -47,7 +47,7 @@ Edit `benchmarks/k6/services.json`:
 Default seeding is configured once in `benchmarks/k6/config.json` as `defaultDbSeedCommand`:
 
 ```bash
-psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
+psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT gen_random_uuid(), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
 ```
 
 Set `dbSeedCommand` in a service entry only when that service needs a custom seed/reset flow.
