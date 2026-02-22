@@ -40,22 +40,20 @@ namespace LampControlApi.Services
                 pageSize = 25;
             }
 
-            // Interpret cursor as a starting index. If parsing fails, start at 0.
-            var start = 0;
+            // Interpret cursor as a starting offset. If parsing fails, start at 0.
+            var offset = 0;
             if (!string.IsNullOrWhiteSpace(cursor) && int.TryParse(cursor, out var parsed))
             {
-                start = Math.Max(0, parsed);
+                offset = Math.Max(0, parsed);
             }
 
-            var entities = await _lampRepository.GetAllAsync();
-            var lamps = entities.Select(LampMapper.ToApiModel)
-                .OrderByDescending(l => l.UpdatedAt)
-                .ThenByDescending(l => l.Id)
-                .ToList();
+            // Fetch one extra row to determine whether a next page exists,
+            // avoiding a separate COUNT(*) query.
+            var entities = await _lampRepository.ListAsync(pageSize + 1, offset);
 
-            var page = lamps.Skip(start).Take(pageSize).ToList();
-            var hasMore = start + pageSize < lamps.Count;
-            var nextCursor = hasMore ? (start + pageSize).ToString() : string.Empty;
+            var hasMore = entities.Count > pageSize;
+            var page = entities.Take(pageSize).Select(LampMapper.ToApiModel).ToList();
+            var nextCursor = hasMore ? (offset + pageSize).ToString() : string.Empty;
 
             var response = new Response
             {
@@ -73,17 +71,9 @@ namespace LampControlApi.Services
         /// <returns>All lamps from the repository.</returns>
         public async Task<ICollection<Lamp>> ListLampsAsync()
         {
-            // Call the paginated implementation with defaults and return the data list.
-            var response = await ListLampsAsync(string.Empty, int.MaxValue);
-
-            // If the paginated overload returns an ActionResult, unwrap the value.
-            if (response is ActionResult<Response> ar && ar.Value != null)
-            {
-                return ar.Value.Data;
-            }
-
-            // Fallback: return empty list if something unexpected happens.
-            return new List<Lamp>();
+            // Fetch all lamps (no pagination) via the repository, then map to API models.
+            var entities = await _lampRepository.GetAllAsync();
+            return entities.Select(LampMapper.ToApiModel).ToList();
         }
 
         /// <summary>

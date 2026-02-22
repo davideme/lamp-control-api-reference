@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using LampControlApi.Domain.Entities;
@@ -273,6 +274,71 @@ namespace LampControlApi.Tests.Infrastructure
             // Assert
             Assert.IsNotNull(allLamps);
             Assert.AreEqual(1, allLamps.Count);
+        }
+
+        /// <summary>
+        /// Test that ListAsync returns the correct page of lamps from PostgreSQL.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldReturnPagedResults()
+        {
+            // Arrange - create 5 lamps
+            for (var i = 0; i < 5; i++)
+            {
+                await this.repository!.CreateAsync(LampEntity.Create(status: i % 2 == 0));
+            }
+
+            // Act
+            var page1 = await this.repository!.ListAsync(limit: 2, offset: 0);
+            var page2 = await this.repository.ListAsync(limit: 2, offset: 2);
+            var page3 = await this.repository.ListAsync(limit: 2, offset: 4);
+
+            // Assert
+            Assert.AreEqual(2, page1.Count);
+            Assert.AreEqual(2, page2.Count);
+            Assert.AreEqual(1, page3.Count);
+        }
+
+        /// <summary>
+        /// Test that ListAsync does not return soft-deleted lamps.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldNotReturnDeletedLamps()
+        {
+            // Arrange
+            var lamp1 = await this.repository!.CreateAsync(LampEntity.Create(status: true));
+            await this.repository.CreateAsync(LampEntity.Create(status: false));
+            await this.repository.DeleteAsync(lamp1.Id);
+
+            // Act
+            var result = await this.repository.ListAsync(limit: 10, offset: 0);
+
+            // Assert
+            Assert.AreEqual(1, result.Count);
+        }
+
+        /// <summary>
+        /// Test that ListAsync returns lamps ordered by created_at then id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldReturnLampsOrderedByCreatedAt()
+        {
+            // Arrange
+            await this.repository!.CreateAsync(LampEntity.Create(status: true));
+            await this.repository.CreateAsync(LampEntity.Create(status: false));
+            await this.repository.CreateAsync(LampEntity.Create(status: true));
+
+            // Act
+            var result = await this.repository.ListAsync(limit: 3, offset: 0);
+            var list = result.ToList();
+
+            // Assert - should be oldest first
+            Assert.AreEqual(3, list.Count);
+            Assert.IsTrue(list[0].CreatedAt <= list[1].CreatedAt);
+            Assert.IsTrue(list[1].CreatedAt <= list[2].CreatedAt);
         }
 
         /// <summary>

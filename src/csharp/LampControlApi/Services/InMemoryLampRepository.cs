@@ -35,6 +35,19 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
+        public Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var page = _lamps.Values
+                .OrderBy(l => l.CreatedAt)
+                .ThenBy(l => l.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+            return Task.FromResult<ICollection<LampEntity>>(page);
+        }
+
+        /// <inheritdoc/>
         public Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
