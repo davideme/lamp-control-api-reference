@@ -57,6 +57,7 @@ class PostgresLampRepository:
 
         self._session.add(db_lamp)
         await self._session.flush()
+        await self._session.commit()
         await self._session.refresh(db_lamp)
 
         return self._to_entity(db_lamp)
