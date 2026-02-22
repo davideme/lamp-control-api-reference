@@ -197,5 +197,74 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsFalse(deleted);
         }
+
+        /// <summary>
+        /// Test that ListAsync returns the correct page of lamps.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldReturnPagedResults()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            for (var i = 0; i < 5; i++)
+            {
+                var lamp = new LampEntity(Guid.NewGuid(), true, now.AddSeconds(i), now.AddSeconds(i));
+                await _repository.CreateAsync(lamp);
+            }
+
+            // Act
+            var page1 = await _repository.ListAsync(limit: 2, offset: 0);
+            var page2 = await _repository.ListAsync(limit: 2, offset: 2);
+            var page3 = await _repository.ListAsync(limit: 2, offset: 4);
+
+            // Assert
+            Assert.AreEqual(2, page1.Count);
+            Assert.AreEqual(2, page2.Count);
+            Assert.AreEqual(1, page3.Count);
+        }
+
+        /// <summary>
+        /// Test that ListAsync returns lamps ordered by CreatedAt then Id.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldReturnLampsOrderedByCreatedAt()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var lamp1 = new LampEntity(Guid.NewGuid(), true, now.AddSeconds(2), now);
+            var lamp2 = new LampEntity(Guid.NewGuid(), false, now.AddSeconds(0), now);
+            var lamp3 = new LampEntity(Guid.NewGuid(), true, now.AddSeconds(1), now);
+            await _repository.CreateAsync(lamp1);
+            await _repository.CreateAsync(lamp2);
+            await _repository.CreateAsync(lamp3);
+
+            // Act
+            var result = await _repository.ListAsync(limit: 3, offset: 0);
+            var list = result.ToList();
+
+            // Assert - should be oldest first
+            Assert.AreEqual(3, list.Count);
+            Assert.IsTrue(list[0].CreatedAt <= list[1].CreatedAt);
+            Assert.IsTrue(list[1].CreatedAt <= list[2].CreatedAt);
+        }
+
+        /// <summary>
+        /// Test that ListAsync returns empty collection when offset exceeds total count.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListAsync_ShouldReturnEmpty_WhenOffsetExceedsCount()
+        {
+            // Arrange
+            await _repository.CreateAsync(LampEntity.Create(true));
+
+            // Act
+            var result = await _repository.ListAsync(limit: 10, offset: 100);
+
+            // Assert
+            Assert.AreEqual(0, result.Count);
+        }
     }
 }

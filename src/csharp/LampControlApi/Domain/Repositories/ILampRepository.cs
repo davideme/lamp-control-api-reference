@@ -20,6 +20,24 @@ namespace LampControlApi.Domain.Repositories
         Task<ICollection<LampEntity>> GetAllAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// List lamps with database-level pagination.
+        /// </summary>
+        /// <param name="limit">
+        /// Maximum number of lamps to return. Must be greater than or equal to 0.
+        /// A value of 0 returns an empty collection. Pass <see cref="int.MaxValue"/> to
+        /// retrieve all remaining lamps from the given offset.
+        /// </param>
+        /// <param name="offset">
+        /// Number of lamps to skip before returning results. Must be greater than or equal to 0.
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Collection of lamps for the requested page, ordered by created_at then id.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="limit"/> or <paramref name="offset"/> is negative.
+        /// </exception>
+        Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Get a lamp by ID.
         /// </summary>
         /// <param name="id">Lamp ID.</param>

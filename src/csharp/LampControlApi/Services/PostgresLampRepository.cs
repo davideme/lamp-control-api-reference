@@ -46,6 +46,35 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
+        public async Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default)
+        {
+            if (limit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(limit), "Limit must be greater than or equal to 0.");
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be greater than or equal to 0.");
+            }
+
+            this.logger.LogDebug(
+                "Listing lamps from PostgreSQL database (limit: {Limit}, offset: {Offset})",
+                limit,
+                offset);
+
+            var dbEntities = await this.context.Lamps
+                .OrderBy(l => l.CreatedAt)
+                .ThenBy(l => l.Id)
+                .Skip(offset)
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            return dbEntities.Select(this.MapToDomain).ToList();
+        }
+
+        /// <inheritdoc/>
         public async Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             this.logger.LogDebug("Getting lamp {LampId} from PostgreSQL database", id);
