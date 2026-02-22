@@ -48,6 +48,16 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public async Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default)
         {
+            if (limit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(limit), "Limit must be greater than or equal to 0.");
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be greater than or equal to 0.");
+            }
+
             this.logger.LogDebug(
                 "Listing lamps from PostgreSQL database (limit: {Limit}, offset: {Offset})",
                 limit,

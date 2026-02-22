@@ -37,6 +37,16 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default)
         {
+            if (limit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(limit), "Limit must be greater than or equal to 0.");
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be greater than or equal to 0.");
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
             var page = _lamps.Values
                 .OrderBy(l => l.CreatedAt)

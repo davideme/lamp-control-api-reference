@@ -15,6 +15,9 @@ namespace LampControlApi.Services
     /// </summary>
     public class LampControllerImplementation : IController
     {
+        private const int DefaultPageSize = 25;
+        private const int MaxPageSize = 1000;
+
         private readonly ILampRepository _lampRepository;
 
         /// <summary>
@@ -34,11 +37,13 @@ namespace LampControlApi.Services
         /// <returns>A paginated response containing lamps.</returns>
         public async Task<ActionResult<Response>> ListLampsAsync(string cursor, int pageSize)
         {
-            // Normalize pageSize
+            // Normalize pageSize: default when missing/invalid, cap to prevent overflow on +1.
             if (pageSize <= 0)
             {
-                pageSize = 25;
+                pageSize = DefaultPageSize;
             }
+
+            pageSize = Math.Min(pageSize, MaxPageSize);
 
             // Interpret cursor as a starting offset. If parsing fails, start at 0.
             var offset = 0;
@@ -48,7 +53,7 @@ namespace LampControlApi.Services
             }
 
             // Fetch one extra row to determine whether a next page exists,
-            // avoiding a separate COUNT(*) query.
+            // avoiding a separate COUNT(*) query. pageSize <= MaxPageSize, so +1 is safe.
             var entities = await _lampRepository.ListAsync(pageSize + 1, offset);
 
             var hasMore = entities.Count > pageSize;
@@ -71,8 +76,8 @@ namespace LampControlApi.Services
         /// <returns>All lamps from the repository.</returns>
         public async Task<ICollection<Lamp>> ListLampsAsync()
         {
-            // Fetch all lamps (no pagination) via the repository, then map to API models.
-            var entities = await _lampRepository.GetAllAsync();
+            // Fetch all lamps with the same deterministic ordering as the paginated endpoint.
+            var entities = await _lampRepository.ListAsync(int.MaxValue, 0);
             return entities.Select(LampMapper.ToApiModel).ToList();
         }
 
