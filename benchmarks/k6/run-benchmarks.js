@@ -8,7 +8,8 @@ const { writeSummary } = require('./summary');
 function parseArgs(argv) {
   const args = {
     config: path.join('benchmarks', 'k6', 'config.json'),
-    services: path.join('benchmarks', 'k6', 'services.json'),
+    servicesFile: path.join('benchmarks', 'k6', 'services.json'),
+    services: null,
     resultsDir: path.join('benchmarks', 'results'),
     passes: null,
     skipSetup: false,
@@ -18,8 +19,10 @@ function parseArgs(argv) {
     const token = argv[i];
     if (token === '--config') {
       args.config = argv[++i];
+    } else if (token === '--services-file') {
+      args.servicesFile = argv[++i];
     } else if (token === '--services') {
-      args.services = argv[++i];
+      args.services = argv[++i].split(',').map((v) => v.trim()).filter(Boolean);
     } else if (token === '--results-dir') {
       args.resultsDir = argv[++i];
     } else if (token === '--passes') {
@@ -38,7 +41,7 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Usage:\n  node benchmarks/k6/run-benchmarks.js [--config path] [--services path] [--results-dir path] [--passes memory,db] [--skip-setup]\n`);
+  console.log(`Usage:\n  node benchmarks/k6/run-benchmarks.js [--config path] [--services-file path] [--services csharp,python] [--results-dir path] [--passes memory,db] [--skip-setup]\n`);
 }
 
 function readJson(filePath) {
@@ -371,7 +374,15 @@ async function main() {
   const args = parseArgs(process.argv);
 
   const config = readJson(args.config);
-  const services = readJson(args.services);
+  let services = readJson(args.servicesFile);
+
+  if (args.services && args.services.length > 0) {
+    const unknown = args.services.filter((name) => !services.some((s) => s.name === name));
+    if (unknown.length > 0) {
+      throw new Error(`Unknown service(s): ${unknown.join(', ')}. Available: ${services.map((s) => s.name).join(', ')}`);
+    }
+    services = services.filter((s) => args.services.includes(s.name));
+  }
 
   services.forEach(validateService);
 

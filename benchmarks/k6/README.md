@@ -162,6 +162,12 @@ Run only memory pass:
 node benchmarks/k6/run-benchmarks.js --passes memory
 ```
 
+Run only specific services:
+
+```bash
+node benchmarks/k6/run-benchmarks.js --services csharp,python
+```
+
 Run benchmark without running setup commands (`memorySetupCommand` / `dbSetupCommand`):
 
 ```bash
