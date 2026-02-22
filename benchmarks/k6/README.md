@@ -144,6 +144,17 @@ For meaningful cold-start sampling, keep `cloudRun.minInstances=0`.
 
 ## 4) Run benchmark
 
+### CLI flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--config <path>` | `benchmarks/k6/config.json` | Benchmark config file |
+| `--services-file <path>` | `benchmarks/k6/services.json` | Services definition file |
+| `--services <names>` | _(all)_ | Comma-separated list of service names to run (e.g. `csharp,python`) |
+| `--passes <names>` | _(from config)_ | Comma-separated passes to run: `memory`, `db`, or both |
+| `--results-dir <path>` | `benchmarks/results` | Directory for raw results and summary |
+| `--skip-setup` | `false` | Skip `memorySetupCommand`/`dbSetupCommand` for each service |
+
 Run both passes (`memory`,`db`) with settings from `config.json`:
 
 ```bash
@@ -162,10 +173,16 @@ Run only memory pass:
 node benchmarks/k6/run-benchmarks.js --passes memory
 ```
 
-Run only specific services:
+Run only specific services (comma-separated, must match `name` in `services.json`):
 
 ```bash
 node benchmarks/k6/run-benchmarks.js --services csharp,python
+```
+
+Run with a custom services file:
+
+```bash
+node benchmarks/k6/run-benchmarks.js --services-file benchmarks/k6/my-services.json
 ```
 
 Run benchmark without running setup commands (`memorySetupCommand` / `dbSetupCommand`):
