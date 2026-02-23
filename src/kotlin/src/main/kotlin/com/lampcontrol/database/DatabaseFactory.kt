@@ -20,6 +20,11 @@ object DatabaseFactory {
     private const val DEFAULT_TRANSACTION_ISOLATION_NAME = "TRANSACTION_READ_COMMITTED"
     private const val DEFAULT_TRANSACTION_ISOLATION_LEVEL = Connection.TRANSACTION_READ_COMMITTED
 
+    internal data class TransactionIsolationConfig(
+        val hikariName: String,
+        val jdbcLevel: Int,
+    )
+
     /**
      * Initialize database connection from environment variables.
      * Returns null if no PostgreSQL configuration is found.
@@ -57,7 +62,7 @@ object DatabaseFactory {
                 idleTimeout = config.idleTimeoutMs
                 connectionTimeout = config.connectionTimeoutMs
                 isAutoCommit = false
-                transactionIsolation = isolationConfig.first
+                transactionIsolation = isolationConfig.hikariName
                 configureCloudSqlProperties(this, config)
                 validate()
             }
@@ -66,7 +71,7 @@ object DatabaseFactory {
         val database = Database.connect(dataSource)
 
         // Set default transaction isolation level
-        TransactionManager.manager.defaultIsolationLevel = isolationConfig.second
+        TransactionManager.manager.defaultIsolationLevel = isolationConfig.jdbcLevel
 
         return database
     }
@@ -98,30 +103,30 @@ object DatabaseFactory {
         return instance.takeIf { it.isNotBlank() }
     }
 
-    private fun resolveTransactionIsolation(rawIsolation: String?): Pair<String, Int> {
+    internal fun resolveTransactionIsolation(rawIsolation: String?): TransactionIsolationConfig {
         val normalizedIsolation = rawIsolation?.trim()?.uppercase()?.replace('-', '_')
         return when (normalizedIsolation) {
             null,
             "",
             "READ_COMMITTED",
             "TRANSACTION_READ_COMMITTED",
-            -> DEFAULT_TRANSACTION_ISOLATION_NAME to DEFAULT_TRANSACTION_ISOLATION_LEVEL
+            -> TransactionIsolationConfig(DEFAULT_TRANSACTION_ISOLATION_NAME, DEFAULT_TRANSACTION_ISOLATION_LEVEL)
             "READ_UNCOMMITTED",
             "TRANSACTION_READ_UNCOMMITTED",
-            -> "TRANSACTION_READ_UNCOMMITTED" to Connection.TRANSACTION_READ_UNCOMMITTED
+            -> TransactionIsolationConfig("TRANSACTION_READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED)
             "REPEATABLE_READ",
             "TRANSACTION_REPEATABLE_READ",
-            -> "TRANSACTION_REPEATABLE_READ" to Connection.TRANSACTION_REPEATABLE_READ
+            -> TransactionIsolationConfig("TRANSACTION_REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ)
             "SERIALIZABLE",
             "TRANSACTION_SERIALIZABLE",
-            -> "TRANSACTION_SERIALIZABLE" to Connection.TRANSACTION_SERIALIZABLE
+            -> TransactionIsolationConfig("TRANSACTION_SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE)
             else -> {
                 logger.warn(
                     "Invalid DB transaction isolation '{}'. Falling back to default {}.",
                     rawIsolation,
                     DEFAULT_TRANSACTION_ISOLATION_NAME,
                 )
-                DEFAULT_TRANSACTION_ISOLATION_NAME to DEFAULT_TRANSACTION_ISOLATION_LEVEL
+                TransactionIsolationConfig(DEFAULT_TRANSACTION_ISOLATION_NAME, DEFAULT_TRANSACTION_ISOLATION_LEVEL)
             }
         }
     }
@@ -146,6 +151,8 @@ data class DatabaseConfig(
     companion object {
         private const val DEFAULT_POSTGRES_PORT = 5432
         private const val DEFAULT_POOL_MIN = 0
+
+        // Balanced default for high-load API workloads while remaining safe to lower per environment.
         private const val DEFAULT_POOL_MAX = 12
         private const val DEFAULT_MAX_LIFETIME_MS = 3600000L
         private const val DEFAULT_IDLE_TIMEOUT_MS = 1800000L

@@ -56,6 +56,7 @@ Configure the database connection using environment variables:
 **Transaction Settings:**
 - `DB_TRANSACTION_ISOLATION` - Transaction isolation level (default: `READ_COMMITTED`)
   - Accepted values: `READ_COMMITTED`, `READ_UNCOMMITTED`, `REPEATABLE_READ`, `SERIALIZABLE`
+  - Both underscore and hyphen forms are accepted (for example `READ_COMMITTED` or `READ-COMMITTED`)
   - `TRANSACTION_*` variants are also supported (for example `TRANSACTION_SERIALIZABLE`)
 
 **Example using DATABASE_URL:**
@@ -79,6 +80,14 @@ export DB_TRANSACTION_ISOLATION="READ_COMMITTED"
 ```
 
 For Cloud Run services with 1 vCPU, start with `DB_POOL_MAX_SIZE` in the `8-16` range and tune from there.
+Use lower values for constrained environments:
+- local development: `2-6`
+- small services: `4-8`
+- high-load services: `8-16`
+
+Migration note:
+- Previous default isolation was `REPEATABLE_READ`.
+- Set `DB_TRANSACTION_ISOLATION=REPEATABLE_READ` to preserve previous behavior.
 
 PostgreSQL is considered configured if any of the following conditions are met:
 - `DATABASE_URL` is set
