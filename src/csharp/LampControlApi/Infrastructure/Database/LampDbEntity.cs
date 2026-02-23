@@ -20,13 +20,13 @@ namespace LampControlApi.Infrastructure.Database
 
         /// <summary>
         /// Gets or sets the timestamp when the lamp was created.
-        /// Database-generated on insert.
+        /// Set by the application on insert.
         /// </summary>
         public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the lamp was last updated.
-        /// Database-generated on insert and update via trigger.
+        /// Set by the application on insert and update.
         /// </summary>
         public DateTimeOffset UpdatedAt { get; set; }
 

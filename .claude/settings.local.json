@@ -70,7 +70,13 @@
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
       "Bash(tree:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(git merge:*)",
+      "Bash(dotnet test:*)",
+      "Bash(docker info:*)",
+      "Bash(TESTCONTAINERS_HOST_OVERRIDE=localhost dotnet test:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(open:*)"
     ]
   }
 }
