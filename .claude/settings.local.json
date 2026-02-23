@@ -71,7 +71,14 @@
       "Bash(tee:*)",
       "Bash(tree:*)",
       "Bash(git check-ignore:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(dotnet test:*)",
+      "Bash(docker info:*)",
+      "Bash(TESTCONTAINERS_HOST_OVERRIDE=localhost dotnet test:*)",
+      "Bash(git -C /Users/davide/Documents/GitHub/lamp/lamp-control-api-reference status)",
+      "Bash(git -C /Users/davide/Documents/GitHub/lamp/lamp-control-api-reference show origin/main:benchmarks/k6/services.json)",
+      "Bash(git -C /Users/davide/Documents/GitHub/lamp/lamp-control-api-reference show origin/main:benchmarks/k6/config.json)",
+      "Bash(git cherry-pick:*)"
     ]
   }
 }
