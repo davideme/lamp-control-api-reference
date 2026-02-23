@@ -70,7 +70,8 @@
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
       "Bash(tree:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(git merge:*)"
     ]
   }
 }
