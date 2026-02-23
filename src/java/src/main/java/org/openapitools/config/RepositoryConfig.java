@@ -87,6 +87,11 @@ public class RepositoryConfig {
       }
 
       @Override
+      public List<LampEntity> findAllActive(final Pageable pageable) {
+        return jpaRepository.findAllActive(pageable);
+      }
+
+      @Override
       public long countActive() {
         return jpaRepository.countActive();
       }

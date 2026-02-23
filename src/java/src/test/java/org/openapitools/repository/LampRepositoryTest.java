@@ -315,6 +315,51 @@ class LampRepositoryTest {
   }
 
   @Test
+  void findAllActivePaged_ShouldApplyOffsetAndLimit() {
+    // Given
+    for (int i = 0; i < 5; i++) {
+      lampRepository.save(new LampEntity(true));
+    }
+
+    // When
+    final List<LampEntity> window = lampRepository.findAllActive(PageRequest.of(1, 2));
+
+    // Then
+    assertThat(window).hasSize(2);
+    assertThat(window).allMatch(lamp -> lamp.getDeletedAt() == null);
+  }
+
+  @Test
+  void findAllActivePaged_ShouldExcludeSoftDeletedAndOrderByCreatedAtThenId() {
+    // Given
+    final OffsetDateTime baseTime = OffsetDateTime.now();
+    final LampEntity firstByIdAtSameTime =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000001"), true);
+    firstByIdAtSameTime.setCreatedAt(baseTime.minusMinutes(2));
+    lampRepository.save(firstByIdAtSameTime);
+
+    final LampEntity secondByIdAtSameTime =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000002"), true);
+    secondByIdAtSameTime.setCreatedAt(baseTime.minusMinutes(2));
+    lampRepository.save(secondByIdAtSameTime);
+
+    final LampEntity deleted =
+        new LampEntity(UUID.fromString("00000000-0000-0000-0000-000000000003"), true);
+    deleted.setCreatedAt(baseTime.minusMinutes(1));
+    final LampEntity savedDeleted = lampRepository.save(deleted);
+    savedDeleted.setDeletedAt(OffsetDateTime.now());
+    lampRepository.save(savedDeleted);
+
+    // When
+    final List<LampEntity> window = lampRepository.findAllActive(PageRequest.of(0, 3));
+
+    // Then
+    assertThat(window)
+        .extracting(LampEntity::getId)
+        .containsExactly(firstByIdAtSameTime.getId(), secondByIdAtSameTime.getId());
+  }
+
+  @Test
   void countActive_ShouldExcludeSoftDeletedLamps() {
     // Given
     lampRepository.save(new LampEntity(true));

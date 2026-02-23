@@ -95,6 +95,18 @@ public interface LampRepository {
   List<LampEntity> findAllActive();
 
   /**
+   * Find a paginated window of active (non-deleted) lamps ordered by creation time and ID.
+   *
+   * <p>Unlike {@link #findAll(Pageable)}, this method is intended for cursor pagination hot paths
+   * where callers may request {@code pageSize + 1} rows to derive {@code hasMore} without
+   * triggering an additional count query.
+   *
+   * @param pageable pagination information
+   * @return active lamps for the requested offset/limit window
+   */
+  List<LampEntity> findAllActive(Pageable pageable);
+
+  /**
    * Count all active (non-deleted) lamps.
    *
    * @return count of active lamps

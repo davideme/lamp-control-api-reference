@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -269,5 +270,29 @@ class JpaLampRepositoryIntegrationTest {
     assertThat(activeLamps.get(0).getId()).isEqualTo(lamp1.getId());
     assertThat(activeLamps.get(1).getId()).isEqualTo(lamp2.getId());
     assertThat(activeLamps.get(0).getCreatedAt()).isBefore(activeLamps.get(1).getCreatedAt());
+  }
+
+  @Test
+  void shouldFindActiveWindowWithoutDeletedLamps() {
+    // Arrange
+    final LampEntity lamp1 = new LampEntity(UUID.randomUUID(), true);
+    final LampEntity lamp2 = new LampEntity(UUID.randomUUID(), false);
+    final LampEntity lamp3 = new LampEntity(UUID.randomUUID(), true);
+    final LampEntity lamp4 = new LampEntity(UUID.randomUUID(), true);
+
+    jpaRepo.save(lamp1);
+    jpaRepo.save(lamp2);
+    final LampEntity savedDeleted = jpaRepo.save(lamp3);
+    jpaRepo.save(lamp4);
+    savedDeleted.setDeletedAt(OffsetDateTime.now());
+    jpaRepo.save(savedDeleted);
+    jpaRepo.flush();
+
+    // Act
+    final List<LampEntity> window = repository.findAllActive(PageRequest.of(0, 3));
+
+    // Assert
+    assertThat(window).hasSize(3);
+    assertThat(window).allMatch(lamp -> lamp.getDeletedAt() == null);
   }
 }
