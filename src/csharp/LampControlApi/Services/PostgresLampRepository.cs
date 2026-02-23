@@ -105,7 +105,12 @@ namespace LampControlApi.Services
 
             this.context.Lamps.Add(dbEntity);
             await this.context.SaveChangesAsync(cancellationToken);
-            await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
+
+            // Fallback for providers that do not round-trip generated values on insert.
+            if (dbEntity.CreatedAt == default || dbEntity.UpdatedAt == default)
+            {
+                await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
+            }
 
             return this.MapToDomain(dbEntity);
         }
@@ -138,10 +143,14 @@ namespace LampControlApi.Services
             // Update the tracked entity reference
             this.context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
+            var previousUpdatedAt = existingEntity.UpdatedAt;
             await this.context.SaveChangesAsync(cancellationToken);
 
-            // Reload to get the trigger-updated timestamp
-            await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
+            // Fallback for providers that do not round-trip trigger-updated values on update.
+            if (existingEntity.UpdatedAt <= previousUpdatedAt)
+            {
+                await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
+            }
 
             return this.MapToDomain(existingEntity);
         }

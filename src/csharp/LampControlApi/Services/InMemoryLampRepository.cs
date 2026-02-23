@@ -89,10 +89,11 @@ namespace LampControlApi.Services
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (_lamps.ContainsKey(entity.Id))
+            if (_lamps.TryGetValue(entity.Id, out var existing))
             {
-                _lamps[entity.Id] = entity;
-                return Task.FromResult<LampEntity?>(entity);
+                var updated = existing.WithUpdatedStatus(entity.Status);
+                _lamps[entity.Id] = updated;
+                return Task.FromResult<LampEntity?>(updated);
             }
 
             return Task.FromResult<LampEntity?>(null);

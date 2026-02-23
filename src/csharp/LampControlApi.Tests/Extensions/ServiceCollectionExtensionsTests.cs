@@ -16,17 +16,25 @@ namespace LampControlApi.Tests.Extensions
     {
         private const string ConnectionStringEnvVar = "ConnectionStrings__LampControl";
         private const string DatabaseUrlEnvVar = "DATABASE_URL";
+        private const string BenchmarkModeEnvVar = "BENCHMARK_MODE";
+        private const string DatabaseRetryEnvVar = "DATABASE_ENABLE_RETRY_ON_FAILURE";
 
         private string? originalConnectionStringEnvVar;
         private string? originalDatabaseUrlEnvVar;
+        private string? originalBenchmarkModeEnvVar;
+        private string? originalDatabaseRetryEnvVar;
 
         [TestInitialize]
         public void Setup()
         {
             this.originalConnectionStringEnvVar = Environment.GetEnvironmentVariable(ConnectionStringEnvVar);
             this.originalDatabaseUrlEnvVar = Environment.GetEnvironmentVariable(DatabaseUrlEnvVar);
+            this.originalBenchmarkModeEnvVar = Environment.GetEnvironmentVariable(BenchmarkModeEnvVar);
+            this.originalDatabaseRetryEnvVar = Environment.GetEnvironmentVariable(DatabaseRetryEnvVar);
             Environment.SetEnvironmentVariable(ConnectionStringEnvVar, null);
             Environment.SetEnvironmentVariable(DatabaseUrlEnvVar, null);
+            Environment.SetEnvironmentVariable(BenchmarkModeEnvVar, null);
+            Environment.SetEnvironmentVariable(DatabaseRetryEnvVar, null);
         }
 
         [TestCleanup]
@@ -34,6 +42,8 @@ namespace LampControlApi.Tests.Extensions
         {
             Environment.SetEnvironmentVariable(ConnectionStringEnvVar, this.originalConnectionStringEnvVar);
             Environment.SetEnvironmentVariable(DatabaseUrlEnvVar, this.originalDatabaseUrlEnvVar);
+            Environment.SetEnvironmentVariable(BenchmarkModeEnvVar, this.originalBenchmarkModeEnvVar);
+            Environment.SetEnvironmentVariable(DatabaseRetryEnvVar, this.originalDatabaseRetryEnvVar);
         }
 
         [TestMethod]
@@ -261,6 +271,41 @@ namespace LampControlApi.Tests.Extensions
                 services.Any(descriptor =>
                     descriptor.ServiceType == typeof(ILampRepository) &&
                     descriptor.ImplementationType == typeof(PostgresLampRepository)));
+        }
+
+        [TestMethod]
+        public void ResolveDbRetryOnFailureEnabled_ShouldDefaultToTrue()
+        {
+            var configuration = BuildConfiguration();
+
+            var result = ServiceCollectionExtensions.ResolveDbRetryOnFailureEnabled(configuration);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ResolveDbRetryOnFailureEnabled_ShouldDisableWhenBenchmarkModeIsTrue()
+        {
+            var configuration = BuildConfiguration();
+            Environment.SetEnvironmentVariable(BenchmarkModeEnvVar, "true");
+
+            var result = ServiceCollectionExtensions.ResolveDbRetryOnFailureEnabled(configuration);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ResolveDbRetryOnFailureEnabled_ShouldRespectExplicitConfigOverride()
+        {
+            Environment.SetEnvironmentVariable(BenchmarkModeEnvVar, "true");
+            var configuration = BuildConfiguration(new Dictionary<string, string?>
+            {
+                ["Database:EnableRetryOnFailure"] = "true",
+            });
+
+            var result = ServiceCollectionExtensions.ResolveDbRetryOnFailureEnabled(configuration);
+
+            Assert.IsTrue(result);
         }
 
         private static IConfiguration BuildConfiguration(Dictionary<string, string?>? values = null)
