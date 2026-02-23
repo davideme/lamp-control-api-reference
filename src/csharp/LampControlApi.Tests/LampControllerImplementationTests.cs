@@ -437,7 +437,7 @@ namespace LampControlApi.Tests
             // Arrange
             var lampId = Guid.NewGuid();
             var lampUpdate = new LampUpdate { Status = true };
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
+            _mockRepository.Setup(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => _controller.UpdateLampAsync(lampId.ToString(), lampUpdate));
@@ -453,12 +453,10 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            var existingLampEntity = new LampEntity(lampId, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
             var lampUpdate = new LampUpdate { Status = true };
             var updatedLampEntity = new LampEntity(lampId, true, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>())).ReturnsAsync(updatedLampEntity);
+            _mockRepository.Setup(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>())).ReturnsAsync(updatedLampEntity);
 
             // Act
             var actionResult = await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
@@ -468,8 +466,7 @@ namespace LampControlApi.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(lampId, result.Id);
             Assert.AreEqual(lampUpdate.Status, result.Status);
-            _mockRepository.Verify(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
-            _mockRepository.Verify(r => r.UpdateAsync(It.Is<LampEntity>(l => l.Id == lampId && l.Status == lampUpdate.Status), It.IsAny<CancellationToken>()), Times.Once);
+            _mockRepository.Verify(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -481,24 +478,23 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            var existingLampEntity = new LampEntity(lampId, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
             var lampUpdate = new LampUpdate { Status = true };
-            var capturedLampEntity = (LampEntity?)null;
-
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>()))
-                .Callback<LampEntity, CancellationToken>((lampEntity, _) => capturedLampEntity = lampEntity)
-                .ReturnsAsync((LampEntity lampEntity, CancellationToken _) => lampEntity);
+            var capturedLampId = Guid.Empty;
+            var capturedStatus = false;
+            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .Callback<Guid, bool, CancellationToken>((id, status, _) =>
+                {
+                    capturedLampId = id;
+                    capturedStatus = status;
+                })
+                .ReturnsAsync(new LampEntity(lampId, lampUpdate.Status, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
 
             // Act
             await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
 
             // Assert
-            Assert.IsNotNull(capturedLampEntity);
-            Assert.AreEqual(lampId, capturedLampEntity.Id);
-            Assert.AreEqual(lampUpdate.Status, capturedLampEntity.Status);
-
-            // Note: LampEntity is immutable, so the controller creates a new instance with updated values
+            Assert.AreEqual(lampId, capturedLampId);
+            Assert.AreEqual(lampUpdate.Status, capturedStatus);
         }
 
         /// <summary>

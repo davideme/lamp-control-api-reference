@@ -94,10 +94,8 @@ namespace LampControlApi.Tests
             var initialLamp = new LampEntity(lampId, false, createdAt, createdAt);
             await _repository.CreateAsync(initialLamp);
 
-            var updatedLamp = initialLamp.WithUpdatedStatus(true); // Flip the status
-
             // Act
-            var result = await _repository.UpdateAsync(updatedLamp);
+            var result = await _repository.UpdateAsync(lampId, status: true);
 
             // Assert
             Assert.IsNotNull(result);
@@ -140,17 +138,6 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test updating a lamp with null entity throws ArgumentNullException.
-        /// </summary>
-        /// <returns>A task.</returns>
-        [TestMethod]
-        public async Task UpdateAsync_WithNullEntity_ShouldThrowArgumentNullException()
-        {
-            // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _repository.UpdateAsync(null!));
-        }
-
-        /// <summary>
         /// Test updating a non-existent lamp returns null.
         /// </summary>
         /// <returns>A task.</returns>
@@ -158,10 +145,10 @@ namespace LampControlApi.Tests
         public async Task UpdateAsync_NonExistentLamp_ShouldReturnNull()
         {
             // Arrange
-            var nonExistentLamp = LampEntity.Create(true);
+            var nonExistentId = Guid.NewGuid();
 
             // Act
-            var result = await _repository.UpdateAsync(nonExistentLamp);
+            var result = await _repository.UpdateAsync(nonExistentId, status: true);
 
             // Assert
             Assert.IsNull(result);

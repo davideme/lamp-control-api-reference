@@ -105,43 +105,47 @@ namespace LampControlApi.Services
 
             this.context.Lamps.Add(dbEntity);
             await this.context.SaveChangesAsync(cancellationToken);
-            await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
+
+            // Fallback for providers that do not round-trip generated values on insert.
+            if (dbEntity.CreatedAt == default || dbEntity.UpdatedAt == default)
+            {
+                await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
+            }
 
             return this.MapToDomain(dbEntity);
         }
 
         /// <inheritdoc/>
-        public async Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
+        public async Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", entity.Id);
+            this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", id);
 
             var existingEntity = await this.context.Lamps
-                .FirstOrDefaultAsync(l => l.Id == entity.Id, cancellationToken);
+                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
 
             if (existingEntity == null)
             {
-                this.logger.LogDebug("Lamp {LampId} not found for update", entity.Id);
+                this.logger.LogDebug("Lamp {LampId} not found for update", id);
                 return null;
             }
 
             // Create updated entity with init setters using with-expression
             var updatedEntity = existingEntity with
             {
-                IsOn = entity.Status,
+                IsOn = status,
             };
 
             // Update the tracked entity reference
             this.context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
+            var previousUpdatedAt = existingEntity.UpdatedAt;
             await this.context.SaveChangesAsync(cancellationToken);
 
-            // Reload to get the trigger-updated timestamp
-            await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
+            // Fallback for providers that do not round-trip trigger-updated values on update.
+            if (existingEntity.UpdatedAt <= previousUpdatedAt)
+            {
+                await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
+            }
 
             return this.MapToDomain(existingEntity);
         }

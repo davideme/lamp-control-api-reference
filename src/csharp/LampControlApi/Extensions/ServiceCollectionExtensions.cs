@@ -36,10 +36,13 @@ namespace LampControlApi.Extensions
                 {
                     options.UseNpgsql(connectionString!, npgsqlOptions =>
                     {
-                        npgsqlOptions.EnableRetryOnFailure(
-                            maxRetryCount: 3,
-                            maxRetryDelay: TimeSpan.FromSeconds(5),
-                            errorCodesToAdd: null);
+                        if (ResolveDbRetryOnFailureEnabled(configuration))
+                        {
+                            npgsqlOptions.EnableRetryOnFailure(
+                                maxRetryCount: 3,
+                                maxRetryDelay: TimeSpan.FromSeconds(5),
+                                errorCodesToAdd: null);
+                        }
                     });
 
                     if (environment.IsDevelopment())
@@ -92,6 +95,27 @@ namespace LampControlApi.Extensions
             }
 
             return connectionString;
+        }
+
+        internal static bool ResolveDbRetryOnFailureEnabled(IConfiguration configuration)
+        {
+            var explicitValue = configuration["Database:EnableRetryOnFailure"] ??
+                Environment.GetEnvironmentVariable("DATABASE_ENABLE_RETRY_ON_FAILURE");
+            if (!string.IsNullOrWhiteSpace(explicitValue) &&
+                bool.TryParse(explicitValue, out var parsedExplicitValue))
+            {
+                return parsedExplicitValue;
+            }
+
+            var benchmarkMode = Environment.GetEnvironmentVariable("BENCHMARK_MODE");
+            if (!string.IsNullOrWhiteSpace(benchmarkMode) &&
+                bool.TryParse(benchmarkMode, out var benchmarkModeEnabled) &&
+                benchmarkModeEnabled)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static string ConvertDatabaseUrlToNpgsqlConnectionString(string databaseUrl)

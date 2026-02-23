@@ -180,8 +180,7 @@ namespace LampControlApi.Tests.Infrastructure
             var created = await this.repository!.CreateAsync(lamp);
 
             // Act
-            var updatedLamp = created.WithUpdatedStatus(newStatus: true);
-            var result = await this.repository.UpdateAsync(updatedLamp);
+            var result = await this.repository.UpdateAsync(created.Id, status: true);
 
             // Assert
             Assert.IsNotNull(result);
@@ -203,10 +202,10 @@ namespace LampControlApi.Tests.Infrastructure
         public async Task UpdateAsync_ShouldReturnNull_WhenNotExists()
         {
             // Arrange
-            var nonExistentLamp = LampEntity.Create(status: true);
+            var nonExistentLampId = Guid.NewGuid();
 
             // Act
-            var result = await this.repository!.UpdateAsync(nonExistentLamp);
+            var result = await this.repository!.UpdateAsync(nonExistentLampId, status: true);
 
             // Assert
             Assert.IsNull(result);
