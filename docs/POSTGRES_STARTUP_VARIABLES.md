@@ -123,14 +123,19 @@ Optional pool/timeout tuning:
 
 ```bash
 export DB_POOL_MIN_SIZE='0'
-export DB_POOL_MAX_SIZE='4'
+export DB_POOL_MAX_SIZE='12'
 export DB_MAX_LIFETIME_MS='3600000'
 export DB_IDLE_TIMEOUT_MS='1800000'
 export DB_CONNECTION_TIMEOUT_MS='30000'
+export DB_TRANSACTION_ISOLATION='READ_COMMITTED'
 ```
 
 Notes:
 - If you use `DATABASE_URL`, keep it in standard `postgresql://...` or `postgres://...` form.
+- For 1 vCPU Cloud Run workloads, start with `DB_POOL_MAX_SIZE` in the `8-16` range.
+- For constrained environments, use lower values (`2-6` local dev, `4-8` small services).
+- `DB_TRANSACTION_ISOLATION` accepts underscore and hyphen forms (for example `READ_COMMITTED` or `READ-COMMITTED`).
+- Kotlin default isolation is `READ_COMMITTED`; set `DB_TRANSACTION_ISOLATION=REPEATABLE_READ` to keep previous behavior.
 
 ## Common Gotchas
 

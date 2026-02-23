@@ -2,6 +2,11 @@ package com.lampcontrol.database
 
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.sql.Connection
+import java.util.stream.Stream
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -66,12 +71,67 @@ class DatabaseFactoryTest {
             hikariConfig.dataSourceProperties["socketFactory"],
         )
         assertEquals(
-            "/cloudsql/project:region:instance-id",
-            hikariConfig.dataSourceProperties["unixSocketPath"],
+            "PUBLIC,PRIVATE",
+            hikariConfig.dataSourceProperties["ipTypes"],
         )
         assertEquals(
             "project:region:instance-id",
             hikariConfig.dataSourceProperties["cloudSqlInstance"],
         )
+    }
+
+    @ParameterizedTest
+    @MethodSource("transactionIsolationInputs")
+    fun `resolveTransactionIsolation handles supported formats and fallback`(
+        input: String?,
+        expectedHikariName: String,
+        expectedJdbcLevel: Int,
+    ) {
+        val isolation = DatabaseFactory.resolveTransactionIsolation(input)
+
+        assertEquals(expectedHikariName, isolation.hikariName)
+        assertEquals(expectedJdbcLevel, isolation.jdbcLevel)
+    }
+
+    companion object {
+        @JvmStatic
+        fun transactionIsolationInputs(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(null, "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of("", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of("   ", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of("READ_COMMITTED", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of("read_committed", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of("READ-COMMITTED", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+                Arguments.of(
+                    "TRANSACTION_READ_COMMITTED",
+                    "TRANSACTION_READ_COMMITTED",
+                    Connection.TRANSACTION_READ_COMMITTED,
+                ),
+                Arguments.of(
+                    "READ_UNCOMMITTED",
+                    "TRANSACTION_READ_UNCOMMITTED",
+                    Connection.TRANSACTION_READ_UNCOMMITTED,
+                ),
+                Arguments.of(
+                    "TRANSACTION_READ_UNCOMMITTED",
+                    "TRANSACTION_READ_UNCOMMITTED",
+                    Connection.TRANSACTION_READ_UNCOMMITTED,
+                ),
+                Arguments.of("REPEATABLE_READ", "TRANSACTION_REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ),
+                Arguments.of(
+                    "TRANSACTION_REPEATABLE_READ",
+                    "TRANSACTION_REPEATABLE_READ",
+                    Connection.TRANSACTION_REPEATABLE_READ,
+                ),
+                Arguments.of("SERIALIZABLE", "TRANSACTION_SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE),
+                Arguments.of(
+                    "TRANSACTION_SERIALIZABLE",
+                    "TRANSACTION_SERIALIZABLE",
+                    Connection.TRANSACTION_SERIALIZABLE,
+                ),
+                Arguments.of("unknown", "TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED),
+            )
+        }
     }
 }
