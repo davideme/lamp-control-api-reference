@@ -18,7 +18,8 @@ packages = [{include = "openapi_server", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.14"
-fastapi = {extras = ["standard"], version = "^0.115.12"}
+fastapi = "^0.115.12"
+uvicorn = "^0.27.1"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
 asyncpg = "^0.30.0"
 alembic = "^1.14.0"
@@ -37,7 +38,7 @@ greenlet = "^3.3.1"
 
 [tool.black]
 line-length = 100
-target-version = ["py314"]
+target-version = ["py313"]
 include = '\.pyi?$'
 exclude = '''
 (
@@ -58,7 +59,7 @@ exclude = '''
 
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+target-version = "py313"
 lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 lint.ignore = []
 lint.exclude = [
@@ -81,7 +82,7 @@ lint.exclude = [
 "src/openapi_server/dependencies.py" = ["PLW0603"]  # Global statement used intentionally for singleton pattern
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
