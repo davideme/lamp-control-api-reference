@@ -1,14 +1,6 @@
-# coding: utf-8
-
-from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
-
-from src.openapi_server.apis.default_api_base import BaseDefaultApi
-from src.openapi_server.dependencies import get_lamp_repository
-from src.openapi_server.repositories.lamp_repository import InMemoryLampRepository
-from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
-import src.openapi_server.impl
+from typing import Annotated, Any, Optional  # noqa: F401
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -24,17 +16,20 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+from pydantic import StrictStr
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.openapi_server.models.extra_models import TokenModel  # noqa: F401
-from pydantic import Field, StrictStr
-from typing import Any, Optional
-from typing_extensions import Annotated
+import src.openapi_server.impl
+from src.openapi_server.apis.default_api_base import BaseDefaultApi
+from src.openapi_server.dependencies import get_lamp_repository, get_optional_db_session
 from src.openapi_server.models.error import Error
+from src.openapi_server.models.extra_models import TokenModel  # noqa: F401
 from src.openapi_server.models.lamp import Lamp
 from src.openapi_server.models.lamp_create import LampCreate
 from src.openapi_server.models.lamp_update import LampUpdate
 from src.openapi_server.models.list_lamps200_response import ListLamps200Response
-
+from src.openapi_server.repositories.lamp_repository import InMemoryLampRepository
+from src.openapi_server.repositories.postgres_lamp_repository import PostgresLampRepository
 
 router = APIRouter()
 
@@ -55,14 +50,15 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     status_code=201,
 )
 async def create_lamp(
-    lamp_create: LampCreate = Body(None, description=""),
+    lamp_create: Annotated[LampCreate | None, Body(description="")] = None,
     repository: Annotated[
         PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
     ] = None,
+    db_session: Annotated[AsyncSession | None, Depends(get_optional_db_session)] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0](repository).create_lamp(lamp_create)
+    return await BaseDefaultApi.subclasses[0](repository, db_session).create_lamp(lamp_create)
 
 
 @router.delete(
@@ -78,14 +74,15 @@ async def create_lamp(
     status_code=204,
 )
 async def delete_lamp(
-    lampId: StrictStr = Path(..., description=""),
+    lamp_id: Annotated[StrictStr, Path(description="", alias="lampId")],
     repository: Annotated[
         PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
     ] = None,
+    db_session: Annotated[AsyncSession | None, Depends(get_optional_db_session)] = None,
 ) -> None:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0](repository).delete_lamp(lampId)
+    return await BaseDefaultApi.subclasses[0](repository, db_session).delete_lamp(lamp_id)
 
 
 @router.get(
@@ -101,14 +98,15 @@ async def delete_lamp(
     response_model_by_alias=True,
 )
 async def get_lamp(
-    lampId: StrictStr = Path(..., description=""),
+    lamp_id: Annotated[StrictStr, Path(description="", alias="lampId")],
     repository: Annotated[
         PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
     ] = None,
+    db_session: Annotated[AsyncSession | None, Depends(get_optional_db_session)] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0](repository).get_lamp(lampId)
+    return await BaseDefaultApi.subclasses[0](repository, db_session).get_lamp(lamp_id)
 
 
 @router.get(
@@ -123,17 +121,16 @@ async def get_lamp(
     response_model_by_alias=True,
 )
 async def list_lamps(
-    cursor: Optional[StrictStr] = Query(None, description="", alias="cursor"),
-    page_size: Optional[Annotated[int, Field(le=100, ge=1)]] = Query(
-        25, description="", alias="pageSize", ge=1, le=100
-    ),
+    cursor: Annotated[StrictStr | None, Query(description="", alias="cursor")] = None,
+    page_size: Annotated[int | None, Query(description="", alias="pageSize", ge=1, le=100)] = 25,
     repository: Annotated[
         PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
     ] = None,
+    db_session: Annotated[AsyncSession | None, Depends(get_optional_db_session)] = None,
 ) -> ListLamps200Response:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0](repository).list_lamps(cursor, page_size)
+    return await BaseDefaultApi.subclasses[0](repository, db_session).list_lamps(cursor, page_size)
 
 
 @router.put(
@@ -148,12 +145,15 @@ async def list_lamps(
     response_model_by_alias=True,
 )
 async def update_lamp(
-    lampId: StrictStr = Path(..., description=""),
-    lamp_update: LampUpdate = Body(None, description=""),
+    lamp_id: Annotated[StrictStr, Path(description="", alias="lampId")],
+    lamp_update: Annotated[LampUpdate | None, Body(description="")] = None,
     repository: Annotated[
         PostgresLampRepository | InMemoryLampRepository, Depends(get_lamp_repository)
     ] = None,
+    db_session: Annotated[AsyncSession | None, Depends(get_optional_db_session)] = None,
 ) -> Lamp:
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0](repository).update_lamp(lampId, lamp_update)
+    return await BaseDefaultApi.subclasses[0](repository, db_session).update_lamp(
+        lamp_id, lamp_update
+    )

@@ -45,7 +45,7 @@ async def test_create_lamp_no_implementation(mock_repository):
 async def test_delete_lamp_no_implementation(mock_repository):
     """Test delete_lamp raises HTTPException when no implementation is registered."""
     with pytest.raises(HTTPException) as exc_info:
-        await default_api.delete_lamp(lampId="test-id", repository=mock_repository)
+        await default_api.delete_lamp(lamp_id="test-id", repository=mock_repository)
 
     assert exc_info.value.status_code == 500
     assert exc_info.value.detail == "Not implemented"
@@ -55,7 +55,7 @@ async def test_delete_lamp_no_implementation(mock_repository):
 async def test_get_lamp_no_implementation(mock_repository):
     """Test get_lamp raises HTTPException when no implementation is registered."""
     with pytest.raises(HTTPException) as exc_info:
-        await default_api.get_lamp(lampId="test-id", repository=mock_repository)
+        await default_api.get_lamp(lamp_id="test-id", repository=mock_repository)
 
     assert exc_info.value.status_code == 500
     assert exc_info.value.detail == "Not implemented"
@@ -78,7 +78,7 @@ async def test_update_lamp_no_implementation(mock_repository):
 
     with pytest.raises(HTTPException) as exc_info:
         await default_api.update_lamp(
-            lampId="test-id", lamp_update=lamp_update, repository=mock_repository
+            lamp_id="test-id", lamp_update=lamp_update, repository=mock_repository
         )
 
     assert exc_info.value.status_code == 500

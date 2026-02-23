@@ -3,6 +3,7 @@
 from uuid import uuid4
 
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.openapi_server.apis.default_api_base import BaseDefaultApi
 from src.openapi_server.mappers.lamp_mapper import LampMapper
@@ -25,13 +26,19 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
     injection system, ensuring proper session lifecycle management.
     """
 
-    def __init__(self, repository: PostgresLampRepository | InMemoryLampRepository) -> None:
+    def __init__(
+        self,
+        repository: PostgresLampRepository | InMemoryLampRepository,
+        db_session: AsyncSession | None = None,
+    ) -> None:
         """Initialize the API implementation with a repository.
 
         Args:
             repository: The lamp repository instance (injected by FastAPI).
+            db_session: Current request DB session for PostgreSQL mode.
         """
         self.repository = repository
+        self.db_session = db_session
 
     async def create_lamp(self, lamp_create: LampCreate) -> Lamp:
         """Create a new lamp.
@@ -52,7 +59,10 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         # Create domain entity from API model
         lamp_entity = LampMapper.create_from_api_model(lamp_create, lamp_id)
-        created_entity = await self.repository.create(lamp_entity)
+        if isinstance(self.repository, PostgresLampRepository):
+            created_entity = await self.repository.create(self._require_db_session(), lamp_entity)
+        else:
+            created_entity = await self.repository.create(lamp_entity)
 
         # Convert domain entity back to API model
         return LampMapper.to_api_model(created_entity)
@@ -67,7 +77,10 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
             HTTPException: If the lamp is not found.
         """
         try:
-            await self.repository.delete(lamp_id)
+            if isinstance(self.repository, PostgresLampRepository):
+                await self.repository.delete(self._require_db_session(), lamp_id)
+            else:
+                await self.repository.delete(lamp_id)
         except LampNotFoundError as err:
             raise HTTPException(status_code=404, detail="Lamp not found") from err
 
@@ -83,7 +96,10 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         Raises:
             HTTPException: If the lamp is not found.
         """
-        lamp_entity = await self.repository.get(lamp_id)
+        if isinstance(self.repository, PostgresLampRepository):
+            lamp_entity = await self.repository.get(self._require_db_session(), lamp_id)
+        else:
+            lamp_entity = await self.repository.get(lamp_id)
         if lamp_entity is None:
             raise HTTPException(status_code=404, detail="Lamp not found")
 
@@ -103,10 +119,17 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
         start_offset = self._parse_cursor(cursor)
         safe_page_size = self._normalize_page_size(page_size)
 
-        entities = await self.repository.list_paginated(
-            offset=start_offset,
-            limit=safe_page_size + 1,
-        )
+        if isinstance(self.repository, PostgresLampRepository):
+            entities = await self.repository.list_paginated(
+                self._require_db_session(),
+                offset=start_offset,
+                limit=safe_page_size + 1,
+            )
+        else:
+            entities = await self.repository.list_paginated(
+                offset=start_offset,
+                limit=safe_page_size + 1,
+            )
         has_more = len(entities) > safe_page_size
         page_entities = entities[:safe_page_size]
         next_cursor = str(start_offset + safe_page_size) if has_more else None
@@ -156,15 +179,29 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         try:
             # Get existing lamp entity
-            existing_entity = await self.repository.get(lamp_id)
+            if isinstance(self.repository, PostgresLampRepository):
+                existing_entity = await self.repository.get(self._require_db_session(), lamp_id)
+            else:
+                existing_entity = await self.repository.get(lamp_id)
             if existing_entity is None:
                 raise LampNotFoundError(lamp_id)
 
             # Update the domain entity using the mapper
             updated_entity = LampMapper.update_from_api_model(existing_entity, lamp_update)
-            final_entity = await self.repository.update(updated_entity)
+            if isinstance(self.repository, PostgresLampRepository):
+                final_entity = await self.repository.update(
+                    self._require_db_session(), updated_entity
+                )
+            else:
+                final_entity = await self.repository.update(updated_entity)
 
             # Convert domain entity back to API model
             return LampMapper.to_api_model(final_entity)
         except LampNotFoundError as err:
             raise HTTPException(status_code=404, detail="Lamp not found") from err
+
+    def _require_db_session(self) -> AsyncSession:
+        """Return current DB session or fail fast for PostgreSQL operations."""
+        if self.db_session is None:
+            raise RuntimeError("Database session is required for PostgreSQL repository")
+        return self.db_session
