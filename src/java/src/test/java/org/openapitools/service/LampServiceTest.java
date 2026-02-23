@@ -144,9 +144,10 @@ class LampServiceTest {
     final LampEntity secondEntity = new LampEntity(secondId, false);
     final Lamp secondLamp = new Lamp(secondId, false);
 
-    final Page<LampEntity> page = new PageImpl<>(List.of(testEntity, secondEntity));
-    when(repository.findAll(any(Pageable.class))).thenReturn(page);
-    when(repository.countActive()).thenReturn(5L);
+    final UUID thirdId = UUID.randomUUID();
+    final LampEntity thirdEntity = new LampEntity(thirdId, true);
+    when(repository.findAllActive(any(Pageable.class)))
+        .thenReturn(List.of(testEntity, secondEntity, thirdEntity));
     when(mapper.toModel(testEntity)).thenReturn(testLamp);
     when(mapper.toModel(secondEntity)).thenReturn(secondLamp);
 
@@ -159,10 +160,10 @@ class LampServiceTest {
     assertThat(result.nextCursor()).contains("4");
 
     final var pageableCaptor = org.mockito.ArgumentCaptor.forClass(Pageable.class);
-    verify(repository).findAll(pageableCaptor.capture());
+    verify(repository).findAllActive(pageableCaptor.capture());
     final Pageable captured = pageableCaptor.getValue();
     assertThat(captured.getOffset()).isEqualTo(2);
-    assertThat(captured.getPageSize()).isEqualTo(2);
+    assertThat(captured.getPageSize()).isEqualTo(3);
     assertThat(captured.getSort())
         .isEqualTo(Sort.by(Sort.Order.asc("createdAt"), Sort.Order.asc("id")));
   }
@@ -170,9 +171,7 @@ class LampServiceTest {
   @Test
   void shouldFindActivePageTerminalWithoutNextCursor() {
     // Arrange
-    final Page<LampEntity> page = new PageImpl<>(List.of(testEntity));
-    when(repository.findAll(any(Pageable.class))).thenReturn(page);
-    when(repository.countActive()).thenReturn(5L);
+    when(repository.findAllActive(any(Pageable.class))).thenReturn(List.of(testEntity));
     when(mapper.toModel(testEntity)).thenReturn(testLamp);
 
     // Act
@@ -187,16 +186,15 @@ class LampServiceTest {
   @Test
   void shouldFallbackToDefaultPageSizeWhenInvalidPageSizeProvided() {
     // Arrange
-    when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
-    when(repository.countActive()).thenReturn(0L);
+    when(repository.findAllActive(any(Pageable.class))).thenReturn(List.of());
 
     // Act
     service.findAllActivePage(0, 0);
 
     // Assert
     final var pageableCaptor = org.mockito.ArgumentCaptor.forClass(Pageable.class);
-    verify(repository).findAll(pageableCaptor.capture());
-    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(25);
+    verify(repository).findAllActive(pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(26);
   }
 
   @Test

@@ -128,16 +128,16 @@ public class LampService {
   public PagedLampsResult findAllActivePage(final int offset, final int pageSize) {
     final int safeOffset = Math.max(offset, 0);
     final int safePageSize = pageSize > 0 ? pageSize : 25;
+    final int queryLimit = safePageSize == Integer.MAX_VALUE ? Integer.MAX_VALUE : safePageSize + 1;
     final Pageable pageable =
         new OffsetBasedPageRequest(
-            safeOffset, safePageSize, Sort.by(Sort.Order.asc("createdAt"), Sort.Order.asc("id")));
+            safeOffset, queryLimit, Sort.by(Sort.Order.asc("createdAt"), Sort.Order.asc("id")));
 
-    final Page<LampEntity> page = repository.findAll(pageable);
-    final List<Lamp> data = page.getContent().stream().map(mapper::toModel).toList();
-    final long totalActive = repository.countActive();
-    final boolean hasMore = safeOffset + data.size() < totalActive;
+    final List<LampEntity> entities = repository.findAllActive(pageable);
+    final boolean hasMore = entities.size() > safePageSize;
+    final List<Lamp> data = entities.stream().limit(safePageSize).map(mapper::toModel).toList();
     final Optional<String> nextCursor =
-        hasMore ? Optional.of(Integer.toString(safeOffset + data.size())) : Optional.empty();
+        hasMore ? Optional.of(Integer.toString(safeOffset + safePageSize)) : Optional.empty();
 
     return new PagedLampsResult(data, hasMore, nextCursor);
   }
