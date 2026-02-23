@@ -50,26 +50,6 @@ namespace LampControlApi.Tests.Infrastructure
         }
 
         /// <summary>
-        /// Test that UpdateAsync throws ArgumentNullException when entity is null.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
-        public async Task UpdateAsync_ShouldThrowArgumentNullException_WhenEntityIsNull()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<LampControlDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            using var context = new LampControlDbContext(options);
-            var repository = new PostgresLampRepository(context, this.mockLogger.Object);
-
-            // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(
-                async () => await repository.UpdateAsync(null!));
-        }
-
-        /// <summary>
         /// Test that constructor throws ArgumentNullException when context is null.
         /// </summary>
         [TestMethod]
@@ -163,7 +143,7 @@ namespace LampControlApi.Tests.Infrastructure
             await repository.CreateAsync(lamp);
             await repository.GetAllAsync();
             await repository.GetByIdAsync(lamp.Id);
-            await repository.UpdateAsync(lamp);
+            await repository.UpdateAsync(lamp.Id, lamp.Status);
             await repository.DeleteAsync(lamp.Id);
 
             // Assert - Verify debug logging was called
@@ -249,10 +229,10 @@ namespace LampControlApi.Tests.Infrastructure
 
             using var context = new LampControlDbContext(options);
             var repository = new PostgresLampRepository(context, this.mockLogger.Object);
-            var nonExistentLamp = LampEntity.Create(status: true);
+            var nonExistentLampId = Guid.NewGuid();
 
             // Act
-            var result = await repository.UpdateAsync(nonExistentLamp);
+            var result = await repository.UpdateAsync(nonExistentLampId, status: true);
 
             // Assert
             Assert.IsNull(result);

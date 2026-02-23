@@ -308,6 +308,18 @@ namespace LampControlApi.Tests.Extensions
             Assert.IsTrue(result);
         }
 
+        [TestMethod]
+        public void ResolveDbRetryOnFailureEnabled_ShouldRespectEnvironmentVariable()
+        {
+            var configuration = BuildConfiguration();
+            Environment.SetEnvironmentVariable(BenchmarkModeEnvVar, null);
+            Environment.SetEnvironmentVariable(DatabaseRetryEnvVar, "false");
+
+            var result = ServiceCollectionExtensions.ResolveDbRetryOnFailureEnabled(configuration);
+
+            Assert.IsFalse(result);
+        }
+
         private static IConfiguration BuildConfiguration(Dictionary<string, string?>? values = null)
         {
             return new ConfigurationBuilder()

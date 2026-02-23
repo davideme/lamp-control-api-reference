@@ -80,19 +80,14 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
+        public Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (entity == null)
+            if (_lamps.TryGetValue(id, out var existing))
             {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (_lamps.TryGetValue(entity.Id, out var existing))
-            {
-                var updated = existing.WithUpdatedStatus(entity.Status);
-                _lamps[entity.Id] = updated;
+                var updated = existing.WithUpdatedStatus(status);
+                _lamps[id] = updated;
                 return Task.FromResult<LampEntity?>(updated);
             }
 

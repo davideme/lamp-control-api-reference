@@ -56,10 +56,11 @@ namespace LampControlApi.Domain.Repositories
         /// <summary>
         /// Update an existing lamp.
         /// </summary>
-        /// <param name="entity">Lamp entity to update.</param>
+        /// <param name="id">Lamp ID.</param>
+        /// <param name="status">The updated on/off status.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Updated lamp entity if found, null otherwise.</returns>
-        Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default);
+        Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a lamp by ID.

@@ -153,9 +153,7 @@ namespace LampControlApi.Services
                 throw new ArgumentException("Invalid lamp ID format.", nameof(lampId));
             }
 
-            var now = DateTimeOffset.UtcNow;
-            var updatedEntity = new LampControlApi.Domain.Entities.LampEntity(id, body.Status, now, now);
-            var updated = await _lampRepository.UpdateAsync(updatedEntity);
+            var updated = await _lampRepository.UpdateAsync(id, body.Status);
             if (updated == null)
             {
                 throw new KeyNotFoundException($"Lamp with ID {lampId} not found.");

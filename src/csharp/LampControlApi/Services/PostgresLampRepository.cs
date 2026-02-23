@@ -116,28 +116,23 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
-        public async Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
+        public async Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", entity.Id);
+            this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", id);
 
             var existingEntity = await this.context.Lamps
-                .FirstOrDefaultAsync(l => l.Id == entity.Id, cancellationToken);
+                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
 
             if (existingEntity == null)
             {
-                this.logger.LogDebug("Lamp {LampId} not found for update", entity.Id);
+                this.logger.LogDebug("Lamp {LampId} not found for update", id);
                 return null;
             }
 
             // Create updated entity with init setters using with-expression
             var updatedEntity = existingEntity with
             {
-                IsOn = entity.Status,
+                IsOn = status,
             };
 
             // Update the tracked entity reference
