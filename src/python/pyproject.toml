@@ -38,7 +38,7 @@ greenlet = "^3.3.1"
 
 [tool.black]
 line-length = 100
-target-version = ["py313"]
+target-version = ["py312"]
 include = '\.pyi?$'
 exclude = '''
 (
@@ -59,7 +59,7 @@ exclude = '''
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+target-version = "py312"
 lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 lint.ignore = []
 lint.exclude = [
@@ -82,7 +82,7 @@ lint.exclude = [
 "src/openapi_server/dependencies.py" = ["PLW0603"]  # Global statement used intentionally for singleton pattern
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
