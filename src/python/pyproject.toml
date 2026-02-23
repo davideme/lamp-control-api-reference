@@ -6,7 +6,7 @@ authors = [
     {name = "Davide Mendolia",email = "davide@gokarumi.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -17,7 +17,7 @@ package-mode = true
 packages = [{include = "openapi_server", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.12.3"
+python = "^3.14"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
 asyncpg = "^0.30.0"
@@ -37,7 +37,7 @@ greenlet = "^3.3.1"
 
 [tool.black]
 line-length = 100
-target-version = ["py312"]
+target-version = ["py314"]
 include = '\.pyi?$'
 exclude = '''
 (
@@ -58,7 +58,7 @@ exclude = '''
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py314"
 lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 lint.ignore = []
 lint.exclude = [
@@ -81,7 +81,7 @@ lint.exclude = [
 "src/openapi_server/dependencies.py" = ["PLW0603"]  # Global statement used intentionally for singleton pattern
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

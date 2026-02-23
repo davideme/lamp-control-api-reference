@@ -4,7 +4,7 @@ A FastAPI-based REST API for controlling lamps.
 
 ## Requirements.
 
-Python >= 3.12
+Python >= 3.14
 Poetry >= 1.0.0
 
 ## Installation & Usage
