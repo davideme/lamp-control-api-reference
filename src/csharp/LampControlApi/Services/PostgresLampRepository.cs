@@ -96,21 +96,18 @@ namespace LampControlApi.Services
 
             this.logger.LogDebug("Creating lamp {LampId} in PostgreSQL database", entity.Id);
 
+            var now = DateTimeOffset.UtcNow;
             var dbEntity = new LampDbEntity
             {
                 Id = entity.Id,
                 IsOn = entity.Status,
+                CreatedAt = now,
+                UpdatedAt = now,
                 DeletedAt = null,
             };
 
             this.context.Lamps.Add(dbEntity);
             await this.context.SaveChangesAsync(cancellationToken);
-
-            // Fallback for providers that do not round-trip generated values on insert.
-            if (dbEntity.CreatedAt == default || dbEntity.UpdatedAt == default)
-            {
-                await this.context.Entry(dbEntity).ReloadAsync(cancellationToken);
-            }
 
             return this.MapToDomain(dbEntity);
         }
@@ -133,19 +130,13 @@ namespace LampControlApi.Services
             var updatedEntity = existingEntity with
             {
                 IsOn = status,
+                UpdatedAt = DateTimeOffset.UtcNow,
             };
 
             // Update the tracked entity reference
             this.context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
-            var previousUpdatedAt = existingEntity.UpdatedAt;
             await this.context.SaveChangesAsync(cancellationToken);
-
-            // Fallback for providers that do not round-trip trigger-updated values on update.
-            if (existingEntity.UpdatedAt <= previousUpdatedAt)
-            {
-                await this.context.Entry(existingEntity).ReloadAsync(cancellationToken);
-            }
 
             return this.MapToDomain(existingEntity);
         }
@@ -166,9 +157,11 @@ namespace LampControlApi.Services
             }
 
             // Soft delete by setting DeletedAt timestamp
+            var now = DateTimeOffset.UtcNow;
             var deletedEntity = existingEntity with
             {
-                DeletedAt = DateTimeOffset.UtcNow,
+                DeletedAt = now,
+                UpdatedAt = now,
             };
 
             // Update the tracked entity reference
