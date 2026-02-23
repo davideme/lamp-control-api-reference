@@ -27,7 +27,7 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals(5432, config.port)
         assertEquals("testdb", config.database)
         assertEquals(0, config.poolMin) // Default
-        assertEquals(4, config.poolMax) // Default
+        assertEquals(12, config.poolMax) // Default
     }
 
     @Test
@@ -173,7 +173,7 @@ class DatabaseConfigEnvironmentVariableTest {
         val config = DatabaseConfig.fromEnv()
 
         assertNotNull(config)
-        assertEquals(4, config.poolMax) // Falls back to default
+        assertEquals(12, config.poolMax) // Falls back to default
     }
 
     @Test

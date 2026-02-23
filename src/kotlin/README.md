@@ -46,17 +46,22 @@ Configure the database connection using environment variables:
 
 **Connection Pool Settings:**
 - `DB_POOL_MIN_SIZE` - Minimum pool size (default: `0`)
-- `DB_POOL_MAX_SIZE` - Maximum pool size (default: `4`)
+- `DB_POOL_MAX_SIZE` - Maximum pool size (default: `12`)
 
 **Connection Pool Timeouts (in milliseconds):**
 - `DB_MAX_LIFETIME_MS` - Maximum lifetime of a connection in the pool (default: `3600000` = 1 hour)
 - `DB_IDLE_TIMEOUT_MS` - Maximum idle time before connection is closed (default: `1800000` = 30 minutes)
 - `DB_CONNECTION_TIMEOUT_MS` - Maximum time to wait for a connection (default: `30000` = 30 seconds)
 
+**Transaction Settings:**
+- `DB_TRANSACTION_ISOLATION` - Transaction isolation level (default: `READ_COMMITTED`)
+  - Accepted values: `READ_COMMITTED`, `READ_UNCOMMITTED`, `REPEATABLE_READ`, `SERIALIZABLE`
+  - `TRANSACTION_*` variants are also supported (for example `TRANSACTION_SERIALIZABLE`)
+
 **Example using DATABASE_URL:**
 ```bash
 export DATABASE_URL="postgresql://lamp_user:password@localhost:5432/lamp_control"
-export DB_POOL_MAX_SIZE="10"
+export DB_POOL_MAX_SIZE="12"
 export DB_MAX_LIFETIME_MS="7200000"  # 2 hours
 ```
 
@@ -68,9 +73,12 @@ export DB_NAME="lamp_control"
 export DB_USER="lamp_user"
 export DB_PASSWORD="password"
 export DB_POOL_MIN_SIZE="2"
-export DB_POOL_MAX_SIZE="10"
+export DB_POOL_MAX_SIZE="12"
 export DB_IDLE_TIMEOUT_MS="900000"  # 15 minutes
+export DB_TRANSACTION_ISOLATION="READ_COMMITTED"
 ```
+
+For Cloud Run services with 1 vCPU, start with `DB_POOL_MAX_SIZE` in the `8-16` range and tune from there.
 
 PostgreSQL is considered configured if any of the following conditions are met:
 - `DATABASE_URL` is set
@@ -131,4 +139,3 @@ Class | Method | HTTP request | Description
 ## Documentation for Authorization
 
 Endpoints do not require authorization.
-

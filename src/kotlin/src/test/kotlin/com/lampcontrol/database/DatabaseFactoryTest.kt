@@ -2,6 +2,7 @@ package com.lampcontrol.database
 
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.Test
+import java.sql.Connection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -66,12 +67,40 @@ class DatabaseFactoryTest {
             hikariConfig.dataSourceProperties["socketFactory"],
         )
         assertEquals(
-            "/cloudsql/project:region:instance-id",
-            hikariConfig.dataSourceProperties["unixSocketPath"],
+            "PUBLIC,PRIVATE",
+            hikariConfig.dataSourceProperties["ipTypes"],
         )
         assertEquals(
             "project:region:instance-id",
             hikariConfig.dataSourceProperties["cloudSqlInstance"],
         )
+    }
+
+    @Test
+    fun `resolveTransactionIsolation defaults to READ_COMMITTED`() {
+        val resolveMethod =
+            DatabaseFactory::class.java.getDeclaredMethod(
+                "resolveTransactionIsolation",
+                String::class.java,
+            )
+        resolveMethod.isAccessible = true
+        val isolation = resolveMethod.invoke(DatabaseFactory, null) as Pair<*, *>
+
+        assertEquals("TRANSACTION_READ_COMMITTED", isolation.first)
+        assertEquals(Connection.TRANSACTION_READ_COMMITTED, isolation.second)
+    }
+
+    @Test
+    fun `resolveTransactionIsolation accepts REPEATABLE_READ override`() {
+        val resolveMethod =
+            DatabaseFactory::class.java.getDeclaredMethod(
+                "resolveTransactionIsolation",
+                String::class.java,
+            )
+        resolveMethod.isAccessible = true
+        val isolation = resolveMethod.invoke(DatabaseFactory, "REPEATABLE_READ") as Pair<*, *>
+
+        assertEquals("TRANSACTION_REPEATABLE_READ", isolation.first)
+        assertEquals(Connection.TRANSACTION_REPEATABLE_READ, isolation.second)
     }
 }
