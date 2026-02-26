@@ -78,7 +78,9 @@
       "Bash(schemathesis run:*)",
       "Bash(tee:*)",
       "Bash(TESTCONTAINERS_HOST_OVERRIDE=localhost dotnet test:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git fetch origin main)",
+      "Bash(git rebase origin/main)"
     ]
   }
 }
