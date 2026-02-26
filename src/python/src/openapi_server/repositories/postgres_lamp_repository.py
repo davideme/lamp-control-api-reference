@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.openapi_server.entities.lamp_entity import LampEntity
@@ -39,17 +39,20 @@ class PostgresLampRepository:
         Returns:
             The created lamp entity with database-generated values.
         """
-        db_lamp = LampModel(
-            id=UUID(lamp_entity.id),
-            is_on=lamp_entity.status,  # Map status -> is_on
-            created_at=lamp_entity.created_at,
-            updated_at=lamp_entity.updated_at,
-            deleted_at=None,
+        stmt = (
+            insert(LampModel)
+            .values(
+                id=UUID(lamp_entity.id),
+                is_on=lamp_entity.status,  # Map status -> is_on
+                created_at=lamp_entity.created_at,
+                updated_at=lamp_entity.updated_at,
+                deleted_at=None,
+            )
+            .returning(LampModel)
         )
 
-        db.add(db_lamp)
-        await db.flush()
-        await db.refresh(db_lamp)
+        result = await db.execute(stmt)
+        db_lamp = result.scalars().one()
 
         return self._to_entity(db_lamp)
 
@@ -116,27 +119,23 @@ class PostgresLampRepository:
             lamp_entity: The lamp entity with updated values.
 
         Returns:
-            The updated lamp entity.
+            The updated lamp entity with trigger-updated timestamps.
 
         Raises:
             LampNotFoundError: If the lamp is not found or is soft-deleted.
         """
-        stmt = select(LampModel).where(
-            LampModel.id == UUID(lamp_entity.id), LampModel.deleted_at.is_(None)
+        stmt = (
+            update(LampModel)
+            .where(LampModel.id == UUID(lamp_entity.id), LampModel.deleted_at.is_(None))
+            .values(is_on=lamp_entity.status)  # Map status -> is_on; updated_at set by trigger
+            .returning(LampModel)
         )
 
         result = await db.execute(stmt)
-        db_lamp = result.scalar_one_or_none()
+        db_lamp = result.scalars().one_or_none()
 
         if db_lamp is None:
             raise LampNotFoundError(lamp_entity.id)
-
-        # Update the status field (is_on in database)
-        db_lamp.is_on = lamp_entity.status
-        # Note: updated_at will be set by the database trigger
-
-        await db.flush()
-        await db.refresh(db_lamp)  # Get trigger-updated values
 
         return self._to_entity(db_lamp)
 
@@ -149,20 +148,18 @@ class PostgresLampRepository:
         Raises:
             LampNotFoundError: If the lamp is not found or already deleted.
         """
-        stmt = select(LampModel).where(
-            LampModel.id == UUID(lamp_id), LampModel.deleted_at.is_(None)
+        stmt = (
+            update(LampModel)
+            .where(LampModel.id == UUID(lamp_id), LampModel.deleted_at.is_(None))
+            .values(deleted_at=datetime.now(UTC))
+            .returning(LampModel.id)
         )
 
         result = await db.execute(stmt)
-        db_lamp = result.scalar_one_or_none()
+        deleted_id = result.scalar_one_or_none()
 
-        if db_lamp is None:
+        if deleted_id is None:
             raise LampNotFoundError(lamp_id)
-
-        # Soft delete: set the deleted_at timestamp
-        db_lamp.deleted_at = datetime.now(UTC)
-
-        await db.flush()
 
     @staticmethod
     def _base_list_query():
