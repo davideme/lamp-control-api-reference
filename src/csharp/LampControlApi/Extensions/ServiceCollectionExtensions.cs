@@ -154,6 +154,7 @@ namespace LampControlApi.Extensions
                 Host = parsedUrl.Host,
                 Port = parsedUrl.Port > 0 ? parsedUrl.Port.Value : 5432,
                 Database = Uri.UnescapeDataString(databaseName),
+                NoResetOnClose = true,
             };
 
             if (!string.IsNullOrWhiteSpace(username))
