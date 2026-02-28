@@ -36,11 +36,3 @@ else if (mode == "serve-only")
 app.ConfigurePipeline();
 
 app.Run();
-
-/// <summary>
-/// Entry point for the LampControlApi application. This partial class is used for test accessibility.
-/// </summary>
-public partial class Program
-{
-    // Intentionally left blank. Used for test accessibility.
-}

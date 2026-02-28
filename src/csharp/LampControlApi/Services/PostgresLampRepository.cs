@@ -14,7 +14,7 @@ namespace LampControlApi.Services
     /// <summary>
     /// PostgreSQL implementation of the lamp repository using Entity Framework Core.
     /// </summary>
-    public class PostgresLampRepository : ILampRepository
+    public partial class PostgresLampRepository : ILampRepository
     {
         private readonly LampControlDbContext context;
         private readonly ILogger<PostgresLampRepository> logger;
@@ -35,7 +35,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public async Task<ICollection<LampEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            this.logger.LogDebug("Getting all lamps from PostgreSQL database");
+            LogGettingAllLamps(this.logger);
 
             var dbEntities = await this.context.Lamps
                 .OrderBy(l => l.CreatedAt)
@@ -58,10 +58,7 @@ namespace LampControlApi.Services
                 throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be greater than or equal to 0.");
             }
 
-            this.logger.LogDebug(
-                "Listing lamps from PostgreSQL database (limit: {Limit}, offset: {Offset})",
-                limit,
-                offset);
+            LogListingLamps(this.logger, limit, offset);
 
             var dbEntities = await this.context.Lamps
                 .OrderBy(l => l.CreatedAt)
@@ -77,7 +74,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public async Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            this.logger.LogDebug("Getting lamp {LampId} from PostgreSQL database", id);
+            LogGettingLampById(this.logger, id);
 
             var dbEntity = await this.context.Lamps
                 .AsNoTracking()
@@ -94,7 +91,7 @@ namespace LampControlApi.Services
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            this.logger.LogDebug("Creating lamp {LampId} in PostgreSQL database", entity.Id);
+            LogCreatingLamp(this.logger, entity.Id);
 
             var now = DateTimeOffset.UtcNow;
             var dbEntity = new LampDbEntity
@@ -115,14 +112,14 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public async Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default)
         {
-            this.logger.LogDebug("Updating lamp {LampId} in PostgreSQL database", id);
+            LogUpdatingLamp(this.logger, id);
 
             var existingEntity = await this.context.Lamps
                 .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
 
             if (existingEntity == null)
             {
-                this.logger.LogDebug("Lamp {LampId} not found for update", id);
+                LogLampNotFoundForUpdate(this.logger, id);
                 return null;
             }
 
@@ -144,7 +141,7 @@ namespace LampControlApi.Services
         /// <inheritdoc/>
         public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            this.logger.LogDebug("Deleting lamp {LampId} from PostgreSQL database", id);
+            LogDeletingLamp(this.logger, id);
 
             var existingEntity = await this.context.Lamps
                 .IgnoreQueryFilters()
@@ -152,7 +149,7 @@ namespace LampControlApi.Services
 
             if (existingEntity == null)
             {
-                this.logger.LogDebug("Lamp {LampId} not found for deletion", id);
+                LogLampNotFoundForDeletion(this.logger, id);
                 return false;
             }
 
@@ -171,6 +168,30 @@ namespace LampControlApi.Services
 
             return true;
         }
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Getting all lamps from PostgreSQL database")]
+        private static partial void LogGettingAllLamps(ILogger logger);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Listing lamps from PostgreSQL database (limit: {Limit}, offset: {Offset})")]
+        private static partial void LogListingLamps(ILogger logger, int limit, int offset);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Getting lamp {LampId} from PostgreSQL database")]
+        private static partial void LogGettingLampById(ILogger logger, Guid lampId);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Creating lamp {LampId} in PostgreSQL database")]
+        private static partial void LogCreatingLamp(ILogger logger, Guid lampId);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Updating lamp {LampId} in PostgreSQL database")]
+        private static partial void LogUpdatingLamp(ILogger logger, Guid lampId);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Lamp {LampId} not found for update")]
+        private static partial void LogLampNotFoundForUpdate(ILogger logger, Guid lampId);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Deleting lamp {LampId} from PostgreSQL database")]
+        private static partial void LogDeletingLamp(ILogger logger, Guid lampId);
+
+        [LoggerMessage(Level = LogLevel.Debug, Message = "Lamp {LampId} not found for deletion")]
+        private static partial void LogLampNotFoundForDeletion(ILogger logger, Guid lampId);
 
         /// <summary>
         /// Maps a database entity to a domain entity.

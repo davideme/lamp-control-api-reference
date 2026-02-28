@@ -147,6 +147,7 @@ namespace LampControlApi.Tests.Infrastructure
             await repository.DeleteAsync(lamp.Id);
 
             // Assert - Verify debug logging was called
+#pragma warning disable CA1873 // Moq.Verify lambda is not a real log call; false positive
             this.mockLogger.Verify(
                 logger => logger.Log(
                     LogLevel.Debug,
@@ -155,6 +156,7 @@ namespace LampControlApi.Tests.Infrastructure
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.AtLeast(5));
+#pragma warning restore CA1873
         }
 
         /// <summary>
