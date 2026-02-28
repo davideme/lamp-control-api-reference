@@ -66,7 +66,19 @@ namespace LampControlApi.Extensions
             services.AddScoped<IController, LampControllerImplementation>();
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+
+            // Swashbuckle 10.x derives the tag name by stripping the "Controller" suffix.
+            // The generated NSwag controller class is literally named "Controller", so
+            // stripping the suffix yields an empty string and throws ArgumentNullException.
+            // Override TagActionsBy to fall back to "Lamps" when the name would be empty.
+            services.AddSwaggerGen(options =>
+            {
+                options.TagActionsBy(api =>
+                {
+                    api.ActionDescriptor.RouteValues.TryGetValue("controller", out var controller);
+                    return new[] { string.IsNullOrEmpty(controller) ? "Lamps" : controller };
+                });
+            });
 
             return usePostgres;
         }
