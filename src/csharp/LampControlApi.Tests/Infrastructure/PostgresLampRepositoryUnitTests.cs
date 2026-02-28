@@ -27,6 +27,10 @@ namespace LampControlApi.Tests.Infrastructure
         public void Initialize()
         {
             this.mockLogger = new Mock<ILogger<PostgresLampRepository>>();
+
+            // [LoggerMessage] source-generated methods call IsEnabled() before Log().
+            // Return true so the log call is not short-circuited by the mock.
+            this.mockLogger.Setup(l => l.IsEnabled(LogLevel.Debug)).Returns(true);
         }
 
         /// <summary>
