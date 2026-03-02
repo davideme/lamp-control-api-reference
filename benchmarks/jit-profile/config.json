@@ -1,0 +1,42 @@
+{
+  "target_rps_per_language": 50,
+  "num_windows": 10,
+  "window_seconds": 30,
+  "seed_fetch_pages": 3,
+  "seed_page_size": 25,
+  "jit_thresholds": [
+    {
+      "label": "C# Tier 1",
+      "description": ".NET JIT compiles methods after ~30 invocations",
+      "method_calls": 30,
+      "languages": ["csharp"]
+    },
+    {
+      "label": "Java/Kotlin C1",
+      "description": "HotSpot client compiler activates at ~2,000 invocations",
+      "method_calls": 2000,
+      "languages": ["java", "kotlin"]
+    },
+    {
+      "label": "V8 TurboFan",
+      "description": "Node.js top-tier JIT compiler activates at ~6,000 invocations",
+      "method_calls": 6000,
+      "languages": ["typescript"]
+    },
+    {
+      "label": "Java/Kotlin C2",
+      "description": "HotSpot server compiler (peak throughput) activates at ~10,000 invocations",
+      "method_calls": 10000,
+      "languages": ["java", "kotlin"]
+    }
+  ],
+  "services_config": "../k6/services.json",
+  "notes": {
+    "go": "AOT compiled — no JIT, flat baseline expected",
+    "python": "CPython — no JIT, flat baseline expected",
+    "csharp": "Tier 1 activates within first window (~0.6s at 50 RPS), effectively instant",
+    "typescript": "V8 TurboFan expected around window t=90-120s",
+    "java": "C1 at ~t=40s (window 1), C2 at ~t=200s (window 6-7)",
+    "kotlin": "Same JVM thresholds as Java"
+  }
+}
