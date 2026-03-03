@@ -17,6 +17,7 @@
 # Requirements:
 #   - k6 installed (https://k6.io/docs/getting-started/installation/)
 #   - jq installed
+#   - curl installed (for warm-up probes)
 #   - gcloud CLI authenticated (for --cold-start or --setup-memory)
 #   - GOOGLE_CLOUD_PROJECT env var set (for gcloud commands)
 
@@ -65,6 +66,11 @@ fi
 
 if ! command -v jq &>/dev/null; then
   echo "ERROR: jq not found. Install with: brew install jq" >&2
+  exit 1
+fi
+
+if ! command -v curl &>/dev/null; then
+  echo "ERROR: curl not found." >&2
   exit 1
 fi
 
@@ -152,6 +158,47 @@ if [[ "$COLD_START" == "true" ]]; then
   sleep 60
   echo ">>> Services are cold. First k6 request will trigger cold start."
 fi
+
+# ─── Warm-up: wait for containers to serve before measuring ──────────────────
+# Cloud Run containers can take 30–60s to respond on first request after a cold
+# start (or after inactivity). Probing until each service returns HTTP 200
+# ensures cold-start latency is excluded from the first benchmark window.
+warmup_service() {
+  local label="$1"
+  local base_url="$2"
+  local deadline=$(( $(date +%s) + 90 ))
+
+  while [[ $(date +%s) -lt $deadline ]]; do
+    status=$(curl -s -o /dev/null -w "%{http_code}" \
+             --max-time 35 \
+             "${base_url}/v1/lamps?pageSize=1" 2>/dev/null || echo "000")
+    if [[ "$status" == "200" ]]; then
+      echo "  ${label} ready"
+      return 0
+    fi
+    sleep 2
+  done
+  echo "  WARNING: ${label} did not become ready within 90s (last HTTP status: ${status})" >&2
+  return 1
+}
+
+echo ">>> Warming up services (probing until HTTP 200, max 90s per service)..."
+warmup_pids=()
+warmup_service "TypeScript" "${TS_URL}"  & warmup_pids+=($!)
+warmup_service "Python"     "${PY_URL}"  & warmup_pids+=($!)
+warmup_service "Go"         "${GO_URL}"  & warmup_pids+=($!)
+warmup_service "Java"       "${JAVA_URL}" & warmup_pids+=($!)
+warmup_service "Kotlin"     "${KT_URL}"  & warmup_pids+=($!)
+warmup_service "C#"         "${CS_URL}"  & warmup_pids+=($!)
+
+warmup_failed=0
+for pid in "${warmup_pids[@]}"; do
+  wait "$pid" || warmup_failed=$((warmup_failed + 1))
+done
+if [[ $warmup_failed -gt 0 ]]; then
+  echo "  WARNING: ${warmup_failed} service(s) did not respond in time; proceeding anyway." >&2
+fi
+echo ""
 
 # ─── Prepare results directory ────────────────────────────────────────────────
 mkdir -p "$RESULTS_DIR"

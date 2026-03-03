@@ -24,8 +24,8 @@ const WINDOW_SECONDS = parseInt(WINDOW_DURATION, 10); // "30s" → 30
 const RESULTS_DIR_ENV = __ENV.RESULTS_DIR || 'results';
 
 // Env var names aligned with benchmarks/k6/scenarios.js; legacy aliases supported.
-const SEED_FETCH_PAGES = Number(__ENV.SEED_FETCH_PAGES || __ENV.SEED_FETCH_PAGES || 3);
-const SEED_SEED_PAGE_SIZE   = Number(__ENV.SEED_SEED_PAGE_SIZE   || __ENV.SEED_PAGE_SIZE  || 25);
+const SEED_FETCH_PAGES = Number(__ENV.SEED_FETCH_PAGES || __ENV.SEED_PAGES || 3);
+const SEED_PAGE_SIZE   = Number(__ENV.SEED_PAGE_SIZE   || __ENV.PAGE_SIZE  || 25);
 
 const SERVICES = {
   typescript: (__ENV.TS_URL || '').replace(/\/$/, ''),
