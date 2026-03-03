@@ -20,8 +20,12 @@ import { check } from 'k6';
 const TARGET_RPS = Number(__ENV.TARGET_RPS || 50);
 const WINDOW = __ENV.WINDOW || '0';
 const WINDOW_DURATION = __ENV.WINDOW_DURATION || '30s';
-const SEED_PAGES = Number(__ENV.SEED_PAGES || 3);
-const PAGE_SIZE = 25;
+const WINDOW_SECONDS = parseInt(WINDOW_DURATION, 10); // "30s" → 30
+const RESULTS_DIR_ENV = __ENV.RESULTS_DIR || 'results';
+
+// Env var names aligned with benchmarks/k6/scenarios.js; legacy aliases supported.
+const SEED_FETCH_PAGES = Number(__ENV.SEED_FETCH_PAGES || __ENV.SEED_FETCH_PAGES || 3);
+const SEED_SEED_PAGE_SIZE   = Number(__ENV.SEED_SEED_PAGE_SIZE   || __ENV.SEED_PAGE_SIZE  || 25);
 
 const SERVICES = {
   typescript: (__ENV.TS_URL || '').replace(/\/$/, ''),
@@ -78,10 +82,10 @@ function fetchSeedIds(baseUrl) {
   const ids = [];
   let cursor = null;
 
-  for (let i = 0; i < SEED_PAGES; i++) {
+  for (let i = 0; i < SEED_FETCH_PAGES; i++) {
     const query = cursor
-      ? `/v1/lamps?pageSize=${PAGE_SIZE}&cursor=${encodeURIComponent(cursor)}`
-      : `/v1/lamps?pageSize=${PAGE_SIZE}`;
+      ? `/v1/lamps?pageSize=${SEED_PAGE_SIZE}&cursor=${encodeURIComponent(cursor)}`
+      : `/v1/lamps?pageSize=${SEED_PAGE_SIZE}`;
 
     const resp = http.get(`${baseUrl}${query}`);
     if (resp.status !== 200) break;
@@ -108,7 +112,7 @@ let vuOwnedIds = [];
 // ─── CRUD operations ──────────────────────────────────────────────────────────
 
 function doList(baseUrl, tags) {
-  const resp = http.get(`${baseUrl}/v1/lamps?pageSize=${PAGE_SIZE}`, { tags });
+  const resp = http.get(`${baseUrl}/v1/lamps?pageSize=${SEED_PAGE_SIZE}`, { tags });
   check(resp, { 'list 200': (r) => r.status === 200 });
 }
 
@@ -198,7 +202,7 @@ export function runCRUD(data) {
 
 export function handleSummary(data) {
   const windowIdx = parseInt(WINDOW, 10);
-  const elapsedSeconds = windowIdx * 30;
+  const elapsedSeconds = windowIdx * WINDOW_SECONDS;
 
   const metrics = {};
   for (const lang of Object.keys(ACTIVE_SERVICES)) {
@@ -224,7 +228,7 @@ export function handleSummary(data) {
   };
 
   return {
-    [`results/window_${WINDOW}.json`]: JSON.stringify(output, null, 2),
+    [`${RESULTS_DIR_ENV}/window_${WINDOW}.json`]: JSON.stringify(output, null, 2),
     stdout: `\n[window ${WINDOW}] t=${elapsedSeconds}s complete\n`,
   };
 }

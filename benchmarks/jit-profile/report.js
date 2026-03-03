@@ -111,7 +111,7 @@ function generateMarkdown(windows, meta) {
   // ── p95 Table ─────────────────────────────────────────────────────────────
   lines.push('## p95 Latency Over Time (ms)');
   lines.push('');
-  lines.push(`> ${rps} RPS constant · 1,500 requests/window · in-memory backend`);
+  lines.push(`> ${rps} RPS constant · ~${rps * windowSeconds} requests/window · in-memory backend`);
   lines.push(`> JIT annotations mark the window where each compiler tier is expected to activate`);
   lines.push('');
 
@@ -146,7 +146,7 @@ function generateMarkdown(windows, meta) {
   lines.push('');
   lines.push(`At ${rps} RPS, assuming each HTTP request invokes each hot-path method once:`);
   lines.push('');
-  lines.push('| Tier | Method invocations | Time at 50 RPS | Window | Languages |');
+  lines.push(`| Tier | Method invocations | Time at ${rps} RPS | Window | Languages |`);
   lines.push('|------|--------------------|----------------|--------|-----------|');
   for (const tier of CONFIG.jit_thresholds) {
     const t = tier.method_calls / rps;

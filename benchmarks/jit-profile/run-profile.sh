@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # run-profile.sh — JIT warmup profiling benchmark orchestrator
 #
-# Runs 10 sequential 30-second k6 windows against all 6 Cloud Run services in
+# Runs sequential 30-second k6 windows against all 6 Cloud Run services in
 # parallel within each window. Cloud Run containers stay alive between windows,
-# so JIT state accumulates across the full 5-minute benchmark.
+# so JIT state accumulates across the full benchmark duration.
 #
 # Usage:
 #   ./run-profile.sh [--cold-start] [--rps N] [--windows N] [--setup-memory]
 #
 # Options:
 #   --cold-start      Scale services to 0 instances before starting (forces fresh JVM)
-#   --rps N           Requests per second per language (default: 50)
-#   --windows N       Number of 30-second windows (default: 10)
+#   --rps N           Requests per second per language (default: from config.json)
+#   --windows N       Number of 30-second windows (default: from config.json)
 #   --setup-memory    Configure all Cloud Run services for in-memory mode first
 #
 # Requirements:
@@ -27,12 +27,24 @@ SERVICES_JSON="${SCRIPT_DIR}/../k6/services.json"
 RESULTS_DIR="${SCRIPT_DIR}/results"
 CONFIG_JSON="${SCRIPT_DIR}/config.json"
 
-# ─── Defaults ────────────────────────────────────────────────────────────────
+# ─── Defaults (loaded from config.json, then overridable via CLI flags) ────────
 TARGET_RPS=50
 NUM_WINDOWS=10
 WINDOW_DURATION=30
 COLD_START=false
 SETUP_MEMORY=false
+
+# Wire defaults from config.json (single source of truth for benchmark settings).
+# CLI flags parsed below still take precedence.
+if [[ -f "$CONFIG_JSON" ]] && command -v jq &>/dev/null; then
+  cfg=$(jq -r '[.target_rps_per_language, .num_windows, .window_seconds] | @sh' "$CONFIG_JSON" 2>/dev/null || true)
+  if [[ -n "$cfg" ]]; then
+    read -r cfg_rps cfg_windows cfg_wsec <<< "$cfg"
+    TARGET_RPS="${cfg_rps//\'/}"
+    NUM_WINDOWS="${cfg_windows//\'/}"
+    WINDOW_DURATION="${cfg_wsec//\'/}"
+  fi
+fi
 
 # ─── Argument parsing ─────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -54,6 +66,14 @@ fi
 if ! command -v jq &>/dev/null; then
   echo "ERROR: jq not found. Install with: brew install jq" >&2
   exit 1
+fi
+
+# gcloud is only required when --cold-start or --setup-memory is set.
+if [[ "$COLD_START" == "true" || "$SETUP_MEMORY" == "true" ]]; then
+  if ! command -v gcloud &>/dev/null; then
+    echo "ERROR: gcloud CLI not found. Install from https://cloud.google.com/sdk/docs/install and ensure you are authenticated." >&2
+    exit 1
+  fi
 fi
 
 if [[ ! -f "$SERVICES_JSON" ]]; then
@@ -95,9 +115,14 @@ echo ""
 
 # ─── Optional: configure services for in-memory mode ────────────────────────
 if [[ "$SETUP_MEMORY" == "true" ]]; then
+  if [[ -z "${GOOGLE_CLOUD_PROJECT:-}" ]]; then
+    echo "ERROR: GOOGLE_CLOUD_PROJECT must be set for --setup-memory" >&2
+    exit 1
+  fi
+
   echo ">>> Configuring all services for in-memory mode..."
   while IFS= read -r cmd; do
-    eval "$cmd"
+    bash -c "$cmd"
   done < <(jq -r '.[].memorySetupCommand' "$SERVICES_JSON")
   echo ">>> Memory mode configured. Waiting 30s for changes to propagate..."
   sleep 30
@@ -158,20 +183,24 @@ for window in $(seq 0 $((NUM_WINDOWS - 1))); do
   elapsed=$((window * WINDOW_DURATION))
   echo "--- Window ${window} (elapsed: ${elapsed}s) ---"
 
-  k6 run \
-    --env "TS_URL=${TS_URL}" \
-    --env "PY_URL=${PY_URL}" \
-    --env "GO_URL=${GO_URL}" \
-    --env "JAVA_URL=${JAVA_URL}" \
-    --env "KT_URL=${KT_URL}" \
-    --env "CS_URL=${CS_URL}" \
-    --env "TARGET_RPS=${TARGET_RPS}" \
-    --env "WINDOW=${window}" \
-    --env "WINDOW_DURATION=${WINDOW_DURATION}s" \
-    --no-summary \
-    "${SCRIPT_DIR}/profile.js"
+  # Run k6 from SCRIPT_DIR so the relative results/ path in profile.js resolves
+  # correctly regardless of the caller's working directory.
+  ( cd "${SCRIPT_DIR}" && k6 run \
+      --env "TS_URL=${TS_URL}" \
+      --env "PY_URL=${PY_URL}" \
+      --env "GO_URL=${GO_URL}" \
+      --env "JAVA_URL=${JAVA_URL}" \
+      --env "KT_URL=${KT_URL}" \
+      --env "CS_URL=${CS_URL}" \
+      --env "TARGET_RPS=${TARGET_RPS}" \
+      --env "WINDOW=${window}" \
+      --env "WINDOW_DURATION=${WINDOW_DURATION}s" \
+      --env "RESULTS_DIR=${RESULTS_DIR}" \
+      --no-summary \
+      "${SCRIPT_DIR}/profile.js" \
+  )
 
-  echo "  Window ${window} saved to results/window_${window}.json"
+  echo "  Window ${window} saved to ${RESULTS_DIR}/window_${window}.json"
 done
 
 echo ""
