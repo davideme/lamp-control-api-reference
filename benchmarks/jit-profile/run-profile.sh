@@ -243,7 +243,6 @@ for window in $(seq 0 $((NUM_WINDOWS - 1))); do
       --env "WINDOW=${window}" \
       --env "WINDOW_DURATION=${WINDOW_DURATION}s" \
       --env "RESULTS_DIR=${RESULTS_DIR}" \
-      --no-summary \
       "${SCRIPT_DIR}/profile.js" \
   )
 
