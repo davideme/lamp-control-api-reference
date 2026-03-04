@@ -27,6 +27,10 @@ namespace LampControlApi.Tests.Infrastructure
         public void Initialize()
         {
             this.mockLogger = new Mock<ILogger<PostgresLampRepository>>();
+
+            // [LoggerMessage] source-generated methods call IsEnabled() before Log().
+            // Return true so the log call is not short-circuited by the mock.
+            this.mockLogger.Setup(l => l.IsEnabled(LogLevel.Debug)).Returns(true);
         }
 
         /// <summary>
@@ -147,6 +151,7 @@ namespace LampControlApi.Tests.Infrastructure
             await repository.DeleteAsync(lamp.Id);
 
             // Assert - Verify debug logging was called
+#pragma warning disable CA1873 // Moq.Verify lambda is not a real log call; false positive
             this.mockLogger.Verify(
                 logger => logger.Log(
                     LogLevel.Debug,
@@ -155,6 +160,7 @@ namespace LampControlApi.Tests.Infrastructure
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.AtLeast(5));
+#pragma warning restore CA1873
         }
 
         /// <summary>

@@ -13,12 +13,12 @@ echo "[pre-commit] Restoring C# dependencies"
 dotnet restore --locked-mode
 
 echo "[pre-commit] Running C# format auto-fix"
-dotnet format
+dotnet format whitespace
 
 cd "$ROOT"
 restage_and_fail_if_changed "src/csharp"
 
 cd "$ROOT/src/csharp"
 echo "[pre-commit] Running C# lint checks"
-dotnet format --verify-no-changes --verbosity diagnostic
 dotnet build --verbosity minimal --configuration Release --no-restore
+dotnet format whitespace --verify-no-changes

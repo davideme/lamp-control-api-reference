@@ -577,7 +577,7 @@ namespace LampControlApi.Tests
             var actionResult = await _controller.DeleteLampAsync(lampId.ToString());
 
             // Assert - No exception should be thrown and check for NoContentResult
-            Assert.IsInstanceOfType(actionResult, typeof(Microsoft.AspNetCore.Mvc.NoContentResult));
+            Assert.IsInstanceOfType<Microsoft.AspNetCore.Mvc.NoContentResult>(actionResult);
             _mockRepository.Verify(r => r.DeleteAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
