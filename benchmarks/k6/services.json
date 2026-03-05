@@ -35,8 +35,8 @@
     "dbUrl": "https://csharp-lamp-control-api-827868544165.europe-west1.run.app",
     "cloudRunService": "csharp-lamp-control-api",
     "cloudRunRegion": "europe-west1",
-    "memorySetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets ConnectionStrings__LampControl",
-    "dbSetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets ConnectionStrings__LampControl=DATABASE_URL:latest",
+    "memorySetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --remove-secrets DATABASE_URL",
+    "dbSetupCommand": "gcloud run services update csharp-lamp-control-api --project \"$GOOGLE_CLOUD_PROJECT\" --region europe-west1 --update-secrets DATABASE_URL=DATABASE_URL:latest",
     "dbSeedCommand": ""
   },
   {
