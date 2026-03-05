@@ -4,7 +4,7 @@ steps:
       - build
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - "--builder=gcr.io/buildpacks/builder:latest"
+      - "--builder=gcr.io/buildpacks/builder:google-24"
       - "--network=cloudbuild"
       - "--path=src/csharp/LampControlApi"
     id: Buildpack
