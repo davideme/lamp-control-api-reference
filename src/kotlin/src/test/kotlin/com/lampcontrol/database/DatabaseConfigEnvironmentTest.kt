@@ -17,11 +17,6 @@ class DatabaseConfigEnvironmentTest {
                 database = "production_db",
                 user = "prod_user",
                 password = "secure_password_123",
-                poolMin = 10,
-                poolMax = 50,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         assertNotNull(config)
@@ -30,8 +25,6 @@ class DatabaseConfigEnvironmentTest {
         assertEquals("production_db", config.database)
         assertEquals("prod_user", config.user)
         assertEquals("secure_password_123", config.password)
-        assertEquals(10, config.poolMin)
-        assertEquals(50, config.poolMax)
     }
 
     @Test
@@ -43,35 +36,10 @@ class DatabaseConfigEnvironmentTest {
                 database = "testdb",
                 user = "testuser",
                 password = "",
-                poolMin = 0,
-                poolMax = 4,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         assertEquals("", config.password)
         assertNotNull(config.connectionString())
-    }
-
-    @Test
-    fun `DatabaseConfig with very large pool size`() {
-        val config =
-            DatabaseConfig(
-                host = "localhost",
-                port = 5432,
-                database = "db",
-                user = "user",
-                password = "pass",
-                poolMin = 100,
-                poolMax = 500,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
-            )
-
-        assertEquals(100, config.poolMin)
-        assertEquals(500, config.poolMax)
     }
 
     @Test
@@ -83,11 +51,6 @@ class DatabaseConfigEnvironmentTest {
                 database = "db",
                 user = "user",
                 password = "pass",
-                poolMin = 0,
-                poolMax = 4,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         assertEquals("::1", config.host)
@@ -96,16 +59,16 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig hashCode is consistent`() {
-        val config1 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-        val config2 = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config1 = DatabaseConfig("host", 5432, "db", "user", "pass")
+        val config2 = DatabaseConfig("host", 5432, "db", "user", "pass")
 
         assertEquals(config1.hashCode(), config2.hashCode())
     }
 
     @Test
     fun `DatabaseConfig with different hosts have different hashCodes`() {
-        val config1 = DatabaseConfig("host1", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-        val config2 = DatabaseConfig("host2", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config1 = DatabaseConfig("host1", 5432, "db", "user", "pass")
+        val config2 = DatabaseConfig("host2", 5432, "db", "user", "pass")
 
         assert(config1.hashCode() != config2.hashCode())
     }
@@ -119,30 +82,20 @@ class DatabaseConfigEnvironmentTest {
                 database = "mydb",
                 user = "myuser",
                 password = "mypass",
-                poolMin = 5,
-                poolMax = 20,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
-        val (host, port, db, user, pass, min, max, maxLifetime, idleTimeout, connectionTimeout) = config
+        val (host, port, db, user, pass) = config
 
         assertEquals("myhost", host)
         assertEquals(5433, port)
         assertEquals("mydb", db)
         assertEquals("myuser", user)
         assertEquals("mypass", pass)
-        assertEquals(5, min)
-        assertEquals(20, max)
-        assertEquals(3600000, maxLifetime)
-        assertEquals(1800000, idleTimeout)
-        assertEquals(30000, connectionTimeout)
     }
 
     @Test
     fun `DatabaseConfig copy preserves unchanged fields`() {
-        val original = DatabaseConfig("host", 5432, "db", "user", "pass", 2, 10, 3600000, 1800000, 30000)
+        val original = DatabaseConfig("host", 5432, "db", "user", "pass")
         val copied = original.copy(host = "newhost")
 
         assertEquals("newhost", copied.host)
@@ -150,8 +103,6 @@ class DatabaseConfigEnvironmentTest {
         assertEquals("db", copied.database)
         assertEquals("user", copied.user)
         assertEquals("pass", copied.password)
-        assertEquals(2, copied.poolMin)
-        assertEquals(10, copied.poolMax)
     }
 
     @Test
@@ -163,11 +114,6 @@ class DatabaseConfigEnvironmentTest {
                 database = "maindb",
                 user = "appuser",
                 password = "secret",
-                poolMin = 1,
-                poolMax = 10,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         val connStr = config.connectionString()
@@ -177,7 +123,7 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig toString format`() {
-        val config = DatabaseConfig("testhost", 5433, "testdb", "testuser", "testpass", 1, 5, 3600000, 1800000, 30000)
+        val config = DatabaseConfig("testhost", 5433, "testdb", "testuser", "testpass")
         val str = config.toString()
 
         assert(str.contains("DatabaseConfig"))
@@ -188,43 +134,38 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig connectionString with database containing underscore`() {
-        val config = DatabaseConfig("localhost", 5432, "my_test_db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config = DatabaseConfig("localhost", 5432, "my_test_db", "user", "pass")
 
         assertEquals("jdbc:postgresql://localhost:5432/my_test_db", config.connectionString())
     }
 
     @Test
     fun `DatabaseConfig connectionString with database containing hyphen`() {
-        val config = DatabaseConfig("localhost", 5432, "my-test-db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config = DatabaseConfig("localhost", 5432, "my-test-db", "user", "pass")
 
         assertEquals("jdbc:postgresql://localhost:5432/my-test-db", config.connectionString())
     }
 
     @Test
     fun `DatabaseConfig equality comparison comprehensive`() {
-        val base = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val base = DatabaseConfig("host", 5432, "db", "user", "pass")
 
-        // Different in each field
-        val diffHost = DatabaseConfig("other", 5432, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-        val diffPort = DatabaseConfig("host", 5433, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-        val diffDb = DatabaseConfig("host", 5432, "other", "user", "pass", 0, 4, 3600000, 1800000, 30000)
-        val diffUser = DatabaseConfig("host", 5432, "db", "other", "pass", 0, 4, 3600000, 1800000, 30000)
-        val diffPass = DatabaseConfig("host", 5432, "db", "user", "other", 0, 4, 3600000, 1800000, 30000)
-        val diffMin = DatabaseConfig("host", 5432, "db", "user", "pass", 1, 4, 3600000, 1800000, 30000)
-        val diffMax = DatabaseConfig("host", 5432, "db", "user", "pass", 0, 5, 3600000, 1800000, 30000)
+        val diffHost = DatabaseConfig("other", 5432, "db", "user", "pass")
+        val diffPort = DatabaseConfig("host", 5433, "db", "user", "pass")
+        val diffDb = DatabaseConfig("host", 5432, "other", "user", "pass")
+        val diffUser = DatabaseConfig("host", 5432, "db", "other", "pass")
+        val diffPass = DatabaseConfig("host", 5432, "db", "user", "other")
 
         assert(base != diffHost)
         assert(base != diffPort)
         assert(base != diffDb)
         assert(base != diffUser)
         assert(base != diffPass)
-        assert(base != diffMin)
-        assert(base != diffMax)
     }
 
     @Test
     fun `DatabaseConfig with port at minimum`() {
-        val config = DatabaseConfig("localhost", 1, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config = DatabaseConfig("localhost", 1, "db", "user", "pass")
 
         assertEquals(1, config.port)
         assertEquals("jdbc:postgresql://localhost:1/db", config.connectionString())
@@ -232,7 +173,7 @@ class DatabaseConfigEnvironmentTest {
 
     @Test
     fun `DatabaseConfig with port at maximum`() {
-        val config = DatabaseConfig("localhost", 65535, "db", "user", "pass", 0, 4, 3600000, 1800000, 30000)
+        val config = DatabaseConfig("localhost", 65535, "db", "user", "pass")
 
         assertEquals(65535, config.port)
         assertEquals("jdbc:postgresql://localhost:65535/db", config.connectionString())

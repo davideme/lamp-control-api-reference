@@ -48,7 +48,6 @@ class PostgresLampRepositoryTest {
                     password = postgres.password
                     maximumPoolSize = 5
                     minimumIdle = 1
-                    isAutoCommit = false
                 }
 
             val dataSource = HikariDataSource(hikariConfig)

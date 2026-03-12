@@ -26,11 +26,6 @@ class DatabaseConfigTest {
                 database = database,
                 user = "user",
                 password = "pass",
-                poolMin = 0,
-                poolMax = 4,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         assertEquals(expected, config.connectionString())
@@ -45,11 +40,6 @@ class DatabaseConfigTest {
                 database = "testdb",
                 user = "testuser",
                 password = "testpass",
-                poolMin = 5,
-                poolMax = 20,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         assertEquals("192.168.1.100", config.host)
@@ -57,8 +47,6 @@ class DatabaseConfigTest {
         assertEquals("testdb", config.database)
         assertEquals("testuser", config.user)
         assertEquals("testpass", config.password)
-        assertEquals(5, config.poolMin)
-        assertEquals(20, config.poolMax)
     }
 
     @Test
