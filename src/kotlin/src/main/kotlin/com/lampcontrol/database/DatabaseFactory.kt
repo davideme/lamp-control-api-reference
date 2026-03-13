@@ -56,12 +56,6 @@ object DatabaseFactory {
                 driverClassName = "org.postgresql.Driver"
                 username = config.user
                 password = config.password
-                maximumPoolSize = config.poolMax
-                minimumIdle = config.poolMin
-                maxLifetime = config.maxLifetimeMs
-                idleTimeout = config.idleTimeoutMs
-                connectionTimeout = config.connectionTimeoutMs
-                isAutoCommit = false
                 transactionIsolation = isolationConfig.hikariName
                 configureCloudSqlProperties(this, config)
                 validate()
@@ -141,22 +135,10 @@ data class DatabaseConfig(
     val database: String,
     val user: String,
     val password: String,
-    val poolMin: Int,
-    val poolMax: Int,
-    val maxLifetimeMs: Long,
-    val idleTimeoutMs: Long,
-    val connectionTimeoutMs: Long,
     val jdbcUrlOverride: String? = null,
 ) {
     companion object {
         private const val DEFAULT_POSTGRES_PORT = 5432
-        private const val DEFAULT_POOL_MIN = 0
-
-        // Balanced default for high-load API workloads while remaining safe to lower per environment.
-        private const val DEFAULT_POOL_MAX = 12
-        private const val DEFAULT_MAX_LIFETIME_MS = 3600000L
-        private const val DEFAULT_IDLE_TIMEOUT_MS = 1800000L
-        private const val DEFAULT_CONNECTION_TIMEOUT_MS = 30000L
 
         /**
          * Create DatabaseConfig from environment variables.
@@ -195,12 +177,6 @@ data class DatabaseConfig(
                 database = database ?: "lamp_control",
                 user = user ?: "lamp_user",
                 password = System.getenv("DB_PASSWORD") ?: "",
-                poolMin = System.getenv("DB_POOL_MIN_SIZE")?.toIntOrNull() ?: DEFAULT_POOL_MIN,
-                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: DEFAULT_POOL_MAX,
-                maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: DEFAULT_MAX_LIFETIME_MS,
-                idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: DEFAULT_IDLE_TIMEOUT_MS,
-                connectionTimeoutMs =
-                    System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: DEFAULT_CONNECTION_TIMEOUT_MS,
             )
         }
 
@@ -222,12 +198,6 @@ data class DatabaseConfig(
                 database = database,
                 user = credentials.first,
                 password = credentials.second,
-                poolMin = System.getenv("DB_POOL_MIN_SIZE")?.toIntOrNull() ?: DEFAULT_POOL_MIN,
-                poolMax = System.getenv("DB_POOL_MAX_SIZE")?.toIntOrNull() ?: DEFAULT_POOL_MAX,
-                maxLifetimeMs = System.getenv("DB_MAX_LIFETIME_MS")?.toLongOrNull() ?: DEFAULT_MAX_LIFETIME_MS,
-                idleTimeoutMs = System.getenv("DB_IDLE_TIMEOUT_MS")?.toLongOrNull() ?: DEFAULT_IDLE_TIMEOUT_MS,
-                connectionTimeoutMs =
-                    System.getenv("DB_CONNECTION_TIMEOUT_MS")?.toLongOrNull() ?: DEFAULT_CONNECTION_TIMEOUT_MS,
                 jdbcUrlOverride = jdbcUrl,
             )
         }

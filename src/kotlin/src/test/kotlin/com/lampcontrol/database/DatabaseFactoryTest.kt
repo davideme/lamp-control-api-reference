@@ -50,11 +50,6 @@ class DatabaseFactoryTest {
                 database = "lamp-control",
                 user = "postgres",
                 password = "secret",
-                poolMin = 0,
-                poolMax = 4,
-                maxLifetimeMs = 3600000,
-                idleTimeoutMs = 1800000,
-                connectionTimeoutMs = 30000,
             )
 
         val configureMethod =
