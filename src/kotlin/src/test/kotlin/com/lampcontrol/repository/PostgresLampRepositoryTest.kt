@@ -46,8 +46,6 @@ class PostgresLampRepositoryTest {
                     driverClassName = "org.postgresql.Driver"
                     username = postgres.username
                     password = postgres.password
-                    maximumPoolSize = 5
-                    minimumIdle = 1
                 }
 
             val dataSource = HikariDataSource(hikariConfig)
