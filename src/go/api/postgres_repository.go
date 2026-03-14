@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
@@ -150,11 +151,11 @@ func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int
 	if limit <= 0 {
 		return []*entities.LampEntity{}, nil
 	}
-	offset32 := int32(offset) //nolint:gosec // G115: values are validated by the round-trip check immediately below
-	limit32 := int32(limit)   //nolint:gosec // G115: values are validated by the round-trip check immediately below
-	if int(offset32) != offset || int(limit32) != limit {
+	if offset > math.MaxInt32 || limit > math.MaxInt32 {
 		return nil, fmt.Errorf("%w: offset=%d limit=%d", ErrInvalidPagination, offset, limit)
 	}
+	offset32 := int32(offset)
+	limit32 := int32(limit)
 
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
 		Limit:  limit32,
