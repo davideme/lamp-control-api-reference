@@ -193,7 +193,7 @@ func testPostgresUpdate(t *testing.T, repo *PostgresLampRepository) {
 
 	// Update the lamp
 	lampEntity.UpdateStatus(false)
-	err = repo.Update(ctx, lampEntity)
+	_, err = repo.Update(ctx, lampEntity)
 	if err != nil {
 		t.Fatalf("Failed to update lamp: %v", err)
 	}
@@ -210,7 +210,7 @@ func testPostgresUpdate(t *testing.T, repo *PostgresLampRepository) {
 
 	// Test updating non-existent lamp
 	nonExistentLamp := entities.NewLampEntity(true)
-	err = repo.Update(ctx, nonExistentLamp)
+	_, err = repo.Update(ctx, nonExistentLamp)
 	if err != ErrLampNotFound {
 		t.Errorf("Expected ErrLampNotFound, got %v", err)
 	}

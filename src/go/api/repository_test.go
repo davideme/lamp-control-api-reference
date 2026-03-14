@@ -151,7 +151,7 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 	}
 
 	// Test updating non-existent lamp
-	err := repo.Update(ctx, lamp)
+	_, err := repo.Update(ctx, lamp)
 	if err == nil {
 		t.Error("Update should return error for non-existent lamp")
 	}
@@ -174,7 +174,7 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 		UpdatedAt: time.Now(),
 	}
 
-	err = repo.Update(ctx, updatedLamp)
+	_, err = repo.Update(ctx, updatedLamp)
 	if err != nil {
 		t.Fatalf("Update failed: %v", err)
 	}
@@ -572,7 +572,7 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 				UpdatedAt: time.Now(),
 			}
 
-			err := repo.Update(ctx, updatedLamp)
+			_, err := repo.Update(ctx, updatedLamp)
 			if err != nil {
 				t.Errorf("Concurrent update failed: %v", err)
 				return
@@ -749,7 +749,7 @@ func TestInMemoryLampRepository_UpdateDoesNotResurrectDeletedLamp(t *testing.T) 
 		go func() {
 			defer wg.Done()
 			<-start
-			_ = repo.Update(ctx, updated)
+			_, _ = repo.Update(ctx, updated)
 		}()
 
 		go func() {

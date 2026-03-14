@@ -83,28 +83,28 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 	return r.convertToEntity(&lamp)
 }
 
-// Update modifies an existing lamp in the repository
-func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
+// Update modifies an existing lamp in the repository and returns the updated entity
+func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) (*entities.LampEntity, error) {
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
 	copy(pgUUID.Bytes[:], lampEntity.ID[:])
 	pgUUID.Valid = true
 
 	// Note: updated_at is automatically set by the database trigger
-	_, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
+	lamp, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
 		ID:   pgUUID,
 		IsOn: lampEntity.Status,
 	})
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrLampNotFound
+			return nil, ErrLampNotFound
 		}
 
-		return fmt.Errorf("failed to update lamp: %w", err)
+		return nil, fmt.Errorf("failed to update lamp: %w", err)
 	}
 
-	return nil
+	return r.convertToEntity(&lamp)
 }
 
 // Delete removes a lamp from the repository (soft delete)

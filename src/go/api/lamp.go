@@ -7,6 +7,9 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/davideme/lamp-control-api-reference/api/entities"
+	"github.com/google/uuid"
 )
 
 type LampAPI struct {
@@ -150,28 +153,25 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 		return nil, &APIError{Message: "Request body is required", StatusCode: http.StatusBadRequest}
 	}
 
-	// Get the existing lamp entity to ensure it exists
-	existingEntity, err := l.repository.GetByID(ctx, request.LampId)
+	uid, parseErr := uuid.Parse(request.LampId)
+	if parseErr != nil {
+		//nolint:nilerr // Strict handler uses typed 404 response with nil Go error.
+		return UpdateLamp404Response{}, nil
+	}
+
+	updatedEntity, err := l.repository.Update(ctx, &entities.LampEntity{
+		ID:     uid,
+		Status: request.Body.Status,
+	})
 	if err != nil {
 		if errors.Is(err, ErrLampNotFound) {
 			return UpdateLamp404Response{}, nil
 		}
 
-		return nil, &APIError{Message: "Failed to retrieve lamp", StatusCode: http.StatusInternalServerError, Err: err}
-	}
-
-	// Update the domain entity using the mapper
-	updatedEntity := UpdateEntityFromAPIUpdate(existingEntity, *request.Body)
-
-	err = l.repository.Update(ctx, updatedEntity)
-	if err != nil {
 		return nil, &APIError{Message: "Failed to update lamp", StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	// Convert domain entity back to API model
-	updatedLamp := ToAPIModel(updatedEntity)
-
-	return UpdateLamp200JSONResponse(updatedLamp), nil
+	return UpdateLamp200JSONResponse(ToAPIModel(updatedEntity)), nil
 }
 
 // APIError represents an API error with status code

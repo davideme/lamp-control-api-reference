@@ -6,6 +6,7 @@ import (
 	"errors"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
 )
@@ -24,8 +25,8 @@ type LampRepository interface {
 	// GetByID retrieves a lamp by its ID
 	GetByID(ctx context.Context, id string) (*entities.LampEntity, error)
 
-	// Update modifies an existing lamp in the repository
-	Update(ctx context.Context, lampEntity *entities.LampEntity) error
+	// Update modifies an existing lamp in the repository and returns the updated entity
+	Update(ctx context.Context, lampEntity *entities.LampEntity) (*entities.LampEntity, error)
 
 	// Delete removes a lamp from the repository
 	Delete(ctx context.Context, id string) error
@@ -74,18 +75,35 @@ func (r *InMemoryLampRepository) GetByID(ctx context.Context, id string) (*entit
 	}, nil
 }
 
-// Update modifies an existing lamp in the repository
-func (r *InMemoryLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
+// Update modifies an existing lamp in the repository and returns the updated entity
+func (r *InMemoryLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) (*entities.LampEntity, error) {
 	id := lampEntity.ID.String()
+	now := time.Now()
 
 	for {
 		current, exists := r.lamps.Load(id)
 		if !exists {
-			return ErrLampNotFound
+			return nil, ErrLampNotFound
 		}
 
-		if r.lamps.CompareAndSwap(id, current, lampEntity) {
-			return nil
+		existing, ok := current.(*entities.LampEntity)
+		if !ok {
+			return nil, ErrLampNotFound
+		}
+		updated := &entities.LampEntity{
+			ID:        existing.ID,
+			Status:    lampEntity.Status,
+			CreatedAt: existing.CreatedAt,
+			UpdatedAt: now,
+		}
+
+		if r.lamps.CompareAndSwap(id, current, updated) {
+			return &entities.LampEntity{
+				ID:        updated.ID,
+				Status:    updated.Status,
+				CreatedAt: updated.CreatedAt,
+				UpdatedAt: updated.UpdatedAt,
+			}, nil
 		}
 	}
 }
