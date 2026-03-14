@@ -55,9 +55,8 @@ class PostgresLampRepository : LampRepository {
             LampsTable.insertReturning {
                 it[id] = entity.id
                 it[isOn] = entity.status
-                it[createdAt] = entity.createdAt
-                it[updatedAt] = entity.updatedAt
                 it[deletedAt] = null
+                // created_at and updated_at set by DB DEFAULT CURRENT_TIMESTAMP
             }.single().let { rowToEntity(it) }
         }
 
@@ -70,7 +69,7 @@ class PostgresLampRepository : LampRepository {
                 where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
             ) {
                 it[isOn] = status
-                it[updatedAt] = Instant.now()
+                // updated_at set by DB BEFORE UPDATE trigger
             }.singleOrNull()?.let { rowToEntity(it) }
         }
 

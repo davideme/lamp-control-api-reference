@@ -44,24 +44,25 @@ namespace LampControlApi.Domain.Entities
         public DateTimeOffset UpdatedAt { get; }
 
         /// <summary>
-        /// Creates a new lamp entity with a generated ID and current timestamps.
+        /// Creates a new lamp entity with a generated ID.
+        /// Timestamps are managed by the database and will be populated after the repository write.
         /// </summary>
         /// <param name="status">The initial status of the lamp.</param>
         /// <returns>A new lamp entity.</returns>
         public static LampEntity Create(bool status)
         {
-            var now = DateTimeOffset.UtcNow;
-            return new LampEntity(Guid.NewGuid(), status, now, now);
+            return new LampEntity(Guid.NewGuid(), status, default, default);
         }
 
         /// <summary>
-        /// Creates an updated copy of this entity with a new status and updated timestamp.
+        /// Creates an updated copy of this entity with a new status.
+        /// updated_at is managed by the database BEFORE UPDATE trigger.
         /// </summary>
         /// <param name="newStatus">The new status to set.</param>
         /// <returns>An updated copy of this entity.</returns>
         public LampEntity WithUpdatedStatus(bool newStatus)
         {
-            return new LampEntity(Id, newStatus, CreatedAt, DateTimeOffset.UtcNow);
+            return new LampEntity(Id, newStatus, CreatedAt, UpdatedAt);
         }
 
         /// <summary>
