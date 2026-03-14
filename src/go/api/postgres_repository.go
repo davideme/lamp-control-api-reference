@@ -150,10 +150,8 @@ func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int
 	if limit <= 0 {
 		return []*entities.LampEntity{}, nil
 	}
-	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
-	offset32 := int32(offset)
-	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
-	limit32 := int32(limit)
+	offset32 := int32(offset) //nolint:gosec // G115: values are validated by the round-trip check immediately below
+	limit32 := int32(limit)   //nolint:gosec // G115: values are validated by the round-trip check immediately below
 	if int(offset32) != offset || int(limit32) != limit {
 		return nil, fmt.Errorf("%w: offset=%d limit=%d", ErrInvalidPagination, offset, limit)
 	}
