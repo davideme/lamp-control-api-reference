@@ -50,11 +50,13 @@ namespace LampControlApi.Infrastructure.Database
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
                     .IsRequired()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
                     .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
                     .IsRequired()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
                     .ValueGeneratedOnAddOrUpdate();
 
                 entity.Property(e => e.DeletedAt)

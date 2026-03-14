@@ -93,13 +93,12 @@ namespace LampControlApi.Services
 
             LogCreatingLamp(this.logger, entity.Id);
 
-            var now = DateTimeOffset.UtcNow;
+            // created_at and updated_at are omitted — set by DB DEFAULT CURRENT_TIMESTAMP
+            // and read back via RETURNING (Npgsql handles this automatically)
             var dbEntity = new LampDbEntity
             {
                 Id = entity.Id,
                 IsOn = entity.Status,
-                CreatedAt = now,
-                UpdatedAt = now,
                 DeletedAt = null,
             };
 
@@ -123,11 +122,10 @@ namespace LampControlApi.Services
                 return null;
             }
 
-            // Create updated entity with init setters using with-expression
+            // updated_at is set by the DB BEFORE UPDATE trigger; only IsOn changes here
             var updatedEntity = existingEntity with
             {
                 IsOn = status,
-                UpdatedAt = DateTimeOffset.UtcNow,
             };
 
             // Update the tracked entity reference
@@ -153,12 +151,10 @@ namespace LampControlApi.Services
                 return false;
             }
 
-            // Soft delete by setting DeletedAt timestamp
-            var now = DateTimeOffset.UtcNow;
+            // Soft delete — updated_at is set by the DB BEFORE UPDATE trigger
             var deletedEntity = existingEntity with
             {
-                DeletedAt = now,
-                UpdatedAt = now,
+                DeletedAt = DateTimeOffset.UtcNow,
             };
 
             // Update the tracked entity reference

@@ -16,8 +16,8 @@ type Lamp struct {
 	IsOn bool `json:"is_on"`
 	// Timestamp when the lamp was created
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	// Timestamp when the lamp was last updated
+	// Last update timestamp (managed by trigger)
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	// Timestamp when the lamp was soft deleted, NULL if active
+	// Soft-delete timestamp; NULL means active
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
 }

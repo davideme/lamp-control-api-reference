@@ -1,6 +1,6 @@
 -- name: CreateLamp :one
-INSERT INTO lamps (id, is_on, created_at, updated_at)
-VALUES ($1, $2, $3, $4)
+INSERT INTO lamps (id, is_on)
+VALUES ($1, $2)
 RETURNING id, is_on, created_at, updated_at, deleted_at;
 
 -- name: GetLampByID :one
