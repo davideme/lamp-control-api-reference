@@ -27,8 +27,7 @@ class InMemoryLampRepositoryTest {
 
             // update
             val beforeUpdatedAt = created.updatedAt
-            val updatedEntity = created.withUpdatedStatus(false)
-            val updated = repo.updateLamp(updatedEntity)
+            val updated = repo.updateLamp(created.id, false)
             assertNotNull(updated)
             assertFalse(updated!!.status)
             assertNotEquals(beforeUpdatedAt, updated.updatedAt)

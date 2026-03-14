@@ -52,49 +52,36 @@ class PostgresLampRepository : LampRepository {
 
     override suspend fun createLamp(entity: LampEntity): LampEntity =
         dbQuery {
-            LampsTable.insert {
+            LampsTable.insertReturning {
                 it[id] = entity.id
                 it[isOn] = entity.status
                 it[createdAt] = entity.createdAt
                 it[updatedAt] = entity.updatedAt
                 it[deletedAt] = null
-            }
-            entity
+            }.single().let { rowToEntity(it) }
         }
 
-    override suspend fun updateLamp(entity: LampEntity): LampEntity? =
+    override suspend fun updateLamp(
+        id: UUID,
+        status: Boolean,
+    ): LampEntity? =
         dbQuery {
-            val now = Instant.now()
-            val rowsUpdated =
-                LampsTable.update(
-                    where = { (LampsTable.id eq entity.id) and LampsTable.deletedAt.isNull() },
-                ) {
-                    it[isOn] = entity.status
-                    it[updatedAt] = now
-                }
-
-            if (rowsUpdated > 0) {
-                // Return the updated entity with new updatedAt timestamp without extra DB round-trip
-                LampEntity(
-                    id = entity.id,
-                    status = entity.status,
-                    createdAt = entity.createdAt,
-                    updatedAt = now,
-                )
-            } else {
-                null
-            }
+            LampsTable.updateReturning(
+                where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
+            ) {
+                it[isOn] = status
+                it[updatedAt] = Instant.now()
+            }.singleOrNull()?.let { rowToEntity(it) }
         }
 
     override suspend fun deleteLamp(id: UUID): Boolean =
         dbQuery {
-            val rowsUpdated =
-                LampsTable.update(
-                    where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
-                ) {
-                    it[deletedAt] = Instant.now()
-                }
-            rowsUpdated > 0
+            LampsTable.updateReturning(
+                returning = listOf(LampsTable.id),
+                where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
+            ) {
+                it[deletedAt] = Instant.now()
+            }.any()
         }
 
     override suspend fun lampExists(id: UUID): Boolean =

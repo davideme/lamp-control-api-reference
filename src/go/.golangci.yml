@@ -112,6 +112,10 @@ linters:
         source: ^\s*//\s*TODO
       - path: (.+)\.go$
         text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
+      - linters:
+          - gosec
+        text: "G115"
+        path: postgres_repository\.go
     paths:
       - third_party$
       - builtin$

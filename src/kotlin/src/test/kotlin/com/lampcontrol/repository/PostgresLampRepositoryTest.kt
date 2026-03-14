@@ -178,11 +178,10 @@ class PostgresLampRepositoryTest {
             // Wait a bit to ensure timestamp changes
             Thread.sleep(10)
 
-            val updated = entity.withUpdatedStatus(newStatus = false)
-            val result = repository.updateLamp(updated)
+            val result = repository.updateLamp(entity.id, false)
 
             assertNotNull(result)
-            assertEquals(updated.id, result.id)
+            assertEquals(entity.id, result.id)
             assertEquals(false, result.status)
             assertTrue(result.updatedAt > entity.updatedAt)
         }
@@ -190,15 +189,7 @@ class PostgresLampRepositoryTest {
     @Test
     fun `updateLamp returns null when lamp does not exist`() =
         runBlocking {
-            val nonExistentEntity =
-                LampEntity(
-                    id = UUID.randomUUID(),
-                    status = true,
-                    createdAt = Instant.now(),
-                    updatedAt = Instant.now(),
-                )
-
-            val result = repository.updateLamp(nonExistentEntity)
+            val result = repository.updateLamp(UUID.randomUUID(), true)
 
             assertNull(result)
         }
@@ -284,8 +275,7 @@ class PostgresLampRepositoryTest {
             repository.createLamp(entity)
             repository.deleteLamp(entity.id)
 
-            val updated = entity.withUpdatedStatus(newStatus = false)
-            val result = repository.updateLamp(updated)
+            val result = repository.updateLamp(entity.id, false)
 
             assertNull(result)
         }
@@ -300,8 +290,7 @@ class PostgresLampRepositoryTest {
             repository.createLamp(lamp2)
 
             // Update lamp1
-            val updated1 = lamp1.withUpdatedStatus(newStatus = false)
-            repository.updateLamp(updated1)
+            repository.updateLamp(lamp1.id, false)
 
             // Delete lamp2
             repository.deleteLamp(lamp2.id)
@@ -323,8 +312,7 @@ class PostgresLampRepositoryTest {
 
             Thread.sleep(10)
 
-            val updated = entity.withUpdatedStatus(newStatus = false)
-            val result = repository.updateLamp(updated)
+            val result = repository.updateLamp(entity.id, false)
 
             assertNotNull(result)
             assertEquals(createdTime, result.createdAt)
