@@ -78,7 +78,7 @@ class PostgresLampRepository : LampRepository {
                 where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
             ) {
                 it[deletedAt] = Instant.now()
-            }.isNotEmpty()
+            }.any()
         }
 
     override suspend fun lampExists(id: UUID): Boolean =
