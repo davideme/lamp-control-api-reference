@@ -174,9 +174,24 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 		UpdatedAt: time.Now(),
 	}
 
-	_, err = repo.Update(ctx, updatedLamp)
+	returnedLamp, err := repo.Update(ctx, updatedLamp)
 	if err != nil {
 		t.Fatalf("Update failed: %v", err)
+	}
+	if returnedLamp == nil {
+		t.Fatal("Update returned nil entity")
+	}
+	if returnedLamp.ID != lamp.ID {
+		t.Errorf("Expected returned ID %v, got %v", lamp.ID, returnedLamp.ID)
+	}
+	if returnedLamp.Status != false {
+		t.Errorf("Expected returned Status false, got %v", returnedLamp.Status)
+	}
+	if returnedLamp.CreatedAt != lamp.CreatedAt {
+		t.Errorf("Expected CreatedAt preserved: got %v, want %v", returnedLamp.CreatedAt, lamp.CreatedAt)
+	}
+	if returnedLamp.UpdatedAt.IsZero() {
+		t.Error("Expected UpdatedAt to be set on returned entity")
 	}
 
 	// Verify update

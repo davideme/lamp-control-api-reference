@@ -61,12 +61,15 @@ class PostgresLampRepository : LampRepository {
             }.single().let { rowToEntity(it) }
         }
 
-    override suspend fun updateLamp(entity: LampEntity): LampEntity? =
+    override suspend fun updateLamp(
+        id: UUID,
+        status: Boolean,
+    ): LampEntity? =
         dbQuery {
             LampsTable.updateReturning(
-                where = { (LampsTable.id eq entity.id) and LampsTable.deletedAt.isNull() },
+                where = { (LampsTable.id eq id) and LampsTable.deletedAt.isNull() },
             ) {
-                it[isOn] = entity.status
+                it[isOn] = status
                 it[updatedAt] = Instant.now()
             }.singleOrNull()?.let { rowToEntity(it) }
         }

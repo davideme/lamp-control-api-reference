@@ -6,7 +6,6 @@ import com.lampcontrol.entity.LampEntity
 import com.lampcontrol.extensions.toUuidOrNull
 import com.lampcontrol.mapper.LampMapper
 import com.lampcontrol.repository.LampRepository
-import java.time.Instant
 import java.util.UUID
 
 /**
@@ -75,8 +74,7 @@ class LampService(
         lampUpdate: LampUpdate,
     ): Lamp {
         val uuid = parseUuid(lampId)
-        val entityToUpdate = LampEntity(id = uuid, status = lampUpdate.status, createdAt = Instant.EPOCH, updatedAt = Instant.now())
-        val savedEntity = lampRepository.updateLamp(entityToUpdate) ?: throw DomainException.NotFound(lampId)
+        val savedEntity = lampRepository.updateLamp(uuid, lampUpdate.status) ?: throw DomainException.NotFound(lampId)
         return lampMapper.toApiModel(savedEntity)
     }
 

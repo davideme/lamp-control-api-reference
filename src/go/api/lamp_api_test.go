@@ -315,7 +315,10 @@ func TestLampAPI_UpdateLamp_WithMock(t *testing.T) {
 					return false
 				}
 				lamp := Lamp(updateResp)
-				return lamp.Id.String() == testID && lamp.Status == false
+				return lamp.Id.String() == testID &&
+					lamp.Status == false &&
+					!lamp.CreatedAt.IsZero() &&
+					!lamp.UpdatedAt.IsZero()
 			},
 		},
 		{

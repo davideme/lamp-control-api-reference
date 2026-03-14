@@ -53,10 +53,13 @@ class InMemoryLampRepository : LampRepository {
     /**
      * Update an existing lamp, preserving createdAt from the stored entity
      */
-    override suspend fun updateLamp(entity: LampEntity): LampEntity? {
-        val existing = lamps[entity.id] ?: return null
-        val updated = existing.copy(status = entity.status, updatedAt = Instant.now())
-        lamps[entity.id] = updated
+    override suspend fun updateLamp(
+        id: UUID,
+        status: Boolean,
+    ): LampEntity? {
+        val existing = lamps[id] ?: return null
+        val updated = existing.copy(status = status, updatedAt = Instant.now())
+        lamps[id] = updated
         return updated
     }
 

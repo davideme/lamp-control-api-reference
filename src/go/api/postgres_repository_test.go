@@ -193,9 +193,18 @@ func testPostgresUpdate(t *testing.T, repo *PostgresLampRepository) {
 
 	// Update the lamp
 	lampEntity.UpdateStatus(false)
-	_, err = repo.Update(ctx, lampEntity)
+	updatedEntity, err := repo.Update(ctx, lampEntity)
 	if err != nil {
 		t.Fatalf("Failed to update lamp: %v", err)
+	}
+	if updatedEntity == nil {
+		t.Fatal("Update returned nil entity")
+	}
+	if updatedEntity.ID != lampEntity.ID {
+		t.Errorf("Expected returned ID %v, got %v", lampEntity.ID, updatedEntity.ID)
+	}
+	if updatedEntity.Status != false {
+		t.Errorf("Expected returned Status false, got %v", updatedEntity.Status)
 	}
 
 	// Verify the update

@@ -155,8 +155,8 @@ func (l *LampAPI) UpdateLamp(ctx context.Context, request UpdateLampRequestObjec
 
 	uid, parseErr := uuid.Parse(request.LampId)
 	if parseErr != nil {
-		//nolint:nilerr // Strict handler uses typed 404 response with nil Go error.
-		return UpdateLamp404Response{}, nil
+		//nolint:nilerr // Strict handler uses typed 400 response with nil Go error.
+		return UpdateLamp400JSONResponse{Error: "INVALID_ARGUMENT"}, nil
 	}
 
 	updatedEntity, err := l.repository.Update(ctx, &entities.LampEntity{

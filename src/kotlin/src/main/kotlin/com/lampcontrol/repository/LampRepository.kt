@@ -20,7 +20,10 @@ interface LampRepository {
 
     suspend fun createLamp(entity: LampEntity): LampEntity
 
-    suspend fun updateLamp(entity: LampEntity): LampEntity?
+    suspend fun updateLamp(
+        id: UUID,
+        status: Boolean,
+    ): LampEntity?
 
     suspend fun deleteLamp(id: UUID): Boolean
 
