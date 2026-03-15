@@ -11,7 +11,7 @@ namespace LampControlApi.Tests.Domain
     public class LampEntityTests
     {
         [TestMethod]
-        public void Create_ShouldGenerateNewIdAndTimestamps()
+        public void Create_ShouldGenerateNewIdAndDeferTimestampsToDatabase()
         {
             // Act
             var entity = LampEntity.Create(true);
@@ -19,9 +19,11 @@ namespace LampControlApi.Tests.Domain
             // Assert
             Assert.AreNotEqual(Guid.Empty, entity.Id);
             Assert.IsTrue(entity.Status);
-            Assert.IsTrue(entity.CreatedAt <= DateTimeOffset.UtcNow);
-            Assert.IsTrue(entity.UpdatedAt <= DateTimeOffset.UtcNow);
-            Assert.AreEqual(entity.CreatedAt, entity.UpdatedAt);
+
+            // Timestamps are managed by the database (DEFAULT CURRENT_TIMESTAMP + trigger).
+            // Before a DB write they hold the default sentinel value.
+            Assert.AreEqual(default(DateTimeOffset), entity.CreatedAt);
+            Assert.AreEqual(default(DateTimeOffset), entity.UpdatedAt);
         }
 
         [TestMethod]
@@ -29,7 +31,6 @@ namespace LampControlApi.Tests.Domain
         {
             // Arrange
             var originalEntity = LampEntity.Create(false);
-            System.Threading.Thread.Sleep(10); // Ensure different timestamp
 
             // Act
             var updatedEntity = originalEntity.WithUpdatedStatus(true);
@@ -38,7 +39,10 @@ namespace LampControlApi.Tests.Domain
             Assert.AreEqual(originalEntity.Id, updatedEntity.Id);
             Assert.IsTrue(updatedEntity.Status);
             Assert.AreEqual(originalEntity.CreatedAt, updatedEntity.CreatedAt);
-            Assert.IsTrue(updatedEntity.UpdatedAt > originalEntity.UpdatedAt);
+
+            // UpdatedAt is owned by the database BEFORE UPDATE trigger;
+            // the domain entity preserves the current value unchanged.
+            Assert.AreEqual(originalEntity.UpdatedAt, updatedEntity.UpdatedAt);
         }
 
         [TestMethod]
