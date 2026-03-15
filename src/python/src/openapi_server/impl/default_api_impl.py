@@ -151,7 +151,7 @@ class DefaultApiImpl(BaseDefaultApi):  # type: ignore[no-untyped-call]
 
         try:
             return max(0, int(cursor))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return 0
 
     @staticmethod

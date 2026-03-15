@@ -21,7 +21,7 @@ jobs:
       checks: write
       issues: write
       contents: write
-      pull-requests: write    
+      pull-requests: write
     defaults:
       run:
         working-directory: src/python
@@ -29,7 +29,7 @@ jobs:
       PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
     - uses: actions/checkout@v4
@@ -44,22 +44,8 @@ jobs:
         cache: 'poetry'
         cache-dependency-path: 'src/python/poetry.lock'
 
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 2.1.2
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: src/python/.venv
-        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('src/python/poetry.lock') }}
-
     - name: Install dependencies
-      run: poetry install --no-interaction --no-root
+      run: poetry install --no-interaction
 
     - name: Run code quality checks
       run: |
@@ -102,7 +88,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     services:
       postgres:
@@ -137,22 +123,8 @@ jobs:
           cache: 'poetry'
           cache-dependency-path: 'src/python/poetry.lock'
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 2.1.2
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: src/python/.venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('src/python/poetry.lock') }}
-
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction
 
       - name: Test all operation modes
         run: |
@@ -173,7 +145,7 @@ jobs:
       PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
     defaults:
       run:
         working-directory: src/python
@@ -192,22 +164,8 @@ jobs:
         cache: 'poetry'
         cache-dependency-path: 'src/python/poetry.lock'
 
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 2.1.2
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: src/python/.venv
-        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('src/python/poetry.lock') }}
-
     - name: Install dependencies
-      run: poetry install --no-interaction --no-root
+      run: poetry install --no-interaction
 
     - name: Start API in background
       run: |

@@ -9,9 +9,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from alembic.util.exc import CommandError
 from sqlalchemy.exc import SQLAlchemyError
 
-from alembic.util.exc import CommandError
 from src.openapi_server.cli import main, run_migrations_only, start_server
 
 

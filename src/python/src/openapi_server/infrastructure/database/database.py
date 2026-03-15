@@ -61,7 +61,7 @@ class DatabaseManager:
         """
         await self.engine.dispose()
 
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession]:
         """Provide an async database session for dependency injection.
 
         This is an async generator that yields a database session and

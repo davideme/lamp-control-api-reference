@@ -13,11 +13,11 @@ import sys
 from pathlib import Path
 
 import uvicorn
+from alembic.config import Config
+from alembic.util.exc import CommandError
 from sqlalchemy.exc import SQLAlchemyError
 
 from alembic import command
-from alembic.config import Config
-from alembic.util.exc import CommandError
 from src.openapi_server.infrastructure.config import DatabaseSettings
 
 logger = logging.getLogger(__name__)

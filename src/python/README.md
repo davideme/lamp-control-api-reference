@@ -4,7 +4,7 @@ A FastAPI-based REST API for controlling lamps.
 
 ## Requirements.
 
-Python >= 3.13
+Python >= 3.14
 Poetry >= 1.0.0
 
 ## Installation & Usage
@@ -298,7 +298,7 @@ If integration tests fail with Docker errors:
    echo 'export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"' >> ~/.zshrc
    ```
 
-3. **Install `greenlet` (Python 3.13+)**:
+3. **Install `greenlet` (Python 3.14+)**:
 
    SQLAlchemy's async support requires the `greenlet` library. It is included as a dev dependency, but if you encounter `No module named 'greenlet'` errors, install it explicitly:
 
