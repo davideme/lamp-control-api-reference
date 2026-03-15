@@ -127,9 +127,9 @@ jobs:
           ../../scripts/ci/test-modes.sh \
             "java" \
             "mvn clean package -DskipTests" \
-            "java -jar target/openapi-spring-1.0.0.jar --mode=migrate" \
-            "java -jar target/openapi-spring-1.0.0.jar --mode=serve-only --server.port=8081" \
-            "java -jar target/openapi-spring-1.0.0.jar --mode=serve --server.port=8082" \
+            "java -jar target/openapi-spring-*.jar --mode=migrate" \
+            "java -jar target/openapi-spring-*.jar --mode=serve-only --server.port=8081" \
+            "java -jar target/openapi-spring-*.jar --mode=serve --server.port=8082" \
             8081 \
             8082
 

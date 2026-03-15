@@ -17,11 +17,14 @@ COPY src/ src/
 # Build the application (skip tests for Docker build speed)
 RUN mvn clean package -DskipTests -q
 
+# Rename the versioned JAR to a stable name for the runtime stage
+RUN cp /app/target/openapi-spring-*.jar /app/main.jar
+
 # Runtime stage using distroless Java 21
 FROM gcr.io/distroless/java21-debian12:nonroot
 
 # Copy the built JAR from build stage
-COPY --from=build-env /app/target/openapi-spring-1.0.0.jar /app/main.jar
+COPY --from=build-env /app/main.jar /app/main.jar
 
 # Set working directory
 WORKDIR /app
