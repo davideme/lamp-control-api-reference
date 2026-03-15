@@ -26,20 +26,15 @@ namespace LampControlApi.Infrastructure.Database.Migrations
                     table.PrimaryKey("PK_lamps", x => x.id);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "idx_lamps_created_at",
-                table: "lamps",
-                column: "created_at");
+            migrationBuilder.Sql(@"
+                CREATE INDEX idx_lamps_active_created_at_id
+                ON lamps (created_at ASC, id ASC)
+                WHERE deleted_at IS NULL;
 
-            migrationBuilder.CreateIndex(
-                name: "idx_lamps_deleted_at",
-                table: "lamps",
-                column: "deleted_at");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_lamps_is_on",
-                table: "lamps",
-                column: "is_on");
+                CREATE INDEX idx_lamps_active_is_on
+                ON lamps (is_on)
+                WHERE deleted_at IS NULL;
+            ");
         }
 
         /// <inheritdoc />
