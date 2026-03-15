@@ -3,7 +3,7 @@ val kotlinVersion: String = project.property("kotlin_version").toString()
 val logbackVersion: String = project.property("logback_version").toString()
 
 group = "org.openapitools"
-version = "1.0.0"
+version = "1.1.1"
 
 plugins {
     kotlin("jvm") version "2.0.20"

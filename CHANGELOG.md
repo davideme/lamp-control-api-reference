@@ -9,20 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+### Bug Fixes
+
+---
+
+## [v1.1.1] — 2026-03-15
+
 **Goal**: Productionize the Cloud Run deployments with Cloud SQL socket support, upgrade to Python 3.14, and deepen benchmark tooling with JIT warmup profiling.
 
 ### Features
 
 - **benchmarks**: Add JIT warmup profiling suite (#429)
 - **benchmarks**: Add `--services` filter to run a subset of languages (#405)
+- **csharp**: Add Cloud Build deployment configuration (#432)
+- **csharp**: Upgrade from .NET 8 to .NET 10 (#428)
 - **python**: Use `RETURNING` for INSERT, UPDATE and DELETE (#426)
 - **python**: Optimize FastAPI deployment with direct uvicorn entrypoint (#422)
 
 ### Bug Fixes
 
+- **csharp**: Point buildpack path to solution root to pick up global.json (#435)
+- **csharp**: Use google-24 builder instead of latest in Cloud Build (#434)
 - **csharp**: Eliminate double DB round-trips by owning timestamps in application code (#418)
 - **csharp**: Push pagination to database level via `ListAsync` (#406)
 - **csharp**: Support Cloud SQL unix socket `DATABASE_URL` (#389)
+- **java**: Use latest buildpacks builder to fix Docker API version mismatch (#438)
 - **python**: Upgrade pydantic to 2.12 for Python 3.14 compatibility (#421)
 - **python**: Commit read-only sessions to avoid spurious rollbacks (#408)
 - **python**: Commit transaction after creating lamp (#407)
@@ -30,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **kotlin**: Support Cloud SQL socket `DATABASE_URL` parsing (#392)
 - **typescript**: Normalize Cloud SQL socket `DATABASE_URL` for Prisma (#390)
 - **java**: Support Cloud SQL socket `DATABASE_URL` and Cloud Run refresh (#393)
+- **benchmarks**: Use `DATABASE_URL` for csharp in services.json (#431)
 - **benchmarks**: Replace `uuid_generate_v5` with `gen_random_uuid` in seed command (#404)
 - Fix Npgsql connection pool and update configurations (#425)
 - Fix missing `InetAddress` resolver (#399)
@@ -38,6 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
+- Delegate timestamps to Postgres (Python, Go, Kotlin, C#) (#439)
+- Refactor repository methods to return updated entities (#437)
+- **kotlin**: Remove custom Hikari pool config, use defaults (#436)
 - Update Python configuration to 3.14 (#419)
 - Update Kotlin DB defaults and transaction isolation config (#414)
 - Improve DB retry configuration and update logic (#415)
@@ -340,6 +356,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/davideme/lamp-control-api-reference/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/davideme/lamp-control-api-reference/compare/v1.1.1...HEAD
+[v1.1.1]: https://github.com/davideme/lamp-control-api-reference/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/davideme/lamp-control-api-reference/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/davideme/lamp-control-api-reference/releases/tag/v1.0.0
