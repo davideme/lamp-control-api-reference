@@ -29,33 +29,79 @@ When releasing a new major or minor version (e.g., v1.0.0, v1.1.0, v2.0.0):
 2. **Update version numbers** in all relevant files:
    - Update package.json, pyproject.toml, pom.xml, etc.
    - Update version references in documentation
-   - Update CHANGELOG.md with release notes
 
-3. **Commit version updates**
+3. **Update `CHANGELOG.md`** — major and minor releases require a full changelog entry:
+
+   a. **Promote `[Unreleased]` to the new version**:
+      ```markdown
+      ## [vX.Y.0] — YYYY-MM-DD
+      ```
+
+   b. **Write a release goal** — one paragraph describing the intent of the milestone.
+      Answer: *What problem does this release solve? What is the user-visible outcome?*
+      Example: "Consolidate to six languages by dropping PHP, add PostgreSQL storage, and
+      introduce three operation modes for zero-downtime deployments."
+
+   c. **Add an ADR section** for every Architecture Decision Record introduced or finalised
+      in this release cycle. Group by scope: cross-language first, then per language:
+      ```markdown
+      ### Architecture Decision Records
+
+      #### Cross-language
+
+      | ADR | Title | Decision |
+      |-----|-------|----------|
+      | [ADR-NNN](docs/adr/NNN-title.md) | Short title | One-sentence decision summary. |
+
+      #### <Language>
+
+      | ADR | Title | Decision |
+      |-----|-------|----------|
+      | [ADR-NNN](src/<lang>/adr/NNN-title.md) | Short title | One-sentence decision summary. |
+      ```
+      Only include ADRs whose **status changed to Accepted** during this release cycle.
+      ADRs that remain Proposed or were already listed in a previous release are omitted.
+
+   d. **Add a fresh `[Unreleased]` section** above the new versioned block, ready for
+      the next cycle:
+      ```markdown
+      ## [Unreleased]
+
+      ### Features
+      ### Bug Fixes
+      ```
+
+   e. **Update the comparison links** at the bottom of the file:
+      ```markdown
+      [Unreleased]: https://github.com/…/compare/vX.Y.0...HEAD
+      [vX.Y.0]: https://github.com/…/compare/vX.(Y-1).0...vX.Y.0
+      ```
+
+4. **Commit version updates**
    ```bash
    git add .
    git commit -m "chore: bump version to X.Y.0"
    git push origin main
    ```
 
-4. **Create an annotated tag**
+5. **Create an annotated tag**
    ```bash
    git tag -a vX.Y.0 -m "Release version X.Y.0"
    git push origin vX.Y.0
    ```
 
-5. **Create a release branch for bugfixes**
+6. **Create a release branch for bugfixes**
    ```bash
    git checkout -b release-X.Y.x
    git push origin release-X.Y.x
    ```
 
-6. **Return to main for continued development**
+7. **Return to main for continued development**
    ```bash
    git checkout main
    ```
 
-7. **(Optional) Bump to next development version on main**
+8. **(Optional) Bump to next development version on main**
    ```bash
    # Update version files to X.(Y+1).0-dev or similar
    git add .
@@ -77,21 +123,32 @@ When releasing a bugfix for an existing version (e.g., v1.0.1):
    - Cherry-pick commits from main: `git cherry-pick <commit-hash>`
    - Or create bugfix commits directly on the release branch
 
-3. **Update version numbers** for the patch release
+3. **Update `CHANGELOG.md`** — add a patch entry under the relevant `[vX.Y.x]` section
+   (or create it if this is the first patch). Patch entries do **not** need a goal
+   paragraph or ADR table; a flat list of bug fixes and changes is sufficient:
+   ```markdown
+   ## [vX.Y.Z] — YYYY-MM-DD
+
+   ### Bug Fixes
+   - fix(lang): description (#PR)
+   ```
+   Then update the comparison link at the bottom of the file.
+
+4. **Update version numbers** for the patch release
    ```bash
    # Update version to X.Y.Z in all relevant files
    git add .
    git commit -m "chore: bump version to X.Y.Z"
    ```
 
-4. **Create an annotated tag**
+5. **Create an annotated tag**
    ```bash
    git tag -a vX.Y.Z -m "Release version X.Y.Z"
    git push origin vX.Y.Z
    git push origin release-X.Y.x
    ```
 
-5. **Merge bugfixes back to main** (if applicable)
+6. **Merge bugfixes back to main** (if applicable)
    ```bash
    git checkout main
    git merge release-X.Y.x
