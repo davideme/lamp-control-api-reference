@@ -62,15 +62,14 @@ namespace LampControlApi.Infrastructure.Database
                 entity.Property(e => e.DeletedAt)
                     .HasColumnName("deleted_at");
 
-                // Indexes
+                // Indexes (partial: active rows only)
+                entity.HasIndex(e => new { e.CreatedAt, e.Id })
+                    .HasDatabaseName("idx_lamps_active_created_at_id")
+                    .HasFilter("deleted_at IS NULL");
+
                 entity.HasIndex(e => e.IsOn)
-                    .HasDatabaseName("idx_lamps_is_on");
-
-                entity.HasIndex(e => e.CreatedAt)
-                    .HasDatabaseName("idx_lamps_created_at");
-
-                entity.HasIndex(e => e.DeletedAt)
-                    .HasDatabaseName("idx_lamps_deleted_at");
+                    .HasDatabaseName("idx_lamps_active_is_on")
+                    .HasFilter("deleted_at IS NULL");
 
                 // Global query filter for soft deletes
                 entity.HasQueryFilter(e => e.DeletedAt == null);

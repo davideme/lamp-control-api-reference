@@ -1,7 +1,8 @@
 -- Rollback soft delete support
 
--- Drop index
-DROP INDEX IF EXISTS idx_lamps_deleted_at;
+-- Drop partial indexes
+DROP INDEX IF EXISTS idx_lamps_active_is_on;
+DROP INDEX IF EXISTS idx_lamps_active_created_at_id;
 
 -- Drop column
 ALTER TABLE lamps

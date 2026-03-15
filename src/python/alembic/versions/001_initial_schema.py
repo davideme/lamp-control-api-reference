@@ -35,9 +35,6 @@ def upgrade() -> None:
     of running this migration, as the SQL file contains additional database
     features like triggers that are better managed there.
     """
-    # Enable UUID extension
-    op.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
-
     # Create lamps table
     op.create_table(
         "lamps",
@@ -45,7 +42,7 @@ def upgrade() -> None:
             "id",
             postgresql.UUID(as_uuid=True),
             primary_key=True,
-            server_default=sa.text("UUID_GENERATE_V4()"),
+            server_default=sa.text("GEN_RANDOM_UUID()"),
         ),
         sa.Column("is_on", sa.Boolean(), nullable=False, server_default="false"),
         sa.Column(
@@ -63,41 +60,44 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
     )
 
-    # Create indexes
-    op.create_index("idx_lamps_is_on", "lamps", ["is_on"])
-    op.create_index("idx_lamps_created_at", "lamps", ["created_at"])
-    op.create_index("idx_lamps_deleted_at", "lamps", ["deleted_at"])
+    # Create partial indexes for active rows
+    # fmt: off
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS idx_lamps_active_created_at_id
+        ON lamps (created_at ASC, id ASC)
+        WHERE deleted_at IS NULL
+    """)
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS idx_lamps_active_is_on
+        ON lamps (is_on)
+        WHERE deleted_at IS NULL
+    """)
 
     # Create trigger function for updated_at
-    op.execute(
-        """
-        CREATE OR REPLACE FUNCTION UPDATE_UPDATED_AT_COLUMN()
+    op.execute("""
+        CREATE OR REPLACE FUNCTION update_updated_at_column()
         RETURNS TRIGGER AS $$
         BEGIN
             NEW.updated_at = CURRENT_TIMESTAMP;
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-    """
-    )
+    """)
 
     # Create trigger
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_lamps_updated_at
         BEFORE UPDATE ON lamps
         FOR EACH ROW
-        EXECUTE FUNCTION UPDATE_UPDATED_AT_COLUMN();
-    """
-    )
+        EXECUTE FUNCTION update_updated_at_column();
+    """)
+    # fmt: on
 
 
 def downgrade() -> None:
     """Remove the initial schema."""
     op.execute("DROP TRIGGER IF EXISTS update_lamps_updated_at ON lamps")
-    op.execute("DROP FUNCTION IF EXISTS UPDATE_UPDATED_AT_COLUMN()")
-    op.drop_index("idx_lamps_deleted_at", table_name="lamps")
-    op.drop_index("idx_lamps_created_at", table_name="lamps")
-    op.drop_index("idx_lamps_is_on", table_name="lamps")
+    op.execute("DROP FUNCTION IF EXISTS update_updated_at_column()")
+    op.execute("DROP INDEX IF EXISTS idx_lamps_active_is_on")
+    op.execute("DROP INDEX IF EXISTS idx_lamps_active_created_at_id")
     op.drop_table("lamps")
-    op.execute('DROP EXTENSION IF EXISTS "uuid-ossp"')

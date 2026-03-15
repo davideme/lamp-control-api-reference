@@ -54,14 +54,13 @@ namespace LampControlApi.Infrastructure.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("idx_lamps_created_at");
-
-                    b.HasIndex("DeletedAt")
-                        .HasDatabaseName("idx_lamps_deleted_at");
+                    b.HasIndex("CreatedAt", "Id")
+                        .HasDatabaseName("idx_lamps_active_created_at_id")
+                        .HasFilter("deleted_at IS NULL");
 
                     b.HasIndex("IsOn")
-                        .HasDatabaseName("idx_lamps_is_on");
+                        .HasDatabaseName("idx_lamps_active_is_on")
+                        .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("lamps", (string)null);
                 });

@@ -9,11 +9,8 @@ CREATE TABLE "lamps" (
     CONSTRAINT "lamps_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE INDEX "idx_lamps_is_on" ON "lamps"("is_on");
+-- CreateIndex (partial index: active rows only)
+CREATE INDEX "idx_lamps_active_created_at_id" ON "lamps"("created_at" ASC, "id" ASC) WHERE deleted_at IS NULL;
 
--- CreateIndex
-CREATE INDEX "idx_lamps_created_at" ON "lamps"("created_at");
-
--- CreateIndex
-CREATE INDEX "idx_lamps_deleted_at" ON "lamps"("deleted_at");
+-- CreateIndex (partial index: active rows only)
+CREATE INDEX "idx_lamps_active_is_on" ON "lamps"("is_on") WHERE deleted_at IS NULL;
