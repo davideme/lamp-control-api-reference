@@ -32,7 +32,7 @@ def initialize_database() -> None:
         db_manager = DatabaseManager(settings)
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session() -> AsyncGenerator[AsyncSession]:
     """Provide a database session for dependency injection.
 
     This is used only when PostgreSQL is enabled.
@@ -50,9 +50,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_lamp_repository() -> (
-    AsyncGenerator[PostgresLampRepository | InMemoryLampRepository, None]
-):
+async def get_lamp_repository() -> AsyncGenerator[PostgresLampRepository | InMemoryLampRepository]:
     """FastAPI dependency that provides a lamp repository instance.
 
     If DATABASE_URL is configured, returns a PostgreSQL repository.
@@ -71,7 +69,7 @@ async def get_lamp_repository() -> (
         yield in_memory_repository
 
 
-async def get_optional_db_session() -> AsyncGenerator[AsyncSession | None, None]:
+async def get_optional_db_session() -> AsyncGenerator[AsyncSession | None]:
     """Provide a database session when PostgreSQL is enabled.
 
     For in-memory mode, this yields None so API handlers can share one

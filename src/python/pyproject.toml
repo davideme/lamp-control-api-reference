@@ -81,8 +81,9 @@ lint.exclude = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"**/{tests,test}/*" = ["PLR2004"]
+"**/{tests,test}/*" = ["PLR2004", "PLC0415"]  # PLC0415: local imports inside test methods are intentional
 "src/openapi_server/dependencies.py" = ["PLW0603"]  # Global statement used intentionally for singleton pattern
+"src/openapi_server/apis/__init__.py" = ["PLC0415"]  # Lazy imports in __getattr__ break circular imports
 
 [tool.mypy]
 python_version = "3.14"
