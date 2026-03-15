@@ -75,8 +75,15 @@ namespace LampControlApi.Services
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            _lamps[entity.Id] = entity;
-            return Task.FromResult(entity);
+            // Simulate Postgres DEFAULT CURRENT_TIMESTAMP: populate timestamps when unset
+            // (LampEntity.Create() leaves them as default until a DB write populates them).
+            var now = DateTimeOffset.UtcNow;
+            var stored = entity.CreatedAt == default(DateTimeOffset)
+                ? new LampEntity(entity.Id, entity.Status, now, now)
+                : entity;
+
+            _lamps[stored.Id] = stored;
+            return Task.FromResult(stored);
         }
 
         /// <inheritdoc/>
@@ -86,7 +93,8 @@ namespace LampControlApi.Services
 
             if (_lamps.TryGetValue(id, out var existing))
             {
-                var updated = existing.WithUpdatedStatus(status);
+                // Simulate Postgres BEFORE UPDATE trigger: bump UpdatedAt on every write.
+                var updated = new LampEntity(existing.Id, status, existing.CreatedAt, DateTimeOffset.UtcNow);
                 _lamps[id] = updated;
                 return Task.FromResult<LampEntity?>(updated);
             }

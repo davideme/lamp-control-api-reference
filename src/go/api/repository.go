@@ -48,8 +48,16 @@ func NewInMemoryLampRepository() *InMemoryLampRepository {
 	return &InMemoryLampRepository{}
 }
 
-// Create adds a new lamp to the repository
+// Create adds a new lamp to the repository.
+// Simulates Postgres DEFAULT CURRENT_TIMESTAMP: sets CreatedAt/UpdatedAt
+// when they are zero so in-memory responses match the OpenAPI contract.
 func (r *InMemoryLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
+	if lampEntity.CreatedAt.IsZero() {
+		now := time.Now()
+		lampEntity.CreatedAt = now
+		lampEntity.UpdatedAt = now
+	}
+
 	r.lamps.Store(lampEntity.ID.String(), lampEntity)
 
 	return nil
