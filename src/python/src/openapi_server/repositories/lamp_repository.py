@@ -52,8 +52,10 @@ class InMemoryLampRepository:
             The created lamp entity with timestamps populated.
         """
         now = datetime.now(UTC)
-        lamp_entity.created_at = now
-        lamp_entity.updated_at = now
+        if lamp_entity.created_at is None:
+            lamp_entity.created_at = now
+        if lamp_entity.updated_at is None:
+            lamp_entity.updated_at = now
         self._lamps[lamp_entity.id] = lamp_entity
         return lamp_entity
 
