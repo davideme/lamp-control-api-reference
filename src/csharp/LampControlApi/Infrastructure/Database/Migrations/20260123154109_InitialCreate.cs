@@ -26,15 +26,19 @@ namespace LampControlApi.Infrastructure.Database.Migrations
                     table.PrimaryKey("PK_lamps", x => x.id);
                 });
 
-            migrationBuilder.Sql(@"
-                CREATE INDEX idx_lamps_active_created_at_id
-                ON lamps (created_at ASC, id ASC)
-                WHERE deleted_at IS NULL;
+#pragma warning disable CA1861
+            migrationBuilder.CreateIndex(
+                name: "idx_lamps_active_created_at_id",
+                table: "lamps",
+                columns: new[] { "created_at", "id" },
+                filter: "deleted_at IS NULL");
+#pragma warning restore CA1861
 
-                CREATE INDEX idx_lamps_active_is_on
-                ON lamps (is_on)
-                WHERE deleted_at IS NULL;
-            ");
+            migrationBuilder.CreateIndex(
+                name: "idx_lamps_active_is_on",
+                table: "lamps",
+                column: "is_on",
+                filter: "deleted_at IS NULL");
         }
 
         /// <inheritdoc />

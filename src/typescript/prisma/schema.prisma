@@ -14,9 +14,10 @@ model Lamp {
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz
 
-  // Partial indexes (WHERE deleted_at IS NULL) are managed via raw SQL in the migration file
-  // as Prisma does not support partial index WHERE clauses in schema declarations.
-  // idx_lamps_active_created_at_id ON lamps (created_at ASC, id ASC) WHERE deleted_at IS NULL
-  // idx_lamps_active_is_on ON lamps (is_on) WHERE deleted_at IS NULL
+  // Prisma does not support partial index WHERE clauses in schema declarations.
+  // These @@index entries keep Prisma's schema diffing aware of the indexes; the migration
+  // SQL file manually adds the WHERE deleted_at IS NULL predicate to make them partial.
+  @@index([createdAt, id], name: "idx_lamps_active_created_at_id")
+  @@index([isOn], name: "idx_lamps_active_is_on")
   @@map("lamps")
 }

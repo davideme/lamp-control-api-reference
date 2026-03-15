@@ -61,6 +61,7 @@ def upgrade() -> None:
     )
 
     # Create partial indexes for active rows
+    # fmt: off
     op.execute("""
         CREATE INDEX IF NOT EXISTS idx_lamps_active_created_at_id
         ON lamps (created_at ASC, id ASC)
@@ -90,6 +91,7 @@ def upgrade() -> None:
         FOR EACH ROW
         EXECUTE FUNCTION update_updated_at_column();
     """)
+    # fmt: on
 
 
 def downgrade() -> None:
