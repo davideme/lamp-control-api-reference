@@ -44,9 +44,8 @@ class PostgresLampRepository:
             .values(
                 id=UUID(lamp_entity.id),
                 is_on=lamp_entity.status,  # Map status -> is_on
-                created_at=lamp_entity.created_at,
-                updated_at=lamp_entity.updated_at,
                 deleted_at=None,
+                # created_at and updated_at set by DB DEFAULT CURRENT_TIMESTAMP
             )
             .returning(LampModel)
         )

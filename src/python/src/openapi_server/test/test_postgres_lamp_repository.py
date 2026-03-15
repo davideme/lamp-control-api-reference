@@ -5,7 +5,7 @@ ensuring that the repository works correctly with an actual database.
 """
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -176,55 +176,44 @@ class TestPostgresLampRepository:
 
     async def test_list_paginated_returns_exact_window(self, repository, session):
         """Test list_paginated returns offset/limit window."""
-        # Arrange
-        now = datetime.now(UTC)
-        lamp_a = LampEntity(id=str(uuid4()), status=True, created_at=now, updated_at=now)
-        lamp_b = LampEntity(
-            id=str(uuid4()),
-            status=False,
-            created_at=now + timedelta(seconds=1),
-            updated_at=now + timedelta(seconds=1),
+        # Arrange - timestamps are DB-generated; capture returned entities so we
+        # know the actual DB order (created_at ASC, id ASC).
+        lamp_a = LampEntity(id=str(uuid4()), status=True)
+        lamp_b = LampEntity(id=str(uuid4()), status=False)
+        lamp_c = LampEntity(id=str(uuid4()), status=True)
+        created_a = await repository.create(session, lamp_a)
+        created_b = await repository.create(session, lamp_b)
+        created_c = await repository.create(session, lamp_c)
+
+        sorted_lamps = sorted(
+            [created_a, created_b, created_c], key=lambda lamp: (lamp.created_at, lamp.id)
         )
-        lamp_c = LampEntity(
-            id=str(uuid4()),
-            status=True,
-            created_at=now + timedelta(seconds=2),
-            updated_at=now + timedelta(seconds=2),
-        )
-        await repository.create(session, lamp_a)
-        await repository.create(session, lamp_b)
-        await repository.create(session, lamp_c)
 
         # Act
         page = await repository.list_paginated(session, offset=1, limit=1)
 
         # Assert
         assert len(page) == 1
-        assert page[0].id == lamp_b.id
+        assert page[0].id == sorted_lamps[1].id
 
     async def test_list_paginated_second_page_progression(self, repository, session):
         """Test pagination progression across pages."""
-        # Arrange
-        now = datetime.now(UTC)
-        lamps = [
-            LampEntity(
-                id=str(uuid4()),
-                status=i % 2 == 0,
-                created_at=now + timedelta(seconds=i),
-                updated_at=now + timedelta(seconds=i),
-            )
-            for i in range(5)
-        ]
+        # Arrange - timestamps are DB-generated; capture returned entities so we
+        # know the actual DB order (created_at ASC, id ASC).
+        lamps = [LampEntity(id=str(uuid4()), status=i % 2 == 0) for i in range(5)]
+        created_lamps = []
         for lamp in lamps:
-            await repository.create(session, lamp)
+            created_lamps.append(await repository.create(session, lamp))
+
+        sorted_lamps = sorted(created_lamps, key=lambda lamp: (lamp.created_at, lamp.id))
 
         # Act
         first_page = await repository.list_paginated(session, offset=0, limit=2)
         second_page = await repository.list_paginated(session, offset=2, limit=2)
 
         # Assert
-        assert [lamp.id for lamp in first_page] == [lamps[0].id, lamps[1].id]
-        assert [lamp.id for lamp in second_page] == [lamps[2].id, lamps[3].id]
+        assert [lamp.id for lamp in first_page] == [sorted_lamps[0].id, sorted_lamps[1].id]
+        assert [lamp.id for lamp in second_page] == [sorted_lamps[2].id, sorted_lamps[3].id]
 
     async def test_list_paginated_excludes_soft_deleted(self, repository, session):
         """Test list_paginated excludes soft-deleted lamps."""
