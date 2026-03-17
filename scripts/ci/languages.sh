@@ -19,7 +19,7 @@ declare -gA LANGUAGE_BUILD=(
 declare -gA LANGUAGE_MIGRATE=(
   ["go"]="./bin/lamp-control-api --mode=migrate"
   ["python"]="poetry run python -m openapi_server.cli --mode=migrate"
-  ["java"]="java -jar target/openapi-spring-1.0.0.jar --mode=migrate"
+  ["java"]="java -jar target/openapi-spring-*.jar --mode=migrate"
   ["csharp"]="cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=migrate"
   ["kotlin"]="./gradlew run --args='--mode=migrate' --no-daemon"
   ["typescript"]="npm start -- --mode=migrate"
@@ -29,7 +29,7 @@ declare -gA LANGUAGE_MIGRATE=(
 declare -gA LANGUAGE_SERVE_ONLY=(
   ["go"]="./bin/lamp-control-api --mode=serve-only --port=8081"
   ["python"]="poetry run python -m openapi_server.cli --mode=serve-only"
-  ["java"]="java -jar target/openapi-spring-1.0.0.jar --mode=serve-only --server.port=8081"
+  ["java"]="java -jar target/openapi-spring-*.jar --mode=serve-only --server.port=8081"
   ["csharp"]="cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve-only --urls http://localhost:5170"
   ["kotlin"]="KTOR_PORT=8081 ./gradlew run --args='--mode=serve-only' --no-daemon"
   ["typescript"]="PORT=8081 npm start -- --mode=serve-only"
@@ -39,7 +39,7 @@ declare -gA LANGUAGE_SERVE_ONLY=(
 declare -gA LANGUAGE_SERVE=(
   ["go"]="./bin/lamp-control-api --mode=serve --port=8082"
   ["python"]="poetry run python -m openapi_server.cli --mode=serve"
-  ["java"]="java -jar target/openapi-spring-1.0.0.jar --mode=serve --server.port=8082"
+  ["java"]="java -jar target/openapi-spring-*.jar --mode=serve --server.port=8082"
   ["csharp"]="cd LampControlApi && dotnet run --configuration Release --no-build -- --mode=serve --urls http://localhost:5171"
   ["kotlin"]="KTOR_PORT=8082 ./gradlew run --args='--mode=serve' --no-daemon"
   ["typescript"]="PORT=8082 npm start -- --mode=serve"
