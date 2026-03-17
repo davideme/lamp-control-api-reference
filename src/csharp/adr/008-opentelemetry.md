@@ -18,14 +18,14 @@ Adopt the **OpenTelemetry .NET SDK** (`OpenTelemetry.*` NuGet packages) to instr
 
 | Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
 |--------|---------------------|----------------|----------------------|
-| Traces – Inbound HTTP | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Code-based |
-| Traces – Outbound HTTP | `OpenTelemetry.Instrumentation.Http` | ✅ Yes | Code-based |
-| Traces – Database (EF Core) | `OpenTelemetry.Instrumentation.EntityFrameworkCore` | ✅ Yes | Code-based |
-| Metrics – HTTP server | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Code-based |
-| Metrics – .NET runtime | `OpenTelemetry.Instrumentation.Runtime` | ✅ Yes | Code-based |
-| Logs | `OpenTelemetry` log bridge (`AddOpenTelemetry()` on `ILogger`) | ✅ Yes | Code-based |
+| Traces – Inbound HTTP | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Config only |
+| Traces – Outbound HTTP | `OpenTelemetry.Instrumentation.Http` | ✅ Yes | Config only |
+| Traces – Database (EF Core) | `OpenTelemetry.Instrumentation.EntityFrameworkCore` | ✅ Yes | Config only |
+| Metrics – HTTP server | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Config only |
+| Metrics – .NET runtime | `OpenTelemetry.Instrumentation.Runtime` | ✅ Yes | Config only |
+| Logs | `OpenTelemetry` log bridge (`AddOpenTelemetry()` on `ILogger`) | ✅ Yes | Config only |
 
-> **Code-based** means registering the instrumentation package in `Program.cs` (a few lines). No application business logic changes are required.
+> **Config only**: add the NuGet package and call the corresponding `.Add*Instrumentation()` method in `Program.cs`. No changes to application business logic or individual request handlers are required. All I/O signals (inbound HTTP, outbound HTTP, database) are fully covered by the instrumentation libraries.
 
 ### Required NuGet Packages
 

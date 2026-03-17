@@ -18,14 +18,15 @@ Adopt the **OpenTelemetry Kotlin / JVM SDK** combined with **Ktor OpenTelemetry 
 
 | Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
 |--------|---------------------|----------------|----------------------|
-| Traces – Inbound HTTP | `opentelemetry-ktor-3.0` (`KtorServerTelemetry` plugin) | ✅ Yes | Code-based |
-| Traces – Outbound HTTP | `opentelemetry-ktor-3.0` (`KtorClientTelemetry` plugin) | ✅ Yes | Code-based |
-| Traces – Database (Exposed) | OTel Tracer API — manual span wrapping (Exposed has no auto-instrumentation library) | ✅ Yes (API only) | Code-based |
-| Metrics – HTTP server | `KtorServerTelemetry` plugin (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
-| Metrics – JVM runtime | `opentelemetry-runtime-telemetry-java8` | ✅ Yes | Code-based |
-| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Code-based (logback.xml) |
+| Traces – Inbound HTTP | `opentelemetry-ktor-3.0` (`KtorServerTelemetry` plugin) | ✅ Yes | Config only |
+| Traces – Outbound HTTP | `opentelemetry-ktor-3.0` (`KtorClientTelemetry` plugin) | ✅ Yes | Config only |
+| Traces – Database (Exposed) | OTel Tracer API — manual span wrapping (Exposed has no auto-instrumentation library) | ✅ Yes (API only) | Custom code required |
+| Metrics – HTTP server | `KtorServerTelemetry` plugin (auto-emitted with HTTP spans) | ✅ Yes | Config only |
+| Metrics – JVM runtime | `opentelemetry-runtime-telemetry-java8` | ✅ Yes | Config only |
+| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Config only |
 
-> **Code-based** means installing the Ktor plugin and configuring the Logback appender. Exposed database spans require manual wrapping because no auto-instrumentation library exists for Exposed ORM.
+> **Config only**: install the Ktor plugin with `install(KtorServerTelemetry)` or add the Logback appender in `logback.xml` — no per-handler changes needed.  
+> **Custom code required**: Exposed ORM has no auto-instrumentation library, so every repository method must be manually wrapped with `tracer.spanBuilder`/`span.end`. All I/O signals (inbound HTTP, outbound HTTP, database) are covered, though database spans require explicit instrumentation code.
 
 ### Required Gradle Dependencies
 

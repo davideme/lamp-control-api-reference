@@ -18,13 +18,16 @@ Adopt the **OpenTelemetry JavaScript/Node.js SDK** with Fastify auto-instrumenta
 
 | Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
 |--------|---------------------|----------------|----------------------|
-| Traces – Inbound HTTP | `@opentelemetry/instrumentation-fastify` + `@opentelemetry/instrumentation-http` | ✅ Yes | Code-based |
-| Traces – Outbound HTTP | `@opentelemetry/instrumentation-http` / `@opentelemetry/instrumentation-undici` | ✅ Yes | Code-based |
-| Traces – Database (Prisma) | `@prisma/instrumentation` (Prisma-official, not from `open-telemetry` org) | ⚠️ Third-party | Code-based |
-| Metrics – HTTP server | `@opentelemetry/instrumentation-http` (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
-| Logs | Manual Fastify `onRequest` hook + OTel API (`trace.getActiveSpan()`) | ✅ Yes (OTel API) | Code-based |
+| Traces – Inbound HTTP | `@opentelemetry/instrumentation-fastify` + `@opentelemetry/instrumentation-http` | ✅ Yes | Config only |
+| Traces – Outbound HTTP | `@opentelemetry/instrumentation-http` / `@opentelemetry/instrumentation-undici` | ✅ Yes | Config only |
+| Traces – Database (Prisma) | `@prisma/instrumentation` (Prisma-official, not from `open-telemetry` org) | ⚠️ Third-party | Config only |
+| Metrics – HTTP server | `@opentelemetry/instrumentation-http` (auto-emitted with HTTP spans) | ✅ Yes | Config only |
+| Logs | Manual Fastify `onRequest` hook + OTel API (`trace.getActiveSpan()`) | ✅ Yes (OTel API) | Custom code required |
 
-> **Code-based** means registering instrumentations in the `NodeSDK` init file. `@prisma/instrumentation` is the only third-party (non-OTel-org) package used; it follows the OTel `Instrumentation` interface but is maintained by Prisma.
+> **Config only**: register the instrumentation in the `NodeSDK` init file — no per-handler changes needed.  
+> **Custom code required**: Fastify's Pino logger does not natively bridge to OTel logs, so a small `onRequest` hook must be written to inject `trace_id`/`span_id` into log records.  
+> `@prisma/instrumentation` is the only third-party (non-OTel-org) package; it follows the OTel `Instrumentation` interface but is maintained by Prisma.  
+> All I/O signals (inbound HTTP, outbound HTTP, database) are fully covered.
 
 ### Required npm Packages
 

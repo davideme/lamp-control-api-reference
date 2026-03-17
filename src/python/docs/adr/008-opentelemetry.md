@@ -18,14 +18,14 @@ Adopt the **OpenTelemetry Python SDK** with FastAPI / ASGI auto-instrumentation 
 
 | Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
 |--------|---------------------|----------------|----------------------|
-| Traces – Inbound HTTP | `opentelemetry-instrumentation-fastapi` (`FastAPIInstrumentor`) | ✅ Yes | Code-based |
-| Traces – Outbound HTTP | `opentelemetry-instrumentation-httpx` (`HTTPXClientInstrumentor`) | ✅ Yes | Code-based |
-| Traces – Database (SQLAlchemy) | `opentelemetry-instrumentation-sqlalchemy` (`SQLAlchemyInstrumentor`) | ✅ Yes | Code-based |
-| Metrics – HTTP server | `opentelemetry-instrumentation-fastapi` (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
-| Metrics – Runtime (optional) | `opentelemetry-instrumentation-system-metrics` | ✅ Yes | Code-based |
-| Logs | `opentelemetry-instrumentation-logging` (`LoggingInstrumentor`) | ✅ Yes | Code-based |
+| Traces – Inbound HTTP | `opentelemetry-instrumentation-fastapi` (`FastAPIInstrumentor`) | ✅ Yes | Config only |
+| Traces – Outbound HTTP | `opentelemetry-instrumentation-httpx` (`HTTPXClientInstrumentor`) | ✅ Yes | Config only |
+| Traces – Database (SQLAlchemy) | `opentelemetry-instrumentation-sqlalchemy` (`SQLAlchemyInstrumentor`) | ✅ Yes | Config only |
+| Metrics – HTTP server | `opentelemetry-instrumentation-fastapi` (auto-emitted with HTTP spans) | ✅ Yes | Config only |
+| Metrics – Runtime (optional) | `opentelemetry-instrumentation-system-metrics` | ✅ Yes | Config only |
+| Logs | `opentelemetry-instrumentation-logging` (`LoggingInstrumentor`) | ✅ Yes | Config only |
 
-> **Code-based** means calling `.instrument_app(app)` / `.instrument()` once at startup. No per-request or per-function changes are required.
+> **Config only**: call `.instrument_app(app)` / `.instrument()` once at startup — no per-request or per-function changes required. All I/O signals (inbound HTTP, outbound HTTP, database) are fully covered by the instrumentation libraries.
 
 ### Required Packages (Poetry)
 

@@ -23,9 +23,11 @@ Adopt the **OpenTelemetry Java Agent** for zero-code auto-instrumentation of the
 | Traces – Database (JPA/JDBC) | OTel Java Agent (Hibernate/JDBC instrumentation) | ✅ Yes | Zero-code |
 | Metrics – HTTP server | OTel Java Agent + Micrometer OTel bridge | ✅ Yes | Zero-code |
 | Metrics – JVM runtime | `opentelemetry-runtime-telemetry-java17` (JFR-based, Java 17+) | ✅ Yes | Zero-code |
-| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Code-based (logback.xml) |
+| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Config only |
 
-> **Zero-code** means the Java Agent instruments everything via the `-javaagent` JVM flag — no changes to application source code. **Code-based** for logs means adding the appender to `logback-spring.xml`.
+> **Zero-code**: the Java Agent instruments everything via the `-javaagent` JVM flag — no changes to application source code.  
+> **Config only**: adding the OTel appender to `logback-spring.xml` (one XML stanza).  
+> All I/O signals (inbound HTTP, outbound HTTP, database) are fully covered by the Java Agent with no application code changes.
 
 ### Approach: Java Agent
 

@@ -18,13 +18,15 @@ Adopt the **OpenTelemetry Go SDK** to instrument the Chi-based HTTP server.
 
 | Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
 |--------|---------------------|----------------|----------------------|
-| Traces – Inbound HTTP | `go.opentelemetry.io/contrib/.../otelhttp` (`otelhttp.NewHandler`) | ✅ Yes | Code-based |
-| Traces – Outbound HTTP | `otelhttp.NewTransport` | ✅ Yes | Code-based |
-| Traces – Database (sqlc) | OTel Tracer API — manual span wrapping (sqlc has no auto-instrumentation library) | ✅ Yes (API only) | Code-based |
-| Metrics – HTTP server | `otelhttp` (auto-emitted alongside HTTP spans) | ✅ Yes | Code-based |
-| Logs | Manual `trace.SpanFromContext` + `log/slog` injection | ✅ Yes (OTel API) | Code-based |
+| Traces – Inbound HTTP | `go.opentelemetry.io/contrib/.../otelhttp` (`otelhttp.NewHandler`) | ✅ Yes | Config only |
+| Traces – Outbound HTTP | `otelhttp.NewTransport` | ✅ Yes | Config only |
+| Traces – Database (sqlc) | OTel Tracer API — manual span wrapping (sqlc has no auto-instrumentation library) | ✅ Yes (API only) | Custom code required |
+| Metrics – HTTP server | `otelhttp` (auto-emitted alongside HTTP spans) | ✅ Yes | Config only |
+| Metrics – Go runtime | `go.opentelemetry.io/contrib/instrumentation/runtime` (goroutines, heap, GC) | ✅ Yes | Config only |
+| Logs | Manual `trace.SpanFromContext` + `log/slog` injection | ✅ Yes (OTel API) | Custom code required |
 
-> **Code-based** means adding the `otelhttp` middleware and writing a small log-helper. sqlc database spans require manual wrapping because no auto-instrumentation library exists for sqlc.
+> **Config only**: wrap the router / transport with `otelhttp` once at startup — no per-handler changes needed.  
+> **Custom code required**: sqlc does not have an auto-instrumentation library, so every repository method must be manually wrapped with `tracer.Start`/`span.End`. Log correlation similarly requires a small helper function. All I/O signals (inbound HTTP, outbound HTTP, database) are covered, though database spans require explicit instrumentation code.
 
 ### Required Go Modules
 
@@ -35,6 +37,7 @@ Adopt the **OpenTelemetry Go SDK** to instrument the Chi-based HTTP server.
 | `go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc` | OTLP gRPC trace export |
 | `go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc` | OTLP gRPC metric export |
 | `go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp` | Inbound HTTP server spans |
+| `go.opentelemetry.io/contrib/instrumentation/runtime` | Go runtime metrics (goroutines, heap, GC) |
 | `go.opentelemetry.io/otel/semconv/v1.26.0` | Semantic convention constants |
 | `go.opentelemetry.io/otel/metric` | Metrics API |
 
@@ -105,6 +108,9 @@ func (r *LampRepository) CreateLamp(ctx context.Context, ...) (*Lamp, error) {
 |--------|-----------|-------|
 | `http.server.request.duration` | Histogram | Provided by `otelhttp` |
 | `http.server.active_requests` | UpDownCounter | Provided by `otelhttp` |
+| `go.goroutine.count` | UpDownCounter | Provided by `go.opentelemetry.io/contrib/instrumentation/runtime` |
+| `go.memory.used` | UpDownCounter | Provided by `go.opentelemetry.io/contrib/instrumentation/runtime` |
+| `go.gc.duration` | Histogram | Provided by `go.opentelemetry.io/contrib/instrumentation/runtime` |
 
 ### Log Correlation
 The current Go implementation uses the standard `log` package. As part of our observability migration, the Go standard `log/slog` package (Go 1.21+) WILL be adopted for structured logging. When using `slog`, include `trace_id` and `span_id` by extracting them from the active span:
