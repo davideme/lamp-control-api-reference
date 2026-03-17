@@ -102,7 +102,7 @@ cd src/python && poetry run pytest --cov         # With coverage
 
 # Go
 cd src/go && make test                           # Run tests
-cd src/go && make test-coverage                  # With coverage report
+cd src/go && make coverage-check                 # With coverage report (excludes generated files)
 
 # Java
 cd src/java && mvn test                          # Run tests
