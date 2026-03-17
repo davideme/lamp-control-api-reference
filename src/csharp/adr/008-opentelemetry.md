@@ -36,30 +36,6 @@ ASP.NET Core instrumentation (`AddAspNetCoreInstrumentation`) automatically crea
 **Database spans:**
 `AddEntityFrameworkCoreInstrumentation` adds spans for EF Core queries, capturing `db.system`, `db.statement`, and related attributes. The `SetDbStatementForText` option MUST be `false` in production to avoid capturing PII in SQL statements.
 
-**Custom business spans (lamp operations):**
-A static `ActivitySource` named `lamp-control-api` is created and injected into the repository/service layer. The following operations MUST create child spans:
-
-- `lamp.create` – `lamp.id` set after insert
-- `lamp.get` – `lamp.id` attribute
-- `lamp.list` – pagination cursor attributes
-- `lamp.update` – `lamp.id` and changed fields
-- `lamp.delete` – `lamp.id`
-
-Example:
-```csharp
-private static readonly ActivitySource ActivitySource =
-    new ActivitySource("lamp-control-api");
-
-public async Task<Lamp> CreateLampAsync(CreateLampRequest request)
-{
-    using var activity = ActivitySource.StartActivity("lamp.create");
-    var lamp = await _repository.CreateAsync(request);
-    activity?.SetTag("lamp.id", lamp.Id.ToString());
-    activity?.SetTag("lamp.operation", "create");
-    return lamp;
-}
-```
-
 ### Metrics Baseline
 
 Register the following meters with `AddMeter` in the OTel builder:
@@ -68,7 +44,6 @@ Register the following meters with `AddMeter` in the OTel builder:
 |--------|-----------|-------|
 | `http.server.request.duration` | Histogram | Provided by `AddAspNetCoreInstrumentation` |
 | `http.server.active_requests` | UpDownCounter | Provided by `AddAspNetCoreInstrumentation` |
-| `lamp.operations.total` | Counter | Custom, emitted per lamp operation with `lamp.operation` and `outcome` tags |
 | Runtime metrics | Various | Provided by `AddRuntimeInstrumentation` |
 
 ### Log Correlation
@@ -112,13 +87,11 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddEntityFrameworkCoreInstrumentation(o => o.SetDbStatementForText = false)
-        .AddSource("lamp-control-api")
         .AddOtlpExporter())
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddMeter("lamp-control-api")
         .AddOtlpExporter())
     .WithLogging(logging => logging
         .AddOtlpExporter());
@@ -141,7 +114,6 @@ The OTLP exporter reads `OTEL_EXPORTER_OTLP_ENDPOINT` automatically; when the va
 ### Negative
 - Adds several NuGet dependencies; increases build time slightly.
 - EF Core statement capture must be explicitly disabled in production to avoid PII leakage.
-- Custom `ActivitySource` requires manual discipline to tag lamp domain attributes consistently.
 
 ## References
 - [docs/adr/007-observability-strategy.md](../../../docs/adr/007-observability-strategy.md)

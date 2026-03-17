@@ -51,27 +51,28 @@ client := &http.Client{
 ```
 
 **Database spans:**
-sqlc-generated queries do not provide automatic OTel instrumentation. Database calls MUST be wrapped manually using `tracer.Start` / `span.End` with `db.system = "postgresql"`, `db.operation.name`, and the table name. The full query string MUST NOT be recorded in production to avoid PII leakage.
+sqlc-generated queries do not provide automatic OTel instrumentation (unlike ORMs such as GORM or sqlx wrappers). Database calls MUST be wrapped manually using `tracer.Start` / `span.End` with `db.system = "postgresql"`, `db.operation.name`, and the table name. The full query string MUST NOT be recorded in production to avoid PII leakage.
 
-**Custom business spans (lamp operations):**
-Use a package-level tracer in the repository layer:
+Example:
 
 ```go
 var tracer = otel.Tracer("lamp-control-api")
 
 func (r *LampRepository) CreateLamp(ctx context.Context, ...) (*Lamp, error) {
-    ctx, span := tracer.Start(ctx, "lamp.create")
-    defer span.End()
-    span.SetAttributes(
-        attribute.String("lamp.operation", "create"),
+    ctx, span := tracer.Start(ctx, "db.lamp.create",
+        oteltrace.WithAttributes(
+            semconv.DBSystemPostgreSQL,
+            semconv.DBOperationName("INSERT"),
+            semconv.DBCollectionName("lamps"),
+        ),
     )
+    defer span.End()
     lamp, err := r.queries.CreateLamp(ctx, ...)
     if err != nil {
         span.RecordError(err)
         span.SetStatus(codes.Error, err.Error())
         return nil, err
     }
-    span.SetAttributes(attribute.String("lamp.id", lamp.ID.String()))
     return lamp, nil
 }
 ```
@@ -82,17 +83,6 @@ func (r *LampRepository) CreateLamp(ctx context.Context, ...) (*Lamp, error) {
 |--------|-----------|-------|
 | `http.server.request.duration` | Histogram | Provided by `otelhttp` |
 | `http.server.active_requests` | UpDownCounter | Provided by `otelhttp` |
-| `lamp.operations.total` | Counter | Custom, tagged with `lamp.operation` and `outcome` |
-
-Register a custom `MeterProvider` and create meters in a shared `observability` package:
-
-```go
-meter := otel.Meter("lamp-control-api")
-lampOpsCounter, _ = meter.Int64Counter(
-    "lamp.operations.total",
-    metric.WithDescription("Total lamp CRUD operations"),
-)
-```
 
 ### Log Correlation
 The Go standard `log/slog` package (Go 1.21+) MUST be used for structured logging. Include `trace_id` and `span_id` by extracting them from the active span:

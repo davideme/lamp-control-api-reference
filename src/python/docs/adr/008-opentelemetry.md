@@ -63,46 +63,13 @@ SQLAlchemyInstrumentor().instrument(engine=engine)
 
 This records `db.system = "postgresql"`, `db.operation.name`, and (optionally) `db.statement`. The `db.statement` capture is **disabled by default** to prevent PII leakage; enable only in development via `enable_commenter=True` configuration if needed.
 
-**Custom business spans (lamp operations):**
-Use a module-level `Tracer` in the repository layer:
-
-```python
-from opentelemetry import trace
-
-tracer = trace.get_tracer("lamp-control-api")
-
-async def create_lamp(self, data: CreateLampRequest) -> Lamp:
-    with tracer.start_as_current_span("lamp.create") as span:
-        lamp = await self._repository.create(data)
-        span.set_attribute("lamp.id", str(lamp.id))
-        span.set_attribute("lamp.operation", "create")
-        return lamp
-```
-
-Each lamp CRUD operation (`lamp.create`, `lamp.get`, `lamp.list`, `lamp.update`, `lamp.delete`) MUST create a span with `lamp.id` and `lamp.operation` attributes. Exceptions are recorded via `span.record_exception(e)` followed by `span.set_status(StatusCode.ERROR, str(e))`.
-
 ### Metrics Baseline
 
 | Metric | Source |
 |--------|--------|
 | `http.server.request.duration` | `FastAPIInstrumentor` auto-instrumentation |
 | `http.server.active_requests` | `FastAPIInstrumentor` auto-instrumentation |
-| `lamp.operations.total` | Custom `Counter` via OTel Meter API |
 | Python runtime metrics | `opentelemetry-instrumentation-system-metrics` (optional) |
-
-Custom metric example:
-```python
-from opentelemetry import metrics
-
-meter = metrics.get_meter("lamp-control-api")
-lamp_ops_counter = meter.create_counter(
-    "lamp.operations.total",
-    description="Total lamp CRUD operations",
-)
-
-# On each operation:
-lamp_ops_counter.add(1, {"lamp.operation": "create", "outcome": "success"})
-```
 
 ### Log Correlation
 Use the `opentelemetry-sdk` logging handler to bridge Python `logging` to OTel. Add the handler to the root logger:

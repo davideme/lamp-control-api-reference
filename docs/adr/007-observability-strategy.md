@@ -60,10 +60,6 @@ All implementations MUST emit the following resource and span attributes using [
 - `error.type` – exception class or error code
 - `exception.message`, `exception.stacktrace` on exception events
 
-**Lamp domain attributes (custom spans):**
-- `lamp.id` – UUID of the lamp resource
-- `lamp.operation` – `create`, `get`, `list`, `update`, `delete`
-
 ### 4. Trace Context Propagation
 All implementations MUST support **W3C Trace Context** (`traceparent` / `tracestate` headers) for distributed trace propagation across API boundaries.
 
@@ -94,7 +90,6 @@ Every implementation MUST expose at minimum:
 |--------|------|-------------|
 | `http.server.request.duration` | Histogram | Latency per route/method/status — drives p50/p95/p99 SLOs |
 | `http.server.active_requests` | UpDownCounter | Concurrent in-flight requests (where framework supports it) |
-| `lamp.operations.total` | Counter | Lamp CRUD operations by type and outcome |
 
 **Runtime / Process metrics** (where the language runtime exposes them)
 
@@ -137,18 +132,6 @@ Every implementation MUST expose at minimum:
 - Query parameters that may carry sensitive data (e.g., API keys) MUST be redacted before recording.
 - Log levels MUST default to `INFO` in production; `DEBUG` must be disabled unless explicitly enabled.
 
-### 9. SLO-Aligned Metrics
-Implementations SHOULD define the following SLO-relevant metrics to enable consistent alerting across languages:
-
-- **Availability**: percentage of non-5xx responses over a rolling window.
-- **Latency**: p50/p95/p99 of `http.server.request.duration`.
-- **Error rate**: rate of `error.type` attributed spans over total spans.
-
-### 10. Dashboards and Alerting Consistency
-- A shared Grafana dashboard template (JSON) SHOULD be maintained in `docs/observability/` covering all three pillars.
-- Alert rules SHOULD be defined as code (e.g., Prometheus alert rules YAML) and stored alongside the dashboard template.
-- All language implementations map to the same dashboard panels via consistent metric and attribute names defined in §3 above.
-
 ## Rationale
 - **OpenTelemetry** was chosen over vendor SDKs (Datadog, New Relic, etc.) because it is vendor-neutral, CNCF-graduated, and supported by all major observability backends.
 - **W3C Trace Context** was chosen over B3 or proprietary formats as it is the current IETF standard and natively supported by OTel and all modern proxies.
@@ -161,7 +144,6 @@ Implementations SHOULD define the following SLO-relevant metrics to enable consi
 - Uniform observability across all six language implementations.
 - Vendor-neutral: teams can swap backends (Jaeger → Tempo, Prometheus → Mimir) without changing application code.
 - Correlation of logs, metrics, and traces within a single request lifecycle.
-- Shared dashboards and runbooks reduce operational overhead.
 
 ### Negative
 - Adds a runtime dependency (OTel SDK) to every implementation.

@@ -57,20 +57,23 @@ val client = HttpClient(CIO) {
 ```
 
 **Database spans:**
-Exposed ORM does not have an official OTel auto-instrumentation library. Database operations MUST be wrapped manually using `tracer.spanBuilder`:
+Exposed ORM does not have an official OTel auto-instrumentation library. Database operations MUST be wrapped manually using `tracer.spanBuilder` with `db.system`, `db.operation.name`, and table name attributes. The full SQL query MUST NOT be recorded in production to avoid PII leakage.
+
+Example:
 
 ```kotlin
 suspend fun createLamp(request: CreateLampRequest): Lamp = withContext(Dispatchers.IO) {
-    val span = tracer.spanBuilder("lamp.create").startSpan()
+    val span = tracer.spanBuilder("db.lamp.insert")
+        .setAttribute(SemanticAttributes.DB_SYSTEM, "postgresql")
+        .setAttribute(SemanticAttributes.DB_OPERATION, "INSERT")
+        .setAttribute(SemanticAttributes.DB_SQL_TABLE, "lamps")
+        .startSpan()
     try {
         span.makeCurrent().use {
-            val lamp = transaction {
+            transaction {
                 LampTable.insert { /* ... */ }
                 // ...
             }
-            span.setAttribute("lamp.id", lamp.id.toString())
-            span.setAttribute("lamp.operation", "create")
-            lamp
         }
     } catch (e: Exception) {
         span.recordException(e)
@@ -82,39 +85,13 @@ suspend fun createLamp(request: CreateLampRequest): Lamp = withContext(Dispatche
 }
 ```
 
-**Custom business spans (lamp operations):**
-A module-level `Tracer` is obtained from the global `OpenTelemetry` instance:
-
-```kotlin
-val tracer: Tracer = GlobalOpenTelemetry.getTracer("lamp-control-api")
-```
-
-Each lamp CRUD operation (`lamp.create`, `lamp.get`, `lamp.list`, `lamp.update`, `lamp.delete`) MUST create a child span with `lamp.id` and `lamp.operation` attributes.
-
 ### Metrics Baseline
 
 | Metric | Source |
 |--------|--------|
 | `http.server.request.duration` | `KtorServerTelemetry` plugin |
 | `http.server.active_requests` | `KtorServerTelemetry` plugin |
-| `lamp.operations.total` | Custom `LongCounter` via OTel Meter API |
 | JVM runtime metrics | `opentelemetry-runtime-telemetry-java8` |
-
-Custom meter example:
-```kotlin
-val meter = GlobalOpenTelemetry.getMeter("lamp-control-api")
-val lampOpsCounter = meter.counterBuilder("lamp.operations.total")
-    .setDescription("Total lamp CRUD operations")
-    .build()
-
-// On each operation:
-lampOpsCounter.add(1,
-    Attributes.of(
-        AttributeKey.stringKey("lamp.operation"), "create",
-        AttributeKey.stringKey("outcome"), "success"
-    )
-)
-```
 
 ### Log Correlation
 Use the `opentelemetry-logback-appender-1.0` with SLF4J / Logback (the default logging backend for Ktor):

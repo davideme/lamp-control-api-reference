@@ -12,9 +12,9 @@ The project-level Observability Strategy ADR ([docs/adr/007](../../../docs/adr/0
 Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tracks the implementation work.
 
 ## Decision
-Adopt the **OpenTelemetry Java Agent** for zero-code auto-instrumentation supplemented by the **OpenTelemetry Java SDK** for custom lamp domain spans.
+Adopt the **OpenTelemetry Java Agent** for zero-code auto-instrumentation of the Spring Boot application.
 
-### Approach: Java Agent + Manual SDK
+### Approach: Java Agent
 
 Spring Boot's rich ecosystem is comprehensively covered by the OTel Java Agent (`opentelemetry-javaagent.jar`), which auto-instruments:
 - Spring Web MVC (inbound HTTP spans)
@@ -22,19 +22,9 @@ Spring Boot's rich ecosystem is comprehensively covered by the OTel Java Agent (
 - JPA / Hibernate (database spans)
 - JDBC drivers
 
-Custom lamp domain spans are added using the **OpenTelemetry Java API** (no agent dependency at compile time – the agent provides the implementation at runtime).
-
 ### Maven Dependencies
 
-Add to `pom.xml` for custom spans only (the agent handles auto-instrumentation at runtime):
-
-```xml
-<dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-api</artifactId>
-    <version>1.44.0</version>
-</dependency>
-```
+The Java Agent handles all auto-instrumentation at runtime. No application code changes are needed for basic instrumentation.
 
 For testing with `InMemorySpanExporter`:
 ```xml
@@ -72,36 +62,6 @@ Auto-instrumented for `RestTemplate` and `WebClient` by the agent. The `tracepar
 **Database spans:**
 Auto-instrumented via JPA / Hibernate / JDBC instrumentation. `db.system`, `db.operation.name`, and sanitised `db.statement` are recorded. The agent sanitises bind parameters by default; verify with `otel.instrumentation.jdbc.statement-sanitizer.enabled=true` (default: enabled).
 
-**Custom business spans (lamp operations):**
-Inject `OpenTelemetry` (or `Tracer`) via Spring DI and create spans in the service layer:
-
-```java
-@Service
-public class LampService {
-    private final Tracer tracer;
-
-    public LampService(OpenTelemetry openTelemetry) {
-        this.tracer = openTelemetry.getTracer("lamp-control-api");
-    }
-
-    public Lamp createLamp(CreateLampRequest request) {
-        Span span = tracer.spanBuilder("lamp.create").startSpan();
-        try (var scope = span.makeCurrent()) {
-            Lamp lamp = repository.save(LampMapper.toDomain(request));
-            span.setAttribute("lamp.id", lamp.getId().toString());
-            span.setAttribute("lamp.operation", "create");
-            return lamp;
-        } catch (Exception e) {
-            span.recordException(e);
-            span.setStatus(StatusCode.ERROR, e.getMessage());
-            throw e;
-        } finally {
-            span.end();
-        }
-    }
-}
-```
-
 ### Metrics Baseline
 
 Spring Boot Actuator with Micrometer is the default metrics solution. Bridge to OTel using `micrometer-registry-otlp` or the agent's Micrometer bridge:
@@ -110,8 +70,7 @@ Spring Boot Actuator with Micrometer is the default metrics solution. Bridge to 
 |--------|--------|
 | `http.server.request.duration` | Spring MVC auto-instrumentation |
 | `http.server.active_requests` | Spring MVC auto-instrumentation |
-| `lamp.operations.total` | Custom `Counter` via OTel Meter API |
-| JVM runtime metrics | `io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8` |
+| JVM runtime metrics | `io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java17` (Java 17+) |
 
 ### Log Correlation
 Use the `opentelemetry-logback-appender-1.0` or `opentelemetry-log4j-appender-2.17` appender to bridge SLF4J / Logback logs to OTel. When an active span exists, `trace_id` and `span_id` are automatically injected into MDC and the structured log record.

@@ -86,55 +86,12 @@ When `OTEL_EXPORTER_OTLP_ENDPOINT` is not set, the SDK is not started and all OT
 **Database spans:**
 `PrismaInstrumentation` (from `@prisma/instrumentation`) creates spans for every Prisma query with `db.system = "postgresql"`, `db.operation.name`, and `db.statement` (sanitised by default).
 
-**Custom business spans (lamp operations):**
-Use the OTel API tracer in the service/repository layer:
-
-```typescript
-import { trace, SpanStatusCode } from '@opentelemetry/api';
-import { ATTR_LAMP_ID, ATTR_LAMP_OPERATION } from './telemetry/attributes';
-
-const tracer = trace.getTracer('lamp-control-api');
-
-export async function createLamp(data: CreateLampInput): Promise<Lamp> {
-  return tracer.startActiveSpan('lamp.create', async (span) => {
-    try {
-      const lamp = await repository.create(data);
-      span.setAttributes({
-        'lamp.id': lamp.id,
-        'lamp.operation': 'create',
-      });
-      return lamp;
-    } catch (error) {
-      span.recordException(error as Error);
-      span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-      throw error;
-    } finally {
-      span.end();
-    }
-  });
-}
-```
-
 ### Metrics Baseline
 
 | Metric | Source |
 |--------|--------|
 | `http.server.request.duration` | `FastifyInstrumentation` / `HttpInstrumentation` |
 | `http.server.active_requests` | `HttpInstrumentation` |
-| `lamp.operations.total` | Custom `Counter` via OTel Metrics API |
-
-Custom metric example:
-```typescript
-import { metrics } from '@opentelemetry/api';
-
-const meter = metrics.getMeter('lamp-control-api');
-const lampOpsCounter = meter.createCounter('lamp.operations.total', {
-  description: 'Total lamp CRUD operations',
-});
-
-// On each operation:
-lampOpsCounter.add(1, { 'lamp.operation': 'create', outcome: 'success' });
-```
 
 ### Log Correlation
 Use `@opentelemetry/winston-transport` (if Winston is the logger) or inject trace context manually into Pino/Fastify logger via a custom hook:
