@@ -14,6 +14,19 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry Java Agent** for zero-code auto-instrumentation of the Spring Boot application.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | OTel Java Agent (Spring Web MVC instrumentation) | ✅ Yes | Zero-code |
+| Traces – Outbound HTTP | OTel Java Agent (`RestTemplate`/`WebClient` instrumentation) | ✅ Yes | Zero-code |
+| Traces – Database (JPA/JDBC) | OTel Java Agent (Hibernate/JDBC instrumentation) | ✅ Yes | Zero-code |
+| Metrics – HTTP server | OTel Java Agent + Micrometer OTel bridge | ✅ Yes | Zero-code |
+| Metrics – JVM runtime | `opentelemetry-runtime-telemetry-java17` (JFR-based, Java 17+) | ✅ Yes | Zero-code |
+| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Code-based (logback.xml) |
+
+> **Zero-code** means the Java Agent instruments everything via the `-javaagent` JVM flag — no changes to application source code. **Code-based** for logs means adding the appender to `logback-spring.xml`.
+
 ### Approach: Java Agent
 
 Spring Boot's rich ecosystem is comprehensively covered by the OTel Java Agent (`opentelemetry-javaagent.jar`), which auto-instruments:

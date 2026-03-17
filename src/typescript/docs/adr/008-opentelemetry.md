@@ -14,6 +14,18 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry JavaScript/Node.js SDK** with Fastify auto-instrumentation and Prisma instrumentation for the TypeScript implementation.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | `@opentelemetry/instrumentation-fastify` + `@opentelemetry/instrumentation-http` | ✅ Yes | Code-based |
+| Traces – Outbound HTTP | `@opentelemetry/instrumentation-http` / `@opentelemetry/instrumentation-undici` | ✅ Yes | Code-based |
+| Traces – Database (Prisma) | `@prisma/instrumentation` (Prisma-official, not from `open-telemetry` org) | ⚠️ Third-party | Code-based |
+| Metrics – HTTP server | `@opentelemetry/instrumentation-http` (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
+| Logs | Manual Fastify `onRequest` hook + OTel API (`trace.getActiveSpan()`) | ✅ Yes (OTel API) | Code-based |
+
+> **Code-based** means registering instrumentations in the `NodeSDK` init file. `@prisma/instrumentation` is the only third-party (non-OTel-org) package used; it follows the OTel `Instrumentation` interface but is maintained by Prisma.
+
 ### Required npm Packages
 
 ```jsonc

@@ -14,6 +14,18 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry Go SDK** to instrument the Chi-based HTTP server.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | `go.opentelemetry.io/contrib/.../otelhttp` (`otelhttp.NewHandler`) | ✅ Yes | Code-based |
+| Traces – Outbound HTTP | `otelhttp.NewTransport` | ✅ Yes | Code-based |
+| Traces – Database (sqlc) | OTel Tracer API — manual span wrapping (sqlc has no auto-instrumentation library) | ✅ Yes (API only) | Code-based |
+| Metrics – HTTP server | `otelhttp` (auto-emitted alongside HTTP spans) | ✅ Yes | Code-based |
+| Logs | Manual `trace.SpanFromContext` + `log/slog` injection | ✅ Yes (OTel API) | Code-based |
+
+> **Code-based** means adding the `otelhttp` middleware and writing a small log-helper. sqlc database spans require manual wrapping because no auto-instrumentation library exists for sqlc.
+
 ### Required Go Modules
 
 | Module | Purpose |

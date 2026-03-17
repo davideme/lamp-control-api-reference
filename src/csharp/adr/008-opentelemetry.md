@@ -14,6 +14,19 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry .NET SDK** (`OpenTelemetry.*` NuGet packages) to instrument the ASP.NET Core application.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Code-based |
+| Traces – Outbound HTTP | `OpenTelemetry.Instrumentation.Http` | ✅ Yes | Code-based |
+| Traces – Database (EF Core) | `OpenTelemetry.Instrumentation.EntityFrameworkCore` | ✅ Yes | Code-based |
+| Metrics – HTTP server | `OpenTelemetry.Instrumentation.AspNetCore` | ✅ Yes | Code-based |
+| Metrics – .NET runtime | `OpenTelemetry.Instrumentation.Runtime` | ✅ Yes | Code-based |
+| Logs | `OpenTelemetry` log bridge (`AddOpenTelemetry()` on `ILogger`) | ✅ Yes | Code-based |
+
+> **Code-based** means registering the instrumentation package in `Program.cs` (a few lines). No application business logic changes are required.
+
 ### Required NuGet Packages
 
 | Package | Purpose |

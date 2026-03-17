@@ -14,6 +14,19 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry Python SDK** with FastAPI / ASGI auto-instrumentation and SQLAlchemy instrumentation.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | `opentelemetry-instrumentation-fastapi` (`FastAPIInstrumentor`) | ✅ Yes | Code-based |
+| Traces – Outbound HTTP | `opentelemetry-instrumentation-httpx` (`HTTPXClientInstrumentor`) | ✅ Yes | Code-based |
+| Traces – Database (SQLAlchemy) | `opentelemetry-instrumentation-sqlalchemy` (`SQLAlchemyInstrumentor`) | ✅ Yes | Code-based |
+| Metrics – HTTP server | `opentelemetry-instrumentation-fastapi` (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
+| Metrics – Runtime (optional) | `opentelemetry-instrumentation-system-metrics` | ✅ Yes | Code-based |
+| Logs | `opentelemetry-instrumentation-logging` (`LoggingInstrumentor`) | ✅ Yes | Code-based |
+
+> **Code-based** means calling `.instrument_app(app)` / `.instrument()` once at startup. No per-request or per-function changes are required.
+
 ### Required Packages (Poetry)
 
 ```toml

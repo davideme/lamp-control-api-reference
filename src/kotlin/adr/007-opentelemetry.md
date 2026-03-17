@@ -14,6 +14,19 @@ Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tr
 ## Decision
 Adopt the **OpenTelemetry Kotlin / JVM SDK** combined with **Ktor OpenTelemetry plugin** for the Ktor server instrumentation.
 
+### Instrumentation Summary
+
+| Signal | Library / Mechanism | Official OTel? | Instrumentation Type |
+|--------|---------------------|----------------|----------------------|
+| Traces – Inbound HTTP | `opentelemetry-ktor-3.0` (`KtorServerTelemetry` plugin) | ✅ Yes | Code-based |
+| Traces – Outbound HTTP | `opentelemetry-ktor-3.0` (`KtorClientTelemetry` plugin) | ✅ Yes | Code-based |
+| Traces – Database (Exposed) | OTel Tracer API — manual span wrapping (Exposed has no auto-instrumentation library) | ✅ Yes (API only) | Code-based |
+| Metrics – HTTP server | `KtorServerTelemetry` plugin (auto-emitted with HTTP spans) | ✅ Yes | Code-based |
+| Metrics – JVM runtime | `opentelemetry-runtime-telemetry-java8` | ✅ Yes | Code-based |
+| Logs | `opentelemetry-logback-appender-1.0` (Logback → OTel bridge) | ✅ Yes | Code-based (logback.xml) |
+
+> **Code-based** means installing the Ktor plugin and configuring the Logback appender. Exposed database spans require manual wrapping because no auto-instrumentation library exists for Exposed ORM.
+
 ### Required Gradle Dependencies
 
 ```kotlin
