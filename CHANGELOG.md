@@ -24,8 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **benchmarks**: Add `--services` filter to run a subset of languages (#405)
 - **csharp**: Add Cloud Build deployment configuration (#432)
 - **csharp**: Upgrade from .NET 8 to .NET 10 (#428)
+- **go**: Add Cloud Build deployment configuration (#443)
+- **python**: Upgrade to Python 3.14 (#442)
 - **python**: Use `RETURNING` for INSERT, UPDATE and DELETE (#426)
 - **python**: Optimize FastAPI deployment with direct uvicorn entrypoint (#422)
+- **typescript**: Add Cloud Build deployment configuration (#443)
 
 ### Bug Fixes
 
@@ -55,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor repository methods to return updated entities (#437)
 - **kotlin**: Remove custom Hikari pool config, use defaults (#436)
 - Update Python configuration to 3.14 (#419)
+- Optimize PostgreSQL 18 migration files: remove `uuid-ossp` extension, replace weak indexes with partial indexes on active rows (#440)
 - Update Kotlin DB defaults and transaction isolation config (#414)
 - Improve DB retry configuration and update logic (#415)
 - Add pageable `findAllActive` query (#417)
@@ -73,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refresh root README to match current project state (#388)
 - Update agent guidance documentation (#410)
+- Add README for JIT warmup profiling suite (#430)
 
 ---
 
