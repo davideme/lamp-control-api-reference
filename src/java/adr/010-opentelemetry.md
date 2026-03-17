@@ -105,19 +105,34 @@ W3C Trace Context is the default propagation format for the OTel Java Agent. No 
 Pass agent configuration via JVM system properties or environment variables:
 
 ```bash
+# Export enabled (endpoint provided)
 java -javaagent:opentelemetry-javaagent.jar \
      -Dotel.service.name=lamp-control-api-java \
      -Dotel.exporter.otlp.endpoint=http://collector:4317 \
+     -jar lamp-control-api.jar
+
+# No-op-by-default exporting (endpoint omitted, exporters disabled)
+java -javaagent:opentelemetry-javaagent.jar \
+     -Dotel.service.name=lamp-control-api-java \
+     -Dotel.traces.exporter=none \
+     -Dotel.metrics.exporter=none \
+     -Dotel.logs.exporter=none \
      -jar lamp-control-api.jar
 ```
 
 | Variable / Property | Default | Description |
 |--------------------|---------|-------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP endpoint; no-op when absent |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP endpoint; used when exporters are configured for `otlp` |
 | `OTEL_SERVICE_NAME` | `lamp-control-api-java` | `service.name` resource attribute |
 | `OTEL_RESOURCE_ATTRIBUTES` | *(none)* | Additional resource attributes |
 | `OTEL_TRACES_SAMPLER` | `parentbased_always_on` | Sampling strategy |
-| `OTEL_LOGS_EXPORTER` | `otlp` | Enable log export (`none` to disable) |
+| `OTEL_LOGS_EXPORTER` | `otlp` | Log exporter implementation (`none` to disable log export) |
+
+To comply with the global observability ADR's "no-op-by-default when endpoint is absent" requirement, the platform runtime MUST explicitly disable exporters whenever `OTEL_EXPORTER_OTLP_ENDPOINT` is not set. This can be achieved by setting the following environment variables (or equivalent `-Dotel.*.exporter` system properties):
+
+- `OTEL_TRACES_EXPORTER=none`
+- `OTEL_METRICS_EXPORTER=none`
+- `OTEL_LOGS_EXPORTER=none`
 
 **With Spring Boot starter (no agent):**
 Configure in `application.yml`:

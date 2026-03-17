@@ -80,14 +80,16 @@ Configure OTLP export via environment variables following the OTel SDK standard:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP gRPC endpoint; if absent, uses no-op exporter |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP gRPC/HTTP endpoint; if absent, OTLP exporters MUST NOT be registered (no-op by default) |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `grpc` | `grpc` or `http/protobuf` |
 | `OTEL_SERVICE_NAME` | `lamp-control-api-csharp` | Overrides `service.name` resource attribute |
 | `OTEL_RESOURCE_ATTRIBUTES` | *(none)* | Additional resource attributes |
 
 Configuration in `Program.cs`:
 ```csharp
-builder.Services.AddOpenTelemetry()
+var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+
+var openTelemetry = builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r
         .AddService(
             serviceName: "lamp-control-api-csharp",
@@ -99,15 +101,19 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddEntityFrameworkCoreInstrumentation(o => o.SetDbStatementForText = false)
-        .AddOtlpExporter())
+        .AddEntityFrameworkCoreInstrumentation(o => o.SetDbStatementForText = false))
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddRuntimeInstrumentation()
-        .AddOtlpExporter())
-    .WithLogging(logging => logging
-        .AddOtlpExporter());
+        .AddRuntimeInstrumentation());
+
+if (!string.IsNullOrWhiteSpace(otlpEndpoint))
+{
+    openTelemetry
+        .WithTracing(tracing => tracing.AddOtlpExporter())
+        .WithMetrics(metrics => metrics.AddOtlpExporter())
+        .WithLogging(logging => logging.AddOtlpExporter());
+}
 ```
 
 The OTLP exporter reads `OTEL_EXPORTER_OTLP_ENDPOINT` automatically; when the variable is not set, the SDK uses a no-op exporter so tests and CI runs without a Collector continue to pass.

@@ -134,7 +134,7 @@ Every implementation MUST expose at minimum:
 
 ## Rationale
 - **OpenTelemetry** was chosen over vendor SDKs (Datadog, New Relic, etc.) because it is vendor-neutral, CNCF-graduated, and supported by all major observability backends.
-- **W3C Trace Context** was chosen over B3 or proprietary formats as it is the current IETF standard and natively supported by OTel and all modern proxies.
+- **W3C Trace Context** was chosen over B3 or proprietary formats as it is a W3C Recommendation and widely implemented web standard, and is natively supported by OTel and all modern proxies.
 - **Baseline metrics** are aligned with the OpenTelemetry HTTP Semantic Conventions to maximise out-of-the-box dashboard compatibility.
 - **No-op default** ensures that adding instrumentation does not break existing CI pipelines that run without a Collector.
 

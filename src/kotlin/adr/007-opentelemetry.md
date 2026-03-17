@@ -41,7 +41,7 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-ktor-3.0:$otelInstrumentationVersion")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$otelVersion")
     // Runtime metrics
-    implementation("io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:$otelInstrumentationVersion-alpha")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:${otelInstrumentationVersion}-alpha")
 }
 ```
 
@@ -134,11 +134,13 @@ openTelemetry = AutoConfiguredOpenTelemetrySdk.initialize().openTelemetrySdk
 
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP gRPC endpoint; no-op when absent |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | *(none)* | OTLP gRPC endpoint used when one or more exporters are set to `otlp` |
 | `OTEL_SERVICE_NAME` | `lamp-control-api-kotlin` | `service.name` resource attribute |
 | `OTEL_RESOURCE_ATTRIBUTES` | *(none)* | Additional resource attributes (e.g., `deployment.environment=production`) |
 | `OTEL_TRACES_SAMPLER` | `parentbased_always_on` | Sampling strategy |
-| `OTEL_LOGS_EXPORTER` | `otlp` | Log export; set to `none` to disable |
+| `OTEL_TRACES_EXPORTER` | `none` | Trace exporter; `none` guarantees no-op-by-default, set to `otlp` when an OTLP endpoint is configured |
+| `OTEL_METRICS_EXPORTER` | `none` | Metrics exporter; `none` guarantees no-op-by-default, set to `otlp` when an OTLP endpoint is configured |
+| `OTEL_LOGS_EXPORTER` | `none` | Log exporter; `none` guarantees no-op-by-default, set to `otlp` when an OTLP endpoint is configured |
 
 Use `AutoConfiguredOpenTelemetrySdk` to read all `OTEL_*` environment variables automatically:
 ```kotlin
@@ -146,7 +148,12 @@ val sdk = AutoConfiguredOpenTelemetrySdk.initialize().openTelemetrySdk
 GlobalOpenTelemetry.set(sdk)
 ```
 
-When `OTEL_EXPORTER_OTLP_ENDPOINT` is unset, the SDK defaults to a no-op exporter, keeping unit and CI tests free of Collector dependencies.
+By default (local development, unit tests, CI), we do **not** set `OTEL_EXPORTER_OTLP_ENDPOINT` and we explicitly configure
+`OTEL_TRACES_EXPORTER=none`, `OTEL_METRICS_EXPORTER=none`, and `OTEL_LOGS_EXPORTER=none` (via environment or runtime configuration).
+In this configuration, `AutoConfiguredOpenTelemetrySdk` initializes no-op exporters and performs no network export.
+When an OpenTelemetry Collector is available and export should be enabled, deployment manifests must set
+`OTEL_EXPORTER_OTLP_ENDPOINT` (for example `http://otel-collector:4317`) and switch the relevant exporters to `otlp`
+(for example `OTEL_TRACES_EXPORTER=otlp`, `OTEL_METRICS_EXPORTER=otlp`, `OTEL_LOGS_EXPORTER=otlp`).
 
 ### Testing and Verification
 - Unit tests: use `OpenTelemetry.noop()` or `GlobalOpenTelemetry.resetForTest()` to avoid actual export.

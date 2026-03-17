@@ -38,9 +38,6 @@ opentelemetry-instrumentation-fastapi = "^0.50b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.50b0"
 opentelemetry-instrumentation-httpx = "^0.50b0"
 opentelemetry-exporter-otlp-proto-grpc = "^1.29"
-
-[tool.poetry.group.dev.dependencies]
-opentelemetry-sdk = "^1.29"  # for InMemorySpanExporter in tests
 ```
 
 ### Instrumentation Scope
@@ -92,7 +89,10 @@ import logging
 from opentelemetry.sdk._logs import LoggerProvider
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
+resource = Resource.create({"service.name": "lamp-control-api"})
 logger_provider = LoggerProvider(resource=resource)
 logger_provider.add_log_record_processor(
     BatchLogRecordProcessor(OTLPLogExporter())

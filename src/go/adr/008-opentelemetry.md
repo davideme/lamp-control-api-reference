@@ -44,9 +44,19 @@ Adopt the **OpenTelemetry Go SDK** to instrument the Chi-based HTTP server.
 Wrap the Chi router with `otelhttp.NewHandler`:
 
 ```go
+func spanNameFromRequest(req *http.Request) string {
+    if routeCtx := chi.RouteContext(req.Context()); routeCtx != nil {
+        if pattern := routeCtx.RoutePattern(); pattern != "" {
+            return req.Method + " " + pattern
+        }
+    }
+
+    return req.Method + " " + req.URL.Path
+}
+
 handler := otelhttp.NewHandler(r, "lamp-control-api",
     otelhttp.WithSpanNameFormatter(func(_ string, req *http.Request) string {
-        return req.Method + " " + req.URL.Path
+        return spanNameFromRequest(req)
     }),
 )
 ```
@@ -97,7 +107,7 @@ func (r *LampRepository) CreateLamp(ctx context.Context, ...) (*Lamp, error) {
 | `http.server.active_requests` | UpDownCounter | Provided by `otelhttp` |
 
 ### Log Correlation
-The Go standard `log/slog` package (Go 1.21+) MUST be used for structured logging. Include `trace_id` and `span_id` by extracting them from the active span:
+The current Go implementation uses the standard `log` package. As part of our observability migration, the Go standard `log/slog` package (Go 1.21+) WILL be adopted for structured logging. When using `slog`, include `trace_id` and `span_id` by extracting them from the active span:
 
 ```go
 func logWithTrace(ctx context.Context, msg string, args ...any) {

@@ -55,6 +55,7 @@ Create `src/infrastructure/telemetry/instrumentation.ts` that is loaded before a
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify';
@@ -109,6 +110,8 @@ When `OTEL_EXPORTER_OTLP_ENDPOINT` is not set, the SDK is not started and all OT
 Use `@opentelemetry/winston-transport` (if Winston is the logger) or inject trace context manually into Pino/Fastify logger via a custom hook:
 
 ```typescript
+import { trace } from '@opentelemetry/api';
+
 // Fastify request hook – inject trace context into log fields
 fastify.addHook('onRequest', (request, _reply, done) => {
   const span = trace.getActiveSpan();
