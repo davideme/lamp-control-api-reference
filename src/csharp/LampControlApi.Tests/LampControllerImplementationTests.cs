@@ -38,7 +38,7 @@ namespace LampControlApi.Tests
         }
 
         /// <summary>
-        /// Test that ListLampsAsync returns empty collection when repository is empty.
+        /// Test that ListLampsAsync (parameterless) returns empty collection when repository is empty.
         /// </summary>
         /// <returns>A task.</returns>
         [TestMethod]
@@ -46,7 +46,7 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var emptyLampEntities = new List<LampEntity>();
-            _mockRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(emptyLampEntities);
+            _mockRepository.Setup(r => r.ListAsync(int.MaxValue, 0, It.IsAny<CancellationToken>())).ReturnsAsync(emptyLampEntities);
 
             // Act
             var result = await _controller.ListLampsAsync();
@@ -54,11 +54,11 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
-            _mockRepository.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _mockRepository.Verify(r => r.ListAsync(int.MaxValue, 0, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
-        /// Test that ListLampsAsync returns all lamps from repository.
+        /// Test that ListLampsAsync (parameterless) returns all lamps from repository.
         /// </summary>
         /// <returns>A task.</returns>
         [TestMethod]
@@ -71,7 +71,7 @@ namespace LampControlApi.Tests
                 new LampEntity(Guid.NewGuid(), false, DateTimeOffset.UtcNow.AddMinutes(-3), DateTimeOffset.UtcNow.AddMinutes(-2)),
                 new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow)
             };
-            _mockRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedLampEntities);
+            _mockRepository.Setup(r => r.ListAsync(int.MaxValue, 0, It.IsAny<CancellationToken>())).ReturnsAsync(expectedLampEntities);
 
             // Act
             var result = await _controller.ListLampsAsync();
@@ -79,9 +79,129 @@ namespace LampControlApi.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedLampEntities.Count, result.Count);
+            _mockRepository.Verify(r => r.ListAsync(int.MaxValue, 0, It.IsAny<CancellationToken>()), Times.Once);
+        }
 
-            // Verify that the controller returns the correct number of lamps (they are mapped from entities to API models)
-            _mockRepository.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+        /// <summary>
+        /// Test that ListLampsAsync with pageSize and cursor returns first page with HasMore=true.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListLampsAsync_WithPageSize_WhenMoreResultsExist_ShouldReturnHasMoreTrue()
+        {
+            // Arrange - repository returns pageSize+1 items, signalling there is a next page
+            var pageSize = 2;
+            var entities = new List<LampEntity>
+            {
+                new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-3), DateTimeOffset.UtcNow),
+                new LampEntity(Guid.NewGuid(), false, DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow),
+                new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow),  // extra item
+            };
+            _mockRepository.Setup(r => r.ListAsync(pageSize + 1, 0, It.IsAny<CancellationToken>())).ReturnsAsync(entities);
+
+            // Act
+            var actionResult = await _controller.ListLampsAsync(string.Empty, pageSize);
+            var response = actionResult.Value!;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(pageSize, response.Data.Count);
+            Assert.IsTrue(response.HasMore);
+            Assert.AreEqual("2", response.NextCursor);
+        }
+
+        /// <summary>
+        /// Test that ListLampsAsync with pageSize and cursor returns last page with HasMore=false.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListLampsAsync_WithPageSize_WhenOnLastPage_ShouldReturnHasMoreFalse()
+        {
+            // Arrange - repository returns fewer than pageSize+1 items, signalling this is the last page
+            var pageSize = 2;
+            var entities = new List<LampEntity>
+            {
+                new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow),
+                new LampEntity(Guid.NewGuid(), false, DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow),
+            };
+            _mockRepository.Setup(r => r.ListAsync(pageSize + 1, 0, It.IsAny<CancellationToken>())).ReturnsAsync(entities);
+
+            // Act
+            var actionResult = await _controller.ListLampsAsync(string.Empty, pageSize);
+            var response = actionResult.Value!;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(2, response.Data.Count);
+            Assert.IsFalse(response.HasMore);
+            Assert.AreEqual(string.Empty, response.NextCursor);
+        }
+
+        /// <summary>
+        /// Test that ListLampsAsync advances offset correctly using the cursor.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListLampsAsync_WithCursor_ShouldPassCorrectOffsetToRepository()
+        {
+            // Arrange - cursor="4" means offset 4, pageSize=2, so request limit=3 at offset=4
+            var pageSize = 2;
+            var cursor = "4";
+            var entities = new List<LampEntity>
+            {
+                new LampEntity(Guid.NewGuid(), true, DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow),
+            };
+            _mockRepository.Setup(r => r.ListAsync(pageSize + 1, 4, It.IsAny<CancellationToken>())).ReturnsAsync(entities);
+
+            // Act
+            var actionResult = await _controller.ListLampsAsync(cursor, pageSize);
+            var response = actionResult.Value!;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(1, response.Data.Count);
+            Assert.IsFalse(response.HasMore);
+            _mockRepository.Verify(r => r.ListAsync(pageSize + 1, 4, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test that ListLampsAsync uses default page size when pageSize is zero or negative.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListLampsAsync_WithNonPositivePageSize_ShouldUseDefaultPageSize()
+        {
+            // Arrange - default page size is 25, so repository is called with limit=26
+            var entities = new List<LampEntity>();
+            _mockRepository.Setup(r => r.ListAsync(26, 0, It.IsAny<CancellationToken>())).ReturnsAsync(entities);
+
+            // Act
+            var actionResult = await _controller.ListLampsAsync(string.Empty, 0);
+            var response = actionResult.Value!;
+
+            // Assert
+            Assert.IsNotNull(response);
+            _mockRepository.Verify(r => r.ListAsync(26, 0, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test that ListLampsAsync clamps oversized pageSize to MaxPageSize.
+        /// </summary>
+        /// <returns>A task.</returns>
+        [TestMethod]
+        public async Task ListLampsAsync_WithExcessivePageSize_ShouldClampToMaxPageSize()
+        {
+            // Arrange - MaxPageSize=1000, so limit should be 1001 (1000+1)
+            var entities = new List<LampEntity>();
+            _mockRepository.Setup(r => r.ListAsync(1001, 0, It.IsAny<CancellationToken>())).ReturnsAsync(entities);
+
+            // Act - pass a value far exceeding MaxPageSize
+            var actionResult = await _controller.ListLampsAsync(string.Empty, int.MaxValue);
+            var response = actionResult.Value!;
+
+            // Assert
+            Assert.IsNotNull(response);
+            _mockRepository.Verify(r => r.ListAsync(1001, 0, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -317,7 +437,7 @@ namespace LampControlApi.Tests
             // Arrange
             var lampId = Guid.NewGuid();
             var lampUpdate = new LampUpdate { Status = true };
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
+            _mockRepository.Setup(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>())).ReturnsAsync((LampEntity?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => _controller.UpdateLampAsync(lampId.ToString(), lampUpdate));
@@ -333,12 +453,10 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            var existingLampEntity = new LampEntity(lampId, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
             var lampUpdate = new LampUpdate { Status = true };
             var updatedLampEntity = new LampEntity(lampId, true, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>())).ReturnsAsync(updatedLampEntity);
+            _mockRepository.Setup(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>())).ReturnsAsync(updatedLampEntity);
 
             // Act
             var actionResult = await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
@@ -348,8 +466,7 @@ namespace LampControlApi.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(lampId, result.Id);
             Assert.AreEqual(lampUpdate.Status, result.Status);
-            _mockRepository.Verify(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
-            _mockRepository.Verify(r => r.UpdateAsync(It.Is<LampEntity>(l => l.Id == lampId && l.Status == lampUpdate.Status), It.IsAny<CancellationToken>()), Times.Once);
+            _mockRepository.Verify(r => r.UpdateAsync(lampId, lampUpdate.Status, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -361,24 +478,23 @@ namespace LampControlApi.Tests
         {
             // Arrange
             var lampId = Guid.NewGuid();
-            var existingLampEntity = new LampEntity(lampId, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
             var lampUpdate = new LampUpdate { Status = true };
-            var capturedLampEntity = (LampEntity?)null;
-
-            _mockRepository.Setup(r => r.GetByIdAsync(lampId, It.IsAny<CancellationToken>())).ReturnsAsync(existingLampEntity);
-            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<LampEntity>(), It.IsAny<CancellationToken>()))
-                .Callback<LampEntity, CancellationToken>((lampEntity, _) => capturedLampEntity = lampEntity)
-                .ReturnsAsync((LampEntity lampEntity, CancellationToken _) => lampEntity);
+            var capturedLampId = Guid.Empty;
+            var capturedStatus = false;
+            _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .Callback<Guid, bool, CancellationToken>((id, status, _) =>
+                {
+                    capturedLampId = id;
+                    capturedStatus = status;
+                })
+                .ReturnsAsync(new LampEntity(lampId, lampUpdate.Status, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
 
             // Act
             await _controller.UpdateLampAsync(lampId.ToString(), lampUpdate);
 
             // Assert
-            Assert.IsNotNull(capturedLampEntity);
-            Assert.AreEqual(lampId, capturedLampEntity.Id);
-            Assert.AreEqual(lampUpdate.Status, capturedLampEntity.Status);
-
-            // Note: LampEntity is immutable, so the controller creates a new instance with updated values
+            Assert.AreEqual(lampId, capturedLampId);
+            Assert.AreEqual(lampUpdate.Status, capturedStatus);
         }
 
         /// <summary>
@@ -461,7 +577,7 @@ namespace LampControlApi.Tests
             var actionResult = await _controller.DeleteLampAsync(lampId.ToString());
 
             // Assert - No exception should be thrown and check for NoContentResult
-            Assert.IsInstanceOfType(actionResult, typeof(Microsoft.AspNetCore.Mvc.NoContentResult));
+            Assert.IsInstanceOfType<Microsoft.AspNetCore.Mvc.NoContentResult>(actionResult);
             _mockRepository.Verify(r => r.DeleteAsync(lampId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }

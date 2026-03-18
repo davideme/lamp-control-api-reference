@@ -313,9 +313,25 @@ func TestLampAPI_UpdateLamp(t *testing.T) {
 		t.Errorf("Lamp not updated in storage: expected status false, got %v", storedLamp.Status)
 	}
 
-	// Test updating non-existent lamp
+	// Test updating with an invalid UUID returns 400
 	req = UpdateLampRequestObject{
-		LampId: "nonexistent",
+		LampId: "not-a-uuid",
+		Body:   &LampUpdate{Status: true},
+	}
+
+	resp, err = api.UpdateLamp(context.Background(), req)
+	if err != nil {
+		t.Fatalf("UpdateLamp failed: %v", err)
+	}
+
+	_, ok = resp.(UpdateLamp400JSONResponse)
+	if !ok {
+		t.Fatalf("Expected UpdateLamp400JSONResponse for invalid UUID, got %T", resp)
+	}
+
+	// Test updating a valid UUID that does not exist returns 404
+	req = UpdateLampRequestObject{
+		LampId: "00000000-0000-0000-0000-000000000000",
 		Body:   &LampUpdate{Status: true},
 	}
 

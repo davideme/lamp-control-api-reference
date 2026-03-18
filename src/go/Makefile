@@ -38,12 +38,6 @@ clean:
 test:
 	$(GOTEST) -v ./...
 
-# Run tests with coverage
-.PHONY: test-coverage
-test-coverage:
-	$(GOTEST) -v -coverprofile=coverage.out ./...
-	$(GOCMD) tool cover -html=coverage.out -o coverage.html
-
 # Check code coverage meets minimum threshold
 .PHONY: coverage-check
 coverage-check:
@@ -51,7 +45,7 @@ coverage-check:
 
 # Generate coverage report and open in browser
 .PHONY: coverage-report
-coverage-report: test-coverage
+coverage-report: coverage-check
 	@echo "Opening coverage report in browser..."
 	@$(GOCMD) tool cover -html=coverage.out
 
@@ -126,8 +120,7 @@ help:
 	@echo "  build              - Build the application"
 	@echo "  clean              - Clean build artifacts"
 	@echo "  test               - Run tests"
-	@echo "  test-coverage      - Run tests with coverage report"
-	@echo "  coverage-check     - Check coverage meets minimum threshold (80%)"
+	@echo "  coverage-check     - Run tests with coverage report (excludes generated files, checks 80% threshold)"
 	@echo "  coverage-report    - Generate and open coverage report in browser"
 	@echo "  coverage-summary   - Show coverage summary"
 	@echo "  lint               - Run all linting checks"

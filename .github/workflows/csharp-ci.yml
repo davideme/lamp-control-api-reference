@@ -19,17 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -53,7 +53,7 @@ jobs:
       run: dotnet test --configuration Release --logger trx --results-directory ./TestResults
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: success()
       with:
         name: csharp-build-artifacts
@@ -67,17 +67,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -100,7 +100,7 @@ jobs:
         fi
     
     - name: Upload security scan results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: security-scan-results
@@ -113,17 +113,17 @@ jobs:
     needs: [code-quality, security-scan]
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -141,7 +141,7 @@ jobs:
       run: dotnet publish LampControlApi/LampControlApi.csproj --configuration Release --no-build --output ./publish
     
     - name: Upload publish artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: csharp-publish-artifacts
         path: src/csharp/publish/
@@ -152,17 +152,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -189,7 +189,7 @@ jobs:
           /p:ExcludeByFile="**/obj/**%2c**/bin/**%2c**/Migrations/**%2c**/Program.cs%2c**/Extensions/MigrationRunner.cs%2c**/Extensions/WebApplicationExtensions.cs%2c**/Extensions/ServiceCollectionExtensions.cs"
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: coverage-report
@@ -201,17 +201,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -234,7 +234,7 @@ jobs:
         dotnet list package --outdated >> dependency-report.md || echo "All packages are up to date" >> dependency-report.md
     
     - name: Upload dependency report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: dependency-report
         path: src/csharp/dependency-report.md
@@ -247,7 +247,7 @@ jobs:
 
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
 
     services:
       postgres:
@@ -270,10 +270,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
           cache: true
@@ -302,17 +302,17 @@ jobs:
     needs: [code-quality]
     strategy:
       matrix:
-        dotnet-version: ['8.x']
+        dotnet-version: ['10.x']
     defaults:
       run:
         working-directory: src/csharp
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
@@ -355,7 +355,7 @@ jobs:
         fi
     
     - name: Upload Schemathesis report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: schemathesis-report

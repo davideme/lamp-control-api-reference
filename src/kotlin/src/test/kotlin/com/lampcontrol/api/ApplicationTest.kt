@@ -1,15 +1,15 @@
 package com.lampcontrol.api
 
-import com.lampcontrol.module
 import com.lampcontrol.api.models.*
+import com.lampcontrol.module
 import com.lampcontrol.testutil.TestJson
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.testing.testApplication
-import kotlin.test.*
 import kotlinx.serialization.*
 import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 class ApplicationTest {
     private val json = TestJson.instance

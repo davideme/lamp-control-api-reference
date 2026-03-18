@@ -44,20 +44,15 @@ Configure the database connection using environment variables:
 - `DB_USER` - Database user (default: `lamp_user`)
 - `DB_PASSWORD` - Database password (default: empty string)
 
-**Connection Pool Settings:**
-- `DB_POOL_MIN_SIZE` - Minimum pool size (default: `0`)
-- `DB_POOL_MAX_SIZE` - Maximum pool size (default: `4`)
-
-**Connection Pool Timeouts (in milliseconds):**
-- `DB_MAX_LIFETIME_MS` - Maximum lifetime of a connection in the pool (default: `3600000` = 1 hour)
-- `DB_IDLE_TIMEOUT_MS` - Maximum idle time before connection is closed (default: `1800000` = 30 minutes)
-- `DB_CONNECTION_TIMEOUT_MS` - Maximum time to wait for a connection (default: `30000` = 30 seconds)
+**Transaction Settings:**
+- `DB_TRANSACTION_ISOLATION` - Transaction isolation level (default: `READ_COMMITTED`)
+  - Accepted values: `READ_COMMITTED`, `READ_UNCOMMITTED`, `REPEATABLE_READ`, `SERIALIZABLE`
+  - Both underscore and hyphen forms are accepted (for example `READ_COMMITTED` or `READ-COMMITTED`)
+  - `TRANSACTION_*` variants are also supported (for example `TRANSACTION_SERIALIZABLE`)
 
 **Example using DATABASE_URL:**
 ```bash
 export DATABASE_URL="postgresql://lamp_user:password@localhost:5432/lamp_control"
-export DB_POOL_MAX_SIZE="10"
-export DB_MAX_LIFETIME_MS="7200000"  # 2 hours
 ```
 
 **Example using individual environment variables:**
@@ -67,10 +62,12 @@ export DB_PORT="5432"
 export DB_NAME="lamp_control"
 export DB_USER="lamp_user"
 export DB_PASSWORD="password"
-export DB_POOL_MIN_SIZE="2"
-export DB_POOL_MAX_SIZE="10"
-export DB_IDLE_TIMEOUT_MS="900000"  # 15 minutes
+export DB_TRANSACTION_ISOLATION="READ_COMMITTED"
 ```
+
+Migration note:
+- Previous default isolation was `REPEATABLE_READ`.
+- Set `DB_TRANSACTION_ISOLATION=REPEATABLE_READ` to preserve previous behavior.
 
 PostgreSQL is considered configured if any of the following conditions are met:
 - `DATABASE_URL` is set
@@ -131,4 +128,3 @@ Class | Method | HTTP request | Description
 ## Documentation for Authorization
 
 Endpoints do not require authorization.
-

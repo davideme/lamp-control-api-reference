@@ -1,6 +1,6 @@
 """Unit tests for the DefaultApiImpl class."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
@@ -37,8 +37,13 @@ def sample_lamp():
 
 @pytest.fixture
 def sample_lamp_entity():
-    """Fixture that provides a sample lamp domain entity for testing."""
-    return LampEntity(id="test-lamp-1", status=True)
+    """Fixture that provides a sample lamp domain entity for testing.
+
+    Timestamps are pre-populated to simulate the values returned by the
+    database after a write (DEFAULT CURRENT_TIMESTAMP / BEFORE UPDATE trigger).
+    """
+    now = datetime.now(UTC)
+    return LampEntity(id="test-lamp-1", status=True, created_at=now, updated_at=now)
 
 
 class TestDefaultApiImpl:
@@ -192,7 +197,12 @@ class TestDefaultApiImpl:
         """Test updating an existing lamp."""
         # Arrange
         lamp_update = LampUpdate(status=True)
-        updated_entity = LampEntity(id=sample_lamp_entity.id, status=True)
+        updated_entity = LampEntity(
+            id=sample_lamp_entity.id,
+            status=True,
+            created_at=sample_lamp_entity.created_at,
+            updated_at=datetime.now(UTC),
+        )
         mock_lamp_repository.get.return_value = sample_lamp_entity
         mock_lamp_repository.update.return_value = updated_entity
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -62,7 +63,8 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 	if portStr != "" {
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
-			log.Printf("Warning: Invalid DB_PORT value '%s', using default %d: %v", portStr, config.Port, err)
+			safeVal, _ := json.Marshal(portStr) //nolint:errcheck // json.Marshal cannot fail for string input
+			log.Printf("Warning: Invalid DB_PORT value %s, using default %d: %v", safeVal, config.Port, err)
 		} else {
 			config.Port = port
 		}
@@ -81,7 +83,8 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 	if poolMinStr := os.Getenv("DB_POOL_MIN_SIZE"); poolMinStr != "" {
 		poolMin, err := strconv.Atoi(poolMinStr)
 		if err != nil {
-			log.Printf("Warning: Invalid DB_POOL_MIN_SIZE value '%s', using default %d: %v", poolMinStr, config.PoolMin, err)
+			safeVal, _ := json.Marshal(poolMinStr) //nolint:errcheck // json.Marshal cannot fail for string input
+			log.Printf("Warning: Invalid DB_POOL_MIN_SIZE value %s, using default %d: %v", safeVal, config.PoolMin, err)
 		} else {
 			config.PoolMin = poolMin
 		}
@@ -89,7 +92,8 @@ func NewDatabaseConfigFromEnv() *DatabaseConfig {
 	if poolMaxStr := os.Getenv("DB_POOL_MAX_SIZE"); poolMaxStr != "" {
 		poolMax, err := strconv.Atoi(poolMaxStr)
 		if err != nil {
-			log.Printf("Warning: Invalid DB_POOL_MAX_SIZE value '%s', using default %d: %v", poolMaxStr, config.PoolMax, err)
+			safeVal, _ := json.Marshal(poolMaxStr) //nolint:errcheck // json.Marshal cannot fail for string input
+			log.Printf("Warning: Invalid DB_POOL_MAX_SIZE value %s, using default %d: %v", safeVal, config.PoolMax, err)
 		} else {
 			config.PoolMax = poolMax
 		}

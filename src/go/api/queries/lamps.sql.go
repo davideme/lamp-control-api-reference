@@ -25,25 +25,18 @@ func (q *Queries) CountLamps(ctx context.Context) (int64, error) {
 }
 
 const createLamp = `-- name: CreateLamp :one
-INSERT INTO lamps (id, is_on, created_at, updated_at)
-VALUES ($1, $2, $3, $4)
+INSERT INTO lamps (id, is_on)
+VALUES ($1, $2)
 RETURNING id, is_on, created_at, updated_at, deleted_at
 `
 
 type CreateLampParams struct {
-	ID        pgtype.UUID        `json:"id"`
-	IsOn      bool               `json:"is_on"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID   pgtype.UUID `json:"id"`
+	IsOn bool        `json:"is_on"`
 }
 
 func (q *Queries) CreateLamp(ctx context.Context, arg CreateLampParams) (Lamp, error) {
-	row := q.db.QueryRow(ctx, createLamp,
-		arg.ID,
-		arg.IsOn,
-		arg.CreatedAt,
-		arg.UpdatedAt,
-	)
+	row := q.db.QueryRow(ctx, createLamp, arg.ID, arg.IsOn)
 	var i Lamp
 	err := row.Scan(
 		&i.ID,
@@ -78,6 +71,7 @@ const getAllLampsForTest = `-- name: GetAllLampsForTest :many
 SELECT id, is_on, created_at, updated_at, deleted_at
 FROM lamps
 WHERE deleted_at IS NULL
+
 ORDER BY created_at ASC
 `
 

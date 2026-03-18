@@ -22,7 +22,7 @@ fi
 cd "$ROOT/src/python"
 echo "[pre-commit] Running Python format auto-fix"
 poetry run black "${py_files[@]}"
-poetry run ruff check "${py_files[@]}" --fix
+poetry run ruff check "${py_files[@]}" --fix --force-exclude
 
 cd "$ROOT"
 restage_and_fail_if_changed "src/python"
@@ -30,4 +30,4 @@ restage_and_fail_if_changed "src/python"
 cd "$ROOT/src/python"
 echo "[pre-commit] Running Python lint checks"
 poetry run black --check --diff "${py_files[@]}"
-poetry run ruff check "${py_files[@]}"
+poetry run ruff check "${py_files[@]}" --force-exclude

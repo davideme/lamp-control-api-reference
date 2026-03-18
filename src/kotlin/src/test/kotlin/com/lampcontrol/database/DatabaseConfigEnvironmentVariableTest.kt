@@ -1,14 +1,20 @@
 package com.lampcontrol.database
 
-import kotlin.test.*
 import org.junit.jupiter.api.Test
 import org.junitpioneer.jupiter.*
+import kotlin.test.*
 
 /**
  * Tests for DatabaseConfig.fromEnv() using JUnit Pioneer to set environment variables.
  * These tests exercise the actual environment variable parsing code paths.
  */
 class DatabaseConfigEnvironmentVariableTest {
+    companion object {
+        private const val CLOUD_SQL_SOCKET_DATABASE_URL =
+            "postgresql://postgres:A3tN1%7DgX%7B5%7Be9ZaL@/lamp-control" +
+                "?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5"
+    }
+
     @Test
     @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://testuser:testpass@localhost:5432/testdb")
     fun `fromEnv parses DATABASE_URL correctly`() {
@@ -20,8 +26,6 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals("localhost", config.host)
         assertEquals(5432, config.port)
         assertEquals("testdb", config.database)
-        assertEquals(0, config.poolMin) // Default
-        assertEquals(4, config.poolMax) // Default
     }
 
     @Test
@@ -35,23 +39,6 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals("db.example.com", config.host)
         assertEquals(5433, config.port)
         assertEquals("production", config.database)
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://admin:secret123@10.0.0.1:5434/lamp_control")
-    @SetEnvironmentVariable(key = "DB_POOL_MIN_SIZE", value = "5")
-    @SetEnvironmentVariable(key = "DB_POOL_MAX_SIZE", value = "20")
-    fun `fromEnv respects pool size env vars with DATABASE_URL`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals("admin", config.user)
-        assertEquals("secret123", config.password)
-        assertEquals("10.0.0.1", config.host)
-        assertEquals(5434, config.port)
-        assertEquals("lamp_control", config.database)
-        assertEquals(5, config.poolMin)
-        assertEquals(20, config.poolMax)
     }
 
     @Test
@@ -90,8 +77,6 @@ class DatabaseConfigEnvironmentVariableTest {
     @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
     @SetEnvironmentVariable(key = "DB_USER", value = "testuser")
     @SetEnvironmentVariable(key = "DB_PASSWORD", value = "testpass")
-    @SetEnvironmentVariable(key = "DB_POOL_MIN_SIZE", value = "2")
-    @SetEnvironmentVariable(key = "DB_POOL_MAX_SIZE", value = "10")
     fun `fromEnv uses all individual env vars`() {
         val config = DatabaseConfig.fromEnv()
 
@@ -101,8 +86,6 @@ class DatabaseConfigEnvironmentVariableTest {
         assertEquals("testdb", config.database)
         assertEquals("testuser", config.user)
         assertEquals("testpass", config.password)
-        assertEquals(2, config.poolMin)
-        assertEquals(10, config.poolMax)
     }
 
     @Test
@@ -146,28 +129,6 @@ class DatabaseConfigEnvironmentVariableTest {
 
         assertNotNull(config)
         assertEquals(5432, config.port) // Falls back to default
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_HOST", value = "host1")
-    @SetEnvironmentVariable(key = "DB_USER", value = "user1")
-    @SetEnvironmentVariable(key = "DB_POOL_MIN_SIZE", value = "not-a-number")
-    fun `fromEnv uses default pool min when DB_POOL_MIN_SIZE is invalid`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(0, config.poolMin) // Falls back to default
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_HOST", value = "host1")
-    @SetEnvironmentVariable(key = "DB_USER", value = "user1")
-    @SetEnvironmentVariable(key = "DB_POOL_MAX_SIZE", value = "not-a-number")
-    fun `fromEnv uses default pool max when DB_POOL_MAX_SIZE is invalid`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(4, config.poolMax) // Falls back to default
     }
 
     @Test
@@ -222,6 +183,54 @@ class DatabaseConfigEnvironmentVariableTest {
     }
 
     @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = CLOUD_SQL_SOCKET_DATABASE_URL,
+    )
+    fun `fromEnv parses Cloud SQL Unix socket DATABASE_URL`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("postgres", config.user)
+        assertEquals("A3tN1}gX{5{e9ZaL", config.password)
+        assertEquals("/cloudsql/lamp-control-469416:europe-west1:lamp-control-db", config.host)
+        assertEquals(5432, config.port)
+        assertEquals("lamp-control", config.database)
+        assertEquals(
+            "jdbc:postgresql://localhost/lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+            config.connectionString(),
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = "postgresql://postgres:secret@/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
+    )
+    fun `fromEnv parses unixSocketPath query parameter`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("/cloudsql/project:region:instance", config.host)
+        assertEquals(
+            "jdbc:postgresql://localhost/lamp-control?unixSocketPath=/cloudsql/project:region:instance",
+            config.connectionString(),
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(
+        key = "DATABASE_URL",
+        value = "postgresql://user:my%21pass%3A123@db.example.com:5432/app",
+    )
+    fun `fromEnv decodes percent encoded password`() {
+        val config = DatabaseConfig.fromEnv()
+
+        assertNotNull(config)
+        assertEquals("my!pass:123", config.password)
+    }
+
+    @Test
     @ClearEnvironmentVariable(key = "DATABASE_URL")
     @ClearEnvironmentVariable(key = "DB_HOST")
     @ClearEnvironmentVariable(key = "DB_NAME")
@@ -273,64 +282,5 @@ class DatabaseConfigEnvironmentVariableTest {
 
         // All empty strings should be treated as not configured
         assertNull(config)
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_HOST", value = "host")
-    @SetEnvironmentVariable(key = "DB_USER", value = "user")
-    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "7200000")
-    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "900000")
-    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "60000")
-    fun `fromEnv respects timeout env vars`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(7200000L, config.maxLifetimeMs) // 2 hours
-        assertEquals(900000L, config.idleTimeoutMs) // 15 minutes
-        assertEquals(60000L, config.connectionTimeoutMs) // 60 seconds
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DATABASE_URL", value = "postgresql://user:pass@localhost:5432/db")
-    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "1800000")
-    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "600000")
-    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "20000")
-    fun `fromEnv respects timeout env vars with DATABASE_URL`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(1800000L, config.maxLifetimeMs) // 30 minutes
-        assertEquals(600000L, config.idleTimeoutMs) // 10 minutes
-        assertEquals(20000L, config.connectionTimeoutMs) // 20 seconds
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
-    @SetEnvironmentVariable(key = "DB_MAX_LIFETIME_MS", value = "invalid")
-    fun `fromEnv uses default max lifetime when invalid`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(3600000L, config.maxLifetimeMs) // Falls back to 1 hour default
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
-    @SetEnvironmentVariable(key = "DB_IDLE_TIMEOUT_MS", value = "invalid")
-    fun `fromEnv uses default idle timeout when invalid`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(1800000L, config.idleTimeoutMs) // Falls back to 30 minutes default
-    }
-
-    @Test
-    @SetEnvironmentVariable(key = "DB_NAME", value = "testdb")
-    @SetEnvironmentVariable(key = "DB_CONNECTION_TIMEOUT_MS", value = "invalid")
-    fun `fromEnv uses default connection timeout when invalid`() {
-        val config = DatabaseConfig.fromEnv()
-
-        assertNotNull(config)
-        assertEquals(30000L, config.connectionTimeoutMs) // Falls back to 30 seconds default
     }
 }

@@ -9,7 +9,7 @@
 * https://openapi-generator.tech
 * Do not edit the class manually.
 */
-@file:Suppress("WildcardImport", "EmptyDefaultConstructor")
+@file:Suppress("WildcardImport", "EmptyDefaultConstructor", "ktlint:standard:class-naming")
 
 package com.lampcontrol.api
 

@@ -30,6 +30,10 @@ class DatabaseManager:
                      and pool settings.
         """
         self.settings = settings
+        connect_args: dict[str, float] = {}
+        connect_timeout = settings.get_connect_timeout()
+        if connect_timeout is not None:
+            connect_args["timeout"] = connect_timeout
 
         # Create async engine with connection pooling
         self.engine = create_async_engine(
@@ -39,6 +43,7 @@ class DatabaseManager:
             max_overflow=settings.db_pool_max_size - settings.db_pool_min_size,
             pool_recycle=3600,  # Recycle connections after 1 hour
             echo=False,  # Set to True for SQL query logging during development
+            connect_args=connect_args,
         )
 
         # Create session factory
@@ -56,7 +61,7 @@ class DatabaseManager:
         """
         await self.engine.dispose()
 
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession]:
         """Provide an async database session for dependency injection.
 
         This is an async generator that yields a database session and
@@ -71,4 +76,9 @@ class DatabaseManager:
                 pass
         """
         async with self.async_session_factory() as session:
-            yield session
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise

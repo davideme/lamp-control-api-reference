@@ -51,7 +51,7 @@ namespace LampControlApi.Tests.Infrastructure
 
             // Assert
             Assert.IsNotNull(context.Lamps);
-            Assert.IsInstanceOfType(context.Lamps, typeof(DbSet<LampDbEntity>));
+            Assert.IsInstanceOfType<DbSet<LampDbEntity>>(context.Lamps);
         }
 
         /// <summary>

@@ -73,9 +73,8 @@ class LampService(
         lampId: String,
         lampUpdate: LampUpdate,
     ): Lamp {
-        val existingEntity = findLampEntity(lampId)
-        val updatedEntity = lampMapper.updateDomainEntity(existingEntity, lampUpdate)
-        val savedEntity = lampRepository.updateLamp(updatedEntity) ?: throw DomainException.NotFound(lampId)
+        val uuid = parseUuid(lampId)
+        val savedEntity = lampRepository.updateLamp(uuid, lampUpdate.status) ?: throw DomainException.NotFound(lampId)
         return lampMapper.toApiModel(savedEntity)
     }
 

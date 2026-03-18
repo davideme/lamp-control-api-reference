@@ -9,7 +9,7 @@
 * https://openapi-generator.tech
 * Do not edit the class manually.
 */
-@file:Suppress("WildcardImport", "LongMethod", "FunctionNaming", "MagicNumber")
+@file:Suppress("WildcardImport", "LongMethod", "FunctionNaming", "MagicNumber", "ktlint:standard:function-naming")
 
 package com.lampcontrol.api.apis
 

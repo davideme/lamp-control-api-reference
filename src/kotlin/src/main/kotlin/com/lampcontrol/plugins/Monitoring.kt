@@ -12,7 +12,7 @@ fun Application.configureMonitoring() {
         filter { call -> call.request.path().startsWith("/") }
     }
     install(CallId) {
-        header(HttpHeaders.XRequestId)
+        header(HttpHeaders.X_REQUEST_ID)
         verify { callId: String ->
             callId.isNotEmpty()
         }
@@ -20,5 +20,5 @@ fun Application.configureMonitoring() {
 }
 
 private object HttpHeaders {
-    const val XRequestId = "X-Request-ID"
+    const val X_REQUEST_ID = "X-Request-ID"
 }

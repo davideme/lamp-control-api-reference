@@ -3,10 +3,10 @@
 package com.lampcontrol.serialization
 
 import com.lampcontrol.testutil.TestJson
-import java.util.UUID
-import kotlin.test.assertEquals
 import kotlinx.serialization.*
 import org.junit.jupiter.api.Test
+import java.util.UUID
+import kotlin.test.assertEquals
 
 class UUIDSerializerTest {
     private val json = TestJson.instance

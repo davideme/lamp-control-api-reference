@@ -115,11 +115,12 @@ func (mr *MockLampRepositoryMockRecorder) List(ctx, offset, limit any) *gomock.C
 }
 
 // Update mocks base method.
-func (m *MockLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
+func (m *MockLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) (*entities.LampEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, lampEntity)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entities.LampEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.

@@ -4,7 +4,7 @@
 DROP TRIGGER IF EXISTS update_lamps_updated_at ON lamps;
 
 -- Drop function
-DROP FUNCTION IF EXISTS UPDATE_UPDATED_AT_COLUMN();
+DROP FUNCTION IF EXISTS update_updated_at_column();
 
 -- Restore original comment
 COMMENT ON COLUMN lamps.updated_at IS 'Timestamp when the lamp was last updated';

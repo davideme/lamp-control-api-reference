@@ -47,7 +47,7 @@ Edit `benchmarks/k6/services.json`:
 Default seeding is configured once in `benchmarks/k6/config.json` as `defaultDbSeedCommand`:
 
 ```bash
-psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'lamp-' || g), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
+psql "$BENCHMARK_DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE lamps RESTART IDENTITY CASCADE; INSERT INTO lamps (id, is_on, created_at, updated_at, deleted_at) SELECT gen_random_uuid(), (g % 2 = 0), NOW() - ((10001 - g) * INTERVAL '1 second'), NOW() - ((10001 - g) * INTERVAL '1 second'), NULL FROM generate_series(1, 10000) AS g;"
 ```
 
 Set `dbSeedCommand` in a service entry only when that service needs a custom seed/reset flow.
@@ -144,6 +144,17 @@ For meaningful cold-start sampling, keep `cloudRun.minInstances=0`.
 
 ## 4) Run benchmark
 
+### CLI flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--config <path>` | `benchmarks/k6/config.json` | Benchmark config file |
+| `--services-file <path>` | `benchmarks/k6/services.json` | Services definition file |
+| `--services <names>` | _(all)_ | Comma-separated list of service names to run (e.g. `csharp,python`) |
+| `--passes <names>` | _(from config)_ | Comma-separated passes to run: `memory`, `db`, or both |
+| `--results-dir <path>` | `benchmarks/results` | Directory for raw results and summary |
+| `--skip-setup` | `false` | Skip `memorySetupCommand`/`dbSetupCommand` for each service |
+
 Run both passes (`memory`,`db`) with settings from `config.json`:
 
 ```bash
@@ -160,6 +171,18 @@ Run only memory pass:
 
 ```bash
 node benchmarks/k6/run-benchmarks.js --passes memory
+```
+
+Run only specific services (comma-separated, must match `name` in `services.json`):
+
+```bash
+node benchmarks/k6/run-benchmarks.js --services csharp,python
+```
+
+Run with a custom services file:
+
+```bash
+node benchmarks/k6/run-benchmarks.js --services-file benchmarks/k6/my-services.json
 ```
 
 Run benchmark without running setup commands (`memorySetupCommand` / `dbSetupCommand`):

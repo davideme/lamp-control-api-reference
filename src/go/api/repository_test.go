@@ -151,7 +151,7 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 	}
 
 	// Test updating non-existent lamp
-	err := repo.Update(ctx, lamp)
+	_, err := repo.Update(ctx, lamp)
 	if err == nil {
 		t.Error("Update should return error for non-existent lamp")
 	}
@@ -174,9 +174,24 @@ func TestInMemoryLampRepository_Update(t *testing.T) {
 		UpdatedAt: time.Now(),
 	}
 
-	err = repo.Update(ctx, updatedLamp)
+	returnedLamp, err := repo.Update(ctx, updatedLamp)
 	if err != nil {
 		t.Fatalf("Update failed: %v", err)
+	}
+	if returnedLamp == nil {
+		t.Fatal("Update returned nil entity")
+	}
+	if returnedLamp.ID != lamp.ID {
+		t.Errorf("Expected returned ID %v, got %v", lamp.ID, returnedLamp.ID)
+	}
+	if returnedLamp.Status != false {
+		t.Errorf("Expected returned Status false, got %v", returnedLamp.Status)
+	}
+	if returnedLamp.CreatedAt != lamp.CreatedAt {
+		t.Errorf("Expected CreatedAt preserved: got %v, want %v", returnedLamp.CreatedAt, lamp.CreatedAt)
+	}
+	if returnedLamp.UpdatedAt.IsZero() {
+		t.Error("Expected UpdatedAt to be set on returned entity")
 	}
 
 	// Verify update
@@ -572,7 +587,7 @@ func TestInMemoryLampRepository_ConcurrentReadWrite(t *testing.T) {
 				UpdatedAt: time.Now(),
 			}
 
-			err := repo.Update(ctx, updatedLamp)
+			_, err := repo.Update(ctx, updatedLamp)
 			if err != nil {
 				t.Errorf("Concurrent update failed: %v", err)
 				return
@@ -749,7 +764,7 @@ func TestInMemoryLampRepository_UpdateDoesNotResurrectDeletedLamp(t *testing.T) 
 		go func() {
 			defer wg.Done()
 			<-start
-			_ = repo.Update(ctx, updated)
+			_, _ = repo.Update(ctx, updated)
 		}()
 
 		go func() {

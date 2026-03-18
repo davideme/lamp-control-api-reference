@@ -2,6 +2,7 @@
 """
 Launcher script for FastAPI application with Cloud Run PORT support.
 """
+
 import os
 
 import uvicorn

@@ -27,6 +27,10 @@ namespace LampControlApi.Tests.Infrastructure
         public void Initialize()
         {
             this.mockLogger = new Mock<ILogger<PostgresLampRepository>>();
+
+            // [LoggerMessage] source-generated methods call IsEnabled() before Log().
+            // Return true so the log call is not short-circuited by the mock.
+            this.mockLogger.Setup(l => l.IsEnabled(LogLevel.Debug)).Returns(true);
         }
 
         /// <summary>
@@ -47,26 +51,6 @@ namespace LampControlApi.Tests.Infrastructure
             // Act & Assert
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(
                 async () => await repository.CreateAsync(null!));
-        }
-
-        /// <summary>
-        /// Test that UpdateAsync throws ArgumentNullException when entity is null.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
-        public async Task UpdateAsync_ShouldThrowArgumentNullException_WhenEntityIsNull()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<LampControlDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            using var context = new LampControlDbContext(options);
-            var repository = new PostgresLampRepository(context, this.mockLogger.Object);
-
-            // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(
-                async () => await repository.UpdateAsync(null!));
         }
 
         /// <summary>
@@ -163,10 +147,11 @@ namespace LampControlApi.Tests.Infrastructure
             await repository.CreateAsync(lamp);
             await repository.GetAllAsync();
             await repository.GetByIdAsync(lamp.Id);
-            await repository.UpdateAsync(lamp);
+            await repository.UpdateAsync(lamp.Id, lamp.Status);
             await repository.DeleteAsync(lamp.Id);
 
             // Assert - Verify debug logging was called
+#pragma warning disable CA1873 // Moq.Verify lambda is not a real log call; false positive
             this.mockLogger.Verify(
                 logger => logger.Log(
                     LogLevel.Debug,
@@ -175,6 +160,7 @@ namespace LampControlApi.Tests.Infrastructure
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.AtLeast(5));
+#pragma warning restore CA1873
         }
 
         /// <summary>
@@ -249,10 +235,10 @@ namespace LampControlApi.Tests.Infrastructure
 
             using var context = new LampControlDbContext(options);
             var repository = new PostgresLampRepository(context, this.mockLogger.Object);
-            var nonExistentLamp = LampEntity.Create(status: true);
+            var nonExistentLampId = Guid.NewGuid();
 
             // Act
-            var result = await repository.UpdateAsync(nonExistentLamp);
+            var result = await repository.UpdateAsync(nonExistentLampId, status: true);
 
             // Assert
             Assert.IsNull(result);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import org.openapitools.entity.LampEntity;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -47,6 +48,18 @@ public interface JpaLampRepository extends JpaRepository<LampEntity, UUID> {
    */
   @Query("SELECT l FROM LampEntity l WHERE l.deletedAt IS NULL ORDER BY l.createdAt ASC")
   List<LampEntity> findAllActive();
+
+  /**
+   * Find an offset/limit window of active lamps for hot-path pagination.
+   *
+   * <p>Spring Data applies offset and limit from {@link Pageable} to this query without needing a
+   * separate count query when returning {@code List}.
+   *
+   * @param pageable offset/limit and ordering information
+   * @return active lamps for the requested window
+   */
+  @Query("SELECT l FROM LampEntity l WHERE l.deletedAt IS NULL ORDER BY l.createdAt ASC, l.id ASC")
+  List<LampEntity> findAllActive(Pageable pageable);
 
   /**
    * Count all active (non-deleted) lamps.

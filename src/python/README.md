@@ -4,7 +4,7 @@ A FastAPI-based REST API for controlling lamps.
 
 ## Requirements.
 
-Python >= 3.12
+Python >= 3.14
 Poetry >= 1.0.0
 
 ## Installation & Usage
@@ -16,7 +16,7 @@ To run the server, please execute the following from the root directory:
 poetry install
 
 # Run the server (with in-memory storage)
-poetry run fastapi run src/openapi_server/main.py --port 8080 --host 0.0.0.0
+poetry run uvicorn src.openapi_server.main:app --port 8080 --host 0.0.0.0
 ```
 
 and open your browser at `http://localhost:8080/docs/` to see the docs.
@@ -120,7 +120,7 @@ poetry run alembic revision --autogenerate -m "Description of changes"
 #### 6. Start the Server with PostgreSQL
 
 ```bash
-poetry run fastapi run src/openapi_server/main.py --port 8080 --host 0.0.0.0
+poetry run uvicorn src.openapi_server.main:app --port 8080 --host 0.0.0.0
 ```
 
 ### Environment Variables Reference
@@ -171,7 +171,7 @@ The Docker image uses:
 - **Distroless runtime**: Production stage uses `gcr.io/distroless/python3-debian12:nonroot` for minimal attack surface and non-root execution
 - **Port Configuration**: Supports PORT environment variable for Cloud Run compatibility via launcher script
 - **Worker Configuration**: Supports WORKERS environment variable to control the number of worker processes via launcher script
-- **FastAPI CLI**: Uses the modern `fastapi run` command for production deployment
+- **Uvicorn runtime**: Uses `uvicorn` for production deployment
 
 #### Building Docker Image
 
@@ -298,7 +298,7 @@ If integration tests fail with Docker errors:
    echo 'export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"' >> ~/.zshrc
    ```
 
-3. **Install `greenlet` (Python 3.13+)**:
+3. **Install `greenlet` (Python 3.14+)**:
 
    SQLAlchemy's async support requires the `greenlet` library. It is included as a dev dependency, but if you encounter `No module named 'greenlet'` errors, install it explicitly:
 

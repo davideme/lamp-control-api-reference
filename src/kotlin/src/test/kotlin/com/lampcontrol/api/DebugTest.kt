@@ -1,14 +1,14 @@
 package com.lampcontrol.api
 
-import com.lampcontrol.module
 import com.lampcontrol.api.models.LampCreate
+import com.lampcontrol.module
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.testing.testApplication
-import kotlin.test.Test
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.test.Test
 
 class DebugTest {
     @Test

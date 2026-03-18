@@ -7,6 +7,8 @@ PostgreSQL repository implementation.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from src.openapi_server.entities.lamp_entity import LampEntity
 
 
@@ -39,12 +41,21 @@ class InMemoryLampRepository:
     async def create(self, lamp_entity: LampEntity) -> LampEntity:
         """Create a new lamp.
 
+        Simulates the database DEFAULT CURRENT_TIMESTAMP behaviour: both
+        created_at and updated_at are set to the current UTC time, mirroring
+        what the PostgreSQL repository receives via the RETURNING clause.
+
         Args:
             lamp_entity: The lamp entity to create.
 
         Returns:
-            The created lamp entity.
+            The created lamp entity with timestamps populated.
         """
+        now = datetime.now(UTC)
+        if lamp_entity.created_at is None:
+            lamp_entity.created_at = now
+        if lamp_entity.updated_at is None:
+            lamp_entity.updated_at = now
         self._lamps[lamp_entity.id] = lamp_entity
         return lamp_entity
 
@@ -88,17 +99,22 @@ class InMemoryLampRepository:
     async def update(self, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp.
 
+        Simulates the database BEFORE UPDATE trigger behaviour: updated_at is
+        refreshed to the current UTC time, mirroring what the PostgreSQL
+        repository receives via the RETURNING clause.
+
         Args:
             lamp_entity: The lamp entity to update.
 
         Returns:
-            The updated lamp entity.
+            The updated lamp entity with updated_at refreshed.
 
         Raises:
             LampNotFoundError: If the lamp is not found.
         """
         if lamp_entity.id not in self._lamps:
             raise LampNotFoundError(lamp_entity.id)
+        lamp_entity.updated_at = datetime.now(UTC)
         self._lamps[lamp_entity.id] = lamp_entity
         return lamp_entity
 

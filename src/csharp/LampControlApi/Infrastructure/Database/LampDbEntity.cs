@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LampControlApi.Infrastructure.Database
 {
@@ -20,14 +21,17 @@ namespace LampControlApi.Infrastructure.Database
 
         /// <summary>
         /// Gets or sets the timestamp when the lamp was created.
-        /// Database-generated on insert.
+        /// Set by the database via DEFAULT CURRENT_TIMESTAMP on insert; never updated.
         /// </summary>
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the lamp was last updated.
-        /// Database-generated on insert and update via trigger.
+        /// Set by the database via DEFAULT CURRENT_TIMESTAMP on insert and a
+        /// BEFORE UPDATE trigger on every update.
         /// </summary>
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>

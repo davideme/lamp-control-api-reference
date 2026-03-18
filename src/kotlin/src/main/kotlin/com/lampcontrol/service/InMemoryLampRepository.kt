@@ -2,6 +2,7 @@ package com.lampcontrol.service
 
 import com.lampcontrol.entity.LampEntity
 import com.lampcontrol.repository.LampRepository
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -50,12 +51,16 @@ class InMemoryLampRepository : LampRepository {
     }
 
     /**
-     * Update an existing lamp
+     * Update an existing lamp, preserving createdAt from the stored entity
      */
-    override suspend fun updateLamp(entity: LampEntity): LampEntity? {
-        if (lamps[entity.id] == null) return null
-        lamps[entity.id] = entity
-        return entity
+    override suspend fun updateLamp(
+        id: UUID,
+        status: Boolean,
+    ): LampEntity? {
+        val existing = lamps[id] ?: return null
+        val updated = existing.copy(status = status, updatedAt = Instant.now())
+        lamps[id] = updated
+        return updated
     }
 
     /**

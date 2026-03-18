@@ -5,8 +5,14 @@
 ALTER TABLE lamps
 ADD COLUMN deleted_at TIMESTAMP WITH TIME ZONE;
 
--- Add index on deleted_at for query performance
-CREATE INDEX idx_lamps_deleted_at ON lamps (deleted_at);
-
 -- Add comment for deleted_at column
 COMMENT ON COLUMN lamps.deleted_at IS 'Timestamp when the lamp was soft deleted, NULL if active';
+
+-- Add optimized partial indexes for active rows
+CREATE INDEX IF NOT EXISTS idx_lamps_active_created_at_id
+ON lamps (created_at ASC, id ASC)
+WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_lamps_active_is_on
+ON lamps (is_on)
+WHERE deleted_at IS NULL;

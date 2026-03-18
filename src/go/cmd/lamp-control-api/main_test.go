@@ -124,7 +124,7 @@ func TestNetJoinHostPort(t *testing.T) {
 
 func TestHealthHandler(t *testing.T) {
 	t.Run("GET request returns ok", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/health", nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health", nil)
 		rr := httptest.NewRecorder()
 
 		healthHandler(rr, req)
@@ -153,7 +153,7 @@ func TestHealthHandler(t *testing.T) {
 	})
 
 	t.Run("POST request returns method not allowed", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/health", nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/health", nil)
 		rr := httptest.NewRecorder()
 
 		healthHandler(rr, req)
@@ -169,7 +169,7 @@ func TestHealthHandler(t *testing.T) {
 	})
 
 	t.Run("PUT request returns method not allowed", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPut, "/health", nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/health", nil)
 		rr := httptest.NewRecorder()
 
 		healthHandler(rr, req)
@@ -180,7 +180,7 @@ func TestHealthHandler(t *testing.T) {
 	})
 
 	t.Run("DELETE request returns method not allowed", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodDelete, "/health", nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodDelete, "/health", nil)
 		rr := httptest.NewRecorder()
 
 		healthHandler(rr, req)

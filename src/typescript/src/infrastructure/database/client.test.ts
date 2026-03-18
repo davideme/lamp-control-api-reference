@@ -86,6 +86,131 @@ describe('Prisma Client', () => {
         }),
       );
     });
+
+    it('should normalize empty host URL when host query parameter is set', async () => {
+      process.env.DATABASE_URL =
+        'postgresql://postgres:pass@/lamp-control?host=/cloudsql/project:region:instance&connect_timeout=5';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://postgres:pass@localhost/lamp-control?host=/cloudsql/project:region:instance&connect_timeout=5',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should keep regular URL unchanged', async () => {
+      process.env.DATABASE_URL = 'postgresql://localhost:5432/test';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://localhost:5432/test',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should normalize cloud sql socket URL with encoded password characters', async () => {
+      process.env.DATABASE_URL =
+        'postgresql://postgres:REDACTED%7BPASSWORD%7D@/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://postgres:REDACTED%7BPASSWORD%7D@localhost/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should normalize cloud sql socket URL without credentials', async () => {
+      process.env.DATABASE_URL =
+        'postgresql:///lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://localhost/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should normalize cloud sql socket URL using postgres scheme', async () => {
+      process.env.DATABASE_URL =
+        'postgres://postgres:REDACTED%7BPASSWORD%7D@/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgres://postgres:REDACTED%7BPASSWORD%7D@localhost/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db&connect_timeout=5',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should detect host parameter in the middle of query parameters', async () => {
+      process.env.DATABASE_URL =
+        'postgresql://postgres:REDACTED%7BPASSWORD%7D@/lamp-control?foo=bar&host=/cloudsql/example-project:europe-west1:lamp-control-db&baz=qux';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://postgres:REDACTED%7BPASSWORD%7D@localhost/lamp-control?foo=bar&host=/cloudsql/example-project:europe-west1:lamp-control-db&baz=qux',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should keep URL with hostname and host parameter unchanged', async () => {
+      process.env.DATABASE_URL =
+        'postgresql://postgres:REDACTED%7BPASSWORD%7D@actualhost:5432/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db';
+
+      const { getPrismaClient } = await import('./client.ts');
+
+      getPrismaClient();
+      expect(MockPrismaClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasources: {
+            db: {
+              url: 'postgresql://postgres:REDACTED%7BPASSWORD%7D@actualhost:5432/lamp-control?host=/cloudsql/example-project:europe-west1:lamp-control-db',
+            },
+          },
+        }),
+      );
+    });
   });
 
   describe('closePrismaClient', () => {

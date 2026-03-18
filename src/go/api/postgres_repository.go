@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/davideme/lamp-control-api-reference/api/entities"
@@ -29,31 +30,28 @@ func NewPostgresLampRepository(pool *pgxpool.Pool) *PostgresLampRepository {
 }
 
 // Create adds a new lamp to the repository
+// created_at and updated_at are set by DB DEFAULT CURRENT_TIMESTAMP; the
+// RETURNING clause sends them back and we populate the entity in-place.
 func (r *PostgresLampRepository) Create(ctx context.Context, lampEntity *entities.LampEntity) error {
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
 	copy(pgUUID.Bytes[:], lampEntity.ID[:])
 	pgUUID.Valid = true
 
-	// Convert time.Time to pgtype.Timestamptz
-	createdAt := pgtype.Timestamptz{
-		Time:  lampEntity.CreatedAt,
-		Valid: true,
-	}
-	updatedAt := pgtype.Timestamptz{
-		Time:  lampEntity.UpdatedAt,
-		Valid: true,
-	}
-
-	_, err := r.queries.CreateLamp(ctx, queries.CreateLampParams{
-		ID:        pgUUID,
-		IsOn:      lampEntity.Status,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+	lamp, err := r.queries.CreateLamp(ctx, queries.CreateLampParams{
+		ID:   pgUUID,
+		IsOn: lampEntity.Status,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create lamp: %w", err)
 	}
+
+	// Populate DB-generated timestamps back onto the entity
+	if !lamp.CreatedAt.Valid || !lamp.UpdatedAt.Valid {
+		return fmt.Errorf("database did not return timestamps for created lamp")
+	}
+	lampEntity.CreatedAt = lamp.CreatedAt.Time
+	lampEntity.UpdatedAt = lamp.UpdatedAt.Time
 
 	return nil
 }
@@ -83,28 +81,28 @@ func (r *PostgresLampRepository) GetByID(ctx context.Context, id string) (*entit
 	return r.convertToEntity(&lamp)
 }
 
-// Update modifies an existing lamp in the repository
-func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) error {
+// Update modifies an existing lamp in the repository and returns the updated entity
+func (r *PostgresLampRepository) Update(ctx context.Context, lampEntity *entities.LampEntity) (*entities.LampEntity, error) {
 	// Convert entity UUID to pgtype.UUID
 	var pgUUID pgtype.UUID
 	copy(pgUUID.Bytes[:], lampEntity.ID[:])
 	pgUUID.Valid = true
 
 	// Note: updated_at is automatically set by the database trigger
-	_, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
+	lamp, err := r.queries.UpdateLamp(ctx, queries.UpdateLampParams{
 		ID:   pgUUID,
 		IsOn: lampEntity.Status,
 	})
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrLampNotFound
+			return nil, ErrLampNotFound
 		}
 
-		return fmt.Errorf("failed to update lamp: %w", err)
+		return nil, fmt.Errorf("failed to update lamp: %w", err)
 	}
 
-	return nil
+	return r.convertToEntity(&lamp)
 }
 
 // Delete removes a lamp from the repository (soft delete)
@@ -150,13 +148,11 @@ func (r *PostgresLampRepository) List(ctx context.Context, offset int, limit int
 	if limit <= 0 {
 		return []*entities.LampEntity{}, nil
 	}
-	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
-	offset32 := int32(offset)
-	//nolint:gosec // Safe narrowing: values are round-trip validated immediately below.
-	limit32 := int32(limit)
-	if int(offset32) != offset || int(limit32) != limit {
+	if offset > math.MaxInt32 || limit > math.MaxInt32 {
 		return nil, fmt.Errorf("%w: offset=%d limit=%d", ErrInvalidPagination, offset, limit)
 	}
+	offset32 := int32(offset)
+	limit32 := int32(limit)
 
 	lamps, err := r.queries.ListLamps(ctx, queries.ListLampsParams{
 		Limit:  limit32,

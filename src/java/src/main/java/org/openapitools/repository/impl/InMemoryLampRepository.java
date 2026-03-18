@@ -144,6 +144,23 @@ public class InMemoryLampRepository implements LampRepository {
   }
 
   @Override
+  public List<LampEntity> findAllActive(final Pageable pageable) {
+    final List<LampEntity> activeLamps =
+        lamps.values().stream()
+            .filter(lamp -> lamp.getDeletedAt() == null)
+            .sorted(Comparator.comparing(LampEntity::getCreatedAt).thenComparing(LampEntity::getId))
+            .toList();
+
+    final int start = (int) pageable.getOffset();
+    if (start >= activeLamps.size()) {
+      return List.of();
+    }
+
+    final int end = Math.min(start + pageable.getPageSize(), activeLamps.size());
+    return activeLamps.subList(start, end);
+  }
+
+  @Override
   public long countActive() {
     return lamps.values().stream().filter(lamp -> lamp.getDeletedAt() == null).count();
   }

@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.openapi_server.entities.lamp_entity import LampEntity
@@ -30,15 +30,7 @@ class PostgresLampRepository:
     - Timestamp management: database trigger updates updated_at
     """
 
-    def __init__(self, session: AsyncSession) -> None:
-        """Initialize the repository with a database session.
-
-        Args:
-            session: AsyncSession for database operations.
-        """
-        self._session = session
-
-    async def create(self, lamp_entity: LampEntity) -> LampEntity:
+    async def create(self, db: AsyncSession, lamp_entity: LampEntity) -> LampEntity:
         """Create a new lamp in the database.
 
         Args:
@@ -47,21 +39,23 @@ class PostgresLampRepository:
         Returns:
             The created lamp entity with database-generated values.
         """
-        db_lamp = LampModel(
-            id=UUID(lamp_entity.id),
-            is_on=lamp_entity.status,  # Map status -> is_on
-            created_at=lamp_entity.created_at,
-            updated_at=lamp_entity.updated_at,
-            deleted_at=None,
+        stmt = (
+            insert(LampModel)
+            .values(
+                id=UUID(lamp_entity.id),
+                is_on=lamp_entity.status,  # Map status -> is_on
+                deleted_at=None,
+                # created_at and updated_at set by DB DEFAULT CURRENT_TIMESTAMP
+            )
+            .returning(LampModel)
         )
 
-        self._session.add(db_lamp)
-        await self._session.flush()
-        await self._session.refresh(db_lamp)
+        result = await db.execute(stmt)
+        db_lamp = result.scalars().one()
 
         return self._to_entity(db_lamp)
 
-    async def get(self, lamp_id: str) -> LampEntity | None:
+    async def get(self, db: AsyncSession, lamp_id: str) -> LampEntity | None:
         """Get a lamp by ID, excluding soft-deleted lamps.
 
         Args:
@@ -74,12 +68,12 @@ class PostgresLampRepository:
             LampModel.id == UUID(lamp_id), LampModel.deleted_at.is_(None)
         )
 
-        result = await self._session.execute(stmt)
+        result = await db.execute(stmt)
         db_lamp = result.scalar_one_or_none()
 
         return self._to_entity(db_lamp) if db_lamp else None
 
-    async def list(self) -> list[LampEntity]:
+    async def list(self, db: AsyncSession) -> list[LampEntity]:
         """List all active lamps (excluding soft-deleted ones).
 
         Returns:
@@ -87,12 +81,12 @@ class PostgresLampRepository:
         """
         stmt = self._base_list_query()
 
-        result = await self._session.execute(stmt)
+        result = await db.execute(stmt)
         db_lamps = result.scalars().all()
 
         return [self._to_entity(lamp) for lamp in db_lamps]
 
-    async def list_paginated(self, offset: int, limit: int) -> list[LampEntity]:
+    async def list_paginated(self, db: AsyncSession, offset: int, limit: int) -> list[LampEntity]:
         """List active lamps with bounded pagination.
 
         Ordering is deterministic: created_at ascending, then id ascending.
@@ -109,12 +103,12 @@ class PostgresLampRepository:
             return []
 
         stmt = self._base_list_query().offset(safe_offset).limit(limit)
-        result = await self._session.execute(stmt)
+        result = await db.execute(stmt)
         db_lamps = result.scalars().all()
 
         return [self._to_entity(lamp) for lamp in db_lamps]
 
-    async def update(self, lamp_entity: LampEntity) -> LampEntity:
+    async def update(self, db: AsyncSession, lamp_entity: LampEntity) -> LampEntity:
         """Update a lamp's status.
 
         The updated_at field will be automatically updated by the database
@@ -124,31 +118,27 @@ class PostgresLampRepository:
             lamp_entity: The lamp entity with updated values.
 
         Returns:
-            The updated lamp entity.
+            The updated lamp entity with trigger-updated timestamps.
 
         Raises:
             LampNotFoundError: If the lamp is not found or is soft-deleted.
         """
-        stmt = select(LampModel).where(
-            LampModel.id == UUID(lamp_entity.id), LampModel.deleted_at.is_(None)
+        stmt = (
+            update(LampModel)
+            .where(LampModel.id == UUID(lamp_entity.id), LampModel.deleted_at.is_(None))
+            .values(is_on=lamp_entity.status)  # Map status -> is_on; updated_at set by trigger
+            .returning(LampModel)
         )
 
-        result = await self._session.execute(stmt)
-        db_lamp = result.scalar_one_or_none()
+        result = await db.execute(stmt)
+        db_lamp = result.scalars().one_or_none()
 
         if db_lamp is None:
             raise LampNotFoundError(lamp_entity.id)
 
-        # Update the status field (is_on in database)
-        db_lamp.is_on = lamp_entity.status
-        # Note: updated_at will be set by the database trigger
-
-        await self._session.commit()
-        await self._session.refresh(db_lamp)  # Get trigger-updated values
-
         return self._to_entity(db_lamp)
 
-    async def delete(self, lamp_id: str) -> None:
+    async def delete(self, db: AsyncSession, lamp_id: str) -> None:
         """Soft delete a lamp by setting the deleted_at timestamp.
 
         Args:
@@ -157,20 +147,18 @@ class PostgresLampRepository:
         Raises:
             LampNotFoundError: If the lamp is not found or already deleted.
         """
-        stmt = select(LampModel).where(
-            LampModel.id == UUID(lamp_id), LampModel.deleted_at.is_(None)
+        stmt = (
+            update(LampModel)
+            .where(LampModel.id == UUID(lamp_id), LampModel.deleted_at.is_(None))
+            .values(deleted_at=datetime.now(UTC))
+            .returning(LampModel.id)
         )
 
-        result = await self._session.execute(stmt)
-        db_lamp = result.scalar_one_or_none()
+        result = await db.execute(stmt)
+        deleted_id = result.scalar_one_or_none()
 
-        if db_lamp is None:
+        if deleted_id is None:
             raise LampNotFoundError(lamp_id)
-
-        # Soft delete: set the deleted_at timestamp
-        db_lamp.deleted_at = datetime.now(UTC)
-
-        await self._session.commit()
 
     @staticmethod
     def _base_list_query():

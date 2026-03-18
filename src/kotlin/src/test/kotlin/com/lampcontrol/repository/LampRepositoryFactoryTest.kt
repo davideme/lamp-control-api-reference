@@ -1,8 +1,8 @@
 package com.lampcontrol.repository
 
 import com.lampcontrol.service.InMemoryLampRepository
-import kotlin.test.*
 import org.junit.jupiter.api.Test
+import kotlin.test.*
 
 class LampRepositoryFactoryTest {
     @Test

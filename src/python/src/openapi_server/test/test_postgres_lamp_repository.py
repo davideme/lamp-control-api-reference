@@ -5,7 +5,7 @@ ensuring that the repository works correctly with an actual database.
 """
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -105,7 +105,7 @@ async def session(engine):
 @pytest.fixture
 def repository(session):
     """Provide a PostgresLampRepository instance."""
-    return PostgresLampRepository(session)
+    return PostgresLampRepository()
 
 
 @pytest.fixture
@@ -120,7 +120,7 @@ class TestPostgresLampRepository:
     async def test_create_lamp(self, repository, sample_lamp_entity, session):
         """Test creating a lamp in PostgreSQL."""
         # Act
-        created_lamp = await repository.create(sample_lamp_entity)
+        created_lamp = await repository.create(session, sample_lamp_entity)
 
         # Assert
         assert created_lamp.id == sample_lamp_entity.id
@@ -131,28 +131,28 @@ class TestPostgresLampRepository:
     async def test_get_existing_lamp(self, repository, sample_lamp_entity, session):
         """Test retrieving an existing lamp."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
 
         # Act
-        retrieved_lamp = await repository.get(sample_lamp_entity.id)
+        retrieved_lamp = await repository.get(session, sample_lamp_entity.id)
 
         # Assert
         assert retrieved_lamp is not None
         assert retrieved_lamp.id == sample_lamp_entity.id
         assert retrieved_lamp.status == sample_lamp_entity.status
 
-    async def test_get_nonexistent_lamp(self, repository):
+    async def test_get_nonexistent_lamp(self, repository, session):
         """Test retrieving a non-existent lamp returns None."""
         # Act
-        retrieved_lamp = await repository.get(str(uuid4()))
+        retrieved_lamp = await repository.get(session, str(uuid4()))
 
         # Assert
         assert retrieved_lamp is None
 
-    async def test_list_empty(self, repository):
+    async def test_list_empty(self, repository, session):
         """Test listing lamps when database is empty."""
         # Act
-        lamps = await repository.list()
+        lamps = await repository.list(session)
 
         # Assert
         assert lamps == []
@@ -160,13 +160,13 @@ class TestPostgresLampRepository:
     async def test_list_multiple_lamps(self, repository, sample_lamp_entity, session):
         """Test listing multiple lamps."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
 
         another_lamp = LampEntity(id=str(uuid4()), status=False)
-        await repository.create(another_lamp)
+        await repository.create(session, another_lamp)
 
         # Act
-        lamps = await repository.list()
+        lamps = await repository.list(session)
 
         # Assert
         assert len(lamps) == 2
@@ -174,77 +174,66 @@ class TestPostgresLampRepository:
         assert sample_lamp_entity.id in lamp_ids
         assert another_lamp.id in lamp_ids
 
-    async def test_list_paginated_returns_exact_window(self, repository):
+    async def test_list_paginated_returns_exact_window(self, repository, session):
         """Test list_paginated returns offset/limit window."""
-        # Arrange
-        now = datetime.now(UTC)
-        lamp_a = LampEntity(id=str(uuid4()), status=True, created_at=now, updated_at=now)
-        lamp_b = LampEntity(
-            id=str(uuid4()),
-            status=False,
-            created_at=now + timedelta(seconds=1),
-            updated_at=now + timedelta(seconds=1),
+        # Arrange - timestamps are DB-generated; capture returned entities so we
+        # know the actual DB order (created_at ASC, id ASC).
+        lamp_a = LampEntity(id=str(uuid4()), status=True)
+        lamp_b = LampEntity(id=str(uuid4()), status=False)
+        lamp_c = LampEntity(id=str(uuid4()), status=True)
+        created_a = await repository.create(session, lamp_a)
+        created_b = await repository.create(session, lamp_b)
+        created_c = await repository.create(session, lamp_c)
+
+        sorted_lamps = sorted(
+            [created_a, created_b, created_c], key=lambda lamp: (lamp.created_at, lamp.id)
         )
-        lamp_c = LampEntity(
-            id=str(uuid4()),
-            status=True,
-            created_at=now + timedelta(seconds=2),
-            updated_at=now + timedelta(seconds=2),
-        )
-        await repository.create(lamp_a)
-        await repository.create(lamp_b)
-        await repository.create(lamp_c)
 
         # Act
-        page = await repository.list_paginated(offset=1, limit=1)
+        page = await repository.list_paginated(session, offset=1, limit=1)
 
         # Assert
         assert len(page) == 1
-        assert page[0].id == lamp_b.id
+        assert page[0].id == sorted_lamps[1].id
 
-    async def test_list_paginated_second_page_progression(self, repository):
+    async def test_list_paginated_second_page_progression(self, repository, session):
         """Test pagination progression across pages."""
-        # Arrange
-        now = datetime.now(UTC)
-        lamps = [
-            LampEntity(
-                id=str(uuid4()),
-                status=i % 2 == 0,
-                created_at=now + timedelta(seconds=i),
-                updated_at=now + timedelta(seconds=i),
-            )
-            for i in range(5)
-        ]
+        # Arrange - timestamps are DB-generated; capture returned entities so we
+        # know the actual DB order (created_at ASC, id ASC).
+        lamps = [LampEntity(id=str(uuid4()), status=i % 2 == 0) for i in range(5)]
+        created_lamps = []
         for lamp in lamps:
-            await repository.create(lamp)
+            created_lamps.append(await repository.create(session, lamp))
+
+        sorted_lamps = sorted(created_lamps, key=lambda lamp: (lamp.created_at, lamp.id))
 
         # Act
-        first_page = await repository.list_paginated(offset=0, limit=2)
-        second_page = await repository.list_paginated(offset=2, limit=2)
+        first_page = await repository.list_paginated(session, offset=0, limit=2)
+        second_page = await repository.list_paginated(session, offset=2, limit=2)
 
         # Assert
-        assert [lamp.id for lamp in first_page] == [lamps[0].id, lamps[1].id]
-        assert [lamp.id for lamp in second_page] == [lamps[2].id, lamps[3].id]
+        assert [lamp.id for lamp in first_page] == [sorted_lamps[0].id, sorted_lamps[1].id]
+        assert [lamp.id for lamp in second_page] == [sorted_lamps[2].id, sorted_lamps[3].id]
 
-    async def test_list_paginated_excludes_soft_deleted(self, repository):
+    async def test_list_paginated_excludes_soft_deleted(self, repository, session):
         """Test list_paginated excludes soft-deleted lamps."""
         # Arrange
         first = LampEntity(id=str(uuid4()), status=True)
         second = LampEntity(id=str(uuid4()), status=False)
         third = LampEntity(id=str(uuid4()), status=True)
-        await repository.create(first)
-        await repository.create(second)
-        await repository.create(third)
-        await repository.delete(second.id)
+        await repository.create(session, first)
+        await repository.create(session, second)
+        await repository.create(session, third)
+        await repository.delete(session, second.id)
 
         # Act
-        lamps = await repository.list_paginated(offset=0, limit=10)
+        lamps = await repository.list_paginated(session, offset=0, limit=10)
 
         # Assert
         assert {lamp.id for lamp in lamps} == {first.id, third.id}
         assert second.id not in {lamp.id for lamp in lamps}
 
-    async def test_list_paginated_uses_deterministic_ordering(self, repository):
+    async def test_list_paginated_uses_deterministic_ordering(self, repository, session):
         """Test list_paginated ordering is created_at then id."""
         # Arrange
         created_at = datetime.now(UTC)
@@ -254,11 +243,11 @@ class TestPostgresLampRepository:
         lamp_b = LampEntity(
             id=str(uuid4()), status=False, created_at=created_at, updated_at=created_at
         )
-        await repository.create(lamp_b)
-        await repository.create(lamp_a)
+        await repository.create(session, lamp_b)
+        await repository.create(session, lamp_a)
 
         # Act
-        lamps = await repository.list_paginated(offset=0, limit=2)
+        lamps = await repository.list_paginated(session, offset=0, limit=2)
 
         # Assert
         expected = sorted([lamp_a.id, lamp_b.id])
@@ -267,13 +256,13 @@ class TestPostgresLampRepository:
     async def test_update_lamp_status(self, repository, sample_lamp_entity, session):
         """Test updating a lamp's status."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
 
         # Modify the status
         sample_lamp_entity.status = not sample_lamp_entity.status
 
         # Act
-        updated_lamp = await repository.update(sample_lamp_entity)
+        updated_lamp = await repository.update(session, sample_lamp_entity)
 
         # Assert
         assert updated_lamp.id == sample_lamp_entity.id
@@ -285,32 +274,32 @@ class TestPostgresLampRepository:
         # generated one passed during create. We only verify it was set.
         assert updated_lamp.updated_at is not None
 
-    async def test_update_nonexistent_lamp(self, repository, sample_lamp_entity):
+    async def test_update_nonexistent_lamp(self, repository, sample_lamp_entity, session):
         """Test updating a non-existent lamp raises LampNotFoundError."""
         # Act & Assert
         with pytest.raises(LampNotFoundError) as exc_info:
-            await repository.update(sample_lamp_entity)
+            await repository.update(session, sample_lamp_entity)
         assert sample_lamp_entity.id in str(exc_info.value)
 
     async def test_soft_delete_lamp(self, repository, sample_lamp_entity, session):
         """Test soft deleting a lamp."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
 
         # Act
-        await repository.delete(sample_lamp_entity.id)
+        await repository.delete(session, sample_lamp_entity.id)
 
         # Assert - lamp should not be retrievable
-        retrieved_lamp = await repository.get(sample_lamp_entity.id)
+        retrieved_lamp = await repository.get(session, sample_lamp_entity.id)
         assert retrieved_lamp is None
 
     async def test_soft_delete_sets_deleted_at(self, repository, sample_lamp_entity, session):
         """Test that soft delete sets the deleted_at timestamp in database."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
 
         # Act
-        await repository.delete(sample_lamp_entity.id)
+        await repository.delete(session, sample_lamp_entity.id)
 
         # Assert - check database directly
         result = await session.execute(
@@ -323,35 +312,35 @@ class TestPostgresLampRepository:
     async def test_soft_deleted_lamp_not_in_list(self, repository, sample_lamp_entity, session):
         """Test that soft-deleted lamps don't appear in list()."""
         # Arrange
-        await repository.create(sample_lamp_entity)
+        await repository.create(session, sample_lamp_entity)
         another_lamp = LampEntity(id=str(uuid4()), status=False)
-        await repository.create(another_lamp)
+        await repository.create(session, another_lamp)
 
         # Act - delete one lamp
-        await repository.delete(sample_lamp_entity.id)
-        lamps = await repository.list()
+        await repository.delete(session, sample_lamp_entity.id)
+        lamps = await repository.list(session)
 
         # Assert - only the non-deleted lamp should be in the list
         assert len(lamps) == 1
         assert lamps[0].id == another_lamp.id
 
-    async def test_delete_nonexistent_lamp(self, repository):
+    async def test_delete_nonexistent_lamp(self, repository, session):
         """Test deleting a non-existent lamp raises LampNotFoundError."""
         # Act & Assert
         nonexistent_id = str(uuid4())
         with pytest.raises(LampNotFoundError) as exc_info:
-            await repository.delete(nonexistent_id)
+            await repository.delete(session, nonexistent_id)
         assert nonexistent_id in str(exc_info.value)
 
     async def test_delete_already_deleted_lamp(self, repository, sample_lamp_entity, session):
         """Test deleting an already-deleted lamp raises LampNotFoundError."""
         # Arrange
-        await repository.create(sample_lamp_entity)
-        await repository.delete(sample_lamp_entity.id)
+        await repository.create(session, sample_lamp_entity)
+        await repository.delete(session, sample_lamp_entity.id)
 
         # Act & Assert
         with pytest.raises(LampNotFoundError):
-            await repository.delete(sample_lamp_entity.id)
+            await repository.delete(session, sample_lamp_entity.id)
 
     async def test_field_mapping_status_to_is_on(self, repository, session):
         """Test that entity status field correctly maps to database is_on field."""
@@ -360,8 +349,8 @@ class TestPostgresLampRepository:
         lamp_off = LampEntity(id=str(uuid4()), status=False)
 
         # Act
-        await repository.create(lamp_on)
-        await repository.create(lamp_off)
+        await repository.create(session, lamp_on)
+        await repository.create(session, lamp_off)
 
         # Assert - check database directly
         result = await session.execute(
@@ -383,8 +372,8 @@ class TestPostgresLampRepository:
 
         # Act - create all lamps
         for lamp in lamps:
-            await repository.create(lamp)
+            await repository.create(session, lamp)
 
         # Assert - all lamps should be retrievable
-        all_lamps = await repository.list()
+        all_lamps = await repository.list(session)
         assert len(all_lamps) == 10

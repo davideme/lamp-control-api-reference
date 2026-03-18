@@ -35,6 +35,29 @@ namespace LampControlApi.Services
         }
 
         /// <inheritdoc/>
+        public Task<ICollection<LampEntity>> ListAsync(int limit, int offset, CancellationToken cancellationToken = default)
+        {
+            if (limit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(limit), "Limit must be greater than or equal to 0.");
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be greater than or equal to 0.");
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var page = _lamps.Values
+                .OrderBy(l => l.CreatedAt)
+                .ThenBy(l => l.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+            return Task.FromResult<ICollection<LampEntity>>(page);
+        }
+
+        /// <inheritdoc/>
         public Task<LampEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -52,24 +75,28 @@ namespace LampControlApi.Services
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            _lamps[entity.Id] = entity;
-            return Task.FromResult(entity);
+            // Simulate Postgres DEFAULT CURRENT_TIMESTAMP: populate timestamps when unset
+            // (LampEntity.Create() leaves them as default until a DB write populates them).
+            var now = DateTimeOffset.UtcNow;
+            var stored = entity.CreatedAt == default(DateTimeOffset)
+                ? new LampEntity(entity.Id, entity.Status, now, now)
+                : entity;
+
+            _lamps[stored.Id] = stored;
+            return Task.FromResult(stored);
         }
 
         /// <inheritdoc/>
-        public Task<LampEntity?> UpdateAsync(LampEntity entity, CancellationToken cancellationToken = default)
+        public Task<LampEntity?> UpdateAsync(Guid id, bool status, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (entity == null)
+            if (_lamps.TryGetValue(id, out var existing))
             {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (_lamps.ContainsKey(entity.Id))
-            {
-                _lamps[entity.Id] = entity;
-                return Task.FromResult<LampEntity?>(entity);
+                // Simulate Postgres BEFORE UPDATE trigger: bump UpdatedAt on every write.
+                var updated = new LampEntity(existing.Id, status, existing.CreatedAt, DateTimeOffset.UtcNow);
+                _lamps[id] = updated;
+                return Task.FromResult<LampEntity?>(updated);
             }
 
             return Task.FromResult<LampEntity?>(null);
