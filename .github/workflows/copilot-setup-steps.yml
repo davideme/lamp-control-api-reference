@@ -26,12 +26,12 @@ jobs:
     # If you do not check out your code, Copilot will do this for you.
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '10.x'
           cache: true
           cache-dependency-path: src/csharp/LampControlApi/packages.lock.json
 
@@ -55,7 +55,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: 'poetry'
           cache-dependency-path: 'src/python/poetry.lock'
 
