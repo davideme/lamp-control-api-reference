@@ -133,7 +133,7 @@ FastAPI's ASGI instrumentation reads and writes `traceparent` / `tracestate` aut
 | `OTEL_TRACES_SAMPLER` | `parentbased_always_on` | Sampling strategy |
 | `OTEL_PYTHON_LOG_CORRELATION` | `true` | Enable trace context injection in Python logs |
 
-Initialize the SDK using `opentelemetry-distro` auto-configuration:
+Initialize the SDK manually as follows:
 
 ```python
 import os

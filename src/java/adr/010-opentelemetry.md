@@ -57,7 +57,10 @@ For testing with `InMemorySpanExporter`:
 </dependency>
 ```
 
-Alternatively, use the Spring Boot OTel starter (Spring Boot 3.3+) which bundles SDK + auto-configuration:
+
+## Alternatives considered
+
+The **Spring Boot OpenTelemetry starter** (Spring Boot 3.3+) was evaluated as an alternative to the Java Agent. It bundles the OpenTelemetry SDK and auto-configuration via a starter dependency:
 ```xml
 <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
@@ -65,6 +68,8 @@ Alternatively, use the Spring Boot OTel starter (Spring Boot 3.3+) which bundles
     <version>2.10.0</version>
 </dependency>
 ```
+
+This ADR standardizes on the **OpenTelemetry Java Agent** as the default and supported approach for this repository. The Spring Boot starter remains a documented alternative but is **not** the standard configuration in this codebase.
 
 ### Instrumentation Scope
 

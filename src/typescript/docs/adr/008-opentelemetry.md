@@ -63,7 +63,9 @@ import { Resource } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
@@ -79,14 +81,39 @@ const sdk = new NodeSDK({
     : undefined,
   instrumentations: [
     new HttpInstrumentation(),
+    new UndiciInstrumentation(),
     new FastifyInstrumentation(),
     new PrismaInstrumentation(),
   ],
 });
 
-if (endpoint) {
-  sdk.start();
+async function initTelemetry(): Promise<void> {
+  if (!endpoint) {
+    return;
+  }
+
+  try {
+    await sdk.start();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to start OpenTelemetry SDK', error);
+    return;
+  }
+
+  const shutdown = async (): Promise<void> => {
+    try {
+      await sdk.shutdown();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error during OpenTelemetry SDK shutdown', error);
+    }
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
+
+void initTelemetry();
 ```
 
 When `OTEL_EXPORTER_OTLP_ENDPOINT` is not set, the SDK is not started and all OTel API calls fall back to no-ops.
@@ -151,14 +178,14 @@ OTEL_PROPAGATORS=tracecontext,baggage
 
 Start the server with the instrumentation file pre-loaded:
 ```bash
-node --import ./dist/infrastructure/telemetry/instrumentation.js ./dist/server.js
+node --import ./dist/src/infrastructure/telemetry/instrumentation.js ./dist/src/cli.js
 ```
 
 Or in `package.json`:
 ```json
 {
   "scripts": {
-    "start": "node --import ./dist/infrastructure/telemetry/instrumentation.js ./dist/server.js"
+    "start": "node --import ./dist/src/infrastructure/telemetry/instrumentation.js ./dist/src/cli.js"
   }
 }
 ```
