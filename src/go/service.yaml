@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: IMAGE_PLACEHOLDER
+          image: us-docker.pkg.dev/cloudrun/container/hello:latest
           ports:
             - containerPort: 8080
           env:
