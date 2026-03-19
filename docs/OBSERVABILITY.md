@@ -118,14 +118,18 @@ http_server_active_requests
 sum by (http_response_status_code) (rate(http_server_request_duration_seconds_count[5m]))
 ```
 
-The collector exposes its Prometheus endpoint at `http://localhost:8889/metrics` if you want to inspect the raw scrape output directly.
+The collector exposes its Prometheus endpoint at `:8889/metrics` inside the `otel-collector` container. To inspect the raw scrape output when running via Docker Compose, you can exec into the container and curl the endpoint:
+
+```bash
+docker-compose exec otel-collector curl http://localhost:8889/metrics
+```
 
 ## Collector Health Check
 
-The collector exposes a health endpoint on port `13133`:
+The collector exposes a health endpoint on port `13133` inside the container. You can check it with:
 
 ```bash
-curl http://localhost:13133
+docker-compose exec otel-collector curl http://localhost:13133
 # returns: {"status":"Server available","upSince":"...","uptime":"..."}
 ```
 
