@@ -41,7 +41,7 @@ docker-compose ps
 
 | Service    | URL                    | Purpose                          |
 |------------|------------------------|----------------------------------|
-| Jaeger     | http://localhost:16686 | Trace search and waterfall view  |
+| Jaeger     | http://localhost:16686 | Trace search and waterfall view (v2.16) |
 | Prometheus | http://localhost:9090  | Metric queries and graphs        |
 
 ## Configuring a Language Service to Export Telemetry
@@ -142,6 +142,8 @@ docker-compose down
 | `otel-collector-config.yaml`  | Local collector: OTLP receiver → Jaeger + Prometheus |
 | `otel-collector-config-gcp.yaml` | Cloud Run collector: OTLP receiver → Google Cloud |
 | `prometheus.yml`              | Prometheus scrape config (targets the collector)     |
+
+> **Jaeger 2.x note**: Starting with Jaeger 2.0, the project ships a single binary/image (`cr.jaegertracing.io/jaegertracing/jaeger`) that natively accepts OTLP on ports 4317 (gRPC) and 4318 (HTTP) — no separate Jaeger agent or collector needed. The OTel Collector forwards traces directly to `jaeger:4317` using its `otlp/jaeger` exporter.
 
 ---
 
