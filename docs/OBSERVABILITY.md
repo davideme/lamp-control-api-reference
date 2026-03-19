@@ -143,7 +143,7 @@ docker-compose down
 | `otel-collector-config-gcp.yaml` | Cloud Run collector: OTLP receiver → Google Cloud |
 | `prometheus.yml`              | Prometheus scrape config (targets the collector)     |
 
-> **Jaeger 2.x note**: Starting with Jaeger 2.0, the project ships a single binary/image (`cr.jaegertracing.io/jaegertracing/jaeger`) that natively accepts OTLP on ports 4317 (gRPC) and 4318 (HTTP) — no separate Jaeger agent or collector needed. The OTel Collector forwards traces directly to `jaeger:4317` using its `otlp/jaeger` exporter.
+> **Jaeger 2.x note**: Starting with Jaeger 2.0, the project ships a single unified image (`cr.jaegertracing.io/jaegertracing/jaeger`). The OTel Collector is kept as a dedicated intermediate step — language services export to the collector, and the collector forwards to Jaeger — to mirror the production Cloud Run sidecar topology and keep buffering, batching, and retry logic in one place.
 
 ---
 
