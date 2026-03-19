@@ -90,6 +90,8 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
+      - "8889:8889"   # Prometheus metrics exporter
+      - "13133:13133" # Health check
     depends_on:
       - jaeger
 
