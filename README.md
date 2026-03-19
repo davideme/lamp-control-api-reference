@@ -50,6 +50,7 @@ For cross-language mode testing, see `scripts/README.md` and `scripts/test-modes
 ## Key Documentation
 
 - `docs/COMPARISON.md`: generated metrics and coverage snapshot
+- `docs/OBSERVABILITY.md`: local OTel stack (Jaeger + Prometheus) setup and usage
 - `docs/OPERATION_MODES.md`: mode semantics and deployment patterns
 - `docs/api/openapi.yaml`: REST contract
 - `docs/api/graphql.graphql`: GraphQL schema contract

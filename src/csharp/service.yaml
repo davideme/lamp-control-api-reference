@@ -1,0 +1,51 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/launch-stage: ALPHA
+  name: csharp-lamp-control-api
+  labels:
+    cloud.googleapis.com/location: europe-west1
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/container-dependencies: "{app:[collector]}"
+        run.googleapis.com/secrets: 'otel-collector-config:projects/lamp-control-469416/secrets/otel-collector-config'
+    spec:
+      containers:
+        - name: app
+          image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://localhost:4317
+            - name: OTEL_SERVICE_NAME
+              value: lamp-control-api-csharp
+        - name: collector
+          image: us-docker.pkg.dev/cloud-ops-agents-artifacts/google-cloud-opentelemetry-collector/otelcol-google:0.147.0
+          args:
+            - --config=/etc/otelcol-google/config.yaml
+          startupProbe:
+            httpGet:
+              path: /
+              port: 13133
+            timeoutSeconds: 30
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 13133
+            timeoutSeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - mountPath: /etc/otelcol-google/
+              name: config
+      volumes:
+        - name: config
+          secret:
+            items:
+              - key: latest
+                path: config.yaml
+            secretName: otel-collector-config

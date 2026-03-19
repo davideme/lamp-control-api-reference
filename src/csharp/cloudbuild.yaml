@@ -22,6 +22,7 @@ steps:
       - services
       - update
       - $_SERVICE_NAME
+      - --container=app
       - >-
         --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
       - >-
