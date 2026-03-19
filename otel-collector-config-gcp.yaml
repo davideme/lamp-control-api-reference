@@ -47,8 +47,6 @@ exporters:
     log:
       default_log_name: opentelemetry-collector
 
-  googlemanagedprometheus:
-
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -64,7 +62,7 @@ service:
     metrics/otlp:
       receivers: [otlp]
       processors: [resourcedetection, transform/collision, memory_limiter, batch]
-      exporters: [googlemanagedprometheus]
+      exporters: [googlecloud]
     traces:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, batch]
@@ -76,5 +74,5 @@ service:
             exporter:
               otlp:
                 protocol: grpc
-                endpoint: localhost:4317
+                endpoint: http://localhost:4317
                 insecure: true
