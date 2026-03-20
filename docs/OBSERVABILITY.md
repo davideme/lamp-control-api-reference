@@ -175,11 +175,9 @@ The app sends OTLP gRPC to `localhost:4317` (the sidecar). The sidecar exports t
    ```bash
    gcloud secrets create otel-collector-config \
      --replication-policy=automatic \
-     --project=lamp-control-469416
 
    gcloud secrets versions add otel-collector-config \
      --data-file=otel-collector-config-gcp.yaml \
-     --project=lamp-control-469416
    ```
 
 2. **Grant the Cloud Run service account** access to the secret:
@@ -188,7 +186,6 @@ The app sends OTLP gRPC to `localhost:4317` (the sidecar). The sidecar exports t
    gcloud secrets add-iam-policy-binding otel-collector-config \
      --member=serviceAccount:<SERVICE_ACCOUNT_EMAIL> \
      --role=roles/secretmanager.secretAccessor \
-     --project=lamp-control-469416
    ```
 
 ### Deploying for the First Time (or Updating the Sidecar)
@@ -197,7 +194,7 @@ Use `gcloud run services replace` to apply the full service definition:
 
 ```bash
 gcloud run services replace src/<language>/service.yaml \
-  --region=europe-west1
+  --region=YOUR_REGION
 ```
 
 | Language   | File                        |
@@ -220,7 +217,7 @@ gcloud run services update <service-name> \
   --container=app \
   --image=<new-image> \
   --update-labels=... \
-  --region=europe-west1 \
+  --region=YOUR_REGION \
   --quiet
 ```
 
@@ -234,7 +231,7 @@ kind: Service
 metadata:
   name: <language>-lamp-control-api          # Cloud Run service name
   labels:
-    cloud.googleapis.com/location: europe-west1
+    cloud.googleapis.com/location: YOUR_REGION
   annotations:
     run.googleapis.com/launch-stage: ALPHA   # required for multi-container support
 spec:
@@ -244,7 +241,7 @@ spec:
         # collector must be ready before app starts
         run.googleapis.com/container-dependencies: "{app:[collector]}"
         # mount the collector config from Secret Manager
-        run.googleapis.com/secrets: 'otel-collector-config:projects/lamp-control-469416/secrets/otel-collector-config'
+        run.googleapis.com/secrets: 'otel-collector-config:projects/YOUR_PROJECT_ID/secrets/otel-collector-config'
     spec:
       containers:
         - name: app
@@ -302,11 +299,10 @@ If you change `otel-collector-config-gcp.yaml`, push a new secret version and re
 ```bash
 gcloud secrets versions add otel-collector-config \
   --data-file=otel-collector-config-gcp.yaml \
-  --project=lamp-control-469416
 
 # No service.yaml change needed — the secret mount always uses 'latest' version
 # Restart the service to pick up the new config:
 gcloud run services update <service-name> \
-  --region=europe-west1 \
+  --region=YOUR_REGION \
   --quiet
 ```
