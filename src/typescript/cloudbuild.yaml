@@ -37,13 +37,6 @@ options:
   requestedVerifyOption: VERIFIED
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _AR_PROJECT_ID: lamp-control-469416
-  _SERVICE_NAME: typescript-lamp-control-api
-  _DEPLOY_REGION: europe-west1
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _TRIGGER_ID: ae30360c-728e-4df9-bb68-6f5c72b0e112
-  _AR_REPOSITORY: cloud-run-source-deploy
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - typescript-lamp-control-api

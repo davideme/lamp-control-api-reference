@@ -38,13 +38,6 @@ options:
   requestedVerifyOption: VERIFIED
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _TRIGGER_ID: c39520dd-8f21-4044-b71e-1c7e2ae44d03
-  _DEPLOY_REGION: europe-west1
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-  _AR_PROJECT_ID: lamp-control-469416
-  _SERVICE_NAME: csharp-lamp-control-api
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - csharp-lamp-control-api

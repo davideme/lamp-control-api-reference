@@ -37,13 +37,6 @@ options:
   requestedVerifyOption: VERIFIED
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _DEPLOY_REGION: europe-west1
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-  _AR_PROJECT_ID: lamp-control-469416
-  _SERVICE_NAME: python-lamp-control-api
-  _TRIGGER_ID: e4522704-3279-49da-b701-63621b89eb67
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - python-lamp-control-api
