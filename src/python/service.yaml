@@ -16,10 +16,10 @@ spec:
         - name: app
           image: us-docker.pkg.dev/cloudrun/container/hello:latest
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
           startupProbe:
             tcpSocket:
-              port: 8000
+              port: 8080
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 1
