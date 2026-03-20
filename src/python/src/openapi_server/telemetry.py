@@ -7,6 +7,7 @@ always enabled.
 
 import logging
 import os
+import sys
 
 from opentelemetry import trace
 from opentelemetry._logs import set_logger_provider
@@ -31,19 +32,26 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 from pythonjsonlogger import jsonlogger
 
 
-def configure_telemetry() -> None:
+def configure_telemetry() -> bool:
     """Configure OpenTelemetry SDK.
 
     Always enables JSON structured logging on stdout.
     Sets W3C TraceContext + Baggage propagation unconditionally.
     Configures trace, metric, and log providers only when
-    OTEL_EXPORTER_OTLP_ENDPOINT is set; otherwise a no-op.
+    OTEL_EXPORTER_OTLP_ENDPOINT is set.
+
+    Returns:
+        True if OTel providers were configured, False otherwise.
     """
-    handler = logging.StreamHandler()
+    handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(
         jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
     )
-    logging.basicConfig(handlers=[handler], level=logging.INFO, force=True)
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        root_logger.addHandler(handler)
+    else:
+        logging.basicConfig(handlers=[handler])
 
     set_global_textmap(
         CompositePropagator(
@@ -56,7 +64,7 @@ def configure_telemetry() -> None:
 
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
     if not endpoint:
-        return
+        return False
 
     service_name = os.getenv("OTEL_SERVICE_NAME", "lamp-control-api-python")
     resource = Resource.create({"service.name": service_name})
@@ -82,3 +90,5 @@ def configure_telemetry() -> None:
     SQLAlchemyInstrumentor().instrument()
     HTTPXClientInstrumentor().instrument()
     LoggingInstrumentor().instrument()
+
+    return True

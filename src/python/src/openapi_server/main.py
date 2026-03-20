@@ -22,8 +22,6 @@ from src.openapi_server.apis.default_api import router as DefaultApiRouter
 from src.openapi_server.dependencies import initialize_database, settings
 from src.openapi_server.telemetry import configure_telemetry
 
-configure_telemetry()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +31,8 @@ async def lifespan(app: FastAPI):
     and properly closes it on shutdown.
     """
     # Startup
+    if configure_telemetry():
+        FastAPIInstrumentor.instrument_app(app)
     initialize_database()
     yield
     # Shutdown
@@ -81,8 +81,6 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 app.include_router(DefaultApiRouter, prefix="/v1")
-
-FastAPIInstrumentor.instrument_app(app)
 
 
 @app.get("/health")

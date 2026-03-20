@@ -1,4 +1,5 @@
 import logging
+import sys
 from unittest.mock import patch
 
 from opentelemetry.sdk.trace import TracerProvider
@@ -9,12 +10,13 @@ from src.openapi_server.telemetry import configure_telemetry
 
 class TestConfigureTelemetry:
     def test_no_op_without_endpoint(self, monkeypatch):
-        """configure_telemetry does not set up providers when endpoint is absent."""
+        """configure_telemetry returns False and skips providers when endpoint is absent."""
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
 
         with patch("opentelemetry.trace.set_tracer_provider") as mock_set:
-            configure_telemetry()
+            result = configure_telemetry()
             mock_set.assert_not_called()
+            assert result is False
 
     def test_sets_w3c_propagators(self, monkeypatch):
         """W3C TraceContext + Baggage propagation is always configured."""
@@ -40,7 +42,8 @@ class TestConfigureTelemetry:
             patch("src.openapi_server.telemetry.set_meter_provider"),
             patch("src.openapi_server.telemetry.set_logger_provider"),
         ):
-            configure_telemetry()
+            result = configure_telemetry()
+            assert result is True
             mock_set.assert_called_once()
             assert isinstance(mock_set.call_args[0][0], TracerProvider)
 
@@ -105,13 +108,19 @@ class TestConfigureTelemetry:
             mock_logging.return_value.instrument.assert_called_once_with()
 
     def test_json_logging_is_always_configured(self, monkeypatch):
-        """Root logger uses a JSON formatter regardless of OTEL_EXPORTER_OTLP_ENDPOINT."""
+        """Root logger uses a JSON formatter on stdout regardless of OTEL_EXPORTER_OTLP_ENDPOINT."""
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
 
         configure_telemetry()
 
         root_handlers = logging.getLogger().handlers
-        assert any(isinstance(h.formatter, jsonlogger.JsonFormatter) for h in root_handlers)
+        json_handlers = [
+            h for h in root_handlers if isinstance(h.formatter, jsonlogger.JsonFormatter)
+        ]
+        assert json_handlers, "Expected at least one JSON log handler"
+        assert all(
+            isinstance(h, logging.StreamHandler) and h.stream is sys.stdout for h in json_handlers
+        )
 
     def test_does_not_instrument_global_libraries_without_endpoint(self, monkeypatch):
         """Instrumentors are not called when endpoint is absent."""
