@@ -14,11 +14,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.openapi_server import dependencies
 from src.openapi_server.apis.default_api import router as DefaultApiRouter
 from src.openapi_server.dependencies import initialize_database, settings
+from src.openapi_server.telemetry import configure_telemetry
+
+configure_telemetry()
 
 
 @asynccontextmanager
@@ -77,6 +81,8 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 app.include_router(DefaultApiRouter, prefix="/v1")
+
+FastAPIInstrumentor.instrument_app(app)
 
 
 @app.get("/health")
