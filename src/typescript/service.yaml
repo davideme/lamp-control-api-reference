@@ -4,14 +4,11 @@ metadata:
   annotations:
     run.googleapis.com/launch-stage: ALPHA
   name: typescript-lamp-control-api
-  labels:
-    cloud.googleapis.com/location: europe-west1
 spec:
   template:
     metadata:
       annotations:
         run.googleapis.com/container-dependencies: "{app:[collector]}"
-        run.googleapis.com/secrets: 'otel-collector-config:projects/lamp-control-469416/secrets/otel-collector-config'
     spec:
       containers:
         - name: app
