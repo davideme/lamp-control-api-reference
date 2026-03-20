@@ -35,15 +35,9 @@ images:
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 options:
   requestedVerifyOption: VERIFIED
-  substitutionOption: ALLOW_LOOSE
+  substitutionOption: ALLOW_LOOSE  # Required substitutions (set in Cloud Build trigger):
+  # _AR_HOSTNAME, _AR_PROJECT_ID, _AR_REPOSITORY, _DEPLOY_REGION, _SERVICE_NAME, _TRIGGER_ID
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _AR_PROJECT_ID: lamp-control-469416
-  _SERVICE_NAME: kotlin-lamp-control-api
-  _DEPLOY_REGION: europe-west1
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-  _TRIGGER_ID: d5bccbbd-c31c-4b33-8615-5aa3603de21d
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - kotlin-lamp-control-api

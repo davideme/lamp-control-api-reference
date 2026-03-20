@@ -36,15 +36,9 @@ images:
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 options:
   requestedVerifyOption: VERIFIED
-  substitutionOption: ALLOW_LOOSE
+  substitutionOption: ALLOW_LOOSE  # Required substitutions (set in Cloud Build trigger):
+  # _AR_HOSTNAME, _AR_PROJECT_ID, _AR_REPOSITORY, _DEPLOY_REGION, _SERVICE_NAME, _TRIGGER_ID
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _TRIGGER_ID: c39520dd-8f21-4044-b71e-1c7e2ae44d03
-  _DEPLOY_REGION: europe-west1
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-  _AR_PROJECT_ID: lamp-control-469416
-  _SERVICE_NAME: csharp-lamp-control-api
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - csharp-lamp-control-api

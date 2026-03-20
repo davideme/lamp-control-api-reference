@@ -4,20 +4,25 @@ metadata:
   annotations:
     run.googleapis.com/launch-stage: ALPHA
   name: java-lamp-control-api
-  labels:
-    cloud.googleapis.com/location: europe-west1
 spec:
   template:
     metadata:
       annotations:
+        autoscaling.knative.dev/maxScale: '1'
+        run.googleapis.com/startup-cpu-boost: 'true'
         run.googleapis.com/container-dependencies: "{app:[collector]}"
-        run.googleapis.com/secrets: 'otel-collector-config:projects/lamp-control-469416/secrets/otel-collector-config'
     spec:
       containers:
         - name: app
           image: us-docker.pkg.dev/cloudrun/container/hello:latest
           ports:
             - containerPort: 8081
+          startupProbe:
+            tcpSocket:
+              port: 8081
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 1
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://localhost:4317
