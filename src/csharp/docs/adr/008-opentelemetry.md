@@ -7,7 +7,7 @@ Accepted
 2026-03-17
 
 ## Context
-The project-level Observability Strategy ADR ([docs/adr/007](../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the C# / ASP.NET Core implementation.
+The project-level Observability Strategy ADR ([docs/adr/007](../../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the C# / ASP.NET Core implementation.
 
 Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tracks the implementation work.
 
@@ -135,7 +135,7 @@ The OTLP exporter reads `OTEL_EXPORTER_OTLP_ENDPOINT` automatically; when the va
 - EF Core statement capture must be explicitly disabled in production to avoid PII leakage.
 
 ## References
-- [docs/adr/007-observability-strategy.md](../../../docs/adr/007-observability-strategy.md)
+- [docs/adr/007-observability-strategy.md](../../../../docs/adr/007-observability-strategy.md)
 - Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14)
 - [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet)
 - [OpenTelemetry .NET Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib)

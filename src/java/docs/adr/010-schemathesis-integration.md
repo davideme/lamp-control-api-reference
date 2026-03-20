@@ -1,4 +1,4 @@
-# ADR 009: Integrate Schemathesis for API Testing in CI
+# ADR 010: Integrate Schemathesis for API Testing in CI
 
 ## Status
 
@@ -153,5 +153,5 @@ The Java Spring Boot application must:
 - [Schemathesis GitHub Action](https://github.com/schemathesis/action)
 - [Project OpenAPI Specification](/docs/api/openapi.yaml)
 - [Java Application Configuration](/src/java/src/main/resources/application.properties)
-- [C# Schemathesis Integration (ADR 005)](/src/csharp/adr/005-schemathesis-integration.md)
-- [Kotlin Schemathesis Integration (ADR 006)](/src/kotlin/adr/006-schemathesis-integration.md)
+- [C# Schemathesis Integration (ADR 005)](/src/csharp/docs/adr/005-schemathesis-integration.md)
+- [Kotlin Schemathesis Integration (ADR 007)](/src/kotlin/docs/adr/007-schemathesis-integration.md)

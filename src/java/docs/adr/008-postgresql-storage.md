@@ -1,4 +1,4 @@
-# ADR 007: PostgreSQL Storage with Spring Data JPA
+# ADR 008: PostgreSQL Storage with Spring Data JPA
 
 ## Status
 
@@ -794,4 +794,4 @@ spring.jpa.properties.hibernate.cache.region.factory_class=org.hibernate.cache.j
 
 - [ADR 001: Java Version Selection](001-java-version-selection.md)
 - [ADR 002: Build Tool Selection](002-build-tool-maven.md)
-- [Root ADR 005: PostgreSQL Storage Support](../../../docs/adr/005-postgresql-storage-support.md)
+- [Root ADR 005: PostgreSQL Storage Support](../../../../docs/adr/005-postgresql-storage-support.md)

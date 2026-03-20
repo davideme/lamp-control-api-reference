@@ -1,4 +1,4 @@
-# ADR 008: OpenTelemetry Instrumentation for Go
+# ADR 007: OpenTelemetry Instrumentation for Go
 
 ## Status
 Accepted
@@ -7,7 +7,7 @@ Accepted
 2026-03-17
 
 ## Context
-The project-level Observability Strategy ADR ([docs/adr/007](../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Go / Chi Router implementation.
+The project-level Observability Strategy ADR ([docs/adr/007](../../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Go / Chi Router implementation.
 
 Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tracks the implementation work.
 
@@ -182,7 +182,7 @@ func initOTel(ctx context.Context) (func(context.Context) error, error) {
 - OTLP gRPC adds a dependency on `google.golang.org/grpc` transitively.
 
 ## References
-- [docs/adr/007-observability-strategy.md](../../../docs/adr/007-observability-strategy.md)
+- [docs/adr/007-observability-strategy.md](../../../../docs/adr/007-observability-strategy.md)
 - Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14)
 - [OpenTelemetry Go SDK](https://github.com/open-telemetry/opentelemetry-go)
 - [otelhttp middleware](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/instrumentation/net/http/otelhttp)

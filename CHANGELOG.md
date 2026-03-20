@@ -97,38 +97,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | ADR                                                                      | Title                          | Decision                                                                                                  |
 | ------------------------------------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| [ADR-007](src/typescript/docs/adr/007-postgresql-storage.md) | PostgreSQL Storage with Prisma | Use Prisma 5.x as the ORM with auto-generated TypeScript types; run Prisma Migrate for schema management. |
+| [ADR-008](src/typescript/docs/adr/008-postgresql-storage.md) | PostgreSQL Storage with Prisma | Use Prisma 5.x as the ORM with auto-generated TypeScript types; run Prisma Migrate for schema management. |
 
 #### Python
 
 | ADR                                                                      | Title                                  | Decision                                                                        |
 | ------------------------------------------------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------- |
-| [ADR-007](src/python/docs/adr/007-postgresql-storage.md) | PostgreSQL Storage with SQLAlchemy 2.0 | Use SQLAlchemy 2.0 async engine with asyncpg driver and Alembic for migrations. |
+| [ADR-006](src/python/docs/adr/006-postgresql-storage.md) | PostgreSQL Storage with SQLAlchemy 2.0 | Use SQLAlchemy 2.0 async engine with asyncpg driver and Alembic for migrations. |
 
 #### Java
 
 | ADR                                                                    | Title                                   | Decision                                                                                                                |
 | ---------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [ADR-007](src/java/adr/007-postgresql-storage.md)               | PostgreSQL Storage with Spring Data JPA | Use Spring Data JPA with Hibernate and HikariCP connection pool; Flyway manages schema migrations.                      |
-| [ADR-008](src/java/adr/008-java-test-tools-selection.md)        | Java Test Tools Selection               | Use JUnit 5, Mockito, Testcontainers, AssertJ, Awaitility, and JaCoCo for comprehensive testing and coverage reporting. |
+| [ADR-008](src/java/docs/adr/008-postgresql-storage.md)          | PostgreSQL Storage with Spring Data JPA | Use Spring Data JPA with Hibernate and HikariCP connection pool; Flyway manages schema migrations.                      |
+| [ADR-009](src/java/docs/adr/009-java-test-tools-selection.md)   | Java Test Tools Selection               | Use JUnit 5, Mockito, Testcontainers, AssertJ, Awaitility, and JaCoCo for comprehensive testing and coverage reporting. |
 
 #### Kotlin
 
 | ADR                                                              | Title                               | Decision                                                                      |
 | ---------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
-| [ADR-006](src/kotlin/adr/006-postgresql-storage.md) | PostgreSQL Storage with Exposed ORM | Use JetBrains Exposed ORM with HikariCP for idiomatic Kotlin database access. |
+| [ADR-006](src/kotlin/docs/adr/006-postgresql-storage.md) | PostgreSQL Storage with Exposed ORM | Use JetBrains Exposed ORM with HikariCP for idiomatic Kotlin database access. |
 
 #### Go
 
 | ADR                                                      | Title                          | Decision                                                                                   |
 | -------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
-| [ADR-005](src/go/adr/005-postgresql-storage.md) | PostgreSQL Storage with pgx v5 | Use pgx v5 with pgxpool for connection pooling and sqlc for type-safe SQL code generation. |
+| [ADR-005](src/go/docs/adr/005-postgresql-storage.md) | PostgreSQL Storage with pgx v5 | Use pgx v5 with pgxpool for connection pooling and sqlc for type-safe SQL code generation. |
 
 #### C#
 
 | ADR                                                              | Title                           | Decision                                                                                           |
 | ---------------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [ADR-007](src/csharp/adr/007-postgresql-storage.md) | PostgreSQL Storage with EF Core | Use Entity Framework Core 8.0+ with the Npgsql provider; EF Core Migrations manage schema changes. |
+| [ADR-007](src/csharp/docs/adr/007-postgresql-storage.md) | PostgreSQL Storage with EF Core | Use Entity Framework Core 8.0+ with the Npgsql provider; EF Core Migrations manage schema changes. |
 
 ### Features
 
@@ -260,45 +260,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | ADR                                                          | Title                    | Decision                                                                                                    |
 | ------------------------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| [ADR-001](src/java/adr/001-adopt-java-21-lts.md)             | Java Version             | Java 21 (LTS) — released September 2023, supported until at least September 2031.                           |
-| [ADR-002](src/java/adr/002-select-eclipse-temurin-21.md)     | Java Runtime             | Eclipse Temurin 21 — TCK-certified, open-source, GPLv2.                                                     |
-| [ADR-003](src/java/adr/003-maven-build-tool-selection.md)    | Build Tool               | Apache Maven — industry standard, convention-over-configuration, first-class Spring Boot integration.       |
-| [ADR-004](src/java/adr/004-select-spring-boot-openapi.md)    | Framework & OpenAPI      | Spring Boot 3.x with springdoc-openapi and OpenAPI Generator — contract-first development.                  |
-| [ADR-005](src/java/adr/005-async-request-handling.md)        | Async Strategy           | Spring MVC with `@Async` and `CompletableFuture` for I/O operations (not reactive WebFlux).                 |
-| [ADR-006](src/java/adr/006-imperative-vs-reactive-stack.md)  | Reactive vs Imperative   | Spring MVC imperative stack — simpler mental model, easier debugging, sufficient for this API's throughput. |
-| [ADR-007](src/java/adr/007-java-linter-and-formatter.md)     | Linter & Formatter       | Spotless + Google Java Format for formatting; SpotBugs, PMD, Checkstyle for static analysis.                |
-| [ADR-009](src/java/adr/009-schemathesis-integration.md)      | Schemathesis Integration | Property-based API testing on `http://localhost:8081/v1`.                                                   |
+| [ADR-001](src/java/docs/adr/001-adopt-java-21-lts.md)             | Java Version             | Java 21 (LTS) — released September 2023, supported until at least September 2031.                           |
+| [ADR-002](src/java/docs/adr/002-select-eclipse-temurin-21.md)     | Java Runtime             | Eclipse Temurin 21 — TCK-certified, open-source, GPLv2.                                                     |
+| [ADR-003](src/java/docs/adr/003-maven-build-tool-selection.md)    | Build Tool               | Apache Maven — industry standard, convention-over-configuration, first-class Spring Boot integration.       |
+| [ADR-004](src/java/docs/adr/004-select-spring-boot-openapi.md)    | Framework & OpenAPI      | Spring Boot 3.x with springdoc-openapi and OpenAPI Generator — contract-first development.                  |
+| [ADR-005](src/java/docs/adr/005-async-request-handling.md)        | Async Strategy           | Spring MVC with `@Async` and `CompletableFuture` for I/O operations (not reactive WebFlux).                 |
+| [ADR-006](src/java/docs/adr/006-imperative-vs-reactive-stack.md)  | Reactive vs Imperative   | Spring MVC imperative stack — simpler mental model, easier debugging, sufficient for this API's throughput. |
+| [ADR-007](src/java/docs/adr/007-java-linter-and-formatter.md)     | Linter & Formatter       | Spotless + Google Java Format for formatting; SpotBugs, PMD, Checkstyle for static analysis.                |
+| [ADR-010](src/java/docs/adr/010-schemathesis-integration.md)      | Schemathesis Integration | Property-based API testing on `http://localhost:8081/v1`.                                                   |
 
 #### Kotlin
 
 | ADR                                                | Title              | Decision                                                                           |
 | -------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------- |
-| [ADR-001](src/kotlin/adr/001-kotlin-version.md)    | Kotlin Version     | Kotlin 2.1.21 (latest stable) — no LTS policy, always track latest.                |
-| [ADR-002](src/kotlin/adr/002-kotlin-runtime.md)    | Runtime            | JVM runtime (not Kotlin/Native or Kotlin/JS).                                      |
-| [ADR-003](src/kotlin/adr/003-gradle-build-tool-selection.md) | Build Tool         | Gradle with Kotlin DSL — idiomatic, flexible, strong Kotlin/JVM ecosystem support. |
-| [ADR-004](src/kotlin/adr/004-web-framework-selection.md)     | HTTP Framework     | Ktor — JetBrains-maintained, coroutine-native, lightweight.                        |
-| [ADR-005](src/kotlin/adr/005-openapi-code-generation.md)     | OpenAPI Generation | OpenAPI Generator with `kotlin-server` template for server stub generation.        |
+| [ADR-001](src/kotlin/docs/adr/001-kotlin-version.md)              | Kotlin Version     | Kotlin 2.1.21 (latest stable) — no LTS policy, always track latest.                |
+| [ADR-002](src/kotlin/docs/adr/002-kotlin-runtime.md)              | Runtime            | JVM runtime (not Kotlin/Native or Kotlin/JS).                                      |
+| [ADR-003](src/kotlin/docs/adr/003-gradle-build-tool-selection.md) | Build Tool         | Gradle with Kotlin DSL — idiomatic, flexible, strong Kotlin/JVM ecosystem support. |
+| [ADR-004](src/kotlin/docs/adr/004-web-framework-selection.md)     | HTTP Framework     | Ktor — JetBrains-maintained, coroutine-native, lightweight.                        |
+| [ADR-005](src/kotlin/docs/adr/005-openapi-code-generation.md)     | OpenAPI Generation | OpenAPI Generator with `kotlin-server` template for server stub generation.        |
 
 #### Go
 
 | ADR                                                   | Title                    | Decision                                                                         |
 | ----------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------- |
-| [ADR-001](src/go/adr/001-Go-Version.md)                                  | Go Version               | Go 1.24.3 — latest stable with security and performance updates.                 |
-| [ADR-002](src/go/adr/002-HTTP-Framework.md)                              | HTTP Framework           | Chi — idiomatic Go, lightweight, `net/http`-compatible, minimal dependencies.    |
-| [ADR-003](src/go/adr/003-go-modules-dependency-management.md)            | Dependency Management    | Go modules (`go.mod`) — standard Go toolchain, reproducible builds.              |
-| [ADR-004](src/go/adr/004-use-oapi-codegen-for-server-generation.md)      | OpenAPI Code Generation  | `oapi-codegen` — generates idiomatic Go server interfaces from the OpenAPI spec. |
-| [ADR-007](src/go/adr/007-schemathesis-integration.md) | Schemathesis Integration | Property-based API testing on `http://localhost:8080/v1`.                        |
+| [ADR-001](src/go/docs/adr/001-go-version.md)                              | Go Version               | Go 1.24.3 — latest stable with security and performance updates.                 |
+| [ADR-002](src/go/docs/adr/002-http-framework.md)                          | HTTP Framework           | Chi — idiomatic Go, lightweight, `net/http`-compatible, minimal dependencies.    |
+| [ADR-003](src/go/docs/adr/003-go-modules-dependency-management.md)        | Dependency Management    | Go modules (`go.mod`) — standard Go toolchain, reproducible builds.              |
+| [ADR-004](src/go/docs/adr/004-use-oapi-codegen-for-server-generation.md)  | OpenAPI Code Generation  | `oapi-codegen` — generates idiomatic Go server interfaces from the OpenAPI spec. |
+| [ADR-006](src/go/docs/adr/006-schemathesis-integration.md)                | Schemathesis Integration | Property-based API testing on `http://localhost:8080/v1`.                        |
 
 #### C#
 
 | ADR                                                       | Title                    | Decision                                                                         |
 | --------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------- |
-| [ADR-001](src/csharp/adr/001-csharp-version.md)           | Language Version         | C# 12.0 with .NET 8 (LTS, supported until November 2026).                        |
-| [ADR-002](src/csharp/adr/002-framework.md)                | HTTP Framework           | ASP.NET Core with minimal APIs.                                                  |
-| [ADR-003](src/csharp/adr/003-dotnet-build-tool-selection.md) | Build Tool               | `dotnet` CLI — standard .NET toolchain, excellent CI/CD integration.             |
-| [ADR-004](src/csharp/adr/004-openapi-generation.md)       | OpenAPI Generation       | NSwag or Swashbuckle for server stub and client generation from the shared spec. |
-| [ADR-005](src/csharp/adr/005-schemathesis-integration.md) | Schemathesis Integration | Property-based API testing on `http://localhost:8083/v1`.                        |
-| [ADR-006](src/csharp/adr/006-package-management.md)       | Package Management       | NuGet via `dotnet` CLI — default .NET package manager.                           |
+| [ADR-001](src/csharp/docs/adr/001-csharp-version.md)              | Language Version         | C# 12.0 with .NET 8 (LTS, supported until November 2026).                        |
+| [ADR-002](src/csharp/docs/adr/002-framework.md)                   | HTTP Framework           | ASP.NET Core with minimal APIs.                                                  |
+| [ADR-003](src/csharp/docs/adr/003-dotnet-build-tool-selection.md) | Build Tool               | `dotnet` CLI — standard .NET toolchain, excellent CI/CD integration.             |
+| [ADR-004](src/csharp/docs/adr/004-openapi-generation.md)          | OpenAPI Generation       | NSwag or Swashbuckle for server stub and client generation from the shared spec. |
+| [ADR-005](src/csharp/docs/adr/005-schemathesis-integration.md)    | Schemathesis Integration | Property-based API testing on `http://localhost:8083/v1`.                        |
+| [ADR-006](src/csharp/docs/adr/006-package-management.md)          | Package Management       | NuGet via `dotnet` CLI — default .NET package manager.                           |
 
 ### API
 

@@ -817,4 +817,4 @@ func (r *PostgresLampRepository) BulkInsert(ctx context.Context, lamps []domain.
 
 - [ADR 001: Go Version Selection](001-go-version-selection.md)
 - [ADR 002: HTTP Router Selection](002-http-router-selection.md)
-- [Root ADR 005: PostgreSQL Storage Support](../../../docs/adr/005-postgresql-storage-support.md)
+- [Root ADR 005: PostgreSQL Storage Support](../../../../docs/adr/005-postgresql-storage-support.md)

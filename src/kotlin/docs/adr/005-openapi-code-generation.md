@@ -125,7 +125,7 @@ dateLibrary=kotlinx-datetime
 2. **Project Structure**:
    ```
    src/kotlin/
-   ├── adr/
+   ├── docs/adr/
    ├── generated/          # Generated code (gitignored)
    ├── src/main/kotlin/
    │   ├── Application.kt  # Main Ktor application

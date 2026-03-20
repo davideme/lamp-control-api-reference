@@ -834,4 +834,4 @@ suspend fun getAllIds(): List<UUID> = dbQuery {
 
 - [ADR 001: Kotlin Version](001-kotlin-version.md)
 - [ADR 002: Web Framework Selection](002-web-framework-ktor.md)
-- [Root ADR 005: PostgreSQL Storage Support](../../../docs/adr/005-postgresql-storage-support.md)
+- [Root ADR 005: PostgreSQL Storage Support](../../../../docs/adr/005-postgresql-storage-support.md)

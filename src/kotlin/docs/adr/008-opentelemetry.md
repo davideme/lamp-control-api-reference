@@ -1,4 +1,4 @@
-# ADR 007: OpenTelemetry Instrumentation for Kotlin
+# ADR 008: OpenTelemetry Instrumentation for Kotlin
 
 ## Status
 Accepted
@@ -7,7 +7,7 @@ Accepted
 2026-03-17
 
 ## Context
-The project-level Observability Strategy ADR ([docs/adr/007](../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Kotlin / Ktor implementation.
+The project-level Observability Strategy ADR ([docs/adr/007](../../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Kotlin / Ktor implementation.
 
 Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tracks the implementation work.
 
@@ -174,7 +174,7 @@ When an OpenTelemetry Collector is available and export should be enabled, deplo
 - Alpha instrumentation packages (`opentelemetry-runtime-telemetry-java8`) may have breaking changes between minor versions.
 
 ## References
-- [docs/adr/007-observability-strategy.md](../../../docs/adr/007-observability-strategy.md)
+- [docs/adr/007-observability-strategy.md](../../../../docs/adr/007-observability-strategy.md)
 - Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14)
 - [OpenTelemetry Kotlin / JVM](https://opentelemetry.io/docs/languages/java/)
 - [opentelemetry-ktor instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/ktor)

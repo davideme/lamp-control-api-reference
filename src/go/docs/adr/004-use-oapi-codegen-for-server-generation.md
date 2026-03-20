@@ -54,7 +54,7 @@ The generated code will be integrated into the existing Go project structure:
 
 ```
 src/go/
-├── adr/
+├── docs/adr/
 ├── internal/
 │   ├── api/          # Generated API code
 │   ├── handlers/     # Implementation of generated interfaces

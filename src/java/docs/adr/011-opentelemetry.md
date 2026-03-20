@@ -1,4 +1,4 @@
-# ADR 010: OpenTelemetry Instrumentation for Java
+# ADR 011: OpenTelemetry Instrumentation for Java
 
 ## Status
 Accepted
@@ -7,7 +7,7 @@ Accepted
 2026-03-17
 
 ## Context
-The project-level Observability Strategy ADR ([docs/adr/007](../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Java / Spring Boot implementation.
+The project-level Observability Strategy ADR ([docs/adr/007](../../../../docs/adr/007-observability-strategy.md)) mandates OpenTelemetry as the standard instrumentation framework and defines shared semantic conventions, trace propagation, and export requirements. This ADR describes how those requirements are met in the Java / Spring Boot implementation.
 
 Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14) tracks the implementation work.
 
@@ -169,7 +169,7 @@ management:
 - Two approaches (agent vs. starter) require a team decision on which to standardise.
 
 ## References
-- [docs/adr/007-observability-strategy.md](../../../docs/adr/007-observability-strategy.md)
+- [docs/adr/007-observability-strategy.md](../../../../docs/adr/007-observability-strategy.md)
 - Issue [#14](https://github.com/davideme/lamp-control-api-reference/issues/14)
 - [OpenTelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
 - [Spring Boot OTel Starter](https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/)

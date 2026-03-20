@@ -107,11 +107,11 @@ Each language implementation includes its own detailed ADR documenting the speci
 The following implementations currently have Schemathesis integration:
 
 - **Python**: [ADR 004: Schemathesis Integration](/src/python/docs/adr/004-schemathesis-integration.md)
-- **C#**: [ADR 005: Schemathesis Integration](/src/csharp/adr/005-schemathesis-integration.md)
+- **C#**: [ADR 005: Schemathesis Integration](/src/csharp/docs/adr/005-schemathesis-integration.md)
 - **TypeScript**: [ADR 006: Schemathesis Integration](/src/typescript/docs/adr/006-schemathesis-integration.md)
-- **Kotlin**: [ADR 006: Schemathesis Integration](/src/kotlin/adr/006-schemathesis-integration.md)
-- **Go**: [ADR 007: Schemathesis Integration](/src/go/adr/007-schemathesis-integration.md)
-- **Java**: [ADR 009: Schemathesis Integration](/src/java/adr/009-schemathesis-integration.md)
+- **Kotlin**: [ADR 007: Schemathesis Integration](/src/kotlin/docs/adr/007-schemathesis-integration.md)
+- **Go**: [ADR 006: Schemathesis Integration](/src/go/docs/adr/006-schemathesis-integration.md)
+- **Java**: [ADR 010: Schemathesis Integration](/src/java/docs/adr/010-schemathesis-integration.md)
 
 ### Common Implementation Pattern
 
