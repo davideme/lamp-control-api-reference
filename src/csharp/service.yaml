@@ -17,6 +17,12 @@ spec:
           image: us-docker.pkg.dev/cloudrun/container/hello:latest
           ports:
             - containerPort: 8083
+          startupProbe:
+            tcpSocket:
+              port: 8083
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 1
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://localhost:4317
