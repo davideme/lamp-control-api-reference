@@ -14,11 +14,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.openapi_server import dependencies
 from src.openapi_server.apis.default_api import router as DefaultApiRouter
 from src.openapi_server.dependencies import initialize_database, settings
+from src.openapi_server.telemetry import configure_telemetry
 
 
 @asynccontextmanager
@@ -29,6 +31,8 @@ async def lifespan(app: FastAPI):
     and properly closes it on shutdown.
     """
     # Startup
+    if configure_telemetry():
+        FastAPIInstrumentor.instrument_app(app)
     initialize_database()
     yield
     # Shutdown
