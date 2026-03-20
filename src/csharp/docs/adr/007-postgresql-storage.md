@@ -452,4 +452,4 @@ public class PostgresLampRepositoryTests : IAsyncLifetime
 - [ADR 001: C# Version](001-csharp-version.md)
 - [ADR 002: Framework](002-framework.md)
 - [ADR 005: Schemathesis Integration](005-schemathesis-integration.md)
-- [Root ADR 005: PostgreSQL Storage Support](../../../docs/adr/005-postgresql-storage-support.md)
+- [Root ADR 005: PostgreSQL Storage Support](../../../../docs/adr/005-postgresql-storage-support.md)

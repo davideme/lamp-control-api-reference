@@ -1,4 +1,4 @@
-# ADR 007: PostgreSQL Storage with Prisma
+# ADR 008: PostgreSQL Storage with Prisma
 
 ## Status
 

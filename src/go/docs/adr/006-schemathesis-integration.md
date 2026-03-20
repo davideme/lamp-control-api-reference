@@ -1,4 +1,4 @@
-# ADR 007: Integrate Schemathesis for API Testing in CI
+# ADR 006: Integrate Schemathesis for API Testing in CI
 
 ## Status
 

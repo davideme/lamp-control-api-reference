@@ -1,4 +1,4 @@
-# ADR 008: OpenTelemetry Instrumentation for TypeScript
+# ADR 009: OpenTelemetry Instrumentation for TypeScript
 
 ## Status
 Accepted

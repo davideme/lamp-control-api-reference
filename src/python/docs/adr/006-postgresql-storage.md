@@ -1,4 +1,4 @@
-# ADR 007: PostgreSQL Storage with SQLAlchemy 2.0
+# ADR 006: PostgreSQL Storage with SQLAlchemy 2.0
 
 ## Status
 

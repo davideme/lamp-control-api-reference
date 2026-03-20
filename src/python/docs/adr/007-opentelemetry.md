@@ -1,4 +1,4 @@
-# ADR 008: OpenTelemetry Instrumentation for Python
+# ADR 007: OpenTelemetry Instrumentation for Python
 
 ## Status
 Accepted

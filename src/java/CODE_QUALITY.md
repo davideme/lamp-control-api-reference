@@ -1,6 +1,6 @@
 # Java Code Quality Tools
 
-This document describes the code quality tools configured for the Java Spring Boot project as outlined in [ADR 006: Java Linter and Formatter Selection](adr/006-java-linter-and-formatter.md).
+This document describes the code quality tools configured for the Java Spring Boot project as outlined in [ADR 007: Java Linter and Formatter Selection](docs/adr/007-java-linter-and-formatter.md).
 
 ## Tools Overview
 
@@ -150,7 +150,7 @@ public void myMethod() {
 - Use `mvn compile` before static analysis for faster execution
 
 ### Getting Help
-- Check the ADR: [006-java-linter-and-formatter.md](adr/006-java-linter-and-formatter.md)
+- Check the ADR: [007-java-linter-and-formatter.md](docs/adr/007-java-linter-and-formatter.md)
 - Tool documentation:
   - [Spotless](https://github.com/diffplug/spotless)
   - [SpotBugs](https://spotbugs.github.io/)

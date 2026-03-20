@@ -9,7 +9,7 @@ Successfully integrated Schemathesis property-based API testing into the Java CI
 ## Implementation Components
 
 ### 1. Architecture Decision Record
-- **File**: `src/java/adr/009-schemathesis-integration.md`
+- **File**: `src/java/docs/adr/010-schemathesis-integration.md`
 - **Status**: Accepted
 - **Purpose**: Documents the integration decision, configuration, and rationale
 

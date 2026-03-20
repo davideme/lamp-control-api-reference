@@ -1,4 +1,4 @@
-# ADR 006: Integrate Schemathesis for API Testing in CI
+# ADR 007: Integrate Schemathesis for API Testing in CI
 
 ## Status
 
@@ -150,4 +150,4 @@ The Kotlin application must provide:
 - [Property-Based Testing](https://hypothesis.works/)
 - [OpenAPI Specification](https://swagger.io/specification/)
 - [Ktor Framework Documentation](https://ktor.io/)
-- [C# Schemathesis Integration ADR](../csharp/adr/005-schemathesis-integration.md)
+- [C# Schemathesis Integration ADR](../csharp/docs/adr/005-schemathesis-integration.md)

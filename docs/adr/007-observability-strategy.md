@@ -156,15 +156,15 @@ Every implementation MUST expose at minimum:
 Going forward:
 
 - **Global / cross-cutting ADRs** (API design, infrastructure, observability, testing strategy) live in `docs/adr/`.
-- **Language implementation ADRs** (framework selection, build tooling, linting, language-specific patterns) live in the language's local ADR directory:
-  - `src/csharp/adr/`
-  - `src/go/adr/`
-  - `src/java/adr/`
-  - `src/kotlin/adr/`
+- **Language implementation ADRs** (framework selection, build tooling, linting, language-specific patterns) live in the language's local `docs/adr/` directory:
+  - `src/csharp/docs/adr/`
+  - `src/go/docs/adr/`
+  - `src/java/docs/adr/`
+  - `src/kotlin/docs/adr/`
   - `src/python/docs/adr/`
   - `src/typescript/docs/adr/`
 
-The current layout reflects organic growth and is intentionally left in place for this PR to minimise disruption. A follow-up PR may consolidate or cross-link these folders if the team agrees. Any new ADR MUST be placed according to the convention above.
+Any new ADR MUST be placed according to the convention above.
 
 ## References
 - Issue [#14 – OpenTelemetry Integration](https://github.com/davideme/lamp-control-api-reference/issues/14)
