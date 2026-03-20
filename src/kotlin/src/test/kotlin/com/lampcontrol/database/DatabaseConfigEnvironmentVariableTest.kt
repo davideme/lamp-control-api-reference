@@ -12,7 +12,7 @@ class DatabaseConfigEnvironmentVariableTest {
     companion object {
         private const val CLOUD_SQL_SOCKET_DATABASE_URL =
             "postgresql://postgres:A3tN1%7DgX%7B5%7Be9ZaL@/lamp-control" +
-                "?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5"
+                "?host=/cloudsql/example-project:us-central1:lamp-control-db&connect_timeout=5"
     }
 
     @Test
@@ -193,11 +193,11 @@ class DatabaseConfigEnvironmentVariableTest {
         assertNotNull(config)
         assertEquals("postgres", config.user)
         assertEquals("A3tN1}gX{5{e9ZaL", config.password)
-        assertEquals("/cloudsql/lamp-control-469416:europe-west1:lamp-control-db", config.host)
+        assertEquals("/cloudsql/example-project:us-central1:lamp-control-db", config.host)
         assertEquals(5432, config.port)
         assertEquals("lamp-control", config.database)
         assertEquals(
-            "jdbc:postgresql://localhost/lamp-control?host=/cloudsql/lamp-control-469416:europe-west1:lamp-control-db&connect_timeout=5",
+            "jdbc:postgresql://localhost/lamp-control?host=/cloudsql/example-project:us-central1:lamp-control-db&connect_timeout=5",
             config.connectionString(),
         )
     }
