@@ -36,7 +36,8 @@ images:
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 options:
   requestedVerifyOption: VERIFIED
-  substitutionOption: ALLOW_LOOSE
+  substitutionOption: ALLOW_LOOSE  # Required substitutions (set in Cloud Build trigger):
+  # _AR_HOSTNAME, _AR_PROJECT_ID, _AR_REPOSITORY, _DEPLOY_REGION, _SERVICE_NAME, _TRIGGER_ID
   logging: CLOUD_LOGGING_ONLY
 tags:
   - gcp-cloud-build-deploy-cloud-run

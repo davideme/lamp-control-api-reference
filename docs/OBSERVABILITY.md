@@ -230,24 +230,28 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: <language>-lamp-control-api          # Cloud Run service name
-  labels:
-    cloud.googleapis.com/location: YOUR_REGION
   annotations:
     run.googleapis.com/launch-stage: ALPHA   # required for multi-container support
 spec:
   template:
     metadata:
       annotations:
+        autoscaling.knative.dev/maxScale: '1'
+        run.googleapis.com/startup-cpu-boost: 'true'
         # collector must be ready before app starts
         run.googleapis.com/container-dependencies: "{app:[collector]}"
-        # mount the collector config from Secret Manager
-        run.googleapis.com/secrets: 'otel-collector-config:projects/YOUR_PROJECT_ID/secrets/otel-collector-config'
     spec:
       containers:
         - name: app
           image: us-docker.pkg.dev/cloudrun/container/hello:latest  # placeholder; replaced by Cloud Build
           ports:
             - containerPort: <port>          # language-specific (see table below)
+          startupProbe:
+            tcpSocket:
+              port: <port>
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 1
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://localhost:4317    # sidecar on loopback

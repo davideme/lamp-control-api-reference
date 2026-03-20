@@ -15,6 +15,12 @@ Each language implementation has a `service.yaml` (Knative format) that defines 
 
 ## Prerequisites
 
+> **Note:** All commands below operate on the currently active gcloud project. Verify it first:
+> ```bash
+> gcloud config get-value project
+> ```
+> To switch projects: `gcloud config set project YOUR_PROJECT_ID`
+
 Each service runs an OTel collector sidecar that reads its config from a GCP Secret Manager secret. This secret must exist before deploying.
 
 ### Create the OTel collector secret (one-time setup)
