@@ -16,6 +16,9 @@ build-backend = "poetry.core.masonry.api"
 package-mode = true
 packages = [{include = "openapi_server", from = "src"}]
 
+[tool.poetry.scripts]
+start = "openapi_server.cli:main"
+
 [tool.poetry.dependencies]
 python = "^3.14"
 fastapi = "^0.115.12"
