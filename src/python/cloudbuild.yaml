@@ -7,7 +7,6 @@ steps:
       - '--builder=gcr.io/buildpacks/builder:google-24'
       - '--network=cloudbuild'
       - '--path=src/python'
-      - '--env=GOOGLE_PYTHON_PACKAGE_MANAGER=poetry'
     id: Buildpack
     entrypoint: pack
   - name: gcr.io/cloud-builders/docker
