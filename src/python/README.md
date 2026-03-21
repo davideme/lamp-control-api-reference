@@ -218,6 +218,18 @@ gcloud run deploy lamp-control-api \
   --allow-unauthenticated
 ```
 
+### Managing `requirements.txt`
+
+Cloud Run uses the Google Cloud Buildpack, which relies on `requirements.txt` for dependency installation. This file must be kept in sync with `pyproject.toml` and `poetry.lock`.
+
+**Regenerate after any dependency change:**
+
+```bash
+poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
+```
+
+> **Important:** Always commit the updated `requirements.txt` alongside any changes to `pyproject.toml` or `poetry.lock`. Failing to do so will cause Cloud Run deployments to use stale dependencies.
+
 ## Tests
 
 ### Running Unit Tests

@@ -76,6 +76,9 @@ cd src/typescript && npm run build
 # Python
 cd src/python && poetry build
 
+# Python - after any dependency change, regenerate requirements.txt for Cloud Run Buildpack:
+cd src/python && poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
+
 # Go
 cd src/go && make build
 
