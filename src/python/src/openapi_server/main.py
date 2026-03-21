@@ -31,8 +31,6 @@ async def lifespan(app: FastAPI):
     and properly closes it on shutdown.
     """
     # Startup
-    if configure_telemetry():
-        FastAPIInstrumentor.instrument_app(app)
     initialize_database()
     yield
     # Shutdown
@@ -46,6 +44,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# Middleware must be added before the app starts — cannot be done inside lifespan
+if configure_telemetry():
+    FastAPIInstrumentor.instrument_app(app)
 
 
 @app.exception_handler(RequestValidationError)
