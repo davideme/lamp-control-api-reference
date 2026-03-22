@@ -82,7 +82,6 @@ def start_server(run_migrations: bool = True, port: int | None = None):
     # Resolve port: CLI argument > PORT env var > default (8080)
     server_port = port if port is not None else int(os.getenv("PORT", "8080"))
 
-    # Start uvicorn server
     uvicorn.run(
         "src.openapi_server.main:app",
         host="0.0.0.0",
