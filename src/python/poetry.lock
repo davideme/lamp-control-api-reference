@@ -966,6 +966,26 @@ importlib-metadata = ">=6.0,<8.8.0"
 typing-extensions = ">=4.5.0"
 
 [[package]]
+name = "opentelemetry-distro"
+version = "0.61b0"
+description = "OpenTelemetry Python Distro"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_distro-0.61b0-py3-none-any.whl", hash = "sha256:f21d1ac0627549795d75e332006dd068877f00e461b1b2e8fe4568d6eb7b9590"},
+    {file = "opentelemetry_distro-0.61b0.tar.gz", hash = "sha256:975b845f50181ad53753becf4fd4b123b54fa04df5a9d78812264436d6518981"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.12,<2.0"
+opentelemetry-instrumentation = "0.61b0"
+opentelemetry-sdk = ">=1.13,<2.0"
+
+[package.extras]
+otlp = ["opentelemetry-exporter-otlp (==1.40.0)"]
+
+[[package]]
 name = "opentelemetry-exporter-otlp-proto-common"
 version = "1.40.0"
 description = "OpenTelemetry Protobuf encoding"
@@ -2102,4 +2122,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "f3da2fe6dcb57c53241d1b3f0c72107c8947bbd4b3f0ed6e4b12a4de050fff96"
+content-hash = "b374a71e60064188e4115c659d783b3bf933f513fbe8b2ca320b348a02e759a8"
